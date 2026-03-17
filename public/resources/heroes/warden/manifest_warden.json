@@ -1,0 +1,8 @@
+{
+  "name": "Warden",
+  "normalized_name": "warden",
+  "wiki_url": "https://deadlock.wiki/Warden",
+  "portrait": "/resources/heroes/warden/portrait_warden.png",
+  "mini_icon": "/resources/heroes/warden/mini_icon_warden.png",
+  "matrix": "/resources/heroes/warden/matrix_warden.csv"
+}

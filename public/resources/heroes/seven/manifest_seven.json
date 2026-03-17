@@ -1,0 +1,8 @@
+{
+  "name": "Seven",
+  "normalized_name": "seven",
+  "wiki_url": "https://deadlock.wiki/Seven",
+  "portrait": "/resources/heroes/seven/portrait_seven.png",
+  "mini_icon": "/resources/heroes/seven/mini_icon_seven.png",
+  "matrix": "/resources/heroes/seven/matrix_seven.csv"
+}

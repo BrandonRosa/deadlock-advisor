@@ -1,0 +1,8 @@
+{
+  "name": "Yamato",
+  "normalized_name": "yamato",
+  "wiki_url": "https://deadlock.wiki/Yamato",
+  "portrait": "/resources/heroes/yamato/portrait_yamato.png",
+  "mini_icon": "/resources/heroes/yamato/mini_icon_yamato.png",
+  "matrix": "/resources/heroes/yamato/matrix_yamato.csv"
+}

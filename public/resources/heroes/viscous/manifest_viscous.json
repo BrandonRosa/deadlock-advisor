@@ -1,0 +1,8 @@
+{
+  "name": "Viscous",
+  "normalized_name": "viscous",
+  "wiki_url": "https://deadlock.wiki/Viscous",
+  "portrait": "/resources/heroes/viscous/portrait_viscous.png",
+  "mini_icon": "/resources/heroes/viscous/mini_icon_viscous.png",
+  "matrix": "/resources/heroes/viscous/matrix_viscous.csv"
+}

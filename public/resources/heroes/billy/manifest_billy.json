@@ -1,0 +1,8 @@
+{
+  "name": "Billy",
+  "normalized_name": "billy",
+  "wiki_url": "https://deadlock.wiki/Billy",
+  "portrait": "/resources/heroes/billy/portrait_billy.png",
+  "mini_icon": "/resources/heroes/billy/mini_icon_billy.png",
+  "matrix": "/resources/heroes/billy/matrix_billy.csv"
+}

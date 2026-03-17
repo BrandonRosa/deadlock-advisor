@@ -1,0 +1,8 @@
+{
+  "name": "Shiv",
+  "normalized_name": "shiv",
+  "wiki_url": "https://deadlock.wiki/Shiv",
+  "portrait": "/resources/heroes/shiv/portrait_shiv.png",
+  "mini_icon": "/resources/heroes/shiv/mini_icon_shiv.png",
+  "matrix": "/resources/heroes/shiv/matrix_shiv.csv"
+}

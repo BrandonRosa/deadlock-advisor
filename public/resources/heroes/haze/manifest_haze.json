@@ -1,0 +1,8 @@
+{
+  "name": "Haze",
+  "normalized_name": "haze",
+  "wiki_url": "https://deadlock.wiki/Haze",
+  "portrait": "/resources/heroes/haze/portrait_haze.png",
+  "mini_icon": "/resources/heroes/haze/mini_icon_haze.png",
+  "matrix": "/resources/heroes/haze/matrix_haze.csv"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Mina",
+  "normalized_name": "mina",
+  "wiki_url": "https://deadlock.wiki/Mina",
+  "portrait": "/resources/heroes/mina/portrait_mina.png",
+  "mini_icon": "/resources/heroes/mina/mini_icon_mina.png",
+  "matrix": "/resources/heroes/mina/matrix_mina.csv"
+}

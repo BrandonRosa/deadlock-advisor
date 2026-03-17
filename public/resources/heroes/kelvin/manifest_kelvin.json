@@ -1,0 +1,8 @@
+{
+  "name": "Kelvin",
+  "normalized_name": "kelvin",
+  "wiki_url": "https://deadlock.wiki/Kelvin",
+  "portrait": "/resources/heroes/kelvin/portrait_kelvin.png",
+  "mini_icon": "/resources/heroes/kelvin/mini_icon_kelvin.png",
+  "matrix": "/resources/heroes/kelvin/matrix_kelvin.csv"
+}

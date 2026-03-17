@@ -1,0 +1,8 @@
+{
+  "name": "Holliday",
+  "normalized_name": "holliday",
+  "wiki_url": "https://deadlock.wiki/Holliday",
+  "portrait": "/resources/heroes/holliday/portrait_holliday.png",
+  "mini_icon": "/resources/heroes/holliday/mini_icon_holliday.png",
+  "matrix": "/resources/heroes/holliday/matrix_holliday.csv"
+}

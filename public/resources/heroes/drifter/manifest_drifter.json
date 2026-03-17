@@ -1,0 +1,8 @@
+{
+  "name": "Drifter",
+  "normalized_name": "drifter",
+  "wiki_url": "https://deadlock.wiki/Drifter",
+  "portrait": "/resources/heroes/drifter/portrait_drifter.png",
+  "mini_icon": "/resources/heroes/drifter/mini_icon_drifter.png",
+  "matrix": "/resources/heroes/drifter/matrix_drifter.csv"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Sinclair",
+  "normalized_name": "sinclair",
+  "wiki_url": "https://deadlock.wiki/Sinclair",
+  "portrait": "/resources/heroes/sinclair/portrait_sinclair.png",
+  "mini_icon": "/resources/heroes/sinclair/mini_icon_sinclair.png",
+  "matrix": "/resources/heroes/sinclair/matrix_sinclair.csv"
+}
