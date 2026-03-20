@@ -22,6 +22,9 @@ export default function App() {
   // Map of heroKey -> HERO_STATE — the source of truth for all selections
   const [heroStates, setHeroStates] = useState(new Map());
 
+  const [heroCounts, setHeroCounts] = useState(new Map());
+  // stores {self: n, ally: n, enemy: n } per hero key
+
   // Which page we're on
   const [page, setPage] = useState('selection'); // 'selection' | 'results'
 
@@ -59,6 +62,27 @@ export default function App() {
     setResults(calcResults);
     setPage('results');
   }
+
+  function getCount(heroKey) {
+    return heroCounts.get(heroKey) ?? { self:0, ally: 0, enemy: 0 };
+  }
+
+  function adjustCount(heroKey,newMap){
+    setHeroCounts(prev=>{
+      const next=new Map(prev);
+      next.set(heroKey,newMap);
+      return next;
+    })
+  }
+  // function adjustCount(heroKey, team, delta) {
+  //   setHeroCounts(prev => {
+  //     const next = new Map(prev);
+  //     const current = next.get(heroKey) ?? { ally: 0, enemy: 0 };
+  //     const newVal = Math.max(0, current[team] + delta);
+  //     next.set(heroKey, { ...current, [team]: newVal });
+  //     return next;
+  //   });
+  // }
 
   // All heroes currently in the roster (for results page)
   const rosterKeys = [...heroStates.entries()]
@@ -110,6 +134,9 @@ export default function App() {
             onRemove={handleRemove}
             onCalculate={handleCalculate}
             multiMode={multiMode}
+            heroCounts={heroCounts}
+            onAdjustCount={adjustCount}
+            getCount={getCount}
           />
         )}
 

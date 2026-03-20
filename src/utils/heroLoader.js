@@ -9,14 +9,23 @@
  * Each row becomes { hero_key, team, [build1]: value, [build2]: value, ... }
  */
 export function parseCSV(csvText) {
-  const lines = csvText.trim().split('\n');
+  const lines = csvText.trim().split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);         // ← skip blank lines
+
   const headers = lines[0].split(',').map(h => h.trim());
+
   return lines.slice(1).map(line => {
     const values = line.split(',').map(v => v.trim());
     const row = {};
     headers.forEach((header, i) => {
-      // Convert numeric strings to numbers, keep others as strings
-      row[header] = isNaN(values[i]) ? values[i] : parseFloat(values[i]);
+      const val = values[i] ?? '';       // ← missing columns default to ''
+      if (header === 'hero') {
+        row[header] = val;
+      } else {
+        const num = parseFloat(val);
+        row[header] = isNaN(num) ? 0 : num;  // ← blanks and bad values → 0
+      }
     });
     return row;
   });

@@ -15,60 +15,70 @@ export default function SelectionPage({
   onRemove,          // (heroKey) => void
   onCalculate,
   multiMode,
+  heroCounts,
+  onAdjustCount,
+  getCount
 }) {
   // Determines what happens when you click a button on a hero card
   // In toggle mode: clicking again deselects; selecting a new hero for a slot deselects the previous
   // In multi mode: you can stack multiple heroes per team (future setting)
-  function handleAlly(heroKey) {
-    const current = heroStates.get(heroKey)??HERO_STATE.NONE;
+  function handleAlly(heroKey,delta=1) {
+    //const current = heroStates.get(heroKey)??HERO_STATE.NONE;
+    const counts= getCount(heroKey) ?? {self:0, ally: 0, enemy: 0 };
 
     if (!multiMode) {
       // Default: toggle on/off, but prevent same hero on both teams
-      if (current === HERO_STATE.ALLY) {
-        onSetState(heroKey, HERO_STATE.NONE);
-      } else if (current === HERO_STATE.ENEMY) {
-        // Already on enemy — switch to ally instead
-        onSetState(heroKey, HERO_STATE.ALLY);
+      if (counts.ally >0) {
+        //onSetState(heroKey, HERO_STATE.NONE);
+        onAdjustCount(heroKey,{self:0,ally:0,enemy:0});
       } else {
-        onSetState(heroKey, HERO_STATE.ALLY);
+        //onSetState(heroKey, HERO_STATE.ALLY);
+        onAdjustCount(heroKey,{self:0, ally:1, enemy:0});
       }
     } else {
       // Multi mode: just toggle, duplicates handled elsewhere
-      onSetState(heroKey, current === HERO_STATE.ALLY ? HERO_STATE.NONE : HERO_STATE.ALLY);
+      if(counts.self==1 && counts.ally+delta<1)
+        onAdjustCount(heroKey,{self:0,ally:0,enemy:counts.enemy})
+      else
+        onAdjustCount(heroKey,{...counts,ally:Math.max(0, counts.ally+delta)});
     }
   }
 
   function handleSelf(heroKey) {
-    const current = heroStates.get(heroKey);
-    if (current === HERO_STATE.SELF) {
-      onSetState(heroKey, HERO_STATE.NONE);
+    const counts= getCount(heroKey) ?? {self:0, ally: 0, enemy: 0 };
+    if (counts.self>0) {
+      onAdjustCount(heroKey,{...counts,self:0,ally:counts.ally-1})
     } else {
       // Only one self allowed always
       heroes.forEach(h => {
-        if (h.normalized_name !== heroKey && heroStates.get(h.normalized_name) === HERO_STATE.SELF) {
-          onSetState(h.normalized_name, HERO_STATE.NONE);
+        if (h.normalized_name !== heroKey && getCount(h.normalized_name).self>0) {
+          onAdjustCount(h.normalized_name,{...counts,self:0})
         }
       });
-      onSetState(heroKey, HERO_STATE.SELF);
+      onAdjustCount(heroKey,{...counts,self:1,ally:counts.ally+1})
     }
   }
 
-  function handleEnemy(heroKey) {
+  function handleEnemy(heroKey,delta=1) {
     const current = heroStates.get(heroKey);
-    if (!multiMode) {
-      if (current === HERO_STATE.ENEMY) {
-        onSetState(heroKey, HERO_STATE.NONE);
-      } else {
+    const counts= getCount(heroKey) ?? {self:0, ally: 0, enemy: 0 };
 
-        onSetState(heroKey, HERO_STATE.ENEMY);
+    if (!multiMode) {
+      // Default: toggle on/off, but prevent same hero on both teams
+      if (counts.enemy >0) {
+        //onSetState(heroKey, HERO_STATE.NONE);
+        onAdjustCount(heroKey,{self:0,ally:0,enemy:0});
+      } else {
+        //onSetState(heroKey, HERO_STATE.ALLY);
+        onAdjustCount(heroKey,{self:0, ally:0, enemy:1});
       }
     } else {
-      onSetState(heroKey, current === HERO_STATE.ENEMY ? HERO_STATE.NONE : HERO_STATE.ENEMY);
+      // Multi mode: just toggle, duplicates handled elsewhere
+      onAdjustCount(heroKey,{...counts,enemy:Math.max(0, counts.enemy+delta)});
     }
   }
 
-  // Can only calculate if there's at least one hero selected
-  const hasSelection = [...heroStates.values()].some(v => v !== HERO_STATE.NONE);
+  const hasSelection = [...heroCounts.values()].some(v => v.ally > 0 || v.enemy > 0 || v.self > 0);
 
   return (
     <div className="selection-page">
@@ -82,10 +92,10 @@ export default function SelectionPage({
             <HeroCard
               key={hero.normalized_name}
               hero={hero}
-              state={heroStates.get(hero.normalized_name) ?? HERO_STATE.NONE}
-              onAlly={() => handleAlly(hero.normalized_name)}
+              heroCounts={getCount(hero.normalized_name)}
+              onAlly={(delta=1) => handleAlly(hero.normalized_name,delta)}
               onSelf={() => handleSelf(hero.normalized_name)}
-              onEnemy={() => handleEnemy(hero.normalized_name)}
+              onEnemy={(delta=1) => handleEnemy(hero.normalized_name,delta)}
               multiMode={multiMode}
             />
           ))}
@@ -102,9 +112,11 @@ export default function SelectionPage({
 
       {/* Right: roster panel */}
       <RosterPanel
-        heroStates={heroStates}
+        heroCounts={heroCounts}
         allHeroes={heroes}
         onRemove={onRemove}
+        heroStates={heroStates}
+        getCount={getCount}
       />
     </div>
   );

@@ -216,6 +216,18 @@ a { color: var(--accent); text-decoration: none; }
   color: var(--text-dim);
   border: 1px solid var(--border);
 }
+.hero-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+}
+.hero-btn-count {
+  font-size: 12px;
+  min-width: 14px;
+  text-align: center;
+  color: var(--text);
+}
 .hero-btn--ally  { color: var(--ally);  border-color: var(--ally-dim);  }
 .hero-btn--self  { color: var(--self);  border-color: var(--self-dim);  }
 .hero-btn--enemy { color: var(--enemy); border-color: var(--enemy-dim); }

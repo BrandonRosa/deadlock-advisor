@@ -22,11 +22,17 @@
  * @param {string[]} enemyKeys - Hero keys on the enemy team
  * @returns {Object} - { [heroKey_ally]: 0|1, [heroKey_enemy]: 0|1 }
  */
-export function buildCompositionVector(allHeroKeys, allyKeys, enemyKeys) {
+export function buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCounts, multiMode) {
   const vector = {};
   allHeroKeys.forEach(key => {
-    vector[`ally_${key}`]  = allyKeys.includes(key) ? 1 : 0;
-    vector[`enemy_${key}`] = enemyKeys.includes(key) ? 1 : 0;
+    if (multiMode && heroCounts) {
+      const counts = heroCounts.get(key) ?? { ally: 0, enemy: 0 };
+      vector[`ally_${key}`]  = counts.ally;
+      vector[`enemy_${key}`] = counts.enemy;
+    } else {
+      vector[`ally_${key}`]  = allyKeys.includes(key) ? 1 : 0;
+      vector[`enemy_${key}`] = enemyKeys.includes(key) ? 1 : 0;
+    }
   });
   return vector;
 }

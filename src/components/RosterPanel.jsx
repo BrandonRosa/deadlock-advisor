@@ -54,18 +54,17 @@ function MiniPortrait({ hero, isSelf, onRemove }) {
   );
 }
 
-export default function RosterPanel({ heroStates, allHeroes, onRemove }) {
+export default function RosterPanel({ heroCounts, allHeroes, onRemove }) {
   // Build ally and enemy lists from heroStates
   // heroStates is a Map: normalized_name -> HERO_STATE value
   const allies = allHeroes.filter(h =>
-    heroStates.get(h.normalized_name) === HERO_STATE.ALLY ||
-    heroStates.get(h.normalized_name) === HERO_STATE.SELF
+    (heroCounts.get(h.normalized_name)?.ally ?? 0) > 0
   );
   const enemies = allHeroes.filter(h =>
-    heroStates.get(h.normalized_name) === HERO_STATE.ENEMY
+    (heroCounts.get(h.normalized_name)?.enemy ?? 0) > 0
   );
-  const selfKey = [...heroStates.entries()]
-    .find(([, v]) => v === HERO_STATE.SELF)?.[0];
+  const selfKey = [...heroCounts.entries()]
+    .find(([, v]) => v.self>0)?.[0];
 
   const isEmpty = allies.length === 0 && enemies.length === 0;
 

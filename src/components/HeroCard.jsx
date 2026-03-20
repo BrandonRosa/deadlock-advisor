@@ -16,10 +16,10 @@ export const HERO_STATE = {
   ENEMY: 'enemy',
 };
 
-export default function HeroCard({ hero, state, onAlly, onSelf, onEnemy, multiMode = false }) {
-  const isAlly = state === HERO_STATE.ALLY || state === HERO_STATE.SELF;
-  const isSelf = state === HERO_STATE.SELF;
-  const isEnemy = state === HERO_STATE.ENEMY;
+export default function HeroCard({ hero, heroCounts, onAlly, onSelf, onEnemy, multiMode = false }) {
+  const isAlly = heroCounts.ally>0;
+  const isSelf = heroCounts.self>0;
+  const isEnemy = heroCounts.enemy>0;
 
   // Glow color based on current state
   const glowClass = isSelf
@@ -50,9 +50,19 @@ export default function HeroCard({ hero, state, onAlly, onSelf, onEnemy, multiMo
         </div>
 
         {/* State badge overlay */}
-        {state !== HERO_STATE.NONE && (
-          <div className={`hero-card__badge hero-card__badge--${state}`}>
-            {isSelf ? '★' : isAlly ? '◀' : '▶'}
+        {isAlly && (
+          <div className={`hero-card__badge hero-card__badge--ally`}>
+            {'◀'}
+          </div>
+        )}
+        {isSelf && (
+          <div className={`hero-card__badge hero-card__badge--self`}>
+            {'★'}
+          </div>
+        )}
+        {isEnemy && (
+          <div className={`hero-card__badge hero-card__badge--enemy`}>
+            {'▶'}
           </div>
         )}
       </div>
@@ -61,32 +71,33 @@ export default function HeroCard({ hero, state, onAlly, onSelf, onEnemy, multiMo
 
       {/* Selection buttons */}
       <div className="hero-card__buttons">
-        {/* Green — Add to your team */}
-        <button
-          className={`hero-btn hero-btn--ally ${isAlly ? 'active' : ''}`}
-          onClick={onAlly}
-          title="Add to your team"
-        >
-          {multiMode ? (isAlly ? '−' : '+') : '◀'}
-        </button>
+        {multiMode ? (
+          <>
+            {/* Ally side */}
+            <div className="hero-btn-group">
+              <button className="hero-btn hero-btn--ally" onClick={() => onAlly(-1)}>−</button>
+              <span className="hero-btn-count">{heroCounts.ally}</span>
+              <button className="hero-btn hero-btn--ally" onClick={() => onAlly(1)}>+</button>
+            </div>
 
-        {/* Yellow — Mark as yourself */}
-        <button
-          className={`hero-btn hero-btn--self ${isSelf ? 'active' : ''}`}
-          onClick={onSelf}
-          title="This is me"
-        >
-          ★
-        </button>
+            {/* Self button stays the same */}
+            <button className={`hero-btn hero-btn--self ${isSelf ? 'active' : ''}`} onClick={onSelf}>★</button>
 
-        {/* Red — Add to enemy team */}
-        <button
-          className={`hero-btn hero-btn--enemy ${isEnemy ? 'active' : ''}`}
-          onClick={onEnemy}
-          title="Add to enemy team"
-        >
-          {multiMode ? (isEnemy ? '−' : '+') : '▶'}
-        </button>
+            {/* Enemy side */}
+            <div className="hero-btn-group">
+              <button className="hero-btn hero-btn--enemy" onClick={()=>onEnemy(-1)}>−</button>
+              <span className="hero-btn-count">{heroCounts.enemy}</span>
+              <button className="hero-btn hero-btn--enemy" onClick={()=>onEnemy(1)}>+</button>
+            </div>
+          </>
+        ) : (
+          /* original toggle buttons */
+          <>
+            <button className={`hero-btn hero-btn--ally ${isAlly ? 'active' : ''}`} onClick={onAlly}>◀</button>
+            <button className={`hero-btn hero-btn--self ${isSelf ? 'active' : ''}`} onClick={onSelf}>★</button>
+            <button className={`hero-btn hero-btn--enemy ${isEnemy ? 'active' : ''}`} onClick={onEnemy}>▶</button>
+          </>
+        )}
       </div>
     </div>
   );
