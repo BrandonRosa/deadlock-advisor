@@ -20,7 +20,7 @@ export function parseCSV(csvText) {
     const row = {};
     headers.forEach((header, i) => {
       const val = values[i] ?? '';       // ← missing columns default to ''
-      if (header === 'hero') {
+      if (header === '') {
         row[header] = val;
       } else {
         const num = parseFloat(val);
@@ -64,7 +64,7 @@ export async function loadAllHeroes() {
 
       // Extract build names from the CSV (everything after hero_key and team columns)
       const buildNames = Object.keys(matrixRows[0]).filter(
-        k => k !== 'hero_key' && k !== 'team'
+        k => k !== 'hero_key' && k!=""
       );
 
       return {

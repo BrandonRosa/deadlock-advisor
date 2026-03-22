@@ -26,7 +26,7 @@ export function buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCou
   const vector = {};
   allHeroKeys.forEach(key => {
     if (multiMode && heroCounts) {
-      const counts = heroCounts.get(key) ?? { ally: 0, enemy: 0 };
+      const counts = heroCounts.get(key) ?? { self:0, ally: 0, enemy: 0 };
       vector[`ally_${key}`]  = counts.ally;
       vector[`enemy_${key}`] = counts.enemy;
     } else {
@@ -45,14 +45,14 @@ export function buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCou
  */
 export function calculateBuildScores(hero, compositionVector) {
   const { matrixRows, buildNames } = hero;
-
+  
   // Initialize scores for each build
   const scores = {};
   buildNames.forEach(build => { scores[build] = 0; });
 
   // For each row in the matrix, check if that hero/team combo is in the vector
   matrixRows.forEach(row => {
-    const vectorKey = row.hero;   // ← was `${row.hero_key}_${row.team}`
+    const vectorKey = row[''];   // ← was `${row.hero_key}_${row.team}`
     const weight = compositionVector[vectorKey] ?? 0;
 
     if (weight === 0) return; // This hero isn't in the match, skip
@@ -76,9 +76,9 @@ export function calculateBuildScores(hero, compositionVector) {
  * @param {string[]} enemyKeys - Heroes on enemy team
  * @returns {Object} - { [heroKey]: [{ build, score }, ...] }
  */
-export function calculateAll(allHeroes, allyKeys, enemyKeys) {
+export function calculateAll(allHeroes, allyKeys, enemyKeys, heroCounts, multiMode) {
   const allHeroKeys = allHeroes.map(h => h.normalized_name);
-  const vector = buildCompositionVector(allHeroKeys, allyKeys, enemyKeys);
+  const vector = buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCounts, multiMode);
 
   const results = {};
   allHeroes.forEach(hero => {

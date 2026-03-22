@@ -45,20 +45,20 @@ export default function App() {
 
   // Remove a hero (set back to NONE)
   const handleRemove = useCallback((heroKey) => {
-    handleSetState(heroKey, HERO_STATE.NONE);
-  }, [handleSetState]);
+    adjustCount(heroKey,{self:0,ally:0,enemy:0});
+  }, []);
 
   // Run the calculation and navigate to results
   function handleCalculate() {
-    const allyKeys = [...heroStates.entries()]
-      .filter(([, v]) => v === HERO_STATE.ALLY || v === HERO_STATE.SELF)
-      .map(([k]) => k);
+    const allyKeys = [];
+    const enemyKeys = [];
 
-    const enemyKeys = [...heroStates.entries()]
-      .filter(([, v]) => v === HERO_STATE.ENEMY)
-      .map(([k]) => k);
+    heroCounts.forEach((counts,heroKey)=> {
+      if(counts.ally>0) allyKeys.push(heroKey);
+      if(counts.enemy>0) enemyKeys.push(heroKey);
+    })
 
-    const calcResults = calculateAll(heroes, allyKeys, enemyKeys);
+    const calcResults = calculateAll(heroes, allyKeys, enemyKeys, heroCounts,multiMode);
     setResults(calcResults);
     setPage('results');
   }
@@ -85,8 +85,8 @@ export default function App() {
   // }
 
   // All heroes currently in the roster (for results page)
-  const rosterKeys = [...heroStates.entries()]
-    .filter(([, v]) => v !== HERO_STATE.NONE)
+  const rosterKeys = [...heroCounts.entries()]
+    .filter(([, v]) => v.ally+v.enemy>0)
     .map(([k]) => k);
 
   // --- Loading / Error states ---
