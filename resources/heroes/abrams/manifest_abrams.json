@@ -1,0 +1,8 @@
+{
+  "name": "Abrams",
+  "normalized_name": "abrams",
+  "wiki_url": "https://deadlock.wiki/Abrams",
+  "portrait": "/resources/heroes/abrams/portrait_abrams.png",
+  "mini_icon": "/resources/heroes/abrams/mini_icon_abrams.png",
+  "matrix": "/resources/heroes/abrams/matrix_abrams.csv"
+}

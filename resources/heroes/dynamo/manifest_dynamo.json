@@ -1,0 +1,8 @@
+{
+  "name": "Dynamo",
+  "normalized_name": "dynamo",
+  "wiki_url": "https://deadlock.wiki/Dynamo",
+  "portrait": "/resources/heroes/dynamo/portrait_dynamo.png",
+  "mini_icon": "/resources/heroes/dynamo/mini_icon_dynamo.png",
+  "matrix": "/resources/heroes/dynamo/matrix_dynamo.csv"
+}

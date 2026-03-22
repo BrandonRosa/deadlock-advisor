@@ -1,0 +1,8 @@
+{
+  "name": "Venator",
+  "normalized_name": "venator",
+  "wiki_url": "https://deadlock.wiki/Venator",
+  "portrait": "/resources/heroes/venator/portrait_venator.png",
+  "mini_icon": "/resources/heroes/venator/mini_icon_venator.png",
+  "matrix": "/resources/heroes/venator/matrix_venator.csv"
+}

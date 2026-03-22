@@ -1,0 +1,8 @@
+{
+  "name": "Apollo",
+  "normalized_name": "apollo",
+  "wiki_url": "https://deadlock.wiki/Apollo",
+  "portrait": "/resources/heroes/apollo/portrait_apollo.png",
+  "mini_icon": "/resources/heroes/apollo/mini_icon_apollo.png",
+  "matrix": "/resources/heroes/apollo/matrix_apollo.csv"
+}

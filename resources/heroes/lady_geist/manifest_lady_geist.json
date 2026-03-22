@@ -1,0 +1,8 @@
+{
+  "name": "Lady Geist",
+  "normalized_name": "lady_geist",
+  "wiki_url": "https://deadlock.wiki/Lady_Geist",
+  "portrait": "/resources/heroes/lady_geist/portrait_lady_geist.png",
+  "mini_icon": "/resources/heroes/lady_geist/mini_icon_lady_geist.png",
+  "matrix": "/resources/heroes/lady_geist/matrix_lady_geist.csv"
+}

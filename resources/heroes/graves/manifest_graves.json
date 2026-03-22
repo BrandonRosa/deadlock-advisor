@@ -1,0 +1,8 @@
+{
+  "name": "Graves",
+  "normalized_name": "graves",
+  "wiki_url": "https://deadlock.wiki/Graves",
+  "portrait": "/resources/heroes/graves/portrait_graves.png",
+  "mini_icon": "/resources/heroes/graves/mini_icon_graves.png",
+  "matrix": "/resources/heroes/graves/matrix_graves.csv"
+}

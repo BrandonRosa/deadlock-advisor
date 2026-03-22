@@ -1,0 +1,8 @@
+{
+  "name": "Calico",
+  "normalized_name": "calico",
+  "wiki_url": "https://deadlock.wiki/Calico",
+  "portrait": "/resources/heroes/calico/portrait_calico.png",
+  "mini_icon": "/resources/heroes/calico/mini_icon_calico.png",
+  "matrix": "/resources/heroes/calico/matrix_calico.csv"
+}

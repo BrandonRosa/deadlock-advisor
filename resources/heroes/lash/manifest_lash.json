@@ -1,0 +1,8 @@
+{
+  "name": "Lash",
+  "normalized_name": "lash",
+  "wiki_url": "https://deadlock.wiki/Lash",
+  "portrait": "/resources/heroes/lash/portrait_lash.png",
+  "mini_icon": "/resources/heroes/lash/mini_icon_lash.png",
+  "matrix": "/resources/heroes/lash/matrix_lash.csv"
+}

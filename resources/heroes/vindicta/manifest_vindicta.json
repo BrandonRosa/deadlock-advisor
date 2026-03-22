@@ -1,0 +1,8 @@
+{
+  "name": "Vindicta",
+  "normalized_name": "vindicta",
+  "wiki_url": "https://deadlock.wiki/Vindicta",
+  "portrait": "/resources/heroes/vindicta/portrait_vindicta.png",
+  "mini_icon": "/resources/heroes/vindicta/mini_icon_vindicta.png",
+  "matrix": "/resources/heroes/vindicta/matrix_vindicta.csv"
+}

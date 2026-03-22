@@ -1,0 +1,8 @@
+{
+  "name": "Celeste",
+  "normalized_name": "celeste",
+  "wiki_url": "https://deadlock.wiki/Celeste",
+  "portrait": "/resources/heroes/celeste/portrait_celeste.png",
+  "mini_icon": "/resources/heroes/celeste/mini_icon_celeste.png",
+  "matrix": "/resources/heroes/celeste/matrix_celeste.csv"
+}

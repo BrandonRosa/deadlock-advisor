@@ -1,0 +1,8 @@
+{
+  "name": "Bebop",
+  "normalized_name": "bebop",
+  "wiki_url": "https://deadlock.wiki/Bebop",
+  "portrait": "/resources/heroes/bebop/portrait_bebop.png",
+  "mini_icon": "/resources/heroes/bebop/mini_icon_bebop.png",
+  "matrix": "/resources/heroes/bebop/matrix_bebop.csv"
+}

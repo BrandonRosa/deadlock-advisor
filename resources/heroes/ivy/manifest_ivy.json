@@ -1,0 +1,8 @@
+{
+  "name": "Ivy",
+  "normalized_name": "ivy",
+  "wiki_url": "https://deadlock.wiki/Ivy",
+  "portrait": "/resources/heroes/ivy/portrait_ivy.png",
+  "mini_icon": "/resources/heroes/ivy/mini_icon_ivy.png",
+  "matrix": "/resources/heroes/ivy/matrix_ivy.csv"
+}

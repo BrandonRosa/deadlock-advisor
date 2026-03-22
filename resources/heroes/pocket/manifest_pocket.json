@@ -1,0 +1,8 @@
+{
+  "name": "Pocket",
+  "normalized_name": "pocket",
+  "wiki_url": "https://deadlock.wiki/Pocket",
+  "portrait": "/resources/heroes/pocket/portrait_pocket.png",
+  "mini_icon": "/resources/heroes/pocket/mini_icon_pocket.png",
+  "matrix": "/resources/heroes/pocket/matrix_pocket.csv"
+}

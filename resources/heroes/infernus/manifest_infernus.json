@@ -1,0 +1,8 @@
+{
+  "name": "Infernus",
+  "normalized_name": "infernus",
+  "wiki_url": "https://deadlock.wiki/Infernus",
+  "portrait": "/resources/heroes/infernus/portrait_infernus.png",
+  "mini_icon": "/resources/heroes/infernus/mini_icon_infernus.png",
+  "matrix": "/resources/heroes/infernus/matrix_infernus.csv"
+}
