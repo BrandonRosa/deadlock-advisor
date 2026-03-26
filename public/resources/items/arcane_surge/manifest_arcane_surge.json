@@ -1,0 +1,9 @@
+{
+  "name": "Arcane Surge",
+  "normalized_name": "arcane_surge",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Arcane_Surge",
+  "image": "/resources/items/arcane_surge/arcane_surge.png",
+  "matrix": "/resources/items/arcane_surge/matrix_arcane_surge.csv"
+}

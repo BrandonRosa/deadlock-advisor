@@ -1,0 +1,9 @@
+{
+  "name": "Hunters Aura",
+  "normalized_name": "hunters_aura",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Hunters_Aura",
+  "image": "/resources/items/hunters_aura/hunters_aura.png",
+  "matrix": "/resources/items/hunters_aura/matrix_hunters_aura.csv"
+}

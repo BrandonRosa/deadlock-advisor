@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Burst",
+  "normalized_name": "mystic_burst",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Mystic_Burst",
+  "image": "/resources/items/mystic_burst/mystic_burst.png",
+  "matrix": "/resources/items/mystic_burst/matrix_mystic_burst.csv"
+}

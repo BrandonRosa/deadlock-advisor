@@ -1,0 +1,9 @@
+{
+  "name": "Cheat Death",
+  "normalized_name": "cheat_death",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Cheat_Death",
+  "image": "/resources/items/cheat_death/cheat_death.png",
+  "matrix": "/resources/items/cheat_death/matrix_cheat_death.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Toxic Bullets",
+  "normalized_name": "toxic_bullets",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Toxic_Bullets",
+  "image": "/resources/items/toxic_bullets/toxic_bullets.png",
+  "matrix": "/resources/items/toxic_bullets/matrix_toxic_bullets.csv"
+}

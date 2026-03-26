@@ -1,0 +1,9 @@
+{
+  "name": "Stamina Mastery",
+  "normalized_name": "stamina_mastery",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Stamina_Mastery",
+  "image": "/resources/items/stamina_mastery/stamina_mastery.png",
+  "matrix": "/resources/items/stamina_mastery/matrix_stamina_mastery.csv"
+}

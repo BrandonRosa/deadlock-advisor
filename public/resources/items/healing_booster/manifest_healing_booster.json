@@ -1,0 +1,9 @@
+{
+  "name": "Healing Booster",
+  "normalized_name": "healing_booster",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Healing_Booster",
+  "image": "/resources/items/healing_booster/healing_booster.png",
+  "matrix": "/resources/items/healing_booster/matrix_healing_booster.csv"
+}

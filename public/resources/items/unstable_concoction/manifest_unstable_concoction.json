@@ -1,0 +1,9 @@
+{
+  "name": "Unstable Concoction",
+  "normalized_name": "unstable_concoction",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Unstable_Concoction",
+  "image": "/resources/items/unstable_concoction/unstable_concoction.png",
+  "matrix": "/resources/items/unstable_concoction/matrix_unstable_concoction.csv"
+}

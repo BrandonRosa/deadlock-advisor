@@ -1,0 +1,9 @@
+{
+  "name": "Extra Spirit",
+  "normalized_name": "extra_spirit",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extra_Spirit",
+  "image": "/resources/items/extra_spirit/extra_spirit.png",
+  "matrix": "/resources/items/extra_spirit/matrix_extra_spirit.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Tesla Bullets",
+  "normalized_name": "tesla_bullets",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Tesla_Bullets",
+  "image": "/resources/items/tesla_bullets/tesla_bullets.png",
+  "matrix": "/resources/items/tesla_bullets/matrix_tesla_bullets.csv"
+}

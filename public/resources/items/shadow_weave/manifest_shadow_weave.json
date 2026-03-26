@@ -1,0 +1,9 @@
+{
+  "name": "Shadow Weave",
+  "normalized_name": "shadow_weave",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Shadow_Weave",
+  "image": "/resources/items/shadow_weave/shadow_weave.png",
+  "matrix": "/resources/items/shadow_weave/matrix_shadow_weave.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Colossus",
+  "normalized_name": "colossus",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Colossus",
+  "image": "/resources/items/colossus/colossus.png",
+  "matrix": "/resources/items/colossus/matrix_colossus.csv"
+}

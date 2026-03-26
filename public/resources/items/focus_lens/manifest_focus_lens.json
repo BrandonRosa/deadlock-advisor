@@ -1,0 +1,9 @@
+{
+  "name": "Focus Lens",
+  "normalized_name": "focus_lens",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Focus_Lens",
+  "image": "/resources/items/focus_lens/focus_lens.png",
+  "matrix": "/resources/items/focus_lens/matrix_focus_lens.csv"
+}

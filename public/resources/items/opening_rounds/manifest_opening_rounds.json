@@ -1,0 +1,9 @@
+{
+  "name": "Opening Rounds",
+  "normalized_name": "opening_rounds",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Opening_Rounds",
+  "image": "/resources/items/opening_rounds/opening_rounds.png",
+  "matrix": "/resources/items/opening_rounds/matrix_opening_rounds.csv"
+}

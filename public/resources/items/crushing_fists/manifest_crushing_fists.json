@@ -1,0 +1,9 @@
+{
+  "name": "Crushing Fists",
+  "normalized_name": "crushing_fists",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Crushing_Fists",
+  "image": "/resources/items/crushing_fists/crushing_fists.png",
+  "matrix": "/resources/items/crushing_fists/matrix_crushing_fists.csv"
+}

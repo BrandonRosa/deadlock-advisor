@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Rend",
+  "normalized_name": "spirit_rend",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Spirit_Rend",
+  "image": "/resources/items/spirit_rend/spirit_rend.png",
+  "matrix": "/resources/items/spirit_rend/matrix_spirit_rend.csv"
+}

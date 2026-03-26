@@ -1,0 +1,9 @@
+{
+  "name": "Bullet Resilience",
+  "normalized_name": "bullet_resilience",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Bullet_Resilience",
+  "image": "/resources/items/bullet_resilience/bullet_resilience.png",
+  "matrix": "/resources/items/bullet_resilience/matrix_bullet_resilience.csv"
+}

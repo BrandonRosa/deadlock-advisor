@@ -1,0 +1,9 @@
+{
+  "name": "Fleetfoot",
+  "normalized_name": "fleetfoot",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Fleetfoot",
+  "image": "/resources/items/fleetfoot/fleetfoot.png",
+  "matrix": "/resources/items/fleetfoot/matrix_fleetfoot.csv"
+}

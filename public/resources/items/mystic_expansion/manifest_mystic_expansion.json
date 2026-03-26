@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Expansion",
+  "normalized_name": "mystic_expansion",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Mystic_Expansion",
+  "image": "/resources/items/mystic_expansion/mystic_expansion.png",
+  "matrix": "/resources/items/mystic_expansion/matrix_mystic_expansion.csv"
+}

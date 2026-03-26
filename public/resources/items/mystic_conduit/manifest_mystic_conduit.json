@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Conduit",
+  "normalized_name": "mystic_conduit",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Mystic_Conduit",
+  "image": "/resources/items/mystic_conduit/mystic_conduit.png",
+  "matrix": "/resources/items/mystic_conduit/matrix_mystic_conduit.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Electric Slippers",
+  "normalized_name": "electric_slippers",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Electric_Slippers",
+  "image": "/resources/items/electric_slippers/electric_slippers.png",
+  "matrix": "/resources/items/electric_slippers/matrix_electric_slippers.csv"
+}

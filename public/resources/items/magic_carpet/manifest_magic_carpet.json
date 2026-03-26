@@ -1,0 +1,9 @@
+{
+  "name": "Magic Carpet",
+  "normalized_name": "magic_carpet",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Magic_Carpet",
+  "image": "/resources/items/magic_carpet/magic_carpet.png",
+  "matrix": "/resources/items/magic_carpet/matrix_magic_carpet.csv"
+}

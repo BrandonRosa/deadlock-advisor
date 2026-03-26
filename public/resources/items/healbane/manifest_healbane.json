@@ -1,0 +1,9 @@
+{
+  "name": "Healbane",
+  "normalized_name": "healbane",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Healbane",
+  "image": "/resources/items/healbane/healbane.png",
+  "matrix": "/resources/items/healbane/matrix_healbane.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Shadow Strike",
+  "normalized_name": "shadow_strike",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Shadow_Strike",
+  "image": "/resources/items/shadow_strike/shadow_strike.png",
+  "matrix": "/resources/items/shadow_strike/matrix_shadow_strike.csv"
+}

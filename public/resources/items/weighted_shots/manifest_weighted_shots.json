@@ -1,0 +1,9 @@
+{
+  "name": "Weighted Shots",
+  "normalized_name": "weighted_shots",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Weighted_Shots",
+  "image": "/resources/items/weighted_shots/weighted_shots.png",
+  "matrix": "/resources/items/weighted_shots/matrix_weighted_shots.csv"
+}

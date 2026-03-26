@@ -1,0 +1,9 @@
+{
+  "name": "Omnicharge Signet",
+  "normalized_name": "omnicharge_signet",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Omnicharge_Signet",
+  "image": "/resources/items/omnicharge_signet/omnicharge_signet.png",
+  "matrix": "/resources/items/omnicharge_signet/matrix_omnicharge_signet.csv"
+}

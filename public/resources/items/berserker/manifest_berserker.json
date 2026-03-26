@@ -1,0 +1,9 @@
+{
+  "name": "Berserker",
+  "normalized_name": "berserker",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Berserker",
+  "image": "/resources/items/berserker/berserker.png",
+  "matrix": "/resources/items/berserker/matrix_berserker.csv"
+}

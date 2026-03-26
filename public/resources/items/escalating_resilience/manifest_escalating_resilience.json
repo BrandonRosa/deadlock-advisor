@@ -1,0 +1,9 @@
+{
+  "name": "Escalating Resilience",
+  "normalized_name": "escalating_resilience",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Escalating_Resilience",
+  "image": "/resources/items/escalating_resilience/escalating_resilience.png",
+  "matrix": "/resources/items/escalating_resilience/matrix_escalating_resilience.csv"
+}

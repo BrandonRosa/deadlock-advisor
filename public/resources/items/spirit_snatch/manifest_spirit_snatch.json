@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Snatch",
+  "normalized_name": "spirit_snatch",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Spirit_Snatch",
+  "image": "/resources/items/spirit_snatch/spirit_snatch.png",
+  "matrix": "/resources/items/spirit_snatch/matrix_spirit_snatch.csv"
+}

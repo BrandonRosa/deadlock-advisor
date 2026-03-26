@@ -1,0 +1,9 @@
+{
+  "name": "Diviners Kevlar",
+  "normalized_name": "diviners_kevlar",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Diviners_Kevlar",
+  "image": "/resources/items/diviners_kevlar/diviners_kevlar.png",
+  "matrix": "/resources/items/diviners_kevlar/matrix_diviners_kevlar.csv"
+}

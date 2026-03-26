@@ -1,0 +1,9 @@
+{
+  "name": "Trophy Collector",
+  "normalized_name": "trophy_collector",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Trophy_Collector",
+  "image": "/resources/items/trophy_collector/trophy_collector.png",
+  "matrix": "/resources/items/trophy_collector/matrix_trophy_collector.csv"
+}

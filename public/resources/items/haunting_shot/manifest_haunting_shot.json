@@ -1,0 +1,9 @@
+{
+  "name": "Haunting Shot",
+  "normalized_name": "haunting_shot",
+  "category": "Weapon",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Haunting_Shot",
+  "image": "/resources/items/haunting_shot/haunting_shot.png",
+  "matrix": "/resources/items/haunting_shot/matrix_haunting_shot.csv"
+}

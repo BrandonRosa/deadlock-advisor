@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Sap",
+  "normalized_name": "spirit_sap",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Spirit_Sap",
+  "image": "/resources/items/spirit_sap/spirit_sap.png",
+  "matrix": "/resources/items/spirit_sap/matrix_spirit_sap.csv"
+}

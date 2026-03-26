@@ -1,0 +1,9 @@
+{
+  "name": "Decay",
+  "normalized_name": "decay",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Decay",
+  "image": "/resources/items/decay/decay.png",
+  "matrix": "/resources/items/decay/matrix_decay.csv"
+}

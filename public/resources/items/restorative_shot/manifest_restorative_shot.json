@@ -1,0 +1,9 @@
+{
+  "name": "Restorative Shot",
+  "normalized_name": "restorative_shot",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Restorative_Shot",
+  "image": "/resources/items/restorative_shot/restorative_shot.png",
+  "matrix": "/resources/items/restorative_shot/matrix_restorative_shot.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Split Shot",
+  "normalized_name": "split_shot",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Split_Shot",
+  "image": "/resources/items/split_shot/split_shot.png",
+  "matrix": "/resources/items/split_shot/matrix_split_shot.csv"
+}

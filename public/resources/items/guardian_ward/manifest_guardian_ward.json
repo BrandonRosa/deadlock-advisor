@@ -1,0 +1,9 @@
+{
+  "name": "Guardian Ward",
+  "normalized_name": "guardian_ward",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Guardian_Ward",
+  "image": "/resources/items/guardian_ward/guardian_ward.png",
+  "matrix": "/resources/items/guardian_ward/matrix_guardian_ward.csv"
+}

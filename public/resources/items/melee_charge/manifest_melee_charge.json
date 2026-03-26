@@ -1,0 +1,9 @@
+{
+  "name": "Melee Charge",
+  "normalized_name": "melee_charge",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Melee_Charge",
+  "image": "/resources/items/melee_charge/melee_charge.png",
+  "matrix": "/resources/items/melee_charge/matrix_melee_charge.csv"
+}

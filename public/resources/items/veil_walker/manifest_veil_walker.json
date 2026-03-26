@@ -1,0 +1,9 @@
+{
+  "name": "Veil Walker",
+  "normalized_name": "veil_walker",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Veil_Walker",
+  "image": "/resources/items/veil_walker/veil_walker.png",
+  "matrix": "/resources/items/veil_walker/matrix_veil_walker.csv"
+}

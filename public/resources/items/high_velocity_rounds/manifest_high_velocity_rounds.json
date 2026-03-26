@@ -1,0 +1,9 @@
+{
+  "name": "High-Velocity Rounds",
+  "normalized_name": "high_velocity_rounds",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds",
+  "image": "/resources/items/high_velocity_rounds/high_velocity_rounds.png",
+  "matrix": "/resources/items/high_velocity_rounds/matrix_high_velocity_rounds.csv"
+}

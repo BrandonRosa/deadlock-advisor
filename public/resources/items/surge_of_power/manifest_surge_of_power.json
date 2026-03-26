@@ -1,0 +1,9 @@
+{
+  "name": "Surge of Power",
+  "normalized_name": "surge_of_power",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Surge_of_Power",
+  "image": "/resources/items/surge_of_power/surge_of_power.png",
+  "matrix": "/resources/items/surge_of_power/matrix_surge_of_power.csv"
+}

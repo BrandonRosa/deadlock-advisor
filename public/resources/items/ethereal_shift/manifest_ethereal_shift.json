@@ -1,0 +1,9 @@
+{
+  "name": "Ethereal Shift",
+  "normalized_name": "ethereal_shift",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Ethereal_Shift",
+  "image": "/resources/items/ethereal_shift/ethereal_shift.png",
+  "matrix": "/resources/items/ethereal_shift/matrix_ethereal_shift.csv"
+}

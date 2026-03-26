@@ -1,0 +1,9 @@
+{
+  "name": "Improved Spirit",
+  "normalized_name": "improved_spirit",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Improved_Spirit",
+  "image": "/resources/items/improved_spirit/improved_spirit.png",
+  "matrix": "/resources/items/improved_spirit/matrix_improved_spirit.csv"
+}

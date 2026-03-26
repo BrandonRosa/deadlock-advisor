@@ -1,0 +1,9 @@
+{
+  "name": "Headshot Booster",
+  "normalized_name": "headshot_booster",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Headshot_Booster",
+  "image": "/resources/items/headshot_booster/headshot_booster.png",
+  "matrix": "/resources/items/headshot_booster/matrix_headshot_booster.csv"
+}

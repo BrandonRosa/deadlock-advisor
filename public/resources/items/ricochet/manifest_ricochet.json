@@ -1,0 +1,9 @@
+{
+  "name": "Ricochet",
+  "normalized_name": "ricochet",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Ricochet",
+  "image": "/resources/items/ricochet/ricochet.png",
+  "matrix": "/resources/items/ricochet/matrix_ricochet.csv"
+}

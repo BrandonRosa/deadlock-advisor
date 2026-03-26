@@ -1,0 +1,9 @@
+{
+  "name": "Sprint Boots",
+  "normalized_name": "sprint_boots",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Sprint_Boots",
+  "image": "/resources/items/sprint_boots/sprint_boots.png",
+  "matrix": "/resources/items/sprint_boots/matrix_sprint_boots.csv"
+}

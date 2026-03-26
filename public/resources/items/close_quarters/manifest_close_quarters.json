@@ -1,0 +1,9 @@
+{
+  "name": "Close Quarters",
+  "normalized_name": "close_quarters",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Close_Quarters",
+  "image": "/resources/items/close_quarters/close_quarters.png",
+  "matrix": "/resources/items/close_quarters/matrix_close_quarters.csv"
+}

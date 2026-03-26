@@ -1,0 +1,9 @@
+{
+  "name": "Point Blank",
+  "normalized_name": "point_blank",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Point_Blank",
+  "image": "/resources/items/point_blank/point_blank.png",
+  "matrix": "/resources/items/point_blank/matrix_point_blank.csv"
+}

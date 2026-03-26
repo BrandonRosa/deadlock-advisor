@@ -1,0 +1,9 @@
+{
+  "name": "Frenzy",
+  "normalized_name": "frenzy",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Frenzy",
+  "image": "/resources/items/frenzy/frenzy.png",
+  "matrix": "/resources/items/frenzy/matrix_frenzy.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Transcendent Cooldown",
+  "normalized_name": "transcendent_cooldown",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Transcendent_Cooldown",
+  "image": "/resources/items/transcendent_cooldown/transcendent_cooldown.png",
+  "matrix": "/resources/items/transcendent_cooldown/matrix_transcendent_cooldown.csv"
+}

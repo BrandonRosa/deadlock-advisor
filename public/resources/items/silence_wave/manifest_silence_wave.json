@@ -1,0 +1,9 @@
+{
+  "name": "Silence Wave",
+  "normalized_name": "silence_wave",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Silence_Wave",
+  "image": "/resources/items/silence_wave/silence_wave.png",
+  "matrix": "/resources/items/silence_wave/matrix_silence_wave.csv"
+}

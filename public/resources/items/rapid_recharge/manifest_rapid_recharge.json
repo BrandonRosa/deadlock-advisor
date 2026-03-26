@@ -1,0 +1,9 @@
+{
+  "name": "Rapid Recharge",
+  "normalized_name": "rapid_recharge",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Rapid_Recharge",
+  "image": "/resources/items/rapid_recharge/rapid_recharge.png",
+  "matrix": "/resources/items/rapid_recharge/matrix_rapid_recharge.csv"
+}

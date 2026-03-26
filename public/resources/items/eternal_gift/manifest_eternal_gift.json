@@ -1,0 +1,9 @@
+{
+  "name": "Eternal Gift",
+  "normalized_name": "eternal_gift",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Eternal_Gift",
+  "image": "/resources/items/eternal_gift/eternal_gift.png",
+  "matrix": "/resources/items/eternal_gift/matrix_eternal_gift.csv"
+}

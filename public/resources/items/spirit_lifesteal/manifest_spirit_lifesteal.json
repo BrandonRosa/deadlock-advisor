@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Lifesteal",
+  "normalized_name": "spirit_lifesteal",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Spirit_Lifesteal",
+  "image": "/resources/items/spirit_lifesteal/spirit_lifesteal.png",
+  "matrix": "/resources/items/spirit_lifesteal/matrix_spirit_lifesteal.csv"
+}

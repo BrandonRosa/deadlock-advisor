@@ -1,0 +1,9 @@
+{
+  "name": "Ballistic Enchantment",
+  "normalized_name": "ballistic_enchantment",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Ballistic_Enchantment",
+  "image": "/resources/items/ballistic_enchantment/ballistic_enchantment.png",
+  "matrix": "/resources/items/ballistic_enchantment/matrix_ballistic_enchantment.csv"
+}

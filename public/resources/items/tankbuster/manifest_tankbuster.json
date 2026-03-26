@@ -1,0 +1,9 @@
+{
+  "name": "Tankbuster",
+  "normalized_name": "tankbuster",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Tankbuster",
+  "image": "/resources/items/tankbuster/tankbuster.png",
+  "matrix": "/resources/items/tankbuster/matrix_tankbuster.csv"
+}

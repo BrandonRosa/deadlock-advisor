@@ -1,0 +1,9 @@
+{
+  "name": "Vortex Web",
+  "normalized_name": "vortex_web",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Vortex_Web",
+  "image": "/resources/items/vortex_web/vortex_web.png",
+  "matrix": "/resources/items/vortex_web/matrix_vortex_web.csv"
+}

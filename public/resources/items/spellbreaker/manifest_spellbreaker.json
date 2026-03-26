@@ -1,0 +1,9 @@
+{
+  "name": "Spellbreaker",
+  "normalized_name": "spellbreaker",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Spellbreaker",
+  "image": "/resources/items/spellbreaker/spellbreaker.png",
+  "matrix": "/resources/items/spellbreaker/matrix_spellbreaker.csv"
+}

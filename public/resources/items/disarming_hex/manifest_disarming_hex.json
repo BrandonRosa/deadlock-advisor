@@ -1,0 +1,9 @@
+{
+  "name": "Disarming Hex",
+  "normalized_name": "disarming_hex",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Disarming_Hex",
+  "image": "/resources/items/disarming_hex/disarming_hex.png",
+  "matrix": "/resources/items/disarming_hex/matrix_disarming_hex.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Plated Armor",
+  "normalized_name": "plated_armor",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Plated_Armor",
+  "image": "/resources/items/plated_armor/plated_armor.png",
+  "matrix": "/resources/items/plated_armor/matrix_plated_armor.csv"
+}

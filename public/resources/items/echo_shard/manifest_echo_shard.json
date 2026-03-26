@@ -1,0 +1,9 @@
+{
+  "name": "Echo Shard",
+  "normalized_name": "echo_shard",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Echo_Shard",
+  "image": "/resources/items/echo_shard/echo_shard.png",
+  "matrix": "/resources/items/echo_shard/matrix_echo_shard.csv"
+}

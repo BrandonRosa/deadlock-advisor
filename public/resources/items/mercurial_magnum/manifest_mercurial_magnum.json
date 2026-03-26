@@ -1,0 +1,9 @@
+{
+  "name": "Mercurial Magnum",
+  "normalized_name": "mercurial_magnum",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Mercurial_Magnum",
+  "image": "/resources/items/mercurial_magnum/mercurial_magnum.png",
+  "matrix": "/resources/items/mercurial_magnum/matrix_mercurial_magnum.csv"
+}

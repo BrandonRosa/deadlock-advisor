@@ -1,0 +1,9 @@
+{
+  "name": "Sharpshooter",
+  "normalized_name": "sharpshooter",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Sharpshooter",
+  "image": "/resources/items/sharpshooter/sharpshooter.png",
+  "matrix": "/resources/items/sharpshooter/matrix_sharpshooter.csv"
+}

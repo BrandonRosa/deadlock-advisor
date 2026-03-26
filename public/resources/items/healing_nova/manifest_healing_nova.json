@@ -1,0 +1,9 @@
+{
+  "name": "Healing Nova",
+  "normalized_name": "healing_nova",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Healing_Nova",
+  "image": "/resources/items/healing_nova/healing_nova.png",
+  "matrix": "/resources/items/healing_nova/matrix_healing_nova.csv"
+}

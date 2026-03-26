@@ -1,0 +1,9 @@
+{
+  "name": "Battle Vest",
+  "normalized_name": "battle_vest",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Battle_Vest",
+  "image": "/resources/items/battle_vest/battle_vest.png",
+  "matrix": "/resources/items/battle_vest/matrix_battle_vest.csv"
+}

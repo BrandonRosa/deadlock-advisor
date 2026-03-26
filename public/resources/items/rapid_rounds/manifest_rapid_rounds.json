@@ -1,0 +1,9 @@
+{
+  "name": "Rapid Rounds",
+  "normalized_name": "rapid_rounds",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Rapid_Rounds",
+  "image": "/resources/items/rapid_rounds/rapid_rounds.png",
+  "matrix": "/resources/items/rapid_rounds/matrix_rapid_rounds.csv"
+}

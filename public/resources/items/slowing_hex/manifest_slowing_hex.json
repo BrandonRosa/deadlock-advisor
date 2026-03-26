@@ -1,0 +1,9 @@
+{
+  "name": "Slowing Hex",
+  "normalized_name": "slowing_hex",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Slowing_Hex",
+  "image": "/resources/items/slowing_hex/slowing_hex.png",
+  "matrix": "/resources/items/slowing_hex/matrix_slowing_hex.csv"
+}

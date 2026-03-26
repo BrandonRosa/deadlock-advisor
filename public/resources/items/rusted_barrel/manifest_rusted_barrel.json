@@ -1,0 +1,9 @@
+{
+  "name": "Rusted Barrel",
+  "normalized_name": "rusted_barrel",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Rusted_Barrel",
+  "image": "/resources/items/rusted_barrel/rusted_barrel.png",
+  "matrix": "/resources/items/rusted_barrel/matrix_rusted_barrel.csv"
+}

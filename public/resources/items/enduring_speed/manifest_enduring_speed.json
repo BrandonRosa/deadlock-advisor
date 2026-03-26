@@ -1,0 +1,9 @@
+{
+  "name": "Enduring Speed",
+  "normalized_name": "enduring_speed",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Enduring_Speed",
+  "image": "/resources/items/enduring_speed/enduring_speed.png",
+  "matrix": "/resources/items/enduring_speed/matrix_enduring_speed.csv"
+}

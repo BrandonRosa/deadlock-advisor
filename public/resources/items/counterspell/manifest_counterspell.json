@@ -1,0 +1,9 @@
+{
+  "name": "Counterspell",
+  "normalized_name": "counterspell",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Counterspell",
+  "image": "/resources/items/counterspell/counterspell.png",
+  "matrix": "/resources/items/counterspell/matrix_counterspell.csv"
+}

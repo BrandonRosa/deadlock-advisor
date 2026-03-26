@@ -1,0 +1,9 @@
+{
+  "name": "Alchemical Fire",
+  "normalized_name": "alchemical_fire",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Alchemical_Fire",
+  "image": "/resources/items/alchemical_fire/alchemical_fire.png",
+  "matrix": "/resources/items/alchemical_fire/matrix_alchemical_fire.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Fortitude",
+  "normalized_name": "fortitude",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Fortitude",
+  "image": "/resources/items/fortitude/fortitude.png",
+  "matrix": "/resources/items/fortitude/matrix_fortitude.csv"
+}

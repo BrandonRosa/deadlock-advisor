@@ -1,0 +1,9 @@
+{
+  "name": "Weapon Shielding",
+  "normalized_name": "weapon_shielding",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Weapon_Shielding",
+  "image": "/resources/items/weapon_shielding/weapon_shielding.png",
+  "matrix": "/resources/items/weapon_shielding/matrix_weapon_shielding.csv"
+}

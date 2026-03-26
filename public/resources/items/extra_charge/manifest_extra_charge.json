@@ -1,0 +1,9 @@
+{
+  "name": "Extra Charge",
+  "normalized_name": "extra_charge",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extra_Charge",
+  "image": "/resources/items/extra_charge/extra_charge.png",
+  "matrix": "/resources/items/extra_charge/matrix_extra_charge.csv"
+}

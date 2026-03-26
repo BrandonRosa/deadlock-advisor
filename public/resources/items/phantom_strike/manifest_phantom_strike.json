@@ -1,0 +1,9 @@
+{
+  "name": "Phantom Strike",
+  "normalized_name": "phantom_strike",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Phantom_Strike",
+  "image": "/resources/items/phantom_strike/phantom_strike.png",
+  "matrix": "/resources/items/phantom_strike/matrix_phantom_strike.csv"
+}

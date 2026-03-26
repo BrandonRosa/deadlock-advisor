@@ -1,0 +1,9 @@
+{
+  "name": "Quicksilver Reload",
+  "normalized_name": "quicksilver_reload",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Quicksilver_Reload",
+  "image": "/resources/items/quicksilver_reload/quicksilver_reload.png",
+  "matrix": "/resources/items/quicksilver_reload/matrix_quicksilver_reload.csv"
+}

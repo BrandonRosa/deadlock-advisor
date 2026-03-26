@@ -1,0 +1,9 @@
+{
+  "name": "Weakening Headshot",
+  "normalized_name": "weakening_headshot",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Weakening_Headshot",
+  "image": "/resources/items/weakening_headshot/weakening_headshot.png",
+  "matrix": "/resources/items/weakening_headshot/matrix_weakening_headshot.csv"
+}

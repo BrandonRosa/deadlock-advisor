@@ -1,0 +1,9 @@
+{
+  "name": "Leech",
+  "normalized_name": "leech",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Leech",
+  "image": "/resources/items/leech/leech.png",
+  "matrix": "/resources/items/leech/matrix_leech.csv"
+}

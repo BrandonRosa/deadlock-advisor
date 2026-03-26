@@ -1,0 +1,9 @@
+{
+  "name": "Swift Striker",
+  "normalized_name": "swift_striker",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Swift_Striker",
+  "image": "/resources/items/swift_striker/swift_striker.png",
+  "matrix": "/resources/items/swift_striker/matrix_swift_striker.csv"
+}

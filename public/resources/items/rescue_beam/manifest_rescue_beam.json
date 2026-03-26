@@ -1,0 +1,9 @@
+{
+  "name": "Rescue Beam",
+  "normalized_name": "rescue_beam",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Rescue_Beam",
+  "image": "/resources/items/rescue_beam/rescue_beam.png",
+  "matrix": "/resources/items/rescue_beam/matrix_rescue_beam.csv"
+}

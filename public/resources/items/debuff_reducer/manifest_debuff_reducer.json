@@ -1,0 +1,9 @@
+{
+  "name": "Debuff Reducer",
+  "normalized_name": "debuff_reducer",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Debuff_Reducer",
+  "image": "/resources/items/debuff_reducer/debuff_reducer.png",
+  "matrix": "/resources/items/debuff_reducer/matrix_debuff_reducer.csv"
+}

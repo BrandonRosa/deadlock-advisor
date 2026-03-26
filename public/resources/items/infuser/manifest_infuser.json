@@ -1,0 +1,9 @@
+{
+  "name": "Infuser",
+  "normalized_name": "infuser",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Infuser",
+  "image": "/resources/items/infuser/infuser.png",
+  "matrix": "/resources/items/infuser/matrix_infuser.csv"
+}

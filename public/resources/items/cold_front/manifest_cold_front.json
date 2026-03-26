@@ -1,0 +1,9 @@
+{
+  "name": "Cold Front",
+  "normalized_name": "cold_front",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Cold_Front",
+  "image": "/resources/items/cold_front/cold_front.png",
+  "matrix": "/resources/items/cold_front/matrix_cold_front.csv"
+}
