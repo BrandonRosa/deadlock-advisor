@@ -1,0 +1,9 @@
+{
+  "name": "Radiant Regeneration",
+  "normalized_name": "radiant_regeneration",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Radiant_Regeneration",
+  "image": "/resources/items/radiant_regeneration/radiant_regeneration.png",
+  "matrix": "/resources/items/radiant_regeneration/matrix_radiant_regeneration.csv"
+}

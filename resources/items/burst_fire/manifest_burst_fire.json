@@ -1,0 +1,9 @@
+{
+  "name": "Burst Fire",
+  "normalized_name": "burst_fire",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Burst_Fire",
+  "image": "/resources/items/burst_fire/burst_fire.png",
+  "matrix": "/resources/items/burst_fire/matrix_burst_fire.csv"
+}

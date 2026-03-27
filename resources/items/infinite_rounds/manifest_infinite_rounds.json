@@ -1,0 +1,9 @@
+{
+  "name": "Infinite Rounds",
+  "normalized_name": "infinite_rounds",
+  "category": "Weapon",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Infinite_Rounds",
+  "image": "/resources/items/infinite_rounds/infinite_rounds.png",
+  "matrix": "/resources/items/infinite_rounds/matrix_infinite_rounds.csv"
+}

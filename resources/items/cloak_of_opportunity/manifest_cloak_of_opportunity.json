@@ -1,0 +1,9 @@
+{
+  "name": "Cloak of Opportunity",
+  "normalized_name": "cloak_of_opportunity",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Cloak_of_Opportunity",
+  "image": "/resources/items/cloak_of_opportunity/cloak_of_opportunity.png",
+  "matrix": "/resources/items/cloak_of_opportunity/matrix_cloak_of_opportunity.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Juggernaut",
+  "normalized_name": "juggernaut",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Juggernaut",
+  "image": "/resources/items/juggernaut/juggernaut.png",
+  "matrix": "/resources/items/juggernaut/matrix_juggernaut.csv"
+}

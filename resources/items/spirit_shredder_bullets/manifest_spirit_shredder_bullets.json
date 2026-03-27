@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Shredder Bullets",
+  "normalized_name": "spirit_shredder_bullets",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Spirit_Shredder_Bullets",
+  "image": "/resources/items/spirit_shredder_bullets/spirit_shredder_bullets.png",
+  "matrix": "/resources/items/spirit_shredder_bullets/matrix_spirit_shredder_bullets.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Armor Piercing Rounds",
+  "normalized_name": "armor_piercing_rounds",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Armor_Piercing_Rounds",
+  "image": "/resources/items/armor_piercing_rounds/armor_piercing_rounds.png",
+  "matrix": "/resources/items/armor_piercing_rounds/matrix_armor_piercing_rounds.csv"
+}

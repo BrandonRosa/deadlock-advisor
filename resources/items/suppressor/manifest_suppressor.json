@@ -1,0 +1,9 @@
+{
+  "name": "Suppressor",
+  "normalized_name": "suppressor",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Suppressor",
+  "image": "/resources/items/suppressor/suppressor.png",
+  "matrix": "/resources/items/suppressor/matrix_suppressor.csv"
+}

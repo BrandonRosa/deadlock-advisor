@@ -1,0 +1,9 @@
+{
+  "name": "Frostbite Charm",
+  "normalized_name": "frostbite_charm",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Frostbite_Charm",
+  "image": "/resources/items/frostbite_charm/frostbite_charm.png",
+  "matrix": "/resources/items/frostbite_charm/matrix_frostbite_charm.csv"
+}

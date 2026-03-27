@@ -1,0 +1,9 @@
+{
+  "name": "Vampiric Burst",
+  "normalized_name": "vampiric_burst",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Vampiric_Burst",
+  "image": "/resources/items/vampiric_burst/vampiric_burst.png",
+  "matrix": "/resources/items/vampiric_burst/matrix_vampiric_burst.csv"
+}

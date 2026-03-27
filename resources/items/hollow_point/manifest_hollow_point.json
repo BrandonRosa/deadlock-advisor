@@ -1,0 +1,9 @@
+{
+  "name": "Hollow Point",
+  "normalized_name": "hollow_point",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Hollow_Point",
+  "image": "/resources/items/hollow_point/hollow_point.png",
+  "matrix": "/resources/items/hollow_point/matrix_hollow_point.csv"
+}

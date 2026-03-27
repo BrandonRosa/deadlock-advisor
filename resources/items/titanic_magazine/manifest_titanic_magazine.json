@@ -1,0 +1,9 @@
+{
+  "name": "Titanic Magazine",
+  "normalized_name": "titanic_magazine",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Titanic_Magazine",
+  "image": "/resources/items/titanic_magazine/titanic_magazine.png",
+  "matrix": "/resources/items/titanic_magazine/matrix_titanic_magazine.csv"
+}

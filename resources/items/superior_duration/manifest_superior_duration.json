@@ -1,0 +1,9 @@
+{
+  "name": "Superior Duration",
+  "normalized_name": "superior_duration",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Superior_Duration",
+  "image": "/resources/items/superior_duration/superior_duration.png",
+  "matrix": "/resources/items/superior_duration/matrix_superior_duration.csv"
+}

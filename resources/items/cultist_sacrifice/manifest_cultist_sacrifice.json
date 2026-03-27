@@ -1,0 +1,9 @@
+{
+  "name": "Cultist Sacrifice",
+  "normalized_name": "cultist_sacrifice",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Cultist_Sacrifice",
+  "image": "/resources/items/cultist_sacrifice/cultist_sacrifice.png",
+  "matrix": "/resources/items/cultist_sacrifice/matrix_cultist_sacrifice.csv"
+}

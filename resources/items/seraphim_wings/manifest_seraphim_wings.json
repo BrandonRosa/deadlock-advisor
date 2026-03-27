@@ -1,0 +1,9 @@
+{
+  "name": "Seraphim Wings",
+  "normalized_name": "seraphim_wings",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Seraphim_Wings",
+  "image": "/resources/items/seraphim_wings/seraphim_wings.png",
+  "matrix": "/resources/items/seraphim_wings/matrix_seraphim_wings.csv"
+}

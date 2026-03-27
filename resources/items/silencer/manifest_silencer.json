@@ -1,0 +1,9 @@
+{
+  "name": "Silencer",
+  "normalized_name": "silencer",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Silencer",
+  "image": "/resources/items/silencer/silencer.png",
+  "matrix": "/resources/items/silencer/matrix_silencer.csv"
+}

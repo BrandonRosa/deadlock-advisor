@@ -1,0 +1,9 @@
+{
+  "name": "Prism Blast",
+  "normalized_name": "prism_blast",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Prism_Blast",
+  "image": "/resources/items/prism_blast/prism_blast.png",
+  "matrix": "/resources/items/prism_blast/matrix_prism_blast.csv"
+}

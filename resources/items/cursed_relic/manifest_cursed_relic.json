@@ -1,0 +1,9 @@
+{
+  "name": "Cursed Relic",
+  "normalized_name": "cursed_relic",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Cursed_Relic",
+  "image": "/resources/items/cursed_relic/cursed_relic.png",
+  "matrix": "/resources/items/cursed_relic/matrix_cursed_relic.csv"
+}

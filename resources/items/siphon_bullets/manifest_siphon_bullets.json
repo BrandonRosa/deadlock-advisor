@@ -1,0 +1,9 @@
+{
+  "name": "Siphon Bullets",
+  "normalized_name": "siphon_bullets",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Siphon_Bullets",
+  "image": "/resources/items/siphon_bullets/siphon_bullets.png",
+  "matrix": "/resources/items/siphon_bullets/matrix_siphon_bullets.csv"
+}

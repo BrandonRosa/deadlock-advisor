@@ -1,0 +1,9 @@
+{
+  "name": "Headhunter",
+  "normalized_name": "headhunter",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Headhunter",
+  "image": "/resources/items/headhunter/headhunter.png",
+  "matrix": "/resources/items/headhunter/matrix_headhunter.csv"
+}

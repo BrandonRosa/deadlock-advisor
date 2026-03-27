@@ -1,0 +1,9 @@
+{
+  "name": "Kinetic Dash",
+  "normalized_name": "kinetic_dash",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Kinetic_Dash",
+  "image": "/resources/items/kinetic_dash/kinetic_dash.png",
+  "matrix": "/resources/items/kinetic_dash/matrix_kinetic_dash.csv"
+}

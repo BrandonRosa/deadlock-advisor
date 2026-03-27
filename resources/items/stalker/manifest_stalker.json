@@ -1,0 +1,9 @@
+{
+  "name": "Stalker",
+  "normalized_name": "stalker",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Stalker",
+  "image": "/resources/items/stalker/stalker.png",
+  "matrix": "/resources/items/stalker/matrix_stalker.csv"
+}

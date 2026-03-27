@@ -1,0 +1,9 @@
+{
+  "name": "Superior Cooldown",
+  "normalized_name": "superior_cooldown",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Superior_Cooldown",
+  "image": "/resources/items/superior_cooldown/superior_cooldown.png",
+  "matrix": "/resources/items/superior_cooldown/matrix_superior_cooldown.csv"
+}

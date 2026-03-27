@@ -1,0 +1,9 @@
+{
+  "name": "Nullification Burst",
+  "normalized_name": "nullification_burst",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Nullification_Burst",
+  "image": "/resources/items/nullification_burst/nullification_burst.png",
+  "matrix": "/resources/items/nullification_burst/matrix_nullification_burst.csv"
+}

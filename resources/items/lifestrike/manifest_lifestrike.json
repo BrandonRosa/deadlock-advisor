@@ -1,0 +1,9 @@
+{
+  "name": "Lifestrike",
+  "normalized_name": "lifestrike",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Lifestrike",
+  "image": "/resources/items/lifestrike/lifestrike.png",
+  "matrix": "/resources/items/lifestrike/matrix_lifestrike.csv"
+}

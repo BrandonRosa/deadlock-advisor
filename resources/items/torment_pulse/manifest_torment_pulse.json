@@ -1,0 +1,9 @@
+{
+  "name": "Torment Pulse",
+  "normalized_name": "torment_pulse",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Torment_Pulse",
+  "image": "/resources/items/torment_pulse/torment_pulse.png",
+  "matrix": "/resources/items/torment_pulse/matrix_torment_pulse.csv"
+}

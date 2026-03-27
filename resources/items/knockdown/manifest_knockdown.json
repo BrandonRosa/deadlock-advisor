@@ -1,0 +1,9 @@
+{
+  "name": "Knockdown",
+  "normalized_name": "knockdown",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Knockdown",
+  "image": "/resources/items/knockdown/knockdown.png",
+  "matrix": "/resources/items/knockdown/matrix_knockdown.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Active Reload",
+  "normalized_name": "active_reload",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Active_Reload",
+  "image": "/resources/items/active_reload/active_reload.png",
+  "matrix": "/resources/items/active_reload/matrix_active_reload.csv"
+}

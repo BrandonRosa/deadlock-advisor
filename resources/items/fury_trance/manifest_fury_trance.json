@@ -1,0 +1,9 @@
+{
+  "name": "Fury Trance",
+  "normalized_name": "fury_trance",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Fury_Trance",
+  "image": "/resources/items/fury_trance/fury_trance.png",
+  "matrix": "/resources/items/fury_trance/matrix_fury_trance.csv"
+}

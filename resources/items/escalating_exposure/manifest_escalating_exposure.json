@@ -1,0 +1,9 @@
+{
+  "name": "Escalating Exposure",
+  "normalized_name": "escalating_exposure",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Escalating_Exposure",
+  "image": "/resources/items/escalating_exposure/escalating_exposure.png",
+  "matrix": "/resources/items/escalating_exposure/matrix_escalating_exposure.csv"
+}

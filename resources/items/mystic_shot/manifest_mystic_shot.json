@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Shot",
+  "normalized_name": "mystic_shot",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Mystic_Shot",
+  "image": "/resources/items/mystic_shot/mystic_shot.png",
+  "matrix": "/resources/items/mystic_shot/matrix_mystic_shot.csv"
+}

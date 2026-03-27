@@ -1,0 +1,9 @@
+{
+  "name": "Enchanters Emblem",
+  "normalized_name": "enchanters_emblem",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Enchanters_Emblem",
+  "image": "/resources/items/enchanters_emblem/enchanters_emblem.png",
+  "matrix": "/resources/items/enchanters_emblem/matrix_enchanters_emblem.csv"
+}

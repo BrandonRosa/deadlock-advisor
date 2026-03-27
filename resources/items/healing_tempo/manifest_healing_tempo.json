@@ -1,0 +1,9 @@
+{
+  "name": "Healing Tempo",
+  "normalized_name": "healing_tempo",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Healing_Tempo",
+  "image": "/resources/items/healing_tempo/healing_tempo.png",
+  "matrix": "/resources/items/healing_tempo/matrix_healing_tempo.csv"
+}

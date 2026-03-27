@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Shielding",
+  "normalized_name": "spirit_shielding",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Spirit_Shielding",
+  "image": "/resources/items/spirit_shielding/spirit_shielding.png",
+  "matrix": "/resources/items/spirit_shielding/matrix_spirit_shielding.csv"
+}

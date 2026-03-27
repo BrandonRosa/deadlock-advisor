@@ -1,0 +1,9 @@
+{
+  "name": "Extra Health",
+  "normalized_name": "extra_health",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extra_Health",
+  "image": "/resources/items/extra_health/extra_health.png",
+  "matrix": "/resources/items/extra_health/matrix_extra_health.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Heroic Aura",
+  "normalized_name": "heroic_aura",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Heroic_Aura",
+  "image": "/resources/items/heroic_aura/heroic_aura.png",
+  "matrix": "/resources/items/heroic_aura/matrix_heroic_aura.csv"
+}

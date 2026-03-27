@@ -1,0 +1,9 @@
+{
+  "name": "Slowing Bullets",
+  "normalized_name": "slowing_bullets",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Slowing_Bullets",
+  "image": "/resources/items/slowing_bullets/slowing_bullets.png",
+  "matrix": "/resources/items/slowing_bullets/matrix_slowing_bullets.csv"
+}

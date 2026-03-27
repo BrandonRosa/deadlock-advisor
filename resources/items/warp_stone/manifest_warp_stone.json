@@ -1,0 +1,9 @@
+{
+  "name": "Warp Stone",
+  "normalized_name": "warp_stone",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Warp_Stone",
+  "image": "/resources/items/warp_stone/warp_stone.png",
+  "matrix": "/resources/items/warp_stone/matrix_warp_stone.csv"
+}

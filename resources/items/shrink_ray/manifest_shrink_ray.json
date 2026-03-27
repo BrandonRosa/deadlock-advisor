@@ -1,0 +1,9 @@
+{
+  "name": "Shrink Ray",
+  "normalized_name": "shrink_ray",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Shrink_Ray",
+  "image": "/resources/items/shrink_ray/shrink_ray.png",
+  "matrix": "/resources/items/shrink_ray/matrix_shrink_ray.csv"
+}

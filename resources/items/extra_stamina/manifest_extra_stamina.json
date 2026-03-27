@@ -1,0 +1,9 @@
+{
+  "name": "Extra Stamina",
+  "normalized_name": "extra_stamina",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extra_Stamina",
+  "image": "/resources/items/extra_stamina/extra_stamina.png",
+  "matrix": "/resources/items/extra_stamina/matrix_extra_stamina.csv"
+}

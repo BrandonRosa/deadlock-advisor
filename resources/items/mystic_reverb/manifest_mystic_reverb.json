@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Reverb",
+  "normalized_name": "mystic_reverb",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Mystic_Reverb",
+  "image": "/resources/items/mystic_reverb/mystic_reverb.png",
+  "matrix": "/resources/items/mystic_reverb/matrix_mystic_reverb.csv"
+}

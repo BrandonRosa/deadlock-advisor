@@ -1,0 +1,9 @@
+{
+  "name": "Rebuttal",
+  "normalized_name": "rebuttal",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Rebuttal",
+  "image": "/resources/items/rebuttal/rebuttal.png",
+  "matrix": "/resources/items/rebuttal/matrix_rebuttal.csv"
+}

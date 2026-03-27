@@ -1,0 +1,9 @@
+{
+  "name": "Divine Barrier",
+  "normalized_name": "divine_barrier",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Divine_Barrier",
+  "image": "/resources/items/divine_barrier/divine_barrier.png",
+  "matrix": "/resources/items/divine_barrier/matrix_divine_barrier.csv"
+}

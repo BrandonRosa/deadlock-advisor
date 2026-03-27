@@ -1,0 +1,9 @@
+{
+  "name": "Bullet Lifesteal",
+  "normalized_name": "bullet_lifesteal",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Bullet_Lifesteal",
+  "image": "/resources/items/bullet_lifesteal/bullet_lifesteal.png",
+  "matrix": "/resources/items/bullet_lifesteal/matrix_bullet_lifesteal.csv"
+}

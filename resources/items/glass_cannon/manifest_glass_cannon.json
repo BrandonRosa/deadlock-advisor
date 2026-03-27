@@ -1,0 +1,9 @@
+{
+  "name": "Glass Cannon",
+  "normalized_name": "glass_cannon",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Glass_Cannon",
+  "image": "/resources/items/glass_cannon/glass_cannon.png",
+  "matrix": "/resources/items/glass_cannon/matrix_glass_cannon.csv"
+}

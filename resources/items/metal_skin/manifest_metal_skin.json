@@ -1,0 +1,9 @@
+{
+  "name": "Metal Skin",
+  "normalized_name": "metal_skin",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Metal_Skin",
+  "image": "/resources/items/metal_skin/metal_skin.png",
+  "matrix": "/resources/items/metal_skin/matrix_metal_skin.csv"
+}

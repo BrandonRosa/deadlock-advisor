@@ -1,0 +1,9 @@
+{
+  "name": "Healing Rite",
+  "normalized_name": "healing_rite",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Healing_Rite",
+  "image": "/resources/items/healing_rite/healing_rite.png",
+  "matrix": "/resources/items/healing_rite/matrix_healing_rite.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Runed Gauntlets",
+  "normalized_name": "runed_gauntlets",
+  "category": "Weapon",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Runed_Gauntlets",
+  "image": "/resources/items/runed_gauntlets/runed_gauntlets.png",
+  "matrix": "/resources/items/runed_gauntlets/matrix_runed_gauntlets.csv"
+}

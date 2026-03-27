@@ -1,0 +1,9 @@
+{
+  "name": "Intensifying Magazine",
+  "normalized_name": "intensifying_magazine",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Intensifying_Magazine",
+  "image": "/resources/items/intensifying_magazine/intensifying_magazine.png",
+  "matrix": "/resources/items/intensifying_magazine/matrix_intensifying_magazine.csv"
+}

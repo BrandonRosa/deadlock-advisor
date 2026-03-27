@@ -1,0 +1,9 @@
+{
+  "name": "Reactive Barrier",
+  "normalized_name": "reactive_barrier",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Reactive_Barrier",
+  "image": "/resources/items/reactive_barrier/reactive_barrier.png",
+  "matrix": "/resources/items/reactive_barrier/matrix_reactive_barrier.csv"
+}

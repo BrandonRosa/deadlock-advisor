@@ -1,0 +1,9 @@
+{
+  "name": "Mystical Piano",
+  "normalized_name": "mystical_piano",
+  "category": "Spirit",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Mystical_Piano",
+  "image": "/resources/items/mystical_piano/mystical_piano.png",
+  "matrix": "/resources/items/mystical_piano/matrix_mystical_piano.csv"
+}

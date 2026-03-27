@@ -1,0 +1,9 @@
+{
+  "name": "Long Range",
+  "normalized_name": "long_range",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Long_Range",
+  "image": "/resources/items/long_range/long_range.png",
+  "matrix": "/resources/items/long_range/matrix_long_range.csv"
+}

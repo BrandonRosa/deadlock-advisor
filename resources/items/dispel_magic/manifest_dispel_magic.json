@@ -1,0 +1,9 @@
+{
+  "name": "Dispel Magic",
+  "normalized_name": "dispel_magic",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Dispel_Magic",
+  "image": "/resources/items/dispel_magic/dispel_magic.png",
+  "matrix": "/resources/items/dispel_magic/matrix_dispel_magic.csv"
+}

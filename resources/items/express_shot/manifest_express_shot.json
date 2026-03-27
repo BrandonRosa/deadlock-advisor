@@ -1,0 +1,9 @@
+{
+  "name": "Express Shot",
+  "normalized_name": "express_shot",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Express_Shot",
+  "image": "/resources/items/express_shot/express_shot.png",
+  "matrix": "/resources/items/express_shot/matrix_express_shot.csv"
+}

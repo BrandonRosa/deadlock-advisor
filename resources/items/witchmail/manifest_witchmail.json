@@ -1,0 +1,9 @@
+{
+  "name": "Witchmail",
+  "normalized_name": "witchmail",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Witchmail",
+  "image": "/resources/items/witchmail/witchmail.png",
+  "matrix": "/resources/items/witchmail/matrix_witchmail.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Greater Expansion",
+  "normalized_name": "greater_expansion",
+  "category": "Spirit",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Greater_Expansion",
+  "image": "/resources/items/greater_expansion/greater_expansion.png",
+  "matrix": "/resources/items/greater_expansion/matrix_greater_expansion.csv"
+}

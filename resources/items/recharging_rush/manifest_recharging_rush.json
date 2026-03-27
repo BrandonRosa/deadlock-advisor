@@ -1,0 +1,9 @@
+{
+  "name": "Recharging Rush",
+  "normalized_name": "recharging_rush",
+  "category": "Weapon",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Recharging_Rush",
+  "image": "/resources/items/recharging_rush/recharging_rush.png",
+  "matrix": "/resources/items/recharging_rush/matrix_recharging_rush.csv"
+}

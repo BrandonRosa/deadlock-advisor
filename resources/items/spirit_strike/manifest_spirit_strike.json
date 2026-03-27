@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Strike",
+  "normalized_name": "spirit_strike",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Spirit_Strike",
+  "image": "/resources/items/spirit_strike/spirit_strike.png",
+  "matrix": "/resources/items/spirit_strike/matrix_spirit_strike.csv"
+}

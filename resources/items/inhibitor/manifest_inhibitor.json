@@ -1,0 +1,9 @@
+{
+  "name": "Inhibitor",
+  "normalized_name": "inhibitor",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Inhibitor",
+  "image": "/resources/items/inhibitor/inhibitor.png",
+  "matrix": "/resources/items/inhibitor/matrix_inhibitor.csv"
+}

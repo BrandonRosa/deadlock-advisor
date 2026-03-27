@@ -1,0 +1,9 @@
+{
+  "name": "Majestic Leap",
+  "normalized_name": "majestic_leap",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Majestic_Leap",
+  "image": "/resources/items/majestic_leap/majestic_leap.png",
+  "matrix": "/resources/items/majestic_leap/matrix_majestic_leap.csv"
+}

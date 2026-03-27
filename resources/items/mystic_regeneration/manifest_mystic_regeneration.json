@@ -1,0 +1,9 @@
+{
+  "name": "Mystic Regeneration",
+  "normalized_name": "mystic_regeneration",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Mystic_Regeneration",
+  "image": "/resources/items/mystic_regeneration/mystic_regeneration.png",
+  "matrix": "/resources/items/mystic_regeneration/matrix_mystic_regeneration.csv"
+}

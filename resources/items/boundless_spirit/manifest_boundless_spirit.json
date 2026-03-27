@@ -1,0 +1,9 @@
+{
+  "name": "Boundless Spirit",
+  "normalized_name": "boundless_spirit",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Boundless_Spirit",
+  "image": "/resources/items/boundless_spirit/boundless_spirit.png",
+  "matrix": "/resources/items/boundless_spirit/matrix_boundless_spirit.csv"
+}

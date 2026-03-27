@@ -1,0 +1,9 @@
+{
+  "name": "Lightning Scroll",
+  "normalized_name": "lightning_scroll",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Lightning_Scroll",
+  "image": "/resources/items/lightning_scroll/lightning_scroll.png",
+  "matrix": "/resources/items/lightning_scroll/matrix_lightning_scroll.csv"
+}

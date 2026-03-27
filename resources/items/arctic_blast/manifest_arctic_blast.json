@@ -1,0 +1,9 @@
+{
+  "name": "Arctic Blast",
+  "normalized_name": "arctic_blast",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Arctic_Blast",
+  "image": "/resources/items/arctic_blast/arctic_blast.png",
+  "matrix": "/resources/items/arctic_blast/matrix_arctic_blast.csv"
+}

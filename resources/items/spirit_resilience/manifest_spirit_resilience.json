@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Resilience",
+  "normalized_name": "spirit_resilience",
+  "category": "Vitality",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Spirit_Resilience",
+  "image": "/resources/items/spirit_resilience/spirit_resilience.png",
+  "matrix": "/resources/items/spirit_resilience/matrix_spirit_resilience.csv"
+}

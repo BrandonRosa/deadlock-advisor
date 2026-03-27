@@ -1,0 +1,9 @@
+{
+  "name": "Lucky Shot",
+  "normalized_name": "lucky_shot",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Lucky_Shot",
+  "image": "/resources/items/lucky_shot/lucky_shot.png",
+  "matrix": "/resources/items/lucky_shot/matrix_lucky_shot.csv"
+}

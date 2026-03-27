@@ -1,0 +1,9 @@
+{
+  "name": "Compress Cooldown",
+  "normalized_name": "compress_cooldown",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Compress_Cooldown",
+  "image": "/resources/items/compress_cooldown/compress_cooldown.png",
+  "matrix": "/resources/items/compress_cooldown/matrix_compress_cooldown.csv"
+}

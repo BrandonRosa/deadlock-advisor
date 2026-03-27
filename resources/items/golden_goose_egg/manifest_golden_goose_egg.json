@@ -1,0 +1,9 @@
+{
+  "name": "Golden Goose Egg",
+  "normalized_name": "golden_goose_egg",
+  "category": "Spirit",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Golden_Goose_Egg",
+  "image": "/resources/items/golden_goose_egg/golden_goose_egg.png",
+  "matrix": "/resources/items/golden_goose_egg/matrix_golden_goose_egg.csv"
+}

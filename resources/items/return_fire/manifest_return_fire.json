@@ -1,0 +1,9 @@
+{
+  "name": "Return Fire",
+  "normalized_name": "return_fire",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Return_Fire",
+  "image": "/resources/items/return_fire/return_fire.png",
+  "matrix": "/resources/items/return_fire/matrix_return_fire.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Refresher",
+  "normalized_name": "refresher",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Refresher",
+  "image": "/resources/items/refresher/refresher.png",
+  "matrix": "/resources/items/refresher/matrix_refresher.csv"
+}

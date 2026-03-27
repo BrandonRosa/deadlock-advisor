@@ -1,0 +1,9 @@
+{
+  "name": "Celestial Blessing",
+  "normalized_name": "celestial_blessing",
+  "category": "Vitality",
+  "tier": 9999,
+  "wiki_url": "https://deadlock.wiki/Celestial_Blessing",
+  "image": "/resources/items/celestial_blessing/celestial_blessing.png",
+  "matrix": "/resources/items/celestial_blessing/matrix_celestial_blessing.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Monster Rounds",
+  "normalized_name": "monster_rounds",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Monster_Rounds",
+  "image": "/resources/items/monster_rounds/monster_rounds.png",
+  "matrix": "/resources/items/monster_rounds/matrix_monster_rounds.csv"
+}

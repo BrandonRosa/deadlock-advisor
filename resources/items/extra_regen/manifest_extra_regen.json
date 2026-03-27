@@ -1,0 +1,9 @@
+{
+  "name": "Extra Regen",
+  "normalized_name": "extra_regen",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extra_Regen",
+  "image": "/resources/items/extra_regen/extra_regen.png",
+  "matrix": "/resources/items/extra_regen/matrix_extra_regen.csv"
+}

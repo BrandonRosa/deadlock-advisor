@@ -1,0 +1,9 @@
+{
+  "name": "Capacitor",
+  "normalized_name": "capacitor",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Capacitor",
+  "image": "/resources/items/capacitor/capacitor.png",
+  "matrix": "/resources/items/capacitor/matrix_capacitor.csv"
+}

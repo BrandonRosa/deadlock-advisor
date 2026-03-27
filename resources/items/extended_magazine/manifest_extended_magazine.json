@@ -1,0 +1,9 @@
+{
+  "name": "Extended Magazine",
+  "normalized_name": "extended_magazine",
+  "category": "Weapon",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Extended_Magazine",
+  "image": "/resources/items/extended_magazine/extended_magazine.png",
+  "matrix": "/resources/items/extended_magazine/matrix_extended_magazine.csv"
+}

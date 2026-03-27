@@ -1,0 +1,9 @@
+{
+  "name": "Duration Extender",
+  "normalized_name": "duration_extender",
+  "category": "Spirit",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Duration_Extender",
+  "image": "/resources/items/duration_extender/duration_extender.png",
+  "matrix": "/resources/items/duration_extender/matrix_duration_extender.csv"
+}

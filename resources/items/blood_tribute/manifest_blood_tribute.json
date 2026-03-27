@@ -1,0 +1,9 @@
+{
+  "name": "Blood Tribute",
+  "normalized_name": "blood_tribute",
+  "category": "Weapon",
+  "tier": 3200,
+  "wiki_url": "https://deadlock.wiki/Blood_Tribute",
+  "image": "/resources/items/blood_tribute/blood_tribute.png",
+  "matrix": "/resources/items/blood_tribute/matrix_blood_tribute.csv"
+}

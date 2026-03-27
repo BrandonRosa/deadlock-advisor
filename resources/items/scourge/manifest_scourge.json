@@ -1,0 +1,9 @@
+{
+  "name": "Scourge",
+  "normalized_name": "scourge",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Scourge",
+  "image": "/resources/items/scourge/scourge.png",
+  "matrix": "/resources/items/scourge/matrix_scourge.csv"
+}

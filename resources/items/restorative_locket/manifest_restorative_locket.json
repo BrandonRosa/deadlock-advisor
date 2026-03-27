@@ -1,0 +1,9 @@
+{
+  "name": "Restorative Locket",
+  "normalized_name": "restorative_locket",
+  "category": "Vitality",
+  "tier": 1600,
+  "wiki_url": "https://deadlock.wiki/Restorative_Locket",
+  "image": "/resources/items/restorative_locket/restorative_locket.png",
+  "matrix": "/resources/items/restorative_locket/matrix_restorative_locket.csv"
+}

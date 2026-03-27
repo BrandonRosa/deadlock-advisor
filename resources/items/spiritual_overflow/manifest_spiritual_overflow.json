@@ -1,0 +1,9 @@
+{
+  "name": "Spiritual Overflow",
+  "normalized_name": "spiritual_overflow",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Spiritual_Overflow",
+  "image": "/resources/items/spiritual_overflow/spiritual_overflow.png",
+  "matrix": "/resources/items/spiritual_overflow/matrix_spiritual_overflow.csv"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Spellslinger",
+  "normalized_name": "spellslinger",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Spellslinger",
+  "image": "/resources/items/spellslinger/spellslinger.png",
+  "matrix": "/resources/items/spellslinger/matrix_spellslinger.csv"
+}

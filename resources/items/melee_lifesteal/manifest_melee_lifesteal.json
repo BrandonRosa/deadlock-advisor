@@ -1,0 +1,9 @@
+{
+  "name": "Melee Lifesteal",
+  "normalized_name": "melee_lifesteal",
+  "category": "Vitality",
+  "tier": 800,
+  "wiki_url": "https://deadlock.wiki/Melee_Lifesteal",
+  "image": "/resources/items/melee_lifesteal/melee_lifesteal.png",
+  "matrix": "/resources/items/melee_lifesteal/matrix_melee_lifesteal.csv"
+}

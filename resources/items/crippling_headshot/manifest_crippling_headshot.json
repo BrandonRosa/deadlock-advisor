@@ -1,0 +1,9 @@
+{
+  "name": "Crippling Headshot",
+  "normalized_name": "crippling_headshot",
+  "category": "Weapon",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Crippling_Headshot",
+  "image": "/resources/items/crippling_headshot/crippling_headshot.png",
+  "matrix": "/resources/items/crippling_headshot/matrix_crippling_headshot.csv"
+}

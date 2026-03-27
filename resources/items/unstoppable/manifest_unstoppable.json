@@ -1,0 +1,9 @@
+{
+  "name": "Unstoppable",
+  "normalized_name": "unstoppable",
+  "category": "Vitality",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Unstoppable",
+  "image": "/resources/items/unstoppable/unstoppable.png",
+  "matrix": "/resources/items/unstoppable/matrix_unstoppable.csv"
+}

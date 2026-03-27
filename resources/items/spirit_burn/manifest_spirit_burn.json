@@ -1,0 +1,9 @@
+{
+  "name": "Spirit Burn",
+  "normalized_name": "spirit_burn",
+  "category": "Spirit",
+  "tier": 6400,
+  "wiki_url": "https://deadlock.wiki/Spirit_Burn",
+  "image": "/resources/items/spirit_burn/spirit_burn.png",
+  "matrix": "/resources/items/spirit_burn/matrix_spirit_burn.csv"
+}
