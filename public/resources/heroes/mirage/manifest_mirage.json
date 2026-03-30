@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Mirage",
   "portrait": "/resources/heroes/mirage/portrait_mirage.png",
   "mini_icon": "/resources/heroes/mirage/mini_icon_mirage.png",
-  "matrix": "/resources/heroes/mirage/matrix_mirage.csv"
+  "matrix": "/resources/heroes/mirage/matrix_mirage.csv",
+  "item_matrix": "/resources/heroes/mirage/item_matrix_mirage.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Silver",
   "portrait": "/resources/heroes/silver/portrait_silver.png",
   "mini_icon": "/resources/heroes/silver/mini_icon_silver.png",
-  "matrix": "/resources/heroes/silver/matrix_silver.csv"
+  "matrix": "/resources/heroes/silver/matrix_silver.csv",
+  "item_matrix": "/resources/heroes/silver/item_matrix_silver.csv"
 }

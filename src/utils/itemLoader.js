@@ -38,7 +38,9 @@ export function parseCSV(csvText) {
  * 3. For each item, fetches and parses their matrix CSV
  * Returns an array of item objects ready to use in the app.
  */
-export async function loadAllItems() {
+// 
+
+export async function loadAllItemsPerHero(heroes) {
   // Step 1: Get the list of hero keys
   const base = import.meta.env.BASE_URL;
   const indexRes = await fetch(`${base}resources/items/index.json`);
@@ -53,24 +55,23 @@ export async function loadAllItems() {
       return res.json();
     })
   );
-
+  //matrixRows=hero.itemMatrixRows.[manifest.normalized_nam]
   // Step 3: Load all matrices in parallel
   const items = await Promise.all(
     manifests.map(async (manifest) => {
       const res = await fetch(`${base}${manifest.matrix.replace(/^\//, '')}`);
       if (!res.ok) throw new Error(`Failed to load matrix for ${manifest.normalized_name}`);
       const csvText = await res.text();
-      const matrixRows = parseCSV(csvText);
+
 
 
       return {
         ...manifest,
         image: `${base}${manifest.portrait.replace(/^\//, '')}`,
         matrix: `${base}${manifest.matrix.replace(/^\//, '')}`,
-        matrixRows,   // raw parsed rows
+        
       };
     })
   );
-
   return items;
 }

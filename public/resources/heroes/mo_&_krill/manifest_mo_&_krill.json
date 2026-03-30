@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Mo_%26_Krill",
   "portrait": "/resources/heroes/mo_&_krill/portrait_mo_&_krill.png",
   "mini_icon": "/resources/heroes/mo_&_krill/mini_icon_mo_&_krill.png",
-  "matrix": "/resources/heroes/mo_&_krill/matrix_mo_&_krill.csv"
+  "matrix": "/resources/heroes/mo_&_krill/matrix_mo_&_krill.csv",
+  "item_matrix": "/resources/heroes/mo_&_krill/item_matrix_mo_&_krill.csv"
 }

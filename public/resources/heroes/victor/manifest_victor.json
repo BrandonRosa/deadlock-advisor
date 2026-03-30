@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Victor",
   "portrait": "/resources/heroes/victor/portrait_victor.png",
   "mini_icon": "/resources/heroes/victor/mini_icon_victor.png",
-  "matrix": "/resources/heroes/victor/matrix_victor.csv"
+  "matrix": "/resources/heroes/victor/matrix_victor.csv",
+  "item_matrix": "/resources/heroes/victor/item_matrix_victor.csv"
 }

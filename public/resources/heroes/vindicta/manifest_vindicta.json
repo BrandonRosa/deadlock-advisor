@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Vindicta",
   "portrait": "/resources/heroes/vindicta/portrait_vindicta.png",
   "mini_icon": "/resources/heroes/vindicta/mini_icon_vindicta.png",
-  "matrix": "/resources/heroes/vindicta/matrix_vindicta.csv"
+  "matrix": "/resources/heroes/vindicta/matrix_vindicta.csv",
+  "item_matrix": "/resources/heroes/vindicta/item_matrix_vindicta.csv"
 }

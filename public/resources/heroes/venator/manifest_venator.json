@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Venator",
   "portrait": "/resources/heroes/venator/portrait_venator.png",
   "mini_icon": "/resources/heroes/venator/mini_icon_venator.png",
-  "matrix": "/resources/heroes/venator/matrix_venator.csv"
+  "matrix": "/resources/heroes/venator/matrix_venator.csv",
+  "item_matrix": "/resources/heroes/venator/item_matrix_venator.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Paradox",
   "portrait": "/resources/heroes/paradox/portrait_paradox.png",
   "mini_icon": "/resources/heroes/paradox/mini_icon_paradox.png",
-  "matrix": "/resources/heroes/paradox/matrix_paradox.csv"
+  "matrix": "/resources/heroes/paradox/matrix_paradox.csv",
+  "item_matrix": "/resources/heroes/paradox/item_matrix_paradox.csv"
 }

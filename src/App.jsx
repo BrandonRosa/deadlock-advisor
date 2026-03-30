@@ -9,6 +9,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useHeroes } from './hooks/useHeroes';
+import { useItems } from './hooks/useItems';
 import { HERO_STATE } from './components/HeroCard';
 import { calculateAll } from './utils/matrixEngine';
 import SelectionPage from './pages/SelectionPage';
@@ -17,7 +18,10 @@ import './styles/main.css';
 
 export default function App() {
   // Load all heroes dynamically on startup
-  const { heroes, loading, error } = useHeroes();
+  const { heroes, loading: loadingHeroes, error: errorHeroes } = useHeroes();
+
+  // Load all items dynamically on startup
+  const {items, loading: loadingItems, error: errorItems } = useItems();
 
   // Map of heroKey -> HERO_STATE — the source of truth for all selections
   const [heroStates, setHeroStates] = useState(new Map());
@@ -33,6 +37,13 @@ export default function App() {
 
   // Settings
   const [multiMode, setMultiMode] = useState(false);
+
+  const [customWeightsEnabled, setCustomWeightsEnabled] = useState(false);
+  const [heroWeights, setHeroWeights] = useState(new Map());
+  // Map: heroKey -> { matrixRows with user-edited values, same shape as hero.matrixRows }
+
+  const [itemWeights, setItemWeights] = useState(new Map());
+  // Map: itemKey -> { matrixRows with user-edited values }
 
   // Update a single hero's state
   const handleSetState = useCallback((heroKey, newState) => {
@@ -58,7 +69,7 @@ export default function App() {
       if(counts.enemy>0) enemyKeys.push(heroKey);
     })
 
-    const calcResults = calculateAll(heroes, allyKeys, enemyKeys, heroCounts,multiMode);
+    const calcResults = calculateAll(heroes, allyKeys, enemyKeys, heroCounts,multiMode,getHeroMatrix);
     setResults(calcResults);
     setPage('results');
   }
@@ -74,6 +85,14 @@ export default function App() {
       return next;
     })
   }
+
+  function getHeroMatrix(heroKey) {
+    if (customWeightsEnabled && heroWeights.has(heroKey)) {
+      return heroWeights.get(heroKey);
+    }
+    return heroes.find(h => h.normalized_name === heroKey)?.matrixRows ?? [];
+  }
+
   // function adjustCount(heroKey, team, delta) {
   //   setHeroCounts(prev => {
   //     const next = new Map(prev);
@@ -90,7 +109,7 @@ export default function App() {
     .map(([k]) => k);
 
   // --- Loading / Error states ---
-  if (loading) {
+  if (loadingHeroes || loadingItems) {
     return (
       <div className="app-loading">
         <div className="loading-spinner" />
@@ -99,12 +118,22 @@ export default function App() {
     );
   }
 
-  if (error) {
+  if (errorHeroes) {
     return (
       <div className="app-error">
         <h2>Failed to load heroes</h2>
-        <p>{error}</p>
+        <p>{errorHeroes}</p>
         <p>Check that your <code>/public/resources/heroes/</code> folder and <code>index.json</code> are set up correctly.</p>
+      </div>
+    );
+  }
+
+  if (errorItems) {
+    return (
+      <div className="app-error">
+        <h2>Failed to load items</h2>
+        <p>{errorItems}</p>
+        <p>Check that your <code>/public/resources/items/</code> folder and <code>index.json</code> are set up correctly.</p>
       </div>
     );
   }

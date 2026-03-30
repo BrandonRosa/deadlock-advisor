@@ -76,13 +76,17 @@ export function calculateBuildScores(hero, compositionVector) {
  * @param {string[]} enemyKeys - Heroes on enemy team
  * @returns {Object} - { [heroKey]: [{ build, score }, ...] }
  */
-export function calculateAll(allHeroes, allyKeys, enemyKeys, heroCounts, multiMode) {
+export function calculateAll(allHeroes, allyKeys, enemyKeys, heroCounts, multiMode,getMatrix) {
   const allHeroKeys = allHeroes.map(h => h.normalized_name);
   const vector = buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCounts, multiMode);
 
   const results = {};
   allHeroes.forEach(hero => {
-    results[hero.normalized_name] = calculateBuildScores(hero, vector);
+    const matrixRows = getMatrix ? getMatrix(hero.normalized_name) : hero.matrixRows;
+    results[hero.normalized_name] = calculateBuildScores(
+      { ...hero, matrixRows },
+      vector
+    );
   });
 
   return results;

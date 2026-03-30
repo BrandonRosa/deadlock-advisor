@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Holliday",
   "portrait": "/resources/heroes/holliday/portrait_holliday.png",
   "mini_icon": "/resources/heroes/holliday/mini_icon_holliday.png",
-  "matrix": "/resources/heroes/holliday/matrix_holliday.csv"
+  "matrix": "/resources/heroes/holliday/matrix_holliday.csv",
+  "item_matrix": "/resources/heroes/holliday/item_matrix_holliday.csv"
 }

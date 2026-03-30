@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Abrams",
   "portrait": "/resources/heroes/abrams/portrait_abrams.png",
   "mini_icon": "/resources/heroes/abrams/mini_icon_abrams.png",
-  "matrix": "/resources/heroes/abrams/matrix_abrams.csv"
+  "matrix": "/resources/heroes/abrams/matrix_abrams.csv",
+  "item_matrix": "/resources/heroes/abrams/item_matrix_abrams.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Shiv",
   "portrait": "/resources/heroes/shiv/portrait_shiv.png",
   "mini_icon": "/resources/heroes/shiv/mini_icon_shiv.png",
-  "matrix": "/resources/heroes/shiv/matrix_shiv.csv"
+  "matrix": "/resources/heroes/shiv/matrix_shiv.csv",
+  "item_matrix": "/resources/heroes/shiv/item_matrix_shiv.csv"
 }

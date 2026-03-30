@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Calico",
   "portrait": "/resources/heroes/calico/portrait_calico.png",
   "mini_icon": "/resources/heroes/calico/mini_icon_calico.png",
-  "matrix": "/resources/heroes/calico/matrix_calico.csv"
+  "matrix": "/resources/heroes/calico/matrix_calico.csv",
+  "item_matrix": "/resources/heroes/calico/item_matrix_calico.csv"
 }

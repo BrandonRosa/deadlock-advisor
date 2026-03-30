@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Dynamo",
   "portrait": "/resources/heroes/dynamo/portrait_dynamo.png",
   "mini_icon": "/resources/heroes/dynamo/mini_icon_dynamo.png",
-  "matrix": "/resources/heroes/dynamo/matrix_dynamo.csv"
+  "matrix": "/resources/heroes/dynamo/matrix_dynamo.csv",
+  "item_matrix": "/resources/heroes/dynamo/item_matrix_dynamo.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/The_Doorman",
   "portrait": "/resources/heroes/the_doorman/portrait_the_doorman.png",
   "mini_icon": "/resources/heroes/the_doorman/mini_icon_the_doorman.png",
-  "matrix": "/resources/heroes/the_doorman/matrix_the_doorman.csv"
+  "matrix": "/resources/heroes/the_doorman/matrix_the_doorman.csv",
+  "item_matrix": "/resources/heroes/the_doorman/item_matrix_the_doorman.csv"
 }

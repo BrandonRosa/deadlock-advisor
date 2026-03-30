@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Yamato",
   "portrait": "/resources/heroes/yamato/portrait_yamato.png",
   "mini_icon": "/resources/heroes/yamato/mini_icon_yamato.png",
-  "matrix": "/resources/heroes/yamato/matrix_yamato.csv"
+  "matrix": "/resources/heroes/yamato/matrix_yamato.csv",
+  "item_matrix": "/resources/heroes/yamato/item_matrix_yamato.csv"
 }

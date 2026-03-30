@@ -62,6 +62,11 @@ export async function loadAllHeroes() {
       const csvText = await res.text();
       const matrixRows = parseCSV(csvText);
 
+      const itemRes = await fetch(`${base}${manifest.item_matrix.replace(/^\//, '')}`);
+      if (!itemRes.ok) throw new Error(`Failed to load item_matrix for ${manifest.normalized_name}`);
+      const itemCsvText = await itemRes.text();
+      const itemMatrixRows = parseCSV(itemCsvText);
+
       // Extract build names from the CSV (everything after hero_key and team columns)
       const buildNames = Object.keys(matrixRows[0]).filter(
         k => k !== 'hero_key' && k!=""
@@ -72,8 +77,10 @@ export async function loadAllHeroes() {
         portrait: `${base}${manifest.portrait.replace(/^\//, '')}`,
         mini_icon: `${base}${manifest.mini_icon.replace(/^\//, '')}`,
         matrix: `${base}${manifest.matrix.replace(/^\//, '')}`,
+        item_matrix:`${base}${manifest.item_matrix.replace(/^\//, '')}`,
         matrixRows,   // raw parsed rows
         buildNames,   // e.g. ["Brawler", "Tank", "Aggressive"]
+        itemMatrixRows
       };
     })
   );
