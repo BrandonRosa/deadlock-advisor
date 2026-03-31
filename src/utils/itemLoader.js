@@ -67,7 +67,7 @@ export async function loadAllItemsPerHero(heroes) {
 
       return {
         ...manifest,
-        image: `${base}${manifest.portrait.replace(/^\//, '')}`,
+        image: `${base}${manifest.image.replace(/^\//, '')}`,
         matrix: `${base}${manifest.matrix.replace(/^\//, '')}`,
         
       };

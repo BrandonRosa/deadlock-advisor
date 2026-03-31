@@ -42,7 +42,7 @@ export default function App() {
   const [heroWeights, setHeroWeights] = useState(new Map());
   // Map: heroKey -> { matrixRows with user-edited values, same shape as hero.matrixRows }
 
-  const [itemWeights, setItemWeights] = useState(new Map());
+  const [heroItemWeights, setItemWeights] = useState(new Map());
   // Map: itemKey -> { matrixRows with user-edited values }
 
   // Update a single hero's state
@@ -69,7 +69,7 @@ export default function App() {
       if(counts.enemy>0) enemyKeys.push(heroKey);
     })
 
-    const calcResults = calculateAll(heroes, allyKeys, enemyKeys, heroCounts,multiMode,getHeroMatrix);
+    const calcResults = calculateAll(heroes, allyKeys, enemyKeys, heroCounts,multiMode,getHeroMatrix,getItemMatrix);
     setResults(calcResults);
     setPage('results');
   }
@@ -93,6 +93,13 @@ export default function App() {
     return heroes.find(h => h.normalized_name === heroKey)?.matrixRows ?? [];
   }
 
+  function getItemMatrix(heroKey) {
+    if (customWeightsEnabled && heroItemWeights.has(heroKey)) {
+      return heroItemWeights.get(heroKey);
+    }
+    return heroes.find(h => h.normalized_name === heroKey)?.itemMatrixRows ?? [];
+  }
+
   // function adjustCount(heroKey, team, delta) {
   //   setHeroCounts(prev => {
   //     const next = new Map(prev);
@@ -106,6 +113,14 @@ export default function App() {
   // All heroes currently in the roster (for results page)
   const rosterKeys = [...heroCounts.entries()]
     .filter(([, v]) => v.ally+v.enemy>0)
+    .map(([k]) => k);
+  
+  const allyKeys = [...heroCounts.entries()]
+    .filter(([, v]) => v.ally>0)
+    .map(([k]) => k);
+  
+  const enemyKeys = [...heroCounts.entries()]
+    .filter(([, v]) => v.enemy>0)
     .map(([k]) => k);
 
   // --- Loading / Error states ---
@@ -173,7 +188,7 @@ export default function App() {
           <ResultsPage
             results={results}
             allHeroes={heroes}
-            rosterKeys={rosterKeys}
+            getCount={getCount}
             onBack={() => setPage('selection')}
           />
         )}

@@ -7,22 +7,18 @@
 
 import React from 'react';
 
-function BuildResult({ hero, buildScores }) {
+function BuildResult({ hero, buildScores, team, isSelf }) {
   if (!buildScores || buildScores.length === 0) return null;
-
   const best = buildScores[0];
   const rest = buildScores.slice(1);
 
   return (
-    <div className="build-result">
+    <div className={`build-result build-result--${isSelf ? 'self' : team}`}>
       <div className="build-result__hero">
-        <img
-          src={hero.mini_icon}
-          alt={hero.name}
-          className="build-result__icon"
-          onError={e => { e.target.style.display = 'none'; }}
-        />
+        <img src={hero.mini_icon} alt={hero.name} className="build-result__icon"
+          onError={e => { e.target.style.display = 'none'; }} />
         <span className="build-result__name">{hero.name}</span>
+        {isSelf && <span className="build-result__self-badge">★ You</span>}
       </div>
 
       {/* Best build highlighted */}
@@ -50,9 +46,15 @@ function BuildResult({ hero, buildScores }) {
   );
 }
 
-export default function ResultsPage({ results, allHeroes, rosterKeys, onBack }) {
+export default function ResultsPage({ results, allHeroes, getCount, onBack }) {
   // Only show results for heroes in the current roster
-  const rosterHeroes = allHeroes.filter(h => rosterKeys.includes(h.normalized_name));
+  const rosterHeroes = allHeroes.filter(h => getCount(h.normalized_name).ally+getCount(h.normalized_name).enemy>0);
+  const rosterAllyHeroes = allHeroes.filter(h => getCount(h.normalized_name).ally>0);
+  const rosterEnemyHeroes = allHeroes.filter(h => getCount(h.normalized_name).enemy>0);
+  const rosterSelfHeroes = allHeroes.filter(h => getCount(h.normalized_name).self>0);
+
+  console.log(rosterAllyHeroes)
+  console.log(rosterEnemyHeroes)
 
   return (
     <div className="results-page">
@@ -61,14 +63,34 @@ export default function ResultsPage({ results, allHeroes, rosterKeys, onBack }) 
         <h1 className="results-page__title">Recommended Builds</h1>
       </div>
 
-      <div className="results-grid">
-        {rosterHeroes.map(hero => (
-          <BuildResult
-            key={hero.normalized_name}
-            hero={hero}
-            buildScores={results[hero.normalized_name]}
-          />
-        ))}
+      <div className="results-columns">
+        {/* Ally side */}
+        <div className="results-column results-column--ally">
+          <h2 className="results-column__title">Your Team</h2>
+          {rosterAllyHeroes.map(hero => (
+            <BuildResult
+              key={hero.normalized_name}
+              hero={hero}
+              buildScores={results.allyTeam[hero.normalized_name]}
+              team="ally"
+              isSelf={getCount(hero.normalized_name).self > 0}
+            />
+          ))}
+        </div>
+
+        {/* Enemy side */}
+        <div className="results-column results-column--enemy">
+          <h2 className="results-column__title">Enemy Team</h2>
+          {rosterEnemyHeroes.map(hero => (
+            <BuildResult
+              key={hero.normalized_name}
+              hero={hero}
+              buildScores={results.enemyTeam[hero.normalized_name]}
+              team="enemy"
+              isSelf={false}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

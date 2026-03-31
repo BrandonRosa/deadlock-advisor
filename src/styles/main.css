@@ -483,3 +483,36 @@ a { color: var(--accent); text-decoration: none; }
   font-size: 0.8rem;
   color: var(--text-dim);
 }
+
+.results-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.results-column__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.results-column--ally .results-column__title { color: var(--ally); }
+.results-column--enemy .results-column__title { color: var(--enemy); }
+
+/* Card border colors per team */
+.build-result--ally  { border-color: var(--ally-dim); }
+.build-result--enemy { border-color: var(--enemy-dim); }
+.build-result--self  { 
+  border-color: var(--self); 
+  box-shadow: var(--glow-self); 
+}
+
+.build-result__self-badge {
+  font-size: 11px;
+  color: var(--self);
+  margin-left: 6px;
+  font-weight: 700;
+}

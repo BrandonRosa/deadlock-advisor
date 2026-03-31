@@ -23,15 +23,22 @@
  * @returns {Object} - { [heroKey_ally]: 0|1, [heroKey_enemy]: 0|1 }
  */
 export function buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCounts, multiMode) {
-  const vector = {};
+  const vector = {
+    allyTeam: {}, 
+    enemyTeam: {},
+  };
   allHeroKeys.forEach(key => {
     if (multiMode && heroCounts) {
       const counts = heroCounts.get(key) ?? { self:0, ally: 0, enemy: 0 };
-      vector[`ally_${key}`]  = counts.ally;
-      vector[`enemy_${key}`] = counts.enemy;
+      vector.allyTeam[`ally_${key}`]  = counts.ally;
+      vector.allyTeam[`enemy_${key}`] = counts.enemy;
+      vector.enemyTeam[`ally_${key}`]  = counts.enemy;
+      vector.enemyTeam[`enemy_${key}`] = counts.ally;
     } else {
-      vector[`ally_${key}`]  = allyKeys.includes(key) ? 1 : 0;
-      vector[`enemy_${key}`] = enemyKeys.includes(key) ? 1 : 0;
+      vector.allyTeam[`ally_${key}`]  = allyKeys.includes(key) ? 1 : 0;
+      vector.allyTeam[`enemy_${key}`] = enemyKeys.includes(key) ? 1 : 0;
+      vector.enemyTeam[`ally_${key}`]  = enemyKeys.includes(key) ? 1 : 0;
+      vector.enemyTeam[`enemy_${key}`] = allyKeys.includes(key) ? 1 : 0;
     }
   });
   return vector;
@@ -76,16 +83,24 @@ export function calculateBuildScores(hero, compositionVector) {
  * @param {string[]} enemyKeys - Heroes on enemy team
  * @returns {Object} - { [heroKey]: [{ build, score }, ...] }
  */
-export function calculateAll(allHeroes, allyKeys, enemyKeys, heroCounts, multiMode,getMatrix) {
+export function calculateAll(allHeroes, allyKeys, enemyKeys, heroCounts, multiMode,getMatrix,getItemMatrix) {
   const allHeroKeys = allHeroes.map(h => h.normalized_name);
   const vector = buildCompositionVector(allHeroKeys, allyKeys, enemyKeys, heroCounts, multiMode);
 
-  const results = {};
+
+  const results = {
+    allyTeam: {}, 
+    enemyTeam: {},
+  };
   allHeroes.forEach(hero => {
     const matrixRows = getMatrix ? getMatrix(hero.normalized_name) : hero.matrixRows;
-    results[hero.normalized_name] = calculateBuildScores(
+    results.allyTeam[hero.normalized_name] = calculateBuildScores(
       { ...hero, matrixRows },
-      vector
+      vector.allyTeam
+    );
+    results.enemyTeam[hero.normalized_name] = calculateBuildScores(
+      { ...hero, matrixRows },
+      vector.enemyTeam
     );
   });
 
