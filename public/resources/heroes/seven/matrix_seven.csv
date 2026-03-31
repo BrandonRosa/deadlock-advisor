@@ -64,7 +64,7 @@ enemy_paradox,1,0,0
 enemy_pocket,0,-1,-1
 enemy_rem,-1,0,1
 enemy_seven,0,1,1
-enemy_shiv,-1,1,1
+enemy_shiv,-1,1,2
 enemy_silver,0,1,1
 enemy_sinclair,1,0,-1
 enemy_venator,1,1,0
