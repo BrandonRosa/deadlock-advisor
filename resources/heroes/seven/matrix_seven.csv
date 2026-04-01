@@ -1,7 +1,7 @@
 ,build_seven_ball,build_ult,build_gun
 ally_abrams,0,0,0
 ally_apollo,0,1,0
-ally_bebop,1,1,1
+ally_bebop,0.5,1,1
 ally_billy,1,1,0
 ally_calico,0,0,0
 ally_celeste,0,0,0
@@ -25,7 +25,7 @@ ally_paige,0,1,0
 ally_paradox,1,1,1
 ally_pocket,0,1,0
 ally_rem,0,1,0
-ally_seven,1,1,0
+ally_seven,1,1,1
 ally_shiv,0,0,0
 ally_silver,0,0,0
 ally_sinclair,0,1,0
@@ -37,14 +37,14 @@ ally_vyper,0,0,0
 ally_warden,0,1,0
 ally_wraith,0,0,0
 ally_yamato,0,0,0
-enemy_abrams,1,-1,1
+enemy_abrams,1,-1.5,1.5
 enemy_apollo,1,1,0
 enemy_bebop,0,-1,0
 enemy_billy,1,1,1
 enemy_calico,1,2,1
 enemy_celeste,-2,1,0
 enemy_the_doorman,0,1,-1
-enemy_drifter,0,2,-1
+enemy_drifter,0,2,0
 enemy_dynamo,1,1,1
 enemy_graves,1,0,0
 enemy_grey_talon,-2,0,-1
@@ -67,7 +67,7 @@ enemy_seven,0,1,1
 enemy_shiv,-1,1,2
 enemy_silver,0,1,1
 enemy_sinclair,1,0,-1
-enemy_venator,1,1,0
+enemy_venator,0,1,0
 enemy_victor,0,-1,1
 enemy_vindicta,-2,1,-2
 enemy_viscous,1,0,1
