@@ -66,6 +66,7 @@ export async function loadAllHeroes() {
       if (!itemRes.ok) throw new Error(`Failed to load item_matrix for ${manifest.normalized_name}`);
       const itemCsvText = await itemRes.text();
       const itemMatrixRows = parseCSV(itemCsvText);
+      console.log(itemMatrixRows);
 
       // Extract build names from the CSV (everything after hero_key and team columns)
       const buildNames = Object.keys(matrixRows[0]).filter(
