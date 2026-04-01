@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Rem",
   "portrait": "/resources/heroes/rem/portrait_rem.png",
   "mini_icon": "/resources/heroes/rem/mini_icon_rem.png",
-  "matrix": "/resources/heroes/rem/matrix_rem.csv"
+  "matrix": "/resources/heroes/rem/matrix_rem.csv",
+  "item_matrix": "/resources/heroes/rem/item_matrix_rem.csv"
 }

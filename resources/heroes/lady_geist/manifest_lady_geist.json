@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Lady_Geist",
   "portrait": "/resources/heroes/lady_geist/portrait_lady_geist.png",
   "mini_icon": "/resources/heroes/lady_geist/mini_icon_lady_geist.png",
-  "matrix": "/resources/heroes/lady_geist/matrix_lady_geist.csv"
+  "matrix": "/resources/heroes/lady_geist/matrix_lady_geist.csv",
+  "item_matrix": "/resources/heroes/lady_geist/item_matrix_lady_geist.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Lash",
   "portrait": "/resources/heroes/lash/portrait_lash.png",
   "mini_icon": "/resources/heroes/lash/mini_icon_lash.png",
-  "matrix": "/resources/heroes/lash/matrix_lash.csv"
+  "matrix": "/resources/heroes/lash/matrix_lash.csv",
+  "item_matrix": "/resources/heroes/lash/item_matrix_lash.csv"
 }

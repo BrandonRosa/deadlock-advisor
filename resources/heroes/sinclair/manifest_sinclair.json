@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Sinclair",
   "portrait": "/resources/heroes/sinclair/portrait_sinclair.png",
   "mini_icon": "/resources/heroes/sinclair/mini_icon_sinclair.png",
-  "matrix": "/resources/heroes/sinclair/matrix_sinclair.csv"
+  "matrix": "/resources/heroes/sinclair/matrix_sinclair.csv",
+  "item_matrix": "/resources/heroes/sinclair/item_matrix_sinclair.csv"
 }

@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Grey_Talon",
   "portrait": "/resources/heroes/grey_talon/portrait_grey_talon.png",
   "mini_icon": "/resources/heroes/grey_talon/mini_icon_grey_talon.png",
-  "matrix": "/resources/heroes/grey_talon/matrix_grey_talon.csv"
+  "matrix": "/resources/heroes/grey_talon/matrix_grey_talon.csv",
+  "item_matrix": "/resources/heroes/grey_talon/item_matrix_grey_talon.csv"
 }

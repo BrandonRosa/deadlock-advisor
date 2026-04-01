@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Pocket",
   "portrait": "/resources/heroes/pocket/portrait_pocket.png",
   "mini_icon": "/resources/heroes/pocket/mini_icon_pocket.png",
-  "matrix": "/resources/heroes/pocket/matrix_pocket.csv"
+  "matrix": "/resources/heroes/pocket/matrix_pocket.csv",
+  "item_matrix": "/resources/heroes/pocket/item_matrix_pocket.csv"
 }

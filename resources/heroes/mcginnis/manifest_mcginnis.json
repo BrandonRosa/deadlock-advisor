@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/McGinnis",
   "portrait": "/resources/heroes/mcginnis/portrait_mcginnis.png",
   "mini_icon": "/resources/heroes/mcginnis/mini_icon_mcginnis.png",
-  "matrix": "/resources/heroes/mcginnis/matrix_mcginnis.csv"
+  "matrix": "/resources/heroes/mcginnis/matrix_mcginnis.csv",
+  "item_matrix": "/resources/heroes/mcginnis/item_matrix_mcginnis.csv"
 }

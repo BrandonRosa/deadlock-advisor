@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Drifter",
   "portrait": "/resources/heroes/drifter/portrait_drifter.png",
   "mini_icon": "/resources/heroes/drifter/mini_icon_drifter.png",
-  "matrix": "/resources/heroes/drifter/matrix_drifter.csv"
+  "matrix": "/resources/heroes/drifter/matrix_drifter.csv",
+  "item_matrix": "/resources/heroes/drifter/item_matrix_drifter.csv"
 }

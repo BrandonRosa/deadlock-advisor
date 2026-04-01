@@ -1,1028 +1,173 @@
 [
-  {
-    "name": "Close Quarters",
-    "normalized_name": "close_quarters",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Extended Magazine",
-    "normalized_name": "extended_magazine",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Headshot Booster",
-    "normalized_name": "headshot_booster",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "High-Velocity Rounds",
-    "normalized_name": "high_velocity_rounds",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Monster Rounds",
-    "normalized_name": "monster_rounds",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Rapid Rounds",
-    "normalized_name": "rapid_rounds",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Restorative Shot",
-    "normalized_name": "restorative_shot",
-    "category": "Weapon",
-    "tier": 800
-  },
-  {
-    "name": "Active Reload",
-    "normalized_name": "active_reload",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Fleetfoot",
-    "normalized_name": "fleetfoot",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Intensifying Magazine",
-    "normalized_name": "intensifying_magazine",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Kinetic Dash",
-    "normalized_name": "kinetic_dash",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Long Range",
-    "normalized_name": "long_range",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Melee Charge",
-    "normalized_name": "melee_charge",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Mystic Shot",
-    "normalized_name": "mystic_shot",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Opening Rounds",
-    "normalized_name": "opening_rounds",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Recharging Rush",
-    "normalized_name": "recharging_rush",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Slowing Bullets",
-    "normalized_name": "slowing_bullets",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Spirit Shredder Bullets",
-    "normalized_name": "spirit_shredder_bullets",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Split Shot",
-    "normalized_name": "split_shot",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Stalker",
-    "normalized_name": "stalker",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Swift Striker",
-    "normalized_name": "swift_striker",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Titanic Magazine",
-    "normalized_name": "titanic_magazine",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Weakening Headshot",
-    "normalized_name": "weakening_headshot",
-    "category": "Weapon",
-    "tier": 1600
-  },
-  {
-    "name": "Alchemical Fire",
-    "normalized_name": "alchemical_fire",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Ballistic Enchantment",
-    "normalized_name": "ballistic_enchantment",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Berserker",
-    "normalized_name": "berserker",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Blood Tribute",
-    "normalized_name": "blood_tribute",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Burst Fire",
-    "normalized_name": "burst_fire",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Cultist Sacrifice",
-    "normalized_name": "cultist_sacrifice",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Escalating Resilience",
-    "normalized_name": "escalating_resilience",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Express Shot",
-    "normalized_name": "express_shot",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Headhunter",
-    "normalized_name": "headhunter",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Heroic Aura",
-    "normalized_name": "heroic_aura",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Hollow Point",
-    "normalized_name": "hollow_point",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Hunters Aura",
-    "normalized_name": "hunters_aura",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Point Blank",
-    "normalized_name": "point_blank",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Sharpshooter",
-    "normalized_name": "sharpshooter",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Spirit Rend",
-    "normalized_name": "spirit_rend",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Tesla Bullets",
-    "normalized_name": "tesla_bullets",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Toxic Bullets",
-    "normalized_name": "toxic_bullets",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Weighted Shots",
-    "normalized_name": "weighted_shots",
-    "category": "Weapon",
-    "tier": 3200
-  },
-  {
-    "name": "Armor Piercing Rounds",
-    "normalized_name": "armor_piercing_rounds",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Capacitor",
-    "normalized_name": "capacitor",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Crippling Headshot",
-    "normalized_name": "crippling_headshot",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Crushing Fists",
-    "normalized_name": "crushing_fists",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Frenzy",
-    "normalized_name": "frenzy",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Glass Cannon",
-    "normalized_name": "glass_cannon",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Lucky Shot",
-    "normalized_name": "lucky_shot",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Ricochet",
-    "normalized_name": "ricochet",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Shadow Weave",
-    "normalized_name": "shadow_weave",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Silencer",
-    "normalized_name": "silencer",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Spellslinger",
-    "normalized_name": "spellslinger",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Spiritual Overflow",
-    "normalized_name": "spiritual_overflow",
-    "category": "Weapon",
-    "tier": 6400
-  },
-  {
-    "name": "Haunting Shot",
-    "normalized_name": "haunting_shot",
-    "category": "Weapon",
-    "tier": 9999
-  },
-  {
-    "name": "Infinite Rounds",
-    "normalized_name": "infinite_rounds",
-    "category": "Weapon",
-    "tier": 9999
-  },
-  {
-    "name": "Runed Gauntlets",
-    "normalized_name": "runed_gauntlets",
-    "category": "Weapon",
-    "tier": 9999
-  },
-  {
-    "name": "Extra Health",
-    "normalized_name": "extra_health",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Extra Regen",
-    "normalized_name": "extra_regen",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Extra Stamina",
-    "normalized_name": "extra_stamina",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Healing Rite",
-    "normalized_name": "healing_rite",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Melee Lifesteal",
-    "normalized_name": "melee_lifesteal",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Rebuttal",
-    "normalized_name": "rebuttal",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Sprint Boots",
-    "normalized_name": "sprint_boots",
-    "category": "Vitality",
-    "tier": 800
-  },
-  {
-    "name": "Battle Vest",
-    "normalized_name": "battle_vest",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Bullet Lifesteal",
-    "normalized_name": "bullet_lifesteal",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Debuff Reducer",
-    "normalized_name": "debuff_reducer",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Enchanters Emblem",
-    "normalized_name": "enchanters_emblem",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Enduring Speed",
-    "normalized_name": "enduring_speed",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Guardian Ward",
-    "normalized_name": "guardian_ward",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Healbane",
-    "normalized_name": "healbane",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Healing Booster",
-    "normalized_name": "healing_booster",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Reactive Barrier",
-    "normalized_name": "reactive_barrier",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Restorative Locket",
-    "normalized_name": "restorative_locket",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Return Fire",
-    "normalized_name": "return_fire",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Spirit Lifesteal",
-    "normalized_name": "spirit_lifesteal",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Spirit Shielding",
-    "normalized_name": "spirit_shielding",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Weapon Shielding",
-    "normalized_name": "weapon_shielding",
-    "category": "Vitality",
-    "tier": 1600
-  },
-  {
-    "name": "Bullet Resilience",
-    "normalized_name": "bullet_resilience",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Counterspell",
-    "normalized_name": "counterspell",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Dispel Magic",
-    "normalized_name": "dispel_magic",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Fortitude",
-    "normalized_name": "fortitude",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Fury Trance",
-    "normalized_name": "fury_trance",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Healing Nova",
-    "normalized_name": "healing_nova",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Lifestrike",
-    "normalized_name": "lifestrike",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Majestic Leap",
-    "normalized_name": "majestic_leap",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Metal Skin",
-    "normalized_name": "metal_skin",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Rescue Beam",
-    "normalized_name": "rescue_beam",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Spirit Resilience",
-    "normalized_name": "spirit_resilience",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Stamina Mastery",
-    "normalized_name": "stamina_mastery",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Trophy Collector",
-    "normalized_name": "trophy_collector",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Veil Walker",
-    "normalized_name": "veil_walker",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Warp Stone",
-    "normalized_name": "warp_stone",
-    "category": "Vitality",
-    "tier": 3200
-  },
-  {
-    "name": "Cheat Death",
-    "normalized_name": "cheat_death",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Colossus",
-    "normalized_name": "colossus",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Divine Barrier",
-    "normalized_name": "divine_barrier",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Diviners Kevlar",
-    "normalized_name": "diviners_kevlar",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Healing Tempo",
-    "normalized_name": "healing_tempo",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Infuser",
-    "normalized_name": "infuser",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Inhibitor",
-    "normalized_name": "inhibitor",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Juggernaut",
-    "normalized_name": "juggernaut",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Leech",
-    "normalized_name": "leech",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Phantom Strike",
-    "normalized_name": "phantom_strike",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Plated Armor",
-    "normalized_name": "plated_armor",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Siphon Bullets",
-    "normalized_name": "siphon_bullets",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Spellbreaker",
-    "normalized_name": "spellbreaker",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Unstoppable",
-    "normalized_name": "unstoppable",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Vampiric Burst",
-    "normalized_name": "vampiric_burst",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Witchmail",
-    "normalized_name": "witchmail",
-    "category": "Vitality",
-    "tier": 6400
-  },
-  {
-    "name": "Celestial Blessing",
-    "normalized_name": "celestial_blessing",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Cloak of Opportunity",
-    "normalized_name": "cloak_of_opportunity",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Electric Slippers",
-    "normalized_name": "electric_slippers",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Eternal Gift",
-    "normalized_name": "eternal_gift",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Nullification Burst",
-    "normalized_name": "nullification_burst",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Seraphim Wings",
-    "normalized_name": "seraphim_wings",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Shadow Strike",
-    "normalized_name": "shadow_strike",
-    "category": "Vitality",
-    "tier": 9999
-  },
-  {
-    "name": "Extra Charge",
-    "normalized_name": "extra_charge",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Extra Spirit",
-    "normalized_name": "extra_spirit",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Golden Goose Egg",
-    "normalized_name": "golden_goose_egg",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Mystic Burst",
-    "normalized_name": "mystic_burst",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Mystic Expansion",
-    "normalized_name": "mystic_expansion",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Mystic Regeneration",
-    "normalized_name": "mystic_regeneration",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Rusted Barrel",
-    "normalized_name": "rusted_barrel",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Spirit Strike",
-    "normalized_name": "spirit_strike",
-    "category": "Spirit",
-    "tier": 800
-  },
-  {
-    "name": "Arcane Surge",
-    "normalized_name": "arcane_surge",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Bullet Resist Shredder",
-    "normalized_name": "bullet_resist_shredder",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Cold Front",
-    "normalized_name": "cold_front",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Compress Cooldown",
-    "normalized_name": "compress_cooldown",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Duration Extender",
-    "normalized_name": "duration_extender",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Improved Spirit",
-    "normalized_name": "improved_spirit",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Mystic Slow",
-    "normalized_name": "mystic_slow",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Mystic Vulnerability",
-    "normalized_name": "mystic_vulnerability",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Quicksilver Reload",
-    "normalized_name": "quicksilver_reload",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Slowing Hex",
-    "normalized_name": "slowing_hex",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Spirit Sap",
-    "normalized_name": "spirit_sap",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Suppressor",
-    "normalized_name": "suppressor",
-    "category": "Spirit",
-    "tier": 1600
-  },
-  {
-    "name": "Decay",
-    "normalized_name": "decay",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Disarming Hex",
-    "normalized_name": "disarming_hex",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Greater Expansion",
-    "normalized_name": "greater_expansion",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Knockdown",
-    "normalized_name": "knockdown",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Radiant Regeneration",
-    "normalized_name": "radiant_regeneration",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Rapid Recharge",
-    "normalized_name": "rapid_recharge",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Silence Wave",
-    "normalized_name": "silence_wave",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Spirit Snatch",
-    "normalized_name": "spirit_snatch",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Superior Cooldown",
-    "normalized_name": "superior_cooldown",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Superior Duration",
-    "normalized_name": "superior_duration",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Surge of Power",
-    "normalized_name": "surge_of_power",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Tankbuster",
-    "normalized_name": "tankbuster",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Torment Pulse",
-    "normalized_name": "torment_pulse",
-    "category": "Spirit",
-    "tier": 3200
-  },
-  {
-    "name": "Arctic Blast",
-    "normalized_name": "arctic_blast",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Boundless Spirit",
-    "normalized_name": "boundless_spirit",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Cursed Relic",
-    "normalized_name": "cursed_relic",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Echo Shard",
-    "normalized_name": "echo_shard",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Escalating Exposure",
-    "normalized_name": "escalating_exposure",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Ethereal Shift",
-    "normalized_name": "ethereal_shift",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Focus Lens",
-    "normalized_name": "focus_lens",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Lightning Scroll",
-    "normalized_name": "lightning_scroll",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Magic Carpet",
-    "normalized_name": "magic_carpet",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Mercurial Magnum",
-    "normalized_name": "mercurial_magnum",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Mystic Reverb",
-    "normalized_name": "mystic_reverb",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Refresher",
-    "normalized_name": "refresher",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Scourge",
-    "normalized_name": "scourge",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Spirit Burn",
-    "normalized_name": "spirit_burn",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Transcendent Cooldown",
-    "normalized_name": "transcendent_cooldown",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Vortex Web",
-    "normalized_name": "vortex_web",
-    "category": "Spirit",
-    "tier": 6400
-  },
-  {
-    "name": "Frostbite Charm",
-    "normalized_name": "frostbite_charm",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Mystic Conduit",
-    "normalized_name": "mystic_conduit",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Mystical Piano",
-    "normalized_name": "mystical_piano",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Omnicharge Signet",
-    "normalized_name": "omnicharge_signet",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Prism Blast",
-    "normalized_name": "prism_blast",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Shrink Ray",
-    "normalized_name": "shrink_ray",
-    "category": "Spirit",
-    "tier": 9999
-  },
-  {
-    "name": "Unstable Concoction",
-    "normalized_name": "unstable_concoction",
-    "category": "Spirit",
-    "tier": 9999
-  }
+  "close_quarters",
+  "extended_magazine",
+  "headshot_booster",
+  "high_velocity_rounds",
+  "monster_rounds",
+  "rapid_rounds",
+  "restorative_shot",
+  "active_reload",
+  "fleetfoot",
+  "intensifying_magazine",
+  "kinetic_dash",
+  "long_range",
+  "melee_charge",
+  "mystic_shot",
+  "opening_rounds",
+  "recharging_rush",
+  "slowing_bullets",
+  "spirit_shredder_bullets",
+  "split_shot",
+  "stalker",
+  "swift_striker",
+  "titanic_magazine",
+  "weakening_headshot",
+  "alchemical_fire",
+  "ballistic_enchantment",
+  "berserker",
+  "blood_tribute",
+  "burst_fire",
+  "cultist_sacrifice",
+  "escalating_resilience",
+  "express_shot",
+  "headhunter",
+  "heroic_aura",
+  "hollow_point",
+  "hunters_aura",
+  "point_blank",
+  "sharpshooter",
+  "spirit_rend",
+  "tesla_bullets",
+  "toxic_bullets",
+  "weighted_shots",
+  "armor_piercing_rounds",
+  "capacitor",
+  "crippling_headshot",
+  "crushing_fists",
+  "frenzy",
+  "glass_cannon",
+  "lucky_shot",
+  "ricochet",
+  "shadow_weave",
+  "silencer",
+  "spellslinger",
+  "spiritual_overflow",
+  "haunting_shot",
+  "infinite_rounds",
+  "runed_gauntlets",
+  "extra_health",
+  "extra_regen",
+  "extra_stamina",
+  "healing_rite",
+  "melee_lifesteal",
+  "rebuttal",
+  "sprint_boots",
+  "battle_vest",
+  "bullet_lifesteal",
+  "debuff_reducer",
+  "enchanters_emblem",
+  "enduring_speed",
+  "guardian_ward",
+  "healbane",
+  "healing_booster",
+  "reactive_barrier",
+  "restorative_locket",
+  "return_fire",
+  "spirit_lifesteal",
+  "spirit_shielding",
+  "weapon_shielding",
+  "bullet_resilience",
+  "counterspell",
+  "dispel_magic",
+  "fortitude",
+  "fury_trance",
+  "healing_nova",
+  "lifestrike",
+  "majestic_leap",
+  "metal_skin",
+  "rescue_beam",
+  "spirit_resilience",
+  "stamina_mastery",
+  "trophy_collector",
+  "veil_walker",
+  "warp_stone",
+  "cheat_death",
+  "colossus",
+  "divine_barrier",
+  "diviners_kevlar",
+  "healing_tempo",
+  "infuser",
+  "inhibitor",
+  "juggernaut",
+  "leech",
+  "phantom_strike",
+  "plated_armor",
+  "siphon_bullets",
+  "spellbreaker",
+  "unstoppable",
+  "vampiric_burst",
+  "witchmail",
+  "celestial_blessing",
+  "cloak_of_opportunity",
+  "electric_slippers",
+  "eternal_gift",
+  "nullification_burst",
+  "seraphim_wings",
+  "shadow_strike",
+  "extra_charge",
+  "extra_spirit",
+  "golden_goose_egg",
+  "mystic_burst",
+  "mystic_expansion",
+  "mystic_regeneration",
+  "rusted_barrel",
+  "spirit_strike",
+  "arcane_surge",
+  "bullet_resist_shredder",
+  "cold_front",
+  "compress_cooldown",
+  "duration_extender",
+  "improved_spirit",
+  "mystic_slow",
+  "mystic_vulnerability",
+  "quicksilver_reload",
+  "slowing_hex",
+  "spirit_sap",
+  "suppressor",
+  "decay",
+  "disarming_hex",
+  "greater_expansion",
+  "knockdown",
+  "radiant_regeneration",
+  "rapid_recharge",
+  "silence_wave",
+  "spirit_snatch",
+  "superior_cooldown",
+  "superior_duration",
+  "surge_of_power",
+  "tankbuster",
+  "torment_pulse",
+  "arctic_blast",
+  "boundless_spirit",
+  "cursed_relic",
+  "echo_shard",
+  "escalating_exposure",
+  "ethereal_shift",
+  "focus_lens",
+  "lightning_scroll",
+  "magic_carpet",
+  "mercurial_magnum",
+  "mystic_reverb",
+  "refresher",
+  "scourge",
+  "spirit_burn",
+  "transcendent_cooldown",
+  "vortex_web",
+  "frostbite_charm",
+  "mystic_conduit",
+  "mystical_piano",
+  "omnicharge_signet",
+  "prism_blast",
+  "shrink_ray",
+  "unstable_concoction"
 ]

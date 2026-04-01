@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Haze",
   "portrait": "/resources/heroes/haze/portrait_haze.png",
   "mini_icon": "/resources/heroes/haze/mini_icon_haze.png",
-  "matrix": "/resources/heroes/haze/matrix_haze.csv"
+  "matrix": "/resources/heroes/haze/matrix_haze.csv",
+  "item_matrix": "/resources/heroes/haze/item_matrix_haze.csv"
 }

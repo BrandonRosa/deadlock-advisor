@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Warden",
   "portrait": "/resources/heroes/warden/portrait_warden.png",
   "mini_icon": "/resources/heroes/warden/mini_icon_warden.png",
-  "matrix": "/resources/heroes/warden/matrix_warden.csv"
+  "matrix": "/resources/heroes/warden/matrix_warden.csv",
+  "item_matrix": "/resources/heroes/warden/item_matrix_warden.csv"
 }

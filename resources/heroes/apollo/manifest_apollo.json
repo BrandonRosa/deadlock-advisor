@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Apollo",
   "portrait": "/resources/heroes/apollo/portrait_apollo.png",
   "mini_icon": "/resources/heroes/apollo/mini_icon_apollo.png",
-  "matrix": "/resources/heroes/apollo/matrix_apollo.csv"
+  "matrix": "/resources/heroes/apollo/matrix_apollo.csv",
+  "item_matrix": "/resources/heroes/apollo/item_matrix_apollo.csv"
 }

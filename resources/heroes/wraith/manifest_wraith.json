@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Wraith",
   "portrait": "/resources/heroes/wraith/portrait_wraith.png",
   "mini_icon": "/resources/heroes/wraith/mini_icon_wraith.png",
-  "matrix": "/resources/heroes/wraith/matrix_wraith.csv"
+  "matrix": "/resources/heroes/wraith/matrix_wraith.csv",
+  "item_matrix": "/resources/heroes/wraith/item_matrix_wraith.csv"
 }

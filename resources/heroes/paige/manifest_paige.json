@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Paige",
   "portrait": "/resources/heroes/paige/portrait_paige.png",
   "mini_icon": "/resources/heroes/paige/mini_icon_paige.png",
-  "matrix": "/resources/heroes/paige/matrix_paige.csv"
+  "matrix": "/resources/heroes/paige/matrix_paige.csv",
+  "item_matrix": "/resources/heroes/paige/item_matrix_paige.csv"
 }

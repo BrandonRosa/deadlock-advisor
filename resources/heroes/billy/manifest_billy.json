@@ -4,5 +4,6 @@
   "wiki_url": "https://deadlock.wiki/Billy",
   "portrait": "/resources/heroes/billy/portrait_billy.png",
   "mini_icon": "/resources/heroes/billy/mini_icon_billy.png",
-  "matrix": "/resources/heroes/billy/matrix_billy.csv"
+  "matrix": "/resources/heroes/billy/matrix_billy.csv",
+  "item_matrix": "/resources/heroes/billy/item_matrix_billy.csv"
 }
