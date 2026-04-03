@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deadlock Tag Generator</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- ── Sidebar ─────────────────────────────────────────────── -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">⚡ TAG GEN</div>
+    <button class="nav-btn active" data-page="heroes">🦸 Heroes</button>
+    <button class="nav-btn" data-page="items">⚔️ Items</button>
+    <button class="nav-btn" data-page="tags">🏷️ Tags</button>
+  </nav>
+
+  <!-- ── Main ───────────────────────────────────────────────── -->
+  <main id="main">
+
+    <!-- HEROES LIST -->
+    <section id="page-heroes" class="page active">
+      <div class="page-header">
+        <h1>Heroes</h1>
+        <button class="btn-primary" id="btn-new-hero">+ New Hero</button>
+      </div>
+      <div id="hero-grid" class="card-grid"></div>
+    </section>
+
+    <!-- HERO EDIT -->
+    <section id="page-hero-edit" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-heroes">← Heroes</button>
+        <h1 id="hero-edit-title">Hero</h1>
+        <div class="header-actions">
+          <span id="dirty-badge" class="dirty-badge hidden">Unsaved</span>
+          <button class="btn-primary" id="btn-save-hero">Save</button>
+        </div>
+      </div>
+      <div class="hero-info-panel">
+        <div class="hero-portrait-col">
+          <img id="hero-portrait-img" src="" alt="" class="hero-portrait-preview" />
+          <img id="hero-mini-img" src="" alt="" class="hero-mini-preview" />
+        </div>
+        <div class="hero-fields-col">
+          <div class="field-row">
+            <label>English Name</label>
+            <input id="hf-eng-name" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Hero Key (normalized)</label>
+            <input id="hf-key" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Description</label>
+            <input id="hf-desc" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Portrait Path</label>
+            <input id="hf-portrait" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Mini Icon Path</label>
+            <input id="hf-mini" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Wiki URL</label>
+            <input id="hf-wiki" type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Build Tabs -->
+      <div class="tabs-bar" id="build-tabs"></div>
+
+      <!-- Build Content -->
+      <div id="build-content">
+        <div class="build-meta-row">
+          <div class="field-row">
+            <label>Build Name</label>
+            <input id="bf-name" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Code Name</label>
+            <input id="bf-code" type="text" />
+          </div>
+          <div class="field-row flex-grow">
+            <label>Description</label>
+            <input id="bf-desc" type="text" />
+          </div>
+          <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
+        </div>
+        <!-- Shown only when General build is empty -->
+        <div id="preset-banner" class="preset-banner hidden">
+          <span class="preset-banner-label">General build is empty —</span>
+          <select id="pb-hero-sel"><option value="">— select preset —</option></select>
+          <select id="pb-build-sel"><option value="">— select hero first —</option></select>
+          <button class="btn-primary btn-sm" id="pb-apply">Fill from Preset</button>
+        </div>
+        <div class="table-wrap">
+          <table class="tag-table" id="hero-tag-table">
+            <thead>
+              <tr>
+                <th class="col-tag" data-col-idx="0">Tag</th>
+                <th data-col-idx="1" title="Multiplies with Team's Scores, used in build calculation.">Ally Weight</th>
+                <th data-col-idx="2" title="Multiplies with Item score, used in item recommendations.">Self Item Weight</th>
+                <th data-col-idx="3" title="Multiplies with enemy team scores, used in build calculations.">Enemy Weight</th>
+                <th data-col-idx="4" title="Directly used in self build calculations. Multiplies in other's build calculations.">Playstyle/Ability Score</th>
+              </tr>
+            </thead>
+            <tbody id="hero-tag-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ITEMS LIST -->
+    <section id="page-items" class="page">
+      <div class="page-header">
+        <h1>Items</h1>
+        <div class="header-actions">
+          <input id="item-search" type="search" placeholder="Search…" />
+          <div class="cat-tabs" id="item-cat-tabs">
+            <button class="cat-btn active" data-cat="All">All</button>
+            <button class="cat-btn weapon" data-cat="Weapon">Weapon</button>
+            <button class="cat-btn vitality" data-cat="Vitality">Vitality</button>
+            <button class="cat-btn spirit" data-cat="Spirit">Spirit</button>
+          </div>
+        </div>
+      </div>
+      <div id="item-grid" class="card-grid"></div>
+    </section>
+
+    <!-- ITEM EDIT -->
+    <section id="page-item-edit" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-items">← Items</button>
+        <h1 id="item-edit-title">Item</h1>
+        <div class="header-actions">
+          <span id="item-dirty-badge" class="dirty-badge hidden">Unsaved</span>
+          <button class="btn-primary" id="btn-save-item">Save</button>
+        </div>
+      </div>
+      <div class="hero-info-panel">
+        <div class="hero-portrait-col">
+          <img id="item-icon-img" src="" alt="" class="item-icon-preview" />
+          <span id="item-cat-badge" class="cat-badge"></span>
+          <span id="item-tier-badge" class="tier-badge"></span>
+        </div>
+        <div class="hero-fields-col">
+          <div class="field-row">
+            <label>Name</label>
+            <input id="if-name" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Normalized Name</label>
+            <input id="if-key" type="text" readonly />
+          </div>
+          <div class="field-row">
+            <label>Category</label>
+            <input id="if-cat" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Tier</label>
+            <input id="if-tier" type="number" />
+          </div>
+          <div class="field-row">
+            <label>Wiki URL</label>
+            <input id="if-wiki" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Image Path</label>
+            <input id="if-image" type="text" />
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tag-table" id="item-tag-table">
+          <thead>
+            <tr>
+              <th class="col-tag" data-col-idx="0">Tag</th>
+              <th data-col-idx="1" title="Used in item recommendation scoring, multiplies with Self Item Weight.">Item Score</th>
+            </tr>
+          </thead>
+          <tbody id="item-tag-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAGS -->
+    <section id="page-tags" class="page">
+      <div class="page-header">
+        <h1>Tag Manager</h1>
+        <button class="btn-primary" id="btn-add-tag">+ Add Tag</button>
+      </div>
+      <table class="data-table" id="tags-table">
+        <thead>
+          <tr><th style="width:28px"></th><th>Code Name</th><th>Display Name</th><th>Description</th><th></th></tr>
+        </thead>
+        <tbody id="tags-body"></tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- ── Modals ──────────────────────────────────────────────── -->
+
+  <!-- Add/Edit Tag Modal -->
+  <div id="modal-tag" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="modal-tag-title">Add Tag</h2>
+      <div class="field-row"><label>Code Name</label><input id="mt-code" type="text" placeholder="e.g. burst_damage" /></div>
+      <div class="field-row"><label>Display Name</label><input id="mt-name" type="text" placeholder="e.g. Burst Damage" /></div>
+      <div class="field-row"><label>Description</label><input id="mt-desc" type="text" /></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="mt-cancel">Cancel</button>
+        <button class="btn-primary" id="mt-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Build Modal -->
+  <div id="modal-build" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Add Build</h2>
+      <div class="field-row"><label>Build Name</label><input id="mb-name" type="text" placeholder="e.g. Tank" /></div>
+      <div class="field-row"><label>Code Name</label><input id="mb-code" type="text" placeholder="auto-filled" /></div>
+      <div class="field-row"><label>Description</label><input id="mb-desc" type="text" /></div>
+      <div class="field-row checkbox-row">
+        <label><input type="checkbox" id="mb-preset-toggle" /> Copy from preset hero</label>
+      </div>
+      <div id="mb-preset-section" class="hidden">
+        <div class="field-row">
+          <label>Source Hero</label>
+          <select id="mb-hero-sel"></select>
+        </div>
+        <div class="field-row">
+          <label>Source Build</label>
+          <select id="mb-build-sel"></select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="mb-cancel">Cancel</button>
+        <button class="btn-primary" id="mb-confirm">Add Build</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Hero Modal -->
+  <div id="modal-new-hero" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>New Hero</h2>
+      <div class="field-row"><label>English Name</label><input id="nh-name" type="text" /></div>
+      <div class="field-row"><label>Normalized Key</label><input id="nh-key" type="text" placeholder="e.g. abrams" /></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="nh-cancel">Cancel</button>
+        <button class="btn-primary" id="nh-confirm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+[
+  {
+    "code": "pure_damage",
+    "description": "",
+    "name": "Pure Damage"
+  },
+  {
+    "code": "spirit_damage",
+    "description": "",
+    "name": "Spirit Damage"
+  },
+  {
+    "code": "bullet_damage",
+    "description": "",
+    "name": "Bullet Damage"
+  },
+  {
+    "code": "melee_damage",
+    "description": "",
+    "name": "Melee Damage"
+  },
+  {
+    "code": "spirit_resistance",
+    "description": "",
+    "name": "Spirit Resistance"
+  },
+  {
+    "code": "bullet_resistance",
+    "description": "",
+    "name": "Bullet Resistance"
+  },
+  {
+    "code": "melee_resistance",
+    "description": "",
+    "name": "Melee Resistance"
+  },
+  {
+    "code": "spirit_resist_shred",
+    "description": "",
+    "name": "Spirit Resist Shred"
+  },
+  {
+    "code": "bullet_resist_shred",
+    "description": "",
+    "name": "Bullet Resist Shred"
+  },
+  {
+    "code": "burst_damage",
+    "description": "",
+    "name": "Burst Damage"
+  },
+  {
+    "code": "continuous_damage",
+    "description": "",
+    "name": "Continuous Damage"
+  },
+  {
+    "code": "dot",
+    "description": "",
+    "name": "DoT"
+  },
+  {
+    "code": "debuff",
+    "description": "",
+    "name": "Debuff"
+  },
+  {
+    "code": "burst_resistance",
+    "description": "",
+    "name": "Burst Resistance"
+  },
+  {
+    "code": "continuous_resistance",
+    "description": "",
+    "name": "Continuous Resistance"
+  },
+  {
+    "code": "debuff_resistance",
+    "description": "",
+    "name": "Debuff Resistance"
+  },
+  {
+    "code": "bullet_proc",
+    "description": "",
+    "name": "Bullet Proc"
+  },
+  {
+    "code": "bullet_evasion",
+    "description": "",
+    "name": "Bullet Evasion"
+  },
+  {
+    "code": "magazine_size_dependant",
+    "description": "",
+    "name": "Magazine Size Dependant"
+  },
+  {
+    "code": "fire_rate",
+    "description": "",
+    "name": "Fire Rate"
+  },
+  {
+    "code": "fire_rate_slow",
+    "description": "",
+    "name": "Fire Rate Slow"
+  },
+  {
+    "code": "aoe_cluster",
+    "description": "",
+    "name": "AoE / Cluster Damage"
+  },
+  {
+    "code": "single_target",
+    "description": "",
+    "name": "Single Target Damage"
+  },
+  {
+    "code": "close_range",
+    "description": "",
+    "name": "Close Range"
+  },
+  {
+    "code": "mid_range",
+    "description": "",
+    "name": "Mid Range"
+  },
+  {
+    "code": "long_range",
+    "description": "",
+    "name": "Long Range"
+  },
+  {
+    "code": "stun",
+    "description": "",
+    "name": "Stun / CC"
+  },
+  {
+    "code": "aerial",
+    "description": "",
+    "name": "Aerial"
+  },
+  {
+    "code": "grounded",
+    "description": "",
+    "name": "Grounded"
+  },
+  {
+    "code": "horizontal_mobility",
+    "description": "",
+    "name": "Horizontal Mobility"
+  },
+  {
+    "code": "vertical_mobility",
+    "description": "",
+    "name": "Vertical Mobility"
+  },
+  {
+    "code": "movement_slow",
+    "description": "",
+    "name": "Movement Slow"
+  },
+  {
+    "code": "silence",
+    "description": "",
+    "name": "Silence"
+  },
+  {
+    "code": "disarm",
+    "description": "",
+    "name": "Disarm"
+  },
+  {
+    "code": "cc_resist",
+    "description": "",
+    "name": "CC Resist"
+  },
+  {
+    "code": "team_heal",
+    "description": "",
+    "name": "Team Heal"
+  },
+  {
+    "code": "self_heal",
+    "description": "",
+    "name": "Self Heal"
+  },
+  {
+    "code": "anti_heal",
+    "description": "",
+    "name": "Anti-Heal"
+  },
+  {
+    "code": "high_max_hp",
+    "description": "",
+    "name": "High Max HP"
+  },
+  {
+    "code": "low_max_hp",
+    "description": "",
+    "name": "Low Max HP"
+  },
+  {
+    "code": "shield",
+    "description": "",
+    "name": "Shield"
+  },
+  {
+    "code": "scaling_early",
+    "description": "",
+    "name": "Early Scaling"
+  },
+  {
+    "code": "scaling_late",
+    "description": "",
+    "name": "Late Scaling"
+  },
+  {
+    "code": "farmer",
+    "description": "",
+    "name": "Farmer"
+  },
+  {
+    "code": "self_buff",
+    "description": "",
+    "name": "Self Buff"
+  },
+  {
+    "code": "ally_buff",
+    "description": "",
+    "name": "Ally Buff"
+  },
+  {
+    "code": "cooldown_reduction",
+    "description": "",
+    "name": "Cooldown Reduction Dependant"
+  },
+  {
+    "code": "range_extender_dependant",
+    "description": "",
+    "name": "Range Dependent"
+  },
+  {
+    "code": "duration_dependant",
+    "description": "",
+    "name": "Duration Dependent"
+  },
+  {
+    "code": "charge_dependant",
+    "description": "",
+    "name": "Charge Dependant"
+  },
+  {
+    "code": "large_hitbox",
+    "description": "",
+    "name": "Large Hitbox"
+  },
+  {
+    "code": "small_hitbox",
+    "description": "",
+    "name": "Small Hitbox"
+  },
+  {
+    "code": "close_to_team",
+    "description": "",
+    "name": "Close To Team"
+  },
+  {
+    "code": "away_from_team",
+    "description": "",
+    "name": "Away From Team"
+  },
+  {
+    "code": "spawn_minions",
+    "description": "",
+    "name": "Spawns Minions"
+  }
+]
