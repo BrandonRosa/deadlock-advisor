@@ -15,6 +15,11 @@
     "name": "Bullet Damage"
   },
   {
+    "code": "headshot_damage",
+    "description": "",
+    "name": "Headshot Damage"
+  },
+  {
     "code": "melee_damage",
     "description": "",
     "name": "Melee Damage"

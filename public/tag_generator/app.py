@@ -10,7 +10,7 @@ HEROES_DIR  = DATA / "heroes"
 ITEMS_DIR   = DATA / "items"
 TAGS_F      = DATA / "tags.json"
 
-SOURCE_ROOT       = Path(r"C:\Users\Brandon Rosa-Parada\deadlock-advisor\public")
+SOURCE_ROOT = Path(__file__).parent.parent
 SOURCE_HEROES     = SOURCE_ROOT / "resources" / "heroes"
 SOURCE_ITEMS_DIR  = SOURCE_ROOT / "resources" / "items"
 SOURCE_ITEMS_IDX  = SOURCE_ITEMS_DIR / "index.json"
@@ -146,6 +146,8 @@ bootstrap()
 # ── Static image proxy ───────────────────────────────────────────────────────
 @app.route("/src/<path:filepath>")
 def src_image(filepath):
+    full_path = SOURCE_ROOT / filepath
+    print(f"Looking for: {full_path}, exists: {full_path.exists()}")
     return send_from_directory(SOURCE_ROOT, filepath)
 
 
@@ -348,4 +350,5 @@ def index():
 
 if __name__ == "__main__":
     print("Tag Generator running at http://127.0.0.1:5000")
-    app.run(debug=True, port=5000, use_reloader=False)
+    #app.run(debug=True, port=5000, use_reloader=False)
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
