@@ -60,7 +60,8 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "headshot_damage": 0.25
     }
   },
   "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds"

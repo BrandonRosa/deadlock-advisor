@@ -6,7 +6,7 @@ ally_billy,1,1,0
 ally_calico,0,0,0
 ally_celeste,0,0,0
 ally_the_doorman,1,0,0
-ally_drifter,0,1,1
+ally_drifter,2,1,1
 ally_dynamo,2,4,2
 ally_graves,1,1,0
 ally_grey_talon,1,0,0
@@ -21,7 +21,7 @@ ally_mcginnis,1,2,1
 ally_mina,0,0,0
 ally_mirage,0,0,0
 ally_mo_&_krill,1,2,1
-ally_paige,0,1,0
+ally_paige,2,1,0
 ally_paradox,1,1,1
 ally_pocket,0,1,0
 ally_rem,0,1,0
@@ -39,13 +39,13 @@ ally_wraith,0,0,0
 ally_yamato,0,0,0
 enemy_abrams,1,-1.5,1.5
 enemy_apollo,1,1,0
-enemy_bebop,0,-1,0
+enemy_bebop,1,-1,0
 enemy_billy,1,1,1
 enemy_calico,1,2,1
 enemy_celeste,-2,1,0
-enemy_the_doorman,0,1,-1
+enemy_the_doorman,1,1,-1
 enemy_drifter,0,2,0
-enemy_dynamo,1,1,1
+enemy_dynamo,1,-1,1
 enemy_graves,1,0,0
 enemy_grey_talon,-2,0,-1
 enemy_haze,0,2,-1
