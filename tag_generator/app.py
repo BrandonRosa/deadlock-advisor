@@ -342,6 +342,17 @@ def save_item(name):
     return jsonify({"ok": True})
 
 
+@app.route("/api/items/all")
+def get_all_items():
+    out = []
+    for f in sorted(ITEMS_DIR.glob("*.json")):
+        try:
+            out.append(json.loads(f.read_text(encoding='utf-8')))
+        except Exception:
+            pass
+    return jsonify(out)
+
+
 # ── App ───────────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
@@ -350,5 +361,5 @@ def index():
 
 if __name__ == "__main__":
     print("Tag Generator running at http://127.0.0.1:5000")
-    #app.run(debug=True, port=5000, use_reloader=False)
-    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(debug=True, port=5000, use_reloader=False)
+    #app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
