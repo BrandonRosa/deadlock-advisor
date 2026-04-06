@@ -13,6 +13,7 @@
     <button class="nav-btn active" data-page="heroes">🦸 Heroes</button>
     <button class="nav-btn" data-page="items">⚔️ Items</button>
     <button class="nav-btn" data-page="tags">🏷️ Tags</button>
+    <button class="nav-btn" data-page="calc">🎯 Calculator</button>
   </nav>
 
   <!-- ── Main ───────────────────────────────────────────────── -->
@@ -199,6 +200,86 @@
         </thead>
         <tbody id="tags-body"></tbody>
       </table>
+    </section>
+
+    <!-- CALCULATOR SETUP -->
+    <section id="page-calc" class="page">
+      <div class="page-header sticky-header">
+        <h1>Match Calculator</h1>
+        <div class="header-actions">
+          <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
+          <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
+          <div class="mult-group">
+            <span class="mult-lbl">Build:</span>
+            <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="0.75" step="0.05" min="0" max="2"></label>
+            <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="0.85" step="0.05" min="0" max="2"></label>
+          </div>
+          <div class="mult-group">
+            <span class="mult-lbl">Items:</span>
+            <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="0.75" step="0.05" min="0" max="2"></label>
+            <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="0.85" step="0.05" min="0" max="2"></label>
+          </div>
+          <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
+        </div>
+      </div>
+      <div class="calc-teams-bar">
+        <div class="calc-team">
+          <div class="calc-team-hdr ally-hdr">Allies <span id="ally-count" class="count-badge">0/6</span></div>
+          <div class="team-chips" id="ally-chips"></div>
+        </div>
+        <div class="calc-team">
+          <div class="calc-team-hdr enemy-hdr">Enemies <span id="enemy-count" class="count-badge">0/6</span></div>
+          <div class="team-chips" id="enemy-chips"></div>
+        </div>
+      </div>
+      <div class="card-grid" id="calc-roster"></div>
+    </section>
+
+    <!-- CALCULATOR SUMMARY -->
+    <section id="page-calc-summary" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-to-setup">← Setup</button>
+        <h1>Match Results</h1>
+        <div class="header-actions">
+          <button class="btn-ghost btn-sm" id="btn-show-regen">Re-generate</button>
+        </div>
+      </div>
+      <div id="regen-panel" class="regen-panel hidden">
+        <div class="regen-teams">
+          <div class="regen-team-col">
+            <div class="regen-col-lbl ally-lbl">Ally Builds</div>
+            <div id="regen-allies"></div>
+          </div>
+          <div class="regen-team-col">
+            <div class="regen-col-lbl enemy-lbl">Enemy Builds</div>
+            <div id="regen-enemies"></div>
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" id="btn-regen-run">Re-run Calculation</button>
+      </div>
+      <div id="summary-tag-panel"></div>
+      <div id="summary-grid" class="summary-grid"></div>
+    </section>
+
+    <!-- CALCULATOR HERO DETAIL -->
+    <section id="page-calc-hero" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-to-summary">← Results</button>
+        <h1 id="calc-hero-name">Hero</h1>
+      </div>
+      <div id="calc-hero-detail"></div>
+    </section>
+
+    <!-- CALCULATOR BUILD DETAIL -->
+    <section id="page-calc-build" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-to-hero">← Builds</button>
+        <div>
+          <h1 id="calc-build-name">Build</h1>
+          <div id="calc-build-desc" class="calc-build-desc"></div>
+        </div>
+      </div>
+      <div id="calc-build-detail"></div>
     </section>
 
   </main>
