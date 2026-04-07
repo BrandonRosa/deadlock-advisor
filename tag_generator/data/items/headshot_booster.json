@@ -34,6 +34,7 @@
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
+      "headshot_damage": 1.25,
       "high_max_hp": null,
       "horizontal_mobility": null,
       "large_hitbox": null,
@@ -60,8 +61,7 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null,
-      "headshot_damage": 1
+      "vertical_mobility": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Headshot_Booster"

@@ -6,7 +6,7 @@
   "tier": 3200,
   "values": {
     "self_score": {
-      "aerial": null,
+      "aerial": -0.75,
       "ally_buff": null,
       "anti_heal": null,
       "aoe_cluster": null,
