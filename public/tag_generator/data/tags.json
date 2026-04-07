@@ -2,7 +2,7 @@
   {
     "code": "pure_damage",
     "description": "",
-    "name": "Pure Damage"
+    "name": "Pure/Execute/MaxHP Damage"
   },
   {
     "code": "spirit_damage",

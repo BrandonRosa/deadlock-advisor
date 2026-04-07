@@ -31,7 +31,7 @@
       "dot": null,
       "duration_dependant": null,
       "farmer": null,
-      "fire_rate": 1,
+      "fire_rate": 1.25,
       "fire_rate_slow": null,
       "grounded": null,
       "high_max_hp": null,
@@ -60,7 +60,8 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "headshot_damage": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Rapid_Rounds"

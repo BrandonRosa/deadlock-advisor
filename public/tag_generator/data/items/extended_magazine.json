@@ -39,7 +39,7 @@
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
-      "magazine_size_dependant": 1,
+      "magazine_size_dependant": 1.25,
       "melee_damage": null,
       "melee_resistance": null,
       "mid_range": null,
@@ -60,7 +60,8 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "headshot_damage": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Extended_Magazine"
