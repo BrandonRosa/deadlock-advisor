@@ -837,19 +837,12 @@ document.getElementById('back-items').addEventListener('click', async () => {
 // MATCH CALCULATOR
 // ════════════════════════════════════════════════════════════════════════════
 
-// ── Not-Recommended config — swap method here as needed ───────────────────
-const NOT_REC = {
-  method:      'rank_diff',  // 'rank_diff' | 'pct_threshold'
-  rankDiff:    15,           // rank_diff: flag when (total_rank - self_rank) > N
-  selfMinPct:  0.15,         // both: ignore items below X% of max self score
-  selfTopPct:  0.35,         // pct_threshold: must be in top 35% by self
-  totalBotPct: 0.50,         // pct_threshold: must be in bottom 50% by total
-};
 
 // ── State ─────────────────────────────────────────────────────────────────
 const MATCH = {
   multiMode:      false,
   uncapped:       false,
+  include9999:    false,
   teamCap:        6,
   self:           null,
   allies:         [],
@@ -882,6 +875,7 @@ async function loadCalc() {
 function renderCalcSetup() {
   document.getElementById('calc-multi-mode').checked    = MATCH.multiMode;
   document.getElementById('calc-uncap').checked         = MATCH.uncapped;
+  document.getElementById('calc-include9999').checked   = MATCH.include9999;
   document.getElementById('mult-build-ally').value      = MATCH.mult.buildAlly;
   document.getElementById('mult-build-enemy').value     = MATCH.mult.buildEnemy;
   document.getElementById('mult-item-ally').value       = MATCH.mult.itemAlly;
@@ -994,15 +988,15 @@ function removeFromTeam(name) {
 }
 
 document.getElementById('calc-multi-mode').addEventListener('change', e => { MATCH.multiMode = e.target.checked; });
+document.getElementById('calc-include9999').addEventListener('change', e => { MATCH.include9999 = e.target.checked; });
 document.getElementById('calc-uncap').addEventListener('change', e => {
   MATCH.uncapped = e.target.checked;
   renderTeamBars();
 });
 ['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy'].forEach(id => {
-  document.getElementById(id).addEventListener('change', e => {
+  document.getElementById(id).addEventListener('input', e => {
     const v = parseFloat(e.target.value);
     if (isNaN(v) || v < 0) return;
-    // 'mult-build-ally' → 'buildAlly'
     const key = id.replace('mult-', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
     MATCH.mult[key] = v;
   });
@@ -1016,12 +1010,13 @@ async function runCalculation() {
   if (!MATCH.allies.length && !MATCH.enemies.length) {
     toast('Add heroes to teams first', 'error'); return;
   }
+  // Always re-fetch so edits made during the session are reflected
   const allNames = [...new Set([...MATCH.allies, ...MATCH.enemies])];
   toast('Loading data...');
   for (const name of allNames) {
-    if (!MATCH.heroData[name]) MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
+    MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
   }
-  if (!MATCH.itemData.length) MATCH.itemData = await api.get('/api/items/all');
+  MATCH.itemData = await api.get('/api/items/all');
   MATCH.results = computeResults();
   renderCalcSummary();
   showPage('calc-summary');
@@ -1040,6 +1035,15 @@ function srcBuild(name) {
 }
 
 function computeResults() {
+  // Always read current input values so changes made without blur are captured
+  ['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy'].forEach(id => {
+    const v = parseFloat(document.getElementById(id)?.value);
+    if (!isNaN(v) && v >= 0) {
+      const key = id.replace('mult-', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      MATCH.mult[key] = v;
+    }
+  });
+
   const allNames = [...new Set([...MATCH.allies, ...MATCH.enemies])];
   const out = [];
 
@@ -1076,7 +1080,8 @@ function computeResults() {
         });
       });
 
-      const items = MATCH.itemData.map(item => {
+      const itemPool = MATCH.include9999 ? MATCH.itemData : MATCH.itemData.filter(it => it.tier !== 9999);
+      const items = itemPool.map(item => {
         let iAlly = 0, iSelf = 0, iEnemy = 0;
         S.tags.forEach(tag => {
           const t  = tag.code;
@@ -1332,7 +1337,7 @@ function makeSummaryCard(r) {
       const sec = document.createElement('div');
       sec.className = `sc-mu-section ${cls}`;
       sec.innerHTML = `<span class="sc-mu-lbl">${label}</span>`;
-      entries.forEach(([eName, score]) => {
+      entries.forEach(([eName]) => {
         const hd  = MATCH.heroData[eName];
         const img = srcUrl(hd?.image_path || '');
         const span = document.createElement('span');
@@ -1380,7 +1385,8 @@ function openCalcHero(name) {
   el.appendChild(hdr);
 
   const myEnemies = r.isEnemy ? MATCH.allies : MATCH.enemies;
-  r.builds.forEach(b => {
+  const sortedBuilds = [...r.builds].sort((a, bld) => bld.total - a.total);
+  sortedBuilds.forEach(b => {
     const row = document.createElement('div');
     row.className = 'ch-build-row' + (b.isGeneral ? ' is-general' : '');
     row.innerHTML = `
@@ -1513,83 +1519,195 @@ function mkItemsPanel(b) {
   d.className = 'calc-panel';
   d.innerHTML = '<div class="calc-panel-title">Item Recommendations</div>';
 
-  const TABS = ['By Type', 'Total', 'Ally', 'Self', 'Not Rec'];
-  const tabBar = document.createElement('div');
-  tabBar.className = 'ci-tab-bar';
-  const bodies = [];
+  const notRecItems = computeNotRec(b.items);
+  const notRecSet   = new Set(notRecItems.map(x => x.key));
+  const mainItems   = b.items.filter(it => !notRecSet.has(it.key));
 
-  TABS.forEach((lbl, i) => {
-    const btn  = document.createElement('button');
-    btn.className = 'ci-tab' + (i === 0 ? ' active' : '');
-    btn.textContent = lbl;
-    const body = document.createElement('div');
-    body.className = 'ci-body' + (i !== 0 ? ' hidden' : '');
-    btn.addEventListener('click', () => {
-      tabBar.querySelectorAll('.ci-tab').forEach(x => x.classList.remove('active'));
-      bodies.forEach(x => x.classList.add('hidden'));
-      btn.classList.add('active');
-      body.classList.remove('hidden');
+  const UNGROUPED_LIMIT = 30;
+  const GROUPED_LIMIT   = 10;
+  const CATS = ['Weapon', 'Vitality', 'Spirit'];
+  // Per-category state: 'summary' | 'expanded' | 'hidden'
+  const catState = { Weapon: 'summary', Vitality: 'summary', Spirit: 'summary', Other: 'summary' };
+  const CAT_CYCLE = { summary: 'expanded', expanded: 'hidden', hidden: 'summary' };
+  const CAT_ICON  = { summary: '▾', expanded: '▾', hidden: '▸' };
+
+  const sortState = { col: 'total', dir: -1 };
+  let groupByType = false;
+
+  const COLS = [
+    { key: 'name',  label: 'Item',    sortable: true  },
+    { key: 'ally',  label: 'Ally',    sortable: true  },
+    { key: 'self',  label: 'Self',    sortable: true  },
+    { key: 'enemy', label: 'Enemy',   sortable: true  },
+    { key: 'total', label: 'Total',   sortable: true  },
+    { key: 'remark',label: 'Remarks', sortable: false },
+  ];
+
+  // Controls
+  const ctrlBar = document.createElement('div');
+  ctrlBar.className = 'ci-ctrl-bar';
+  ctrlBar.innerHTML = `<label class="ci-bytype-lbl"><input type="checkbox" class="ci-bytype-chk"> Group by Type</label>`;
+  d.appendChild(ctrlBar);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ci-table-wrap';
+  d.appendChild(wrap);
+
+  function sortedList(items) {
+    return [...items].sort((a, x) => {
+      if (sortState.col === 'name') return sortState.dir * a.name.localeCompare(x.name);
+      return sortState.dir * ((a[sortState.col] ?? 0) - (x[sortState.col] ?? 0));
     });
-    tabBar.appendChild(btn);
-    bodies.push(body);
+  }
+
+  function mkItemTr(it) {
+    const tr = document.createElement('tr');
+    const img = srcUrl(it.imagePath);
+    tr.innerHTML = `
+      <td class="ci-item-cell">
+        ${img ? `<img class="ci-item-img" src="${img}" alt="" onerror="this.style.display='none'">` : ''}
+        <span class="ci-item-name">${it.name}</span>
+        <span class="ci-tier">${it.tier ? it.tier + '★' : ''}</span>
+      </td>
+      <td class="ci-num ally-clr">${fmtScore(it.ally)}</td>
+      <td class="ci-num">${fmtScore(it.self)}</td>
+      <td class="ci-num enemy-clr">${fmtScore(it.enemy)}</td>
+      <td class="ci-num total-clr"><b>${fmtScore(it.total)}</b></td>
+      <td class="ci-remark"></td>`;
+    return tr;
+  }
+
+  function appendCatGroup(tbody, cat, items, cls) {
+    if (!items.length) return;
+    const state = catState[cat];
+    const hdr = document.createElement('tr');
+    hdr.className = 'ci-cat-sep ci-cat-clickable';
+    hdr.innerHTML = `<td colspan="6" class="ci-cat-sep-cell it-cat-${cls}">
+      <span class="ci-cat-icon">${CAT_ICON[state]}</span> ${cat}
+      <span class="ci-cat-count">${state === 'summary' ? Math.min(items.length, GROUPED_LIMIT) : items.length} / ${items.length}</span>
+      <span class="ci-cat-state-hint">${state === 'hidden' ? '(hidden)' : state === 'expanded' ? '(all)' : ''}</span>
+    </td>`;
+    hdr.addEventListener('click', () => { catState[cat] = CAT_CYCLE[state]; buildTable(); });
+    tbody.appendChild(hdr);
+    if (state === 'hidden') return;
+    const visible = state === 'summary' ? items.slice(0, GROUPED_LIMIT) : items;
+    visible.forEach(it => tbody.appendChild(mkItemTr(it)));
+    if (state === 'summary' && items.length > GROUPED_LIMIT) {
+      const moreRow = document.createElement('tr');
+      moreRow.className = 'ci-show-more-row';
+      moreRow.innerHTML = `<td colspan="6"><button class="ci-show-more-btn">Show ${items.length - GROUPED_LIMIT} more…</button></td>`;
+      moreRow.querySelector('button').addEventListener('click', e => {
+        e.stopPropagation(); catState[cat] = 'expanded'; buildTable();
+      });
+      tbody.appendChild(moreRow);
+    }
+  }
+
+  function buildTable() {
+    wrap.innerHTML = '';
+    const table = document.createElement('table');
+    table.className = 'ci-sort-table';
+
+    const thead = document.createElement('thead');
+    const hr = document.createElement('tr');
+    COLS.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col.label;
+      if (col.sortable) {
+        th.className = 'ci-sortable';
+        if (sortState.col === col.key) th.classList.add(sortState.dir === -1 ? 'sort-desc' : 'sort-asc');
+        th.addEventListener('click', () => {
+          if (sortState.col === col.key) sortState.dir *= -1;
+          else { sortState.col = col.key; sortState.dir = -1; }
+          buildTable();
+        });
+      }
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    const sorted = sortedList(mainItems);
+
+    if (groupByType) {
+      CATS.forEach(cat => appendCatGroup(tbody, cat, sorted.filter(it => it.category === cat), cat.toLowerCase()));
+      const other = sorted.filter(it => !CATS.includes(it.category));
+      if (other.length) appendCatGroup(tbody, 'Other', other, '');
+    } else {
+      const visible = sorted.slice(0, UNGROUPED_LIMIT);
+      if (visible.length) visible.forEach(it => tbody.appendChild(mkItemTr(it)));
+      else {
+        const er = document.createElement('tr');
+        er.innerHTML = `<td colspan="6" class="empty-msg">No items scored.</td>`;
+        tbody.appendChild(er);
+      }
+    }
+
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+  }
+
+  buildTable();
+
+  d.querySelector('.ci-bytype-chk').addEventListener('change', e => {
+    groupByType = e.target.checked;
+    buildTable();
   });
-  d.appendChild(tabBar);
-  bodies.forEach(body => d.appendChild(body));
 
-  const sorted = [...b.items].sort((a, x) => x.total - a.total);
+  // ── Not Recommended block ─────────────────────────────────────────────────
+  if (notRecItems.length) {
+    const nrBlock = document.createElement('div');
+    nrBlock.className = 'ci-not-rec-block';
+    let nrOpen = false;
 
-  // Tab 0: By Type
-  ['Weapon', 'Vitality', 'Spirit'].forEach(cat => {
-    const catItems = sorted.filter(it => it.category === cat && it.total > 0).slice(0, 10);
-    if (!catItems.length) return;
-    const sec = document.createElement('div');
-    sec.className = 'it-cat-block';
-    sec.innerHTML = `<div class="it-cat-hdr it-cat-${cat.toLowerCase()}">${cat}</div>`;
-    catItems.forEach(it => sec.appendChild(mkItemRow(it, 'total')));
-    bodies[0].appendChild(sec);
-  });
-  if (!bodies[0].children.length) bodies[0].innerHTML = '<div class="empty-msg">No positive-scoring items.</div>';
+    const nrHdr = document.createElement('div');
+    nrHdr.className = 'ci-not-rec-hdr';
+    nrHdr.innerHTML =
+      `<span class="ci-nr-toggle">▸</span>
+       <span class="ci-nr-title">Not Recommended</span>
+       <span class="ci-not-rec-count">${notRecItems.length}</span>
+       <span class="ci-nr-hint">(total &lt; 1.0 &amp; enemy &lt; 0) or self &lt; 0.5</span>`;
+    nrBlock.appendChild(nrHdr);
 
-  // Tab 1-3
-  const filterSort = (arr, key) => [...arr].sort((a, x) => x[key] - a[key]).filter(it => it[key] > 0).slice(0, 30);
-  filterSort(b.items, 'total').forEach(it => bodies[1].appendChild(mkItemRow(it, 'total')));
-  filterSort(b.items, 'ally').forEach(it  => bodies[2].appendChild(mkItemRow(it, 'ally')));
-  filterSort(b.items, 'self').forEach(it  => bodies[3].appendChild(mkItemRow(it, 'self')));
-  if (!bodies[1].children.length) bodies[1].innerHTML = '<div class="empty-msg">No items scored.</div>';
-  if (!bodies[2].children.length) bodies[2].innerHTML = '<div class="empty-msg">No ally scores.</div>';
-  if (!bodies[3].children.length) bodies[3].innerHTML = '<div class="empty-msg">No self scores.</div>';
+    const nrWrap = document.createElement('div');
+    nrWrap.className = 'ci-nr-body hidden';
+    const nrTable = document.createElement('table');
+    nrTable.className = 'ci-sort-table';
+    nrTable.innerHTML = `<thead><tr>
+      <th class="ci-sortable">Item</th>
+      <th class="ci-sortable ci-num">Ally</th>
+      <th class="ci-sortable ci-num">Self</th>
+      <th class="ci-sortable ci-num enemy-clr">Enemy</th>
+      <th class="ci-sortable ci-num total-clr">Total</th>
+      <th></th>
+    </tr></thead>`;
+    const nrBody = document.createElement('tbody');
+    notRecItems.forEach(it => {
+      const tr = mkItemTr(it);
+      tr.className = 'ci-not-rec-row';
+      nrBody.appendChild(tr);
+    });
+    nrTable.appendChild(nrBody);
+    nrWrap.appendChild(nrTable);
+    nrBlock.appendChild(nrWrap);
 
-  // Tab 4: Not Recommended
-  const notRec = computeNotRec(b.items);
-  if (notRec.length) notRec.forEach(it => bodies[4].appendChild(mkItemRow(it, 'self', true)));
-  else bodies[4].innerHTML = '<div class="empty-msg">No items flagged.</div>';
+    nrHdr.addEventListener('click', () => {
+      nrOpen = !nrOpen;
+      nrWrap.classList.toggle('hidden', !nrOpen);
+      nrHdr.querySelector('.ci-nr-toggle').textContent = nrOpen ? '▾' : '▸';
+    });
+
+    d.appendChild(nrBlock);
+  }
 
   return d;
 }
 
 function computeNotRec(items) {
-  const withSelf = items.filter(it => it.self > 0);
-  if (!withSelf.length) return [];
-  const maxSelf  = Math.max(...withSelf.map(it => it.self));
-  const minSelf  = maxSelf * NOT_REC.selfMinPct;
-  const byTotal  = [...items].sort((a, b) => b.total - a.total);
-  const bySelf   = [...withSelf].sort((a, b) => b.self - a.self);
-
-  if (NOT_REC.method === 'rank_diff') {
-    return items.filter(it => {
-      if (it.self < minSelf) return false;
-      const tr = byTotal.findIndex(x => x.key === it.key);
-      const sr = bySelf.findIndex(x => x.key === it.key);
-      return sr >= 0 && (tr - sr) > NOT_REC.rankDiff;
-    }).sort((a, b) => b.self - a.self);
-  }
-  // pct_threshold
-  const topN   = Math.ceil(bySelf.length * NOT_REC.selfTopPct);
-  const botN   = Math.floor(byTotal.length * NOT_REC.totalBotPct);
-  const topSet = new Set(bySelf.slice(0, topN).map(x => x.key));
-  return byTotal.slice(botN)
-    .filter(it => topSet.has(it.key) && it.self >= minSelf)
-    .sort((a, b) => b.self - a.self);
+  return items
+    .filter(it => (it.total < 1.0 && it.enemy < 0) || it.self < 0.5)
+    .sort((a, b) => a.total - b.total);
 }
 
 function mkItemRow(item, hiCol, isNotRec = false) {

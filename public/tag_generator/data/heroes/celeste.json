@@ -34,6 +34,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -60,8 +61,7 @@
           "spirit_resistance": null,
           "stun": 0.5,
           "team_heal": null,
-          "vertical_mobility": null,
-          "headshot_damage": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -92,6 +92,7 @@
           "fire_rate": null,
           "fire_rate_slow": -0.25,
           "grounded": 0.5,
+          "headshot_damage": 0.25,
           "high_max_hp": -0.75,
           "horizontal_mobility": -0.5,
           "large_hitbox": 0.15,
@@ -118,8 +119,7 @@
           "spirit_resistance": -1,
           "stun": -1,
           "team_heal": -0.5,
-          "vertical_mobility": -0.15,
-          "headshot_damage": 0.25
+          "vertical_mobility": -0.15
         },
         "self_score": {
           "aerial": 1.5,
@@ -150,6 +150,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": -0.5,
+          "headshot_damage": -0.15,
           "high_max_hp": null,
           "horizontal_mobility": 1,
           "large_hitbox": null,
@@ -176,8 +177,7 @@
           "spirit_resistance": null,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": 1,
-          "headshot_damage": -0.15
+          "vertical_mobility": 1
         },
         "self_weight": {
           "aerial": 0.75,
@@ -194,7 +194,7 @@
           "burst_resistance": 0.15,
           "cc_resist": 0.25,
           "charge_dependant": 0.5,
-          "close_range": 0.25,
+          "close_range": -0.25,
           "close_to_team": null,
           "continuous_damage": null,
           "continuous_resistance": 0.25,
@@ -208,6 +208,7 @@
           "fire_rate": 0.15,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.25,
           "high_max_hp": null,
           "horizontal_mobility": 0.75,
           "large_hitbox": null,
@@ -234,8 +235,7 @@
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 1,
-          "headshot_damage": -0.25
+          "vertical_mobility": 1
         }
       }
     }
