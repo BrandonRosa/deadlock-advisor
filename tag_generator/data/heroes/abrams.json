@@ -34,6 +34,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -56,12 +57,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": null,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": null,
-          "headshot_damage": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "aerial": -1,
@@ -92,6 +93,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.25,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -114,12 +116,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": -0.5,
           "spirit_resistance": -0.25,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": -0.75,
-          "headshot_damage": -0.25
+          "vertical_mobility": -0.75
         },
         "self_score": {
           "aerial": -0.5,
@@ -150,6 +152,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": 1,
+          "headshot_damage": null,
           "high_max_hp": 0.75,
           "horizontal_mobility": 0.5,
           "large_hitbox": 0.5,
@@ -172,12 +175,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.25,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.5,
           "stun": 1.25,
           "team_heal": null,
-          "vertical_mobility": 0.5,
-          "headshot_damage": null
+          "vertical_mobility": 0.5
         },
         "self_weight": {
           "aerial": null,
@@ -208,6 +211,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 1,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.75,
           "large_hitbox": null,
@@ -230,12 +234,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.25,
+          "spirit_proc": 0.1,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.5,
           "stun": 1,
           "team_heal": null,
-          "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "vertical_mobility": 0.25
         }
       }
     },
@@ -273,6 +277,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -295,12 +300,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": null,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": null,
-          "headshot_damage": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "aerial": -1,
@@ -331,6 +336,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.5,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -353,12 +359,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": -0.5,
           "spirit_resistance": -0.25,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": -0.75,
-          "headshot_damage": -0.5
+          "vertical_mobility": -0.75
         },
         "self_score": {
           "aerial": -0.5,
@@ -389,6 +395,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": 1.5,
+          "headshot_damage": null,
           "high_max_hp": 0.75,
           "horizontal_mobility": 0.75,
           "large_hitbox": 0.5,
@@ -411,12 +418,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.15,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.25,
           "stun": 1.25,
           "team_heal": null,
-          "vertical_mobility": 0.5,
-          "headshot_damage": null
+          "vertical_mobility": 0.5
         },
         "self_weight": {
           "aerial": null,
@@ -447,6 +454,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 1,
+          "headshot_damage": null,
           "high_max_hp": 0.5,
           "horizontal_mobility": 0.75,
           "large_hitbox": null,
@@ -469,12 +477,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.15,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.5,
           "stun": 1,
           "team_heal": null,
-          "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "vertical_mobility": 0.25
         }
       }
     },
@@ -512,6 +520,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -534,12 +543,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.25,
           "spirit_resistance": null,
           "stun": null,
           "team_heal": 1,
-          "vertical_mobility": null,
-          "headshot_damage": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "aerial": -1,
@@ -570,6 +579,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.2,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -592,12 +602,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": -0.5,
           "spirit_resistance": -0.75,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": -0.75,
-          "headshot_damage": -0.2
+          "vertical_mobility": -0.75
         },
         "self_score": {
           "aerial": -0.5,
@@ -628,6 +638,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.15,
           "grounded": 1,
+          "headshot_damage": null,
           "high_max_hp": 1.25,
           "horizontal_mobility": 0.5,
           "large_hitbox": 0.5,
@@ -650,12 +661,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.5,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.75,
           "stun": 1.25,
           "team_heal": null,
-          "vertical_mobility": 0.5,
-          "headshot_damage": null
+          "vertical_mobility": 0.5
         },
         "self_weight": {
           "aerial": null,
@@ -686,6 +697,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 1,
+          "headshot_damage": null,
           "high_max_hp": 0.75,
           "horizontal_mobility": 0.75,
           "large_hitbox": null,
@@ -708,12 +720,12 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.5,
+          "spirit_proc": 0.2,
           "spirit_resist_shred": null,
           "spirit_resistance": 0.75,
           "stun": 1,
           "team_heal": null,
-          "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "vertical_mobility": 0.25
         }
       }
     }

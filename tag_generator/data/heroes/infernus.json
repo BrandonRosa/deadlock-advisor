@@ -61,7 +61,8 @@
           "spirit_resistance": null,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.15,
@@ -119,7 +120,8 @@
           "spirit_resistance": -0.55,
           "stun": -0.45,
           "team_heal": null,
-          "vertical_mobility": -0.15
+          "vertical_mobility": -0.15,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": null,
@@ -147,7 +149,7 @@
           "dot": 1.15,
           "duration_dependant": 0.45,
           "farmer": 0.25,
-          "fire_rate": 0.75,
+          "fire_rate": 0.85,
           "fire_rate_slow": null,
           "grounded": 0.33,
           "headshot_damage": 0.75,
@@ -160,7 +162,7 @@
           "melee_damage": 0.05,
           "melee_resistance": null,
           "mid_range": 0.75,
-          "movement_slow": 0.55,
+          "movement_slow": 0.25,
           "pure_damage": null,
           "range_extender_dependant": 0.15,
           "scaling_early": null,
@@ -177,7 +179,8 @@
           "spirit_resistance": 0.33,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": 0.15
+          "vertical_mobility": 0.15,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": -0.05,
@@ -190,8 +193,8 @@
           "bullet_proc": 1.25,
           "bullet_resist_shred": null,
           "bullet_resistance": 0.15,
-          "burst_damage": 0.25,
-          "burst_resistance": 0.25,
+          "burst_damage": 0.15,
+          "burst_resistance": 0.15,
           "cc_resist": 0.15,
           "charge_dependant": 0.15,
           "close_range": 0.15,
@@ -205,12 +208,12 @@
           "dot": 0.85,
           "duration_dependant": 0.45,
           "farmer": 0.15,
-          "fire_rate": 0.75,
+          "fire_rate": 0.85,
           "fire_rate_slow": null,
           "grounded": 0.05,
           "headshot_damage": 0.66,
           "high_max_hp": 0.15,
-          "horizontal_mobility": 0.25,
+          "horizontal_mobility": 0.33,
           "large_hitbox": null,
           "long_range": -0.05,
           "low_max_hp": null,
@@ -218,7 +221,7 @@
           "melee_damage": -0.25,
           "melee_resistance": null,
           "mid_range": 0.5,
-          "movement_slow": 0.25,
+          "movement_slow": 0.15,
           "pure_damage": 0.05,
           "range_extender_dependant": 0.15,
           "scaling_early": null,
@@ -235,7 +238,8 @@
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 0.1
+          "vertical_mobility": 0.1,
+          "spirit_proc": 0.1
         }
       }
     },
@@ -300,7 +304,8 @@
           "spirit_resistance": null,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.15,
@@ -328,11 +333,11 @@
           "dot": null,
           "duration_dependant": null,
           "farmer": null,
-          "fire_rate": null,
+          "fire_rate": -0.25,
           "fire_rate_slow": -1.15,
           "grounded": 0.55,
           "headshot_damage": null,
-          "high_max_hp": 0.05,
+          "high_max_hp": -0.15,
           "horizontal_mobility": -0.1,
           "large_hitbox": 0.75,
           "long_range": -0.15,
@@ -355,10 +360,11 @@
           "spawn_minions": -0.1,
           "spirit_damage": 1,
           "spirit_resist_shred": -0.1,
-          "spirit_resistance": -0.55,
+          "spirit_resistance": -0.75,
           "stun": -0.45,
           "team_heal": null,
-          "vertical_mobility": -0.15
+          "vertical_mobility": -0.15,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": null,
@@ -366,7 +372,7 @@
           "anti_heal": 0.15,
           "aoe_cluster": 0.33,
           "away_from_team": null,
-          "bullet_damage": 0.66,
+          "bullet_damage": 0.5,
           "bullet_evasion": null,
           "bullet_proc": 1.5,
           "bullet_resist_shred": 0.15,
@@ -386,15 +392,15 @@
           "dot": 1.25,
           "duration_dependant": 0.75,
           "farmer": 0.15,
-          "fire_rate": 0.75,
+          "fire_rate": 1,
           "fire_rate_slow": null,
           "grounded": 0.25,
-          "headshot_damage": 0.75,
+          "headshot_damage": 0.5,
           "high_max_hp": 0.05,
           "horizontal_mobility": 0.45,
           "large_hitbox": -0.1,
           "long_range": -0.05,
-          "low_max_hp": null,
+          "low_max_hp": 0.05,
           "magazine_size_dependant": 1,
           "melee_damage": 0.05,
           "melee_resistance": null,
@@ -405,18 +411,19 @@
           "scaling_early": null,
           "scaling_late": 0.15,
           "self_buff": 0.05,
-          "self_heal": 0.33,
+          "self_heal": 0.66,
           "shield": null,
           "silence": null,
           "single_target": 0.75,
           "small_hitbox": 0.15,
           "spawn_minions": null,
           "spirit_damage": 1.25,
-          "spirit_resist_shred": 0.75,
+          "spirit_resist_shred": 0.5,
           "spirit_resistance": 0.33,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -424,7 +431,7 @@
           "anti_heal": 0.15,
           "aoe_cluster": 0.25,
           "away_from_team": 0.25,
-          "bullet_damage": 0.66,
+          "bullet_damage": 0.25,
           "bullet_evasion": null,
           "bullet_proc": 1.33,
           "bullet_resist_shred": null,
@@ -433,7 +440,7 @@
           "burst_resistance": 0.15,
           "cc_resist": 0.15,
           "charge_dependant": 0.15,
-          "close_range": 0.15,
+          "close_range": -0.05,
           "close_to_team": null,
           "continuous_damage": 1,
           "continuous_resistance": 0.15,
@@ -444,17 +451,17 @@
           "dot": 1,
           "duration_dependant": 0.75,
           "farmer": 0.15,
-          "fire_rate": 0.75,
+          "fire_rate": 1,
           "fire_rate_slow": null,
           "grounded": 0.05,
-          "headshot_damage": 0.66,
+          "headshot_damage": 0.25,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.45,
           "large_hitbox": null,
           "long_range": -0.05,
-          "low_max_hp": null,
+          "low_max_hp": 0.15,
           "magazine_size_dependant": 0.5,
-          "melee_damage": -0.15,
+          "melee_damage": -0.25,
           "melee_resistance": null,
           "mid_range": 0.5,
           "movement_slow": 0.2,
@@ -463,18 +470,19 @@
           "scaling_early": null,
           "scaling_late": 0.15,
           "self_buff": 0.05,
-          "self_heal": 0.33,
+          "self_heal": 0.5,
           "shield": null,
           "silence": 0.15,
           "single_target": 0.66,
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 1.15,
-          "spirit_resist_shred": 0.75,
+          "spirit_resist_shred": 0.25,
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "spirit_proc": 0.1
         }
       }
     },
@@ -539,7 +547,8 @@
           "spirit_resistance": null,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.05,
@@ -597,7 +606,8 @@
           "spirit_resistance": 0.05,
           "stun": -0.45,
           "team_heal": null,
-          "vertical_mobility": -0.15
+          "vertical_mobility": -0.15,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": null,
@@ -655,7 +665,8 @@
           "spirit_resistance": 0.33,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 0.2
+          "vertical_mobility": 0.2,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -713,7 +724,8 @@
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
-          "vertical_mobility": 0.2
+          "vertical_mobility": 0.2,
+          "spirit_proc": 0.1
         }
       }
     },
@@ -778,7 +790,8 @@
           "spirit_resistance": null,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -1.25,
@@ -836,7 +849,8 @@
           "spirit_resistance": -0.75,
           "stun": -1.66,
           "team_heal": -0.15,
-          "vertical_mobility": -0.5
+          "vertical_mobility": -0.5,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": -0.5,
@@ -894,7 +908,8 @@
           "spirit_resistance": 0.33,
           "stun": 0.25,
           "team_heal": null,
-          "vertical_mobility": 0.15
+          "vertical_mobility": 0.15,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": -0.05,
@@ -952,7 +967,8 @@
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 0.1
+          "vertical_mobility": 0.1,
+          "spirit_proc": 0.2
         }
       }
     }

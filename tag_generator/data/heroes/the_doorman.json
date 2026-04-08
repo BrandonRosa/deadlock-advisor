@@ -61,7 +61,8 @@
           "spirit_resistance": null,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.5,
@@ -119,7 +120,8 @@
           "spirit_resistance": -0.5,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": -0.75
+          "vertical_mobility": -0.75,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": null,
@@ -127,7 +129,7 @@
           "anti_heal": 0.1,
           "aoe_cluster": 1.5,
           "away_from_team": null,
-          "bullet_damage": 0.25,
+          "bullet_damage": 0.33,
           "bullet_evasion": null,
           "bullet_proc": null,
           "bullet_resist_shred": null,
@@ -177,7 +179,8 @@
           "spirit_resistance": null,
           "stun": 1.5,
           "team_heal": null,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -185,7 +188,7 @@
           "anti_heal": 0.15,
           "aoe_cluster": 1,
           "away_from_team": null,
-          "bullet_damage": 0.25,
+          "bullet_damage": 0.33,
           "bullet_evasion": null,
           "bullet_proc": null,
           "bullet_resist_shred": null,
@@ -235,7 +238,8 @@
           "spirit_resistance": null,
           "stun": 0.75,
           "team_heal": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "spirit_proc": 0.15
         }
       }
     }

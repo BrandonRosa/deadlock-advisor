@@ -34,6 +34,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -61,7 +62,7 @@
           "stun": null,
           "team_heal": null,
           "vertical_mobility": null,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.15,
@@ -92,6 +93,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.25,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "large_hitbox": 0.75,
@@ -119,7 +121,7 @@
           "stun": -0.5,
           "team_heal": null,
           "vertical_mobility": -0.5,
-          "headshot_damage": -0.25
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": 0.5,
@@ -150,6 +152,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 0.5,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "large_hitbox": 0.75,
@@ -177,7 +180,7 @@
           "stun": 0.75,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -208,6 +211,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.5,
           "large_hitbox": null,
@@ -235,7 +239,7 @@
           "stun": 0.25,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": null
         }
       }
     },
@@ -273,6 +277,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -300,7 +305,7 @@
           "stun": null,
           "team_heal": null,
           "vertical_mobility": null,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.25,
@@ -331,6 +336,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.25,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "large_hitbox": 0.75,
@@ -358,7 +364,7 @@
           "stun": -0.25,
           "team_heal": null,
           "vertical_mobility": -0.5,
-          "headshot_damage": -0.25
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": 0.5,
@@ -389,6 +395,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 0.5,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "large_hitbox": 0.75,
@@ -416,7 +423,7 @@
           "stun": 0.75,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -447,6 +454,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.75,
           "large_hitbox": null,
@@ -474,7 +482,7 @@
           "stun": 0.25,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": 0.15
         }
       }
     },
@@ -512,6 +520,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "large_hitbox": null,
@@ -539,7 +548,7 @@
           "stun": null,
           "team_heal": null,
           "vertical_mobility": null,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": -0.15,
@@ -570,6 +579,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.5,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "large_hitbox": 0.75,
@@ -597,7 +607,7 @@
           "stun": -1.25,
           "team_heal": null,
           "vertical_mobility": -0.25,
-          "headshot_damage": -0.5
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": 0.5,
@@ -628,6 +638,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": 0.25,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.25,
           "large_hitbox": 0.75,
@@ -655,7 +666,7 @@
           "stun": 0.25,
           "team_heal": null,
           "vertical_mobility": 0.5,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": 0.25,
@@ -686,6 +697,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.25,
           "large_hitbox": null,
@@ -713,7 +725,7 @@
           "stun": 0.25,
           "team_heal": null,
           "vertical_mobility": 0.5,
-          "headshot_damage": null
+          "spirit_proc": 0.2
         }
       }
     },
@@ -751,6 +763,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": null,
           "high_max_hp": null,
           "horizontal_mobility": 0.25,
           "large_hitbox": null,
@@ -778,7 +791,7 @@
           "stun": null,
           "team_heal": null,
           "vertical_mobility": null,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": 1.75,
@@ -809,6 +822,7 @@
           "fire_rate": null,
           "fire_rate_slow": null,
           "grounded": null,
+          "headshot_damage": -0.15,
           "high_max_hp": -0.25,
           "horizontal_mobility": -0.5,
           "large_hitbox": 0.5,
@@ -836,7 +850,7 @@
           "stun": null,
           "team_heal": -0.75,
           "vertical_mobility": 0.5,
-          "headshot_damage": -0.15
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": null,
@@ -867,6 +881,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.25,
           "grounded": 0.5,
+          "headshot_damage": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "large_hitbox": 0.5,
@@ -894,7 +909,7 @@
           "stun": 1.25,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": null,
@@ -925,6 +940,7 @@
           "fire_rate": null,
           "fire_rate_slow": 0.05,
           "grounded": 0.5,
+          "headshot_damage": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.25,
           "large_hitbox": null,
@@ -952,7 +968,7 @@
           "stun": 1.5,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "headshot_damage": null
+          "spirit_proc": null
         }
       }
     }
