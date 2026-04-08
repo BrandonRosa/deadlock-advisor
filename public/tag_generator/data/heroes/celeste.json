@@ -61,7 +61,8 @@
           "spirit_resistance": null,
           "stun": 0.5,
           "team_heal": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "spirit_proc": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -119,7 +120,8 @@
           "spirit_resistance": -1,
           "stun": -1,
           "team_heal": -0.5,
-          "vertical_mobility": -0.15
+          "vertical_mobility": -0.15,
+          "spirit_proc": null
         },
         "self_score": {
           "aerial": 1.5,
@@ -177,7 +179,8 @@
           "spirit_resistance": null,
           "stun": null,
           "team_heal": null,
-          "vertical_mobility": 1
+          "vertical_mobility": 1,
+          "spirit_proc": null
         },
         "self_weight": {
           "aerial": 0.75,
@@ -235,7 +238,8 @@
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
-          "vertical_mobility": 1
+          "vertical_mobility": 1,
+          "spirit_proc": 0.25
         }
       }
     }

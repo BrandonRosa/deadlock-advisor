@@ -85,6 +85,11 @@
     "name": "Debuff Resistance"
   },
   {
+    "code": "spirit_proc",
+    "description": "",
+    "name": "Spirit Proc"
+  },
+  {
     "code": "bullet_proc",
     "description": "",
     "name": "Bullet Proc"

@@ -61,7 +61,8 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "spirit_proc": 0.5
     }
   },
   "wiki_url": "https://deadlock.wiki/Mystic_Regeneration"
