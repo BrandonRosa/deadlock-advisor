@@ -3,6 +3,7 @@
   "image_path": "/resources/items/spirit_rend/spirit_rend.png",
   "name": "Spirit Rend",
   "normalized_name": "spirit_rend",
+  "remarks": "Only get if you can consistently hit headshots with the build. ",
   "tier": 3200,
   "values": {
     "self_score": {
@@ -10,6 +11,7 @@
       "ally_buff": 0.25,
       "anti_heal": null,
       "aoe_cluster": null,
+      "assist_importance": 0.15,
       "away_from_team": null,
       "bullet_damage": 0.15,
       "bullet_evasion": null,
@@ -25,6 +27,7 @@
       "continuous_damage": 0.15,
       "continuous_resistance": null,
       "cooldown_reduction": null,
+      "counter_importance": 0.15,
       "debuff": 0.75,
       "debuff_resistance": null,
       "disarm": null,
@@ -57,6 +60,7 @@
       "small_hitbox": null,
       "spawn_minions": null,
       "spirit_damage": 0.25,
+      "spirit_proc": null,
       "spirit_resist_shred": 1.25,
       "spirit_resistance": null,
       "stun": null,
