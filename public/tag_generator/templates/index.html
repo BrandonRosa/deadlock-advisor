@@ -173,6 +173,10 @@
             <label>Image Path</label>
             <input id="if-image" type="text" />
           </div>
+          <div class="field-row">
+            <label>Remarks</label>
+            <input id="if-remarks" type="text" placeholder="e.g. Only buy if enemy melees a lot" />
+          </div>
         </div>
       </div>
       <div class="table-wrap">
@@ -212,13 +216,13 @@
           <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include 9999 items</label>
           <div class="mult-group">
             <span class="mult-lbl">Build:</span>
-            <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="0.75" step="0.05" min="0" max="2"></label>
-            <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="0.85" step="0.05" min="0" max="2"></label>
+            <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+            <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
           </div>
           <div class="mult-group">
             <span class="mult-lbl">Items:</span>
-            <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="0.75" step="0.05" min="0" max="2"></label>
-            <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="0.85" step="0.05" min="0" max="2"></label>
+            <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+            <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
           </div>
           <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
         </div>

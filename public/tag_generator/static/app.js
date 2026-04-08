@@ -733,7 +733,8 @@ function renderItemEditPage() {
   document.getElementById('if-cat').value   = it.category          || '';
   document.getElementById('if-tier').value  = it.tier              || '';
   document.getElementById('if-wiki').value  = it.wiki_url          || '';
-  document.getElementById('if-image').value = it.image_path        || '';
+  document.getElementById('if-image').value   = it.image_path        || '';
+  document.getElementById('if-remarks').value = it.remarks           || '';
 
   const catBadge = document.getElementById('item-cat-badge');
   catBadge.textContent = it.category;
@@ -745,7 +746,7 @@ function renderItemEditPage() {
 }
 
 // Item field changes
-['if-name','if-cat','if-tier','if-wiki','if-image'].forEach(id => {
+['if-name','if-cat','if-tier','if-wiki','if-image','if-remarks'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const it = S.currentItem;
     if (!it) return;
@@ -754,6 +755,7 @@ function renderItemEditPage() {
     it.tier       = parseInt(document.getElementById('if-tier').value) || 0;
     it.wiki_url   = document.getElementById('if-wiki').value;
     it.image_path = document.getElementById('if-image').value;
+    it.remarks    = document.getElementById('if-remarks').value;
     setImg('item-icon-img', it.image_path);
     document.getElementById('item-cat-badge').textContent = it.category;
     document.getElementById('item-cat-badge').className   = `cat-badge ${it.category}`;
@@ -854,11 +856,22 @@ const MATCH = {
   viewHeroName:   null,
   viewBuildIdx:   null,
   mult: {
-    buildAlly:  0.75,
-    buildEnemy: 0.85,
-    itemAlly:   0.75,
-    itemEnemy:  0.85,
+    buildAlly:  1.5,
+    buildEnemy: 1.5,
+    itemAlly:   1.5,
+    itemEnemy:  1.5,
   },
+};
+
+// ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
+// ally:  Σ(item.self_score × ally.ally_weight).          > norm = synergizes, > super = VERY
+// enemy: -Σ(item.self_score × enemy.enemy_weight) (neg). > norm = effective,  > super = VERY
+//        (only items with a genuine negative raw product show — score <= 0 is hidden)
+// self:  item self score from build weights.             > norm = effective,  > super = VERY
+const EFFECT_THRESH = {
+  ally:  { norm: 1.0, super: 1.5 },
+  enemy: { norm: 1.5, super: 2.5 },
+  self:  { norm: 1.5, super: 2.5 },
 };
 
 // ── Load ──────────────────────────────────────────────────────────────────
@@ -1080,6 +1093,14 @@ function computeResults() {
         });
       });
 
+      // Average by team size
+      const numAllies  = myAllies.length  || 1;
+      const numEnemies = myEnemies.length || 1;
+      allyScore  /= numAllies;
+      enemyScore /= numEnemies;
+      Object.keys(allyBD).forEach(k  => allyBD[k]  /= numAllies);
+      Object.keys(enemyBD).forEach(k => enemyBD[k] /= numEnemies);
+
       const itemPool = MATCH.include9999 ? MATCH.itemData : MATCH.itemData.filter(it => it.tier !== 9999);
       const items = itemPool.map(item => {
         let iAlly = 0, iSelf = 0, iEnemy = 0;
@@ -1095,19 +1116,47 @@ function computeResults() {
             iEnemy += is * tv(srcBuild(en)?.values?.enemy_weight, t) * -1;
           });
         });
+        iAlly  /= numAllies;
+        iEnemy /= numEnemies;
         return {
           key: item.normalized_name, name: item.name,
           category: item.category, tier: item.tier, imagePath: item.image_path,
+          values:   item.values?.self_score || {},
+          remarks:  item.remarks || '',
           total: iAlly * MATCH.mult.itemAlly + iSelf + iEnemy * MATCH.mult.itemEnemy,
           ally: iAlly, self: iSelf, enemy: iEnemy,
         };
       });
 
+      // Items to Assist: item × build.ally_weight (highest = best assist)
+      // Items to Counter: item × build.enemy_weight (lowest = best counter)
+      const assistItems = itemPool.map(item => {
+        let score = 0;
+        S.tags.forEach(tag => {
+          const t = tag.code;
+          if (t === 'assist_importance' || t === 'counter_importance') return;
+          score += tv(item.values?.self_score, t) * tv(build.values?.ally_weight, t);
+        });
+        const aImp = tv(item.values?.self_score, 'assist_importance');
+        return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1) };
+      }).sort((a, b) => b.score - a.score).slice(0, 3);
+
+      const counterItems = itemPool.map(item => {
+        let score = 0;
+        S.tags.forEach(tag => {
+          const t = tag.code;
+          if (t === 'assist_importance' || t === 'counter_importance') return;
+          score += tv(item.values?.self_score, t) * tv(build.values?.enemy_weight, t);
+        });
+        const cImp = tv(item.values?.self_score, 'counter_importance');
+        return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1) };
+      }).sort((a, b) => a.score - b.score).slice(0, 3);
+
       return {
         buildIdx: bi, name: build.name || `Build ${bi + 1}`, isGeneral: bi === 0,
         total: allyScore * MATCH.mult.buildAlly + enemyScore * MATCH.mult.buildEnemy,
         ally: allyScore, enemy: enemyScore,
-        allyBD, enemyBD, items,
+        allyBD, enemyBD, items, assistItems, counterItems,
       };
     });
 
@@ -1131,41 +1180,60 @@ function computeResults() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// TAG AFFINITY HELPERS
+// STRENGTHS / WEAKNESSES HELPERS
 // ════════════════════════════════════════════════════════════════════════════
 
-function computeTagAffinity(selfScoreDicts, enemyNames) {
-  // score[t] = Σ(self_score[t] for all dicts) - Σ(enemy.enemy_weight[t])
-  const entries = S.tags.map(tag => {
-    const t = tag.code;
-    let score = 0;
-    selfScoreDicts.forEach(ss => { score += tv(ss, t); });
-    enemyNames.forEach(en => { score -= tv(srcBuild(en)?.values?.enemy_weight, t); });
-    return { code: t, name: tag.name, score };
-  }).filter(x => x.score !== 0);
+// Per-build: strengths = top self_score tags, weaknesses = lowest enemy_weight tags
+function computeStrengthsWeaknesses(buildData) {
+  const selfScores   = buildData?.values?.self_score   || {};
+  const enemyWeights = buildData?.values?.enemy_weight || {};
 
-  const sorted = [...entries].sort((a, b) => b.score - a.score);
-  return {
-    good: sorted.slice(0, 3),
-    bad:  sorted.length > 0 ? sorted.slice(-3).reverse() : [],
-  };
+  const strengths = S.tags
+    .map(t => ({ code: t.code, name: t.name, val: tv(selfScores, t.code) }))
+    .filter(x => x.val > 0)
+    .sort((a, b) => b.val - a.val)
+    .slice(0, 3);
+
+  const weaknesses = S.tags
+    .map(t => ({ code: t.code, name: t.name, val: tv(enemyWeights, t.code) }))
+    .sort((a, b) => a.val - b.val)
+    .filter(x => x.val !== 0)
+    .slice(0, 3);
+
+  return { strengths, weaknesses };
 }
 
-function mkTagAffinityEl(aff, compact = false) {
+// Team: aggregate self_score and enemy_weight across all heroes
+function computeTeamStrengthsWeaknesses(heroNames) {
+  const n = heroNames.length || 1;
+  const strengths = S.tags.map(t => ({
+    code: t.code, name: t.name,
+    val: heroNames.reduce((s, nm) => s + tv(srcBuild(nm)?.values?.self_score,   t.code), 0) / n,
+  })).filter(x => x.val > 0).sort((a, b) => b.val - a.val).slice(0, 3);
+
+  const weaknesses = S.tags.map(t => ({
+    code: t.code, name: t.name,
+    val: heroNames.reduce((s, nm) => s + tv(srcBuild(nm)?.values?.enemy_weight, t.code), 0) / n,
+  })).sort((a, b) => a.val - b.val).filter(x => x.val !== 0).slice(0, 3);
+
+  return { strengths, weaknesses };
+}
+
+function mkStrengthsWeaknessesEl(sw, compact = false) {
   const d = document.createElement('div');
   d.className = 'tag-affinity' + (compact ? ' ta-compact' : '');
-  if (aff.good.length) {
+  if (sw.strengths.length) {
     const row = document.createElement('div');
     row.className = 'ta-row';
-    row.innerHTML = `<span class="ta-lbl ta-good-lbl">Good with:</span>`
-      + aff.good.map(t => `<span class="ta-tag ta-good" title="${fmtScore(t.score)}">${t.name}</span>`).join('');
+    row.innerHTML = `<span class="ta-lbl ta-good-lbl">Strengths:</span>`
+      + sw.strengths.map(t => `<span class="ta-tag ta-good" title="${fmtScore(t.val)}">${t.name}</span>`).join('');
     d.appendChild(row);
   }
-  if (aff.bad.length) {
+  if (sw.weaknesses.length) {
     const row = document.createElement('div');
     row.className = 'ta-row';
-    row.innerHTML = `<span class="ta-lbl ta-bad-lbl">Bad with:</span>`
-      + aff.bad.map(t => `<span class="ta-tag ta-bad" title="${fmtScore(t.score)}">${t.name}</span>`).join('');
+    row.innerHTML = `<span class="ta-lbl ta-bad-lbl">Countered by:</span>`
+      + sw.weaknesses.map(t => `<span class="ta-tag ta-bad" title="${fmtScore(t.val)}">${t.name}</span>`).join('');
     d.appendChild(row);
   }
   return d;
@@ -1184,22 +1252,20 @@ function renderCalcSummary() {
   profileRow.className = 'ta-profile-row';
 
   if (MATCH.allies.length) {
-    const selfDicts = MATCH.allies.map(n => srcBuild(n)?.values?.self_score).filter(Boolean);
-    const teamAff   = computeTagAffinity(selfDicts, MATCH.enemies);
+    const sw    = computeTeamStrengthsWeaknesses(MATCH.allies);
     const panel = document.createElement('div');
     panel.className = 'calc-panel ta-team-panel';
     panel.innerHTML = '<div class="calc-panel-title">Ally Team Tag Profile</div>';
-    panel.appendChild(mkTagAffinityEl(teamAff));
+    panel.appendChild(mkStrengthsWeaknessesEl(sw));
     profileRow.appendChild(panel);
   }
 
   if (MATCH.enemies.length) {
-    const enemyDicts = MATCH.enemies.map(n => srcBuild(n)?.values?.self_score).filter(Boolean);
-    const enemyAff   = computeTagAffinity(enemyDicts, MATCH.allies);
+    const sw    = computeTeamStrengthsWeaknesses(MATCH.enemies);
     const panel = document.createElement('div');
     panel.className = 'calc-panel ta-team-panel';
     panel.innerHTML = '<div class="calc-panel-title">Enemy Team Tag Profile</div>';
-    panel.appendChild(mkTagAffinityEl(enemyAff));
+    panel.appendChild(mkStrengthsWeaknessesEl(sw));
     profileRow.appendChild(panel);
   }
 
@@ -1310,18 +1376,44 @@ function makeSummaryCard(r) {
         </div>`).join('')}
     </div>` : ''}`;
 
-  // Per-hero tag affinity (compact, using top build)
+  // Per-hero strengths / weaknesses (compact, using top build)
   const topBuildData = r.topBuilds[0]
     ? MATCH.heroData[r.name]?.builds[r.topBuilds[0].buildIdx]
     : null;
   if (topBuildData) {
-    const myEnemies = r.isEnemy ? MATCH.allies : MATCH.enemies;
-    const aff = computeTagAffinity([topBuildData.values?.self_score], myEnemies);
-    if (aff.good.length || aff.bad.length) {
-      const taEl = mkTagAffinityEl(aff, true);
-      taEl.classList.add('sc-tags');
-      card.appendChild(taEl);
+    const sw = computeStrengthsWeaknesses(topBuildData);
+    if (sw.strengths.length || sw.weaknesses.length) {
+      const swEl = mkStrengthsWeaknessesEl(sw, true);
+      swEl.classList.add('sc-tags');
+      card.appendChild(swEl);
     }
+  }
+
+  // Items to Assist / Items to Counter (from top build)
+  if (topBuild && (topBuild.assistItems?.length || topBuild.counterItems?.length)) {
+    const acEl = document.createElement('div');
+    acEl.className = 'sc-assist-counter';
+
+    const mkAcCol = (label, cls, items) => {
+      const col = document.createElement('div');
+      col.className = `sc-ac-col ${cls}`;
+      col.innerHTML = `<div class="sc-ac-lbl">${label}</div>`;
+      items.forEach(it => {
+        const img = srcUrl(it.imagePath);
+        const row = document.createElement('div');
+        row.className = 'sc-ac-item';
+        row.innerHTML = `${img ? `<img class="sc-ac-img" src="${img}" alt="">` : ''}
+          <span class="sc-ac-name">${it.name}</span>`;
+        col.appendChild(row);
+      });
+      return col;
+    };
+
+    if (topBuild.assistItems?.length)
+      acEl.appendChild(mkAcCol('Items to Assist', 'sc-ac-assist', topBuild.assistItems));
+    if (topBuild.counterItems?.length)
+      acEl.appendChild(mkAcCol('Items to Counter', 'sc-ac-counter', topBuild.counterItems));
+    card.appendChild(acEl);
   }
 
   // Per-hero best/worst matchups from top build's enemyBD
@@ -1384,7 +1476,6 @@ function openCalcHero(name) {
   hdr.innerHTML = '<span>Build</span><span>Ally</span><span>Enemy</span><span>Total</span>';
   el.appendChild(hdr);
 
-  const myEnemies = r.isEnemy ? MATCH.allies : MATCH.enemies;
   const sortedBuilds = [...r.builds].sort((a, bld) => bld.total - a.total);
   sortedBuilds.forEach(b => {
     const row = document.createElement('div');
@@ -1397,11 +1488,11 @@ function openCalcHero(name) {
 
     const buildData = MATCH.heroData[name]?.builds[b.buildIdx];
     if (buildData) {
-      const aff = computeTagAffinity([buildData.values?.self_score], myEnemies);
-      if (aff.good.length || aff.bad.length) {
-        const taEl = mkTagAffinityEl(aff, true);
-        taEl.classList.add('ch-ta-row');
-        row.appendChild(taEl);
+      const sw = computeStrengthsWeaknesses(buildData);
+      if (sw.strengths.length || sw.weaknesses.length) {
+        const swEl = mkStrengthsWeaknessesEl(sw, true);
+        swEl.classList.add('ch-ta-row');
+        row.appendChild(swEl);
       }
     }
 
@@ -1454,7 +1545,7 @@ function openCalcBuild(heroName, buildIdx) {
   el.appendChild(mkScorePanel(b));
   el.appendChild(mkTagPanel(heroName, buildIdx));
   el.appendChild(mkBreakdownPanel(b));
-  el.appendChild(mkItemsPanel(b));
+  el.appendChild(mkItemsPanel(b, heroName));
   showPage('calc-build');
 }
 
@@ -1477,15 +1568,13 @@ function mkScorePanel(b) {
 }
 
 function mkTagPanel(heroName, buildIdx) {
-  const r         = MATCH.results.find(x => x.name === heroName);
   const buildData = MATCH.heroData[heroName]?.builds[buildIdx];
   const d         = document.createElement('div');
   d.className     = 'calc-panel';
   d.innerHTML     = '<div class="calc-panel-title">Tag Profile</div>';
   if (buildData) {
-    const myEnemies = r?.isEnemy ? MATCH.allies : MATCH.enemies;
-    const aff = computeTagAffinity([buildData.values?.self_score], myEnemies);
-    d.appendChild(mkTagAffinityEl(aff));
+    const sw = computeStrengthsWeaknesses(buildData);
+    d.appendChild(mkStrengthsWeaknessesEl(sw));
   }
   return d;
 }
@@ -1514,7 +1603,7 @@ function mkBreakdownPanel(b) {
   return d;
 }
 
-function mkItemsPanel(b) {
+function mkItemsPanel(b, heroName) {
   const d = document.createElement('div');
   d.className = 'calc-panel';
   d.innerHTML = '<div class="calc-panel-title">Item Recommendations</div>';
@@ -1525,8 +1614,8 @@ function mkItemsPanel(b) {
 
   const UNGROUPED_LIMIT = 30;
   const GROUPED_LIMIT   = 10;
-  const CATS = ['Weapon', 'Vitality', 'Spirit'];
-  // Per-category state: 'summary' | 'expanded' | 'hidden'
+  const NCOLS = 7;  // total column count for colspan
+  const CATS  = ['Weapon', 'Vitality', 'Spirit'];
   const catState = { Weapon: 'summary', Vitality: 'summary', Spirit: 'summary', Other: 'summary' };
   const CAT_CYCLE = { summary: 'expanded', expanded: 'hidden', hidden: 'summary' };
   const CAT_ICON  = { summary: '▾', expanded: '▾', hidden: '▸' };
@@ -1534,13 +1623,20 @@ function mkItemsPanel(b) {
   const sortState = { col: 'total', dir: -1 };
   let groupByType = false;
 
+  // Hero context for effectiveness notes
+  const heroResult  = heroName ? MATCH.results.find(x => x.name === heroName) : null;
+  const effAllies   = heroResult ? (heroResult.isEnemy ? MATCH.enemies.filter(n => n !== heroName) : MATCH.allies.filter(n => n !== heroName)) : [];
+  const effEnemies  = heroResult ? (heroResult.isEnemy ? MATCH.allies : MATCH.enemies) : [];
+  const SKIP_TAGS   = new Set(['assist_importance', 'counter_importance']);
+
   const COLS = [
-    { key: 'name',  label: 'Item',    sortable: true  },
-    { key: 'ally',  label: 'Ally',    sortable: true  },
-    { key: 'self',  label: 'Self',    sortable: true  },
-    { key: 'enemy', label: 'Enemy',   sortable: true  },
-    { key: 'total', label: 'Total',   sortable: true  },
-    { key: 'remark',label: 'Remarks', sortable: false },
+    { key: 'name',          label: 'Item',          sortable: true  },
+    { key: 'remarks',       label: 'Remarks',       sortable: false },
+    { key: 'effectiveness', label: 'Effectiveness', sortable: false },
+    { key: 'ally',          label: 'Ally',          sortable: true  },
+    { key: 'self',          label: 'Self',          sortable: true  },
+    { key: 'enemy',         label: 'Enemy',         sortable: true  },
+    { key: 'total',         label: 'Total',         sortable: true  },
   ];
 
   // Controls
@@ -1560,8 +1656,80 @@ function mkItemsPanel(b) {
     });
   }
 
+  function mkEffIcon(imgSrc, _name, colorCls, isVery, titleText) {
+    const el = document.createElement('span');
+    el.className = `eff-icon ${colorCls}${isVery ? ' eff-very' : ''}`;
+    el.title = titleText;
+    if (imgSrc) {
+      const i = document.createElement('img');
+      i.src = imgSrc; i.alt = '';
+      el.appendChild(i);
+    }
+    if (isVery) {
+      const badge = document.createElement('span');
+      badge.className = 'eff-super-badge';
+      badge.textContent = '!';
+      el.appendChild(badge);
+    }
+    return el;
+  }
+
+  function mkEffCell(it) {
+    const td = document.createElement('td');
+    td.className = 'ci-eff';
+
+    // Self (yellow) — show current hero icon if above threshold
+    if (heroResult && it.self >= EFFECT_THRESH.self.norm) {
+      const hd  = MATCH.heroData[heroName];
+      td.appendChild(mkEffIcon(
+        srcUrl(hd?.image_path || ''),
+        hd?.eng_name || heroName,
+        'eff-self',
+        it.self >= EFFECT_THRESH.self.super,
+        `Self: ${fmtScore(it.self)}`
+      ));
+    }
+
+    // Ally synergy (green)
+    effAllies.forEach(an => {
+      const score = S.tags.reduce((sum, tag) => {
+        if (SKIP_TAGS.has(tag.code)) return sum;
+        return sum + tv(it.values, tag.code) * tv(srcBuild(an)?.values?.ally_weight, tag.code);
+      }, 0);
+      if (score < EFFECT_THRESH.ally.norm) return;
+      const hd = MATCH.heroData[an];
+      td.appendChild(mkEffIcon(
+        srcUrl(hd?.image_path || ''),
+        hd?.eng_name || an,
+        'eff-ally',
+        score >= EFFECT_THRESH.ally.super,
+        `${hd?.eng_name || an}: ${fmtScore(score)}`
+      ));
+    });
+
+    // Enemy counter (red) — negate raw score so positive = effective counter
+    effEnemies.forEach(en => {
+      const raw = S.tags.reduce((sum, tag) => {
+        if (SKIP_TAGS.has(tag.code)) return sum;
+        return sum + tv(it.values, tag.code) * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+      }, 0);
+      const score = -raw;   // mirror iEnemy which uses ×-1 in total calc
+      if (score <= 0 || score < EFFECT_THRESH.enemy.norm) return;
+      const hd = MATCH.heroData[en];
+      td.appendChild(mkEffIcon(
+        srcUrl(hd?.image_path || ''),
+        hd?.eng_name || en,
+        'eff-enemy',
+        score >= EFFECT_THRESH.enemy.super,
+        `vs ${hd?.eng_name || en}: ${fmtScore(score)}`
+      ));
+    });
+
+    return td;
+  }
+
   function mkItemTr(it) {
-    const tr = document.createElement('tr');
+    const tr  = document.createElement('tr');
     const img = srcUrl(it.imagePath);
     tr.innerHTML = `
       <td class="ci-item-cell">
@@ -1569,11 +1737,13 @@ function mkItemsPanel(b) {
         <span class="ci-item-name">${it.name}</span>
         <span class="ci-tier">${it.tier ? it.tier + '★' : ''}</span>
       </td>
+      <td class="ci-remarks-cell">${it.remarks ? `<span class="ci-remarks-txt">${it.remarks}</span>` : ''}</td>`;
+    tr.appendChild(mkEffCell(it));
+    tr.insertAdjacentHTML('beforeend', `
       <td class="ci-num ally-clr">${fmtScore(it.ally)}</td>
       <td class="ci-num">${fmtScore(it.self)}</td>
       <td class="ci-num enemy-clr">${fmtScore(it.enemy)}</td>
-      <td class="ci-num total-clr"><b>${fmtScore(it.total)}</b></td>
-      <td class="ci-remark"></td>`;
+      <td class="ci-num total-clr"><b>${fmtScore(it.total)}</b></td>`);
     return tr;
   }
 
@@ -1582,7 +1752,7 @@ function mkItemsPanel(b) {
     const state = catState[cat];
     const hdr = document.createElement('tr');
     hdr.className = 'ci-cat-sep ci-cat-clickable';
-    hdr.innerHTML = `<td colspan="6" class="ci-cat-sep-cell it-cat-${cls}">
+    hdr.innerHTML = `<td colspan="${NCOLS}" class="ci-cat-sep-cell it-cat-${cls}">
       <span class="ci-cat-icon">${CAT_ICON[state]}</span> ${cat}
       <span class="ci-cat-count">${state === 'summary' ? Math.min(items.length, GROUPED_LIMIT) : items.length} / ${items.length}</span>
       <span class="ci-cat-state-hint">${state === 'hidden' ? '(hidden)' : state === 'expanded' ? '(all)' : ''}</span>
@@ -1595,7 +1765,7 @@ function mkItemsPanel(b) {
     if (state === 'summary' && items.length > GROUPED_LIMIT) {
       const moreRow = document.createElement('tr');
       moreRow.className = 'ci-show-more-row';
-      moreRow.innerHTML = `<td colspan="6"><button class="ci-show-more-btn">Show ${items.length - GROUPED_LIMIT} more…</button></td>`;
+      moreRow.innerHTML = `<td colspan="${NCOLS}"><button class="ci-show-more-btn">Show ${items.length - GROUPED_LIMIT} more…</button></td>`;
       moreRow.querySelector('button').addEventListener('click', e => {
         e.stopPropagation(); catState[cat] = 'expanded'; buildTable();
       });
@@ -1639,7 +1809,7 @@ function mkItemsPanel(b) {
       if (visible.length) visible.forEach(it => tbody.appendChild(mkItemTr(it)));
       else {
         const er = document.createElement('tr');
-        er.innerHTML = `<td colspan="6" class="empty-msg">No items scored.</td>`;
+        er.innerHTML = `<td colspan="${NCOLS}" class="empty-msg">No items scored.</td>`;
         tbody.appendChild(er);
       }
     }

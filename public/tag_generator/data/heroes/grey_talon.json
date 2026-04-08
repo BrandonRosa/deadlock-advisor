@@ -57,12 +57,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.15,
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": null,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -116,12 +118,14 @@
           "small_hitbox": -0.3,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": -0.5,
           "stun": -1.15,
           "team_heal": -0.25,
           "vertical_mobility": -0.15,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": null
         },
         "self_score": {
           "aerial": 0.75,
@@ -175,12 +179,14 @@
           "small_hitbox": 0.25,
           "spawn_minions": null,
           "spirit_damage": 0.66,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.15,
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "spirit_proc": null
+          "assist_importance": 0.05,
+          "counter_importance": 0.2
         },
         "self_weight": {
           "aerial": 0.5,
@@ -234,12 +240,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 1,
+          "spirit_proc": 0.1,
           "spirit_resist_shred": 0.05,
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
           "vertical_mobility": 0.1,
-          "spirit_proc": 0.1
+          "assist_importance": 0.05,
+          "counter_importance": 0.2
         }
       }
     },
@@ -300,12 +308,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.75,
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": null,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -359,12 +369,14 @@
           "small_hitbox": -0.3,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": -1.75,
           "stun": -1.15,
           "team_heal": -0.25,
           "vertical_mobility": -0.15,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": -1
         },
         "self_score": {
           "aerial": 0.75,
@@ -418,12 +430,14 @@
           "small_hitbox": 0.25,
           "spawn_minions": null,
           "spirit_damage": 1.66,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.15,
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "spirit_proc": null
+          "assist_importance": 0.05,
+          "counter_importance": 0.2
         },
         "self_weight": {
           "aerial": 0.5,
@@ -477,12 +491,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 1.45,
+          "spirit_proc": 0.15,
           "spirit_resist_shred": 0.25,
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
           "vertical_mobility": 0.1,
-          "spirit_proc": 0.15
+          "assist_importance": 0.05,
+          "counter_importance": 0.2
         }
       }
     },
@@ -543,12 +559,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.15,
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": null,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -602,12 +620,14 @@
           "small_hitbox": -0.3,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": -0.15,
           "stun": -1.15,
           "team_heal": -0.25,
           "vertical_mobility": -0.15,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": -0.5
         },
         "self_score": {
           "aerial": 0.75,
@@ -661,12 +681,14 @@
           "small_hitbox": 0.25,
           "spawn_minions": null,
           "spirit_damage": 0.45,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.05,
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "spirit_proc": null
+          "assist_importance": 0.05,
+          "counter_importance": 0.15
         },
         "self_weight": {
           "aerial": 0.5,
@@ -720,12 +742,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.25,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.05,
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
           "vertical_mobility": 0.1,
-          "spirit_proc": null
+          "assist_importance": 0.05,
+          "counter_importance": 0.15
         }
       }
     },
@@ -786,12 +810,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.35,
           "spirit_resistance": null,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": null,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": null
         },
         "enemy_weight": {
           "aerial": null,
@@ -845,12 +871,14 @@
           "small_hitbox": -0.3,
           "spawn_minions": null,
           "spirit_damage": null,
+          "spirit_proc": null,
           "spirit_resist_shred": null,
           "spirit_resistance": -0.4,
           "stun": -1.15,
           "team_heal": -0.25,
           "vertical_mobility": -0.15,
-          "spirit_proc": null
+          "assist_importance": null,
+          "counter_importance": -0.25
         },
         "self_score": {
           "aerial": 0.75,
@@ -904,12 +932,14 @@
           "small_hitbox": 0.25,
           "spawn_minions": null,
           "spirit_damage": 0.95,
+          "spirit_proc": null,
           "spirit_resist_shred": 0.2,
           "spirit_resistance": 0.15,
           "stun": 0.15,
           "team_heal": null,
           "vertical_mobility": 0.25,
-          "spirit_proc": null
+          "assist_importance": 0.05,
+          "counter_importance": 0.05
         },
         "self_weight": {
           "aerial": 0.5,
@@ -963,12 +993,14 @@
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_damage": 0.85,
+          "spirit_proc": 0.1,
           "spirit_resist_shred": 0.2,
           "spirit_resistance": 0.15,
           "stun": 0.05,
           "team_heal": null,
           "vertical_mobility": 0.1,
-          "spirit_proc": 0.1
+          "assist_importance": 0.05,
+          "counter_importance": 0.05
         }
       }
     }

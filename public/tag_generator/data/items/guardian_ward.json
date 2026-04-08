@@ -61,7 +61,10 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "spirit_proc": null,
+      "assist_importance": 0.25,
+      "counter_importance": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Guardian_Ward"

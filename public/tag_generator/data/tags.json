@@ -283,5 +283,60 @@
     "code": "spawn_minions",
     "description": "",
     "name": "Spawns Minions"
+  },
+  {
+    "code": "assist_importance",
+    "name": "Assist Importance",
+    "description": ""
+  },
+  {
+    "code": "counter_importance",
+    "name": "Counter Importance",
+    "description": ""
+  },
+  {
+    "code": "ult_focused",
+    "name": "Ult Focused",
+    "description": ""
+  },
+  {
+    "code": "spirit_burst_damage",
+    "name": "Spirit Burst Damage",
+    "description": ""
+  },
+  {
+    "code": "spirit_burst_resistance",
+    "name": "Spirit Burst Resistance",
+    "description": ""
+  },
+  {
+    "code": "spirit_continuous_damage",
+    "name": "Spirit Continuous Damage",
+    "description": ""
+  },
+  {
+    "code": "spirit_continuous_resistance",
+    "name": "Spirit Continuous Resistance",
+    "description": ""
+  },
+  {
+    "code": "gun_burst_damage",
+    "name": "Gun Burst Damage",
+    "description": ""
+  },
+  {
+    "code": "gun_burst_resistance",
+    "name": "Gun Burst Resistance",
+    "description": ""
+  },
+  {
+    "code": "gun_continuous_damage",
+    "name": "Gun Continuous Damage",
+    "description": ""
+  },
+  {
+    "code": "gun_continuous_resistance",
+    "name": "Gun Continuous Resistance",
+    "description": ""
   }
 ]
