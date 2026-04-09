@@ -338,5 +338,40 @@
     "code": "gun_continuous_resistance",
     "name": "Gun Continuous Resistance",
     "description": ""
+  },
+  {
+    "code": "damage_sponge",
+    "name": "Damage Sponginess",
+    "description": ""
+  },
+  {
+    "code": "anti_air",
+    "name": "Anti Air",
+    "description": ""
+  },
+  {
+    "code": "trap_block_obstruct",
+    "name": "Trap/Block/Obstruct",
+    "description": ""
+  },
+  {
+    "code": "displace",
+    "name": "Displace",
+    "description": ""
+  },
+  {
+    "code": "hybrid_damage_usage",
+    "name": "Hybrid/Mixed Damage",
+    "description": ""
+  },
+  {
+    "code": "single_ability_focus",
+    "name": "Single Ability Focus",
+    "description": ""
+  },
+  {
+    "code": "multi_ability_focus",
+    "name": "Multi Ability Focus",
+    "description": ""
   }
 ]
