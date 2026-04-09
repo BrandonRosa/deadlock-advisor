@@ -26,7 +26,7 @@
       "continuous_resistance": null,
       "cooldown_reduction": null,
       "debuff": null,
-      "debuff_resistance": 0.5,
+      "debuff_resistance": 0.33,
       "disarm": null,
       "dot": null,
       "duration_dependant": null,
@@ -61,7 +61,19 @@
       "spirit_resistance": 0.15,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "spirit_proc": null,
+      "assist_importance": null,
+      "counter_importance": null,
+      "ult_focused": null,
+      "spirit_burst_damage": null,
+      "spirit_burst_resistance": null,
+      "spirit_continuous_damage": null,
+      "spirit_continuous_resistance": null,
+      "gun_burst_damage": null,
+      "gun_burst_resistance": null,
+      "gun_continuous_damage": null,
+      "gun_continuous_resistance": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Blood_Tribute"

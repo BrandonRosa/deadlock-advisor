@@ -28,7 +28,7 @@
       "cooldown_reduction": 0.05,
       "counter_importance": 0.25,
       "debuff": null,
-      "debuff_resistance": 0.15,
+      "debuff_resistance": 0.33,
       "disarm": null,
       "dot": null,
       "duration_dependant": null,
@@ -64,7 +64,16 @@
       "spirit_resistance": 0.15,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "ult_focused": null,
+      "spirit_burst_damage": null,
+      "spirit_burst_resistance": 0.1,
+      "spirit_continuous_damage": 0.1,
+      "spirit_continuous_resistance": null,
+      "gun_burst_damage": null,
+      "gun_burst_resistance": null,
+      "gun_continuous_damage": null,
+      "gun_continuous_resistance": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Dispel_Magic"
