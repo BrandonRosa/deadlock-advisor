@@ -39,7 +39,7 @@
       "gun_burst_damage": null,
       "gun_burst_resistance": 0.33,
       "gun_continuous_damage": null,
-      "gun_continuous_resistance": 25,
+      "gun_continuous_resistance": 0.25,
       "headshot_damage": null,
       "high_max_hp": null,
       "horizontal_mobility": 0.2,
@@ -73,7 +73,14 @@
       "stun": null,
       "team_heal": null,
       "ult_focused": 0.05,
-      "vertical_mobility": 0.3
+      "vertical_mobility": 0.3,
+      "damage_sponge": null,
+      "anti_air": null,
+      "trap_block_obstruct": null,
+      "displace": null,
+      "hybrid_damage_usage": null,
+      "single_ability_focus": null,
+      "multi_ability_focus": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Warp_Stone"
