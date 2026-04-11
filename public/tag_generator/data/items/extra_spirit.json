@@ -46,6 +46,7 @@
       "headshot_damage": null,
       "high_max_hp": null,
       "horizontal_mobility": null,
+      "hybrid_damage_usage": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -54,6 +55,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
+      "multi_ability_focus": 0.25,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -62,6 +64,7 @@
       "self_heal": null,
       "shield": null,
       "silence": null,
+      "single_ability_focus": 0.15,
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
@@ -77,11 +80,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": 0.1,
-      "vertical_mobility": null,
-      "hybrid_damage_usage": null,
-      "single_ability_focus": 0.15,
-      "multi_ability_focus": 0.25
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Extra_Spirit"
+  "wiki_url": "https://deadlock.wiki/Extra_Spirit",
+  "upgrades_from": [],
+  "remarks": ""
 }
