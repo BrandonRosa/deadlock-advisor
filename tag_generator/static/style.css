@@ -544,7 +544,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 
 /* ── Hero Detail ────────────────────────────────────────────── */
 .ch-header-row {
-  display: grid; grid-template-columns: 1fr repeat(3, 90px);
+  display: grid; grid-template-columns: 1fr repeat(2, 90px) 120px;
   padding: 8px 14px; font-size: 11px; font-weight: 700;
   letter-spacing: .5px; text-transform: uppercase; color: var(--muted);
   background: var(--panel); border-radius: 8px 8px 0 0;
@@ -552,7 +552,7 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 }
 .ch-header-row span:not(:first-child) { text-align: right; }
 .ch-build-row {
-  display: grid; grid-template-columns: 1fr repeat(3, 90px);
+  display: grid; grid-template-columns: 1fr repeat(2, 90px) 120px;
   padding: 11px 14px; border: 1px solid var(--border); border-top: none;
   cursor: pointer; transition: background .12s; font-size: 13px;
 }
@@ -875,3 +875,133 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 }
 .sc-ac-img  { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
 .sc-ac-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── % diff badges on hero detail build rows ────────────────── */
+.ch-total-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.ch-pct {
+  font-size: 16px; font-weight: 800; letter-spacing: -.5px; min-width: 48px; text-align: right;
+}
+.pct-pos { color: #2ecc71; }
+.pct-neg { color: #e74c3c; }
+.ch-score-dim { font-size: 11px; color: var(--muted); }
+
+/* ── % diff on summary card builds ─────────────────────────── */
+.sc-build-row { display: flex; align-items: center; gap: 6px; }
+.sc-bname     { flex: 1; }
+.sc-build-pct { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.sc-build-pct.pct-pos { color: #2ecc71; }
+.sc-build-pct.pct-neg { color: #e74c3c; }
+
+/* ── Situational items perspective note ─────────────────────── */
+.sit-panel-note {
+  font-size: 10px; color: var(--muted); margin-bottom: 8px; margin-top: -4px;
+  font-style: italic; line-height: 1.5;
+}
+.sit-note-ally  { color: #2ecc71; font-style: normal; font-weight: 600; }
+.sit-note-enemy { color: #e74c3c; font-style: normal; font-weight: 600; }
+
+/* ── Calc empty state ───────────────────────────────────────── */
+.calc-empty { color: var(--muted); font-size: 12px; padding: 6px 0; font-style: italic; }
+
+/* ── Situational items panel (build detail) ─────────────────── */
+.sit-items-row {
+  display: flex; gap: 12px; margin-top: 4px;
+}
+.sit-col { flex: 1; min-width: 0; }
+.sit-col-lbl {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; margin-bottom: 6px; white-space: nowrap;
+}
+.sit-col.sit-assist  .sit-col-lbl { color: #2ecc71; }
+.sit-col.sit-counter .sit-col-lbl { color: #e74c3c; }
+.sit-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 0; border-bottom: 1px solid rgba(42,42,74,.3); font-size: 12px;
+}
+.sit-score {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 11px; font-weight: 600; color: var(--muted);
+}
+
+/* ── Build Path Guide ───────────────────────────────────────── */
+.bp-container { display: flex; flex-direction: column; gap: 0; }
+
+.bp-phase {
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 8px; overflow: hidden;
+}
+.bp-phase-hdr {
+  background: var(--panel); padding: 7px 14px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--accent); border-bottom: 1px solid var(--border);
+}
+.bp-cols {
+  display: grid; grid-template-columns: 1fr 160px 160px;
+  gap: 0;
+}
+.bp-main-col {
+  padding: 8px 12px; border-right: 1px solid var(--border);
+}
+.bp-side-col {
+  padding: 8px 10px;
+}
+.bp-side-col + .bp-side-col { border-left: 1px solid var(--border); }
+.bp-side-lbl {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .4px; margin-bottom: 5px;
+}
+.bp-assist-col  .bp-side-lbl { color: #2ecc71; }
+.bp-counter-col .bp-side-lbl { color: #e74c3c; }
+
+.bp-change {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 0; font-size: 12px;
+}
+.bp-action-badge {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0;
+}
+.bp-buy-badge     { background: rgba(46,204,113,.2);  color: #2ecc71; }
+.bp-sell-badge    { background: rgba(231,76,60,.2);   color: #e74c3c; }
+.bp-upgrade-badge { background: rgba(52,152,219,.2);  color: #3498db; }
+.bp-item-img {
+  width: 22px; height: 22px; object-fit: contain;
+  border-radius: 3px; background: var(--panel); flex-shrink: 0;
+}
+.bp-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bp-cost      { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.bp-upgrade-from {
+  font-size: 10px; color: var(--muted); font-style: italic;
+  padding: 0 0 3px 28px;
+}
+.bp-side-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 0; border-bottom: 1px solid rgba(42,42,74,.2); font-size: 11px;
+}
+.bp-empty { font-size: 11px; color: var(--muted); font-style: italic; }
+.bp-eff-icons { display: inline-flex; gap: 2px; align-items: center; flex-shrink: 0; }
+
+/* ── Build path panel title bar + summary ───────────────────── */
+.bp-title-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.bp-detail-toggle {
+  font-size: 11px; padding: 3px 10px; flex-shrink: 0;
+}
+.bp-summary-row {
+  display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 4px;
+}
+.bp-summary-chip {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; cursor: default;
+}
+.bp-summary-chip img.bp-item-img {
+  width: 32px; height: 32px;   /* larger icon in summary view */
+}
+.bp-summary-name {
+  font-size: 9px; color: var(--muted); text-align: center;
+  max-width: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bp-detail { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }

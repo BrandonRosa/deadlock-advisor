@@ -717,6 +717,7 @@ async function openItemEdit(name) {
   // Ensure all tags present
   if (!S.currentItem.values) S.currentItem.values = {};
   if (!S.currentItem.values.self_score) S.currentItem.values.self_score = {};
+  if (!S.currentItem.upgrades_from) S.currentItem.upgrades_from = [];
   S.tags.forEach(t => {
     if (!(t.code in S.currentItem.values.self_score)) S.currentItem.values.self_score[t.code] = null;
   });
@@ -734,7 +735,8 @@ function renderItemEditPage() {
   document.getElementById('if-tier').value  = it.tier              || '';
   document.getElementById('if-wiki').value  = it.wiki_url          || '';
   document.getElementById('if-image').value   = it.image_path        || '';
-  document.getElementById('if-remarks').value = it.remarks           || '';
+  document.getElementById('if-remarks').value       = it.remarks           || '';
+  document.getElementById('if-upgrades-from').value = (it.upgrades_from || []).join(', ');
 
   const catBadge = document.getElementById('item-cat-badge');
   catBadge.textContent = it.category;
@@ -746,16 +748,18 @@ function renderItemEditPage() {
 }
 
 // Item field changes
-['if-name','if-cat','if-tier','if-wiki','if-image','if-remarks'].forEach(id => {
+['if-name','if-cat','if-tier','if-wiki','if-image','if-remarks','if-upgrades-from'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const it = S.currentItem;
     if (!it) return;
-    it.name       = document.getElementById('if-name').value;
-    it.category   = document.getElementById('if-cat').value;
-    it.tier       = parseInt(document.getElementById('if-tier').value) || 0;
-    it.wiki_url   = document.getElementById('if-wiki').value;
-    it.image_path = document.getElementById('if-image').value;
-    it.remarks    = document.getElementById('if-remarks').value;
+    it.name          = document.getElementById('if-name').value;
+    it.category      = document.getElementById('if-cat').value;
+    it.tier          = parseInt(document.getElementById('if-tier').value) || 0;
+    it.wiki_url      = document.getElementById('if-wiki').value;
+    it.image_path    = document.getElementById('if-image').value;
+    it.remarks       = document.getElementById('if-remarks').value;
+    it.upgrades_from = document.getElementById('if-upgrades-from').value
+      .split(',').map(s => s.trim()).filter(Boolean);
     setImg('item-icon-img', it.image_path);
     document.getElementById('item-cat-badge').textContent = it.category;
     document.getElementById('item-cat-badge').className   = `cat-badge ${it.category}`;
@@ -861,6 +865,8 @@ const MATCH = {
     itemAlly:   1.5,
     itemEnemy:  1.5,
   },
+  // Set to true to replace eager build-path computation with a per-build "Calculate" button
+  lazyBuildPaths: false,
 };
 
 // ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
@@ -873,6 +879,9 @@ const EFFECT_THRESH = {
   enemy: { norm: 1.5, super: 2.5 },
   self:  { norm: 1.5, super: 2.5 },
 };
+
+// Tags excluded from effectiveness notes and regular item scoring
+const SKIP_TAGS = new Set(['assist_importance', 'counter_importance']);
 
 // ── Load ──────────────────────────────────────────────────────────────────
 async function loadCalc() {
@@ -1101,6 +1110,16 @@ function computeResults() {
       Object.keys(allyBD).forEach(k  => allyBD[k]  /= numAllies);
       Object.keys(enemyBD).forEach(k => enemyBD[k] /= numEnemies);
 
+      // vsBreakdown: how well each enemy counters this build (high = bad for us)
+      // = Σ_t(build.self_score[t] × enemy.enemy_weight[t])
+      const vsBreakdown = {};
+      S.tags.forEach(tag => {
+        const ss = tv(build.values?.self_score, tag.code);
+        myEnemies.forEach(en => {
+          vsBreakdown[en] = (vsBreakdown[en] || 0) + ss * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+        });
+      });
+
       const itemPool = MATCH.include9999 ? MATCH.itemData : MATCH.itemData.filter(it => it.tier !== 9999);
       const items = itemPool.map(item => {
         let iAlly = 0, iSelf = 0, iEnemy = 0;
@@ -1118,13 +1137,15 @@ function computeResults() {
         });
         iAlly  /= numAllies;
         iEnemy /= numEnemies;
+        const tm = tierMult(item.tier);
         return {
           key: item.normalized_name, name: item.name,
           category: item.category, tier: item.tier, imagePath: item.image_path,
           values:   item.values?.self_score || {},
           remarks:  item.remarks || '',
-          total: iAlly * MATCH.mult.itemAlly + iSelf + iEnemy * MATCH.mult.itemEnemy,
-          ally: iAlly, self: iSelf, enemy: iEnemy,
+          upgrades_from: item.upgrades_from || [],
+          total: (iAlly * MATCH.mult.itemAlly + iSelf + iEnemy * MATCH.mult.itemEnemy) * tm,
+          ally: iAlly * tm, self: iSelf * tm, enemy: iEnemy * tm,
         };
       });
 
@@ -1138,8 +1159,9 @@ function computeResults() {
           score += tv(item.values?.self_score, t) * tv(build.values?.ally_weight, t);
         });
         const aImp = tv(item.values?.self_score, 'assist_importance');
-        return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1) };
-      }).sort((a, b) => b.score - a.score).slice(0, 3);
+        return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1), _assist_imp: aImp };
+      }).filter(x => x._assist_imp > 0)
+        .sort((a, b) => b.score - a.score).slice(0, 3);
 
       const counterItems = itemPool.map(item => {
         let score = 0;
@@ -1149,15 +1171,18 @@ function computeResults() {
           score += tv(item.values?.self_score, t) * tv(build.values?.enemy_weight, t);
         });
         const cImp = tv(item.values?.self_score, 'counter_importance');
-        return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1) };
-      }).sort((a, b) => a.score - b.score).slice(0, 3);
+        return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1), _raw_values: item.values?.self_score || {} };
+      }).filter(x => tv(x._raw_values, 'counter_importance') > 0)
+        .sort((a, b) => a.score - b.score).slice(0, 3);
 
-      return {
+      const buildResult = {
         buildIdx: bi, name: build.name || `Build ${bi + 1}`, isGeneral: bi === 0,
         total: allyScore * MATCH.mult.buildAlly + enemyScore * MATCH.mult.buildEnemy,
         ally: allyScore, enemy: enemyScore,
-        allyBD, enemyBD, items, assistItems, counterItems,
+        allyBD, enemyBD, vsBreakdown, items, assistItems, counterItems,
       };
+      buildResult.buildPath = computeBuildPath(buildResult);
+      return buildResult;
     });
 
     const nonGen    = buildResults.filter(b => !b.isGeneral);
@@ -1347,6 +1372,23 @@ function makeSummaryCard(r) {
     ? [...topBuild.items].sort((a, b) => b.total - a.total).slice(0, 3)
     : [];
   const img = srcUrl(r.imagePath);
+  const genBuild = r.builds.find(x => x.isGeneral);
+  const genTotal = genBuild?.total ?? 0;
+
+  function scBuildRow(b) {
+    let pctHtml = '';
+    if (!b.isGeneral && genTotal !== 0) {
+      const pct  = (b.total - genTotal) / Math.abs(genTotal) * 100;
+      const sign = pct >= 0 ? '+' : '';
+      const pcls = pct >= 0 ? 'pct-pos' : 'pct-neg';
+      pctHtml = `<span class="sc-build-pct ${pcls}">${sign}${pct.toFixed(0)}%</span>`;
+    }
+    return `<div class="sc-build-row">
+      <span class="sc-bname">${b.name}</span>
+      ${pctHtml}
+      <span class="sc-bscore">${fmtScore(b.total)}</span>
+    </div>`;
+  }
 
   card.innerHTML = `
     <div class="sc-header">
@@ -1360,11 +1402,7 @@ function makeSummaryCard(r) {
       </div>
     </div>
     <div class="sc-builds">
-      ${r.topBuilds.map(b => `
-        <div class="sc-build-row">
-          <span class="sc-bname">${b.name}</span>
-          <span class="sc-bscore">${fmtScore(b.total)}</span>
-        </div>`).join('')}
+      ${r.topBuilds.map(b => scBuildRow(b)).join('')}
     </div>
     ${topItems.length ? `<div class="sc-items">
       <div class="sc-items-lbl">Top Items (${topBuild.name}):</div>
@@ -1476,15 +1514,26 @@ function openCalcHero(name) {
   hdr.innerHTML = '<span>Build</span><span>Ally</span><span>Enemy</span><span>Total</span>';
   el.appendChild(hdr);
 
+  const genBuild     = r.builds.find(x => x.isGeneral);
+  const genTotal     = genBuild?.total ?? 0;
   const sortedBuilds = [...r.builds].sort((a, bld) => bld.total - a.total);
   sortedBuilds.forEach(b => {
+    let totalHtml;
+    if (!b.isGeneral && genTotal !== 0) {
+      const pct  = (b.total - genTotal) / Math.abs(genTotal) * 100;
+      const sign = pct >= 0 ? '+' : '';
+      const pcls = pct >= 0 ? 'pct-pos' : 'pct-neg';
+      totalHtml = `<span class="ch-pct ${pcls}">${sign}${pct.toFixed(0)}%</span><span class="ch-score-dim total-clr">${fmtScore(b.total)}</span>`;
+    } else {
+      totalHtml = `<span class="ch-score total-clr">${fmtScore(b.total)}</span>`;
+    }
     const row = document.createElement('div');
     row.className = 'ch-build-row' + (b.isGeneral ? ' is-general' : '');
     row.innerHTML = `
       <span class="ch-bname">${b.name}</span>
       <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
       <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
-      <span class="ch-score total-clr">${fmtScore(b.total)}</span>`;
+      <div class="ch-total-wrap">${totalHtml}</div>`;
 
     const buildData = MATCH.heroData[name]?.builds[b.buildIdx];
     if (buildData) {
@@ -1544,6 +1593,9 @@ function openCalcBuild(heroName, buildIdx) {
   el.innerHTML = '';
   el.appendChild(mkScorePanel(b));
   el.appendChild(mkTagPanel(heroName, buildIdx));
+  el.appendChild(mkBestWorstVsPanel(b));
+  el.appendChild(mkAssistCounterBuildPanel(b, heroName, buildIdx));
+  el.appendChild(mkBuildPathPanel(b));
   el.appendChild(mkBreakdownPanel(b));
   el.appendChild(mkItemsPanel(b, heroName));
   showPage('calc-build');
@@ -1627,7 +1679,6 @@ function mkItemsPanel(b, heroName) {
   const heroResult  = heroName ? MATCH.results.find(x => x.name === heroName) : null;
   const effAllies   = heroResult ? (heroResult.isEnemy ? MATCH.enemies.filter(n => n !== heroName) : MATCH.allies.filter(n => n !== heroName)) : [];
   const effEnemies  = heroResult ? (heroResult.isEnemy ? MATCH.allies : MATCH.enemies) : [];
-  const SKIP_TAGS   = new Set(['assist_importance', 'counter_importance']);
 
   const COLS = [
     { key: 'name',          label: 'Item',          sortable: true  },
@@ -1654,24 +1705,6 @@ function mkItemsPanel(b, heroName) {
       if (sortState.col === 'name') return sortState.dir * a.name.localeCompare(x.name);
       return sortState.dir * ((a[sortState.col] ?? 0) - (x[sortState.col] ?? 0));
     });
-  }
-
-  function mkEffIcon(imgSrc, _name, colorCls, isVery, titleText) {
-    const el = document.createElement('span');
-    el.className = `eff-icon ${colorCls}${isVery ? ' eff-very' : ''}`;
-    el.title = titleText;
-    if (imgSrc) {
-      const i = document.createElement('img');
-      i.src = imgSrc; i.alt = '';
-      el.appendChild(i);
-    }
-    if (isVery) {
-      const badge = document.createElement('span');
-      badge.className = 'eff-super-badge';
-      badge.textContent = '!';
-      el.appendChild(badge);
-    }
-    return el;
   }
 
   function mkEffCell(it) {
@@ -1878,6 +1911,575 @@ function computeNotRec(items) {
   return items
     .filter(it => (it.total < 1.0 && it.enemy < 0) || it.self < 0.5)
     .sort((a, b) => a.total - b.total);
+}
+
+// ── Tier score multiplier ─────────────────────────────────────────────────────
+// Higher-tier items receive a slight bonus to account for their greater impact.
+// Edit these values to adjust tier scaling.
+function tierMult(tier) {
+  if (tier <= 800)  return 1.0;
+  if (tier <= 1600) return 1.2;
+  if (tier <= 3200) return 1.4;
+  if (tier <= 6400) return 1.6;
+  return 2.0;
+}
+
+// ── Effectiveness icon helper (module scope) ──────────────────────────────────
+function mkEffIcon(imgSrc, _name, colorCls, isVery, titleText) {
+  const el = document.createElement('span');
+  el.className = `eff-icon ${colorCls}${isVery ? ' eff-very' : ''}`;
+  el.title = titleText;
+  if (imgSrc) {
+    const i = document.createElement('img');
+    i.src = imgSrc; i.alt = '';
+    el.appendChild(i);
+  }
+  if (isVery) {
+    const badge = document.createElement('span');
+    badge.className = 'eff-super-badge';
+    badge.textContent = '!';
+    el.appendChild(badge);
+  }
+  return el;
+}
+
+// Returns a span containing effectiveness icons for a scored item (used in build path / assist panels)
+function mkEffIcons(it, heroName) {
+  const heroResult = heroName ? MATCH.results.find(x => x.name === heroName) : null;
+  const effAllies  = heroResult ? (heroResult.isEnemy ? MATCH.enemies.filter(n => n !== heroName) : MATCH.allies.filter(n => n !== heroName)) : [];
+  const effEnemies = heroResult ? (heroResult.isEnemy ? MATCH.allies : MATCH.enemies) : [];
+  const wrap = document.createElement('span');
+  wrap.className = 'bp-eff-icons';
+
+  if (heroResult && it.self >= EFFECT_THRESH.self.norm) {
+    const hd = MATCH.heroData[heroName];
+    wrap.appendChild(mkEffIcon(srcUrl(hd?.image_path || ''), hd?.eng_name || heroName, 'eff-self',
+      it.self >= EFFECT_THRESH.self.super, `Self: ${fmtScore(it.self)}`));
+  }
+  effAllies.forEach(an => {
+    const score = S.tags.reduce((sum, tag) => {
+      if (SKIP_TAGS.has(tag.code)) return sum;
+      return sum + tv(it.values, tag.code) * tv(srcBuild(an)?.values?.ally_weight, tag.code);
+    }, 0);
+    if (score < EFFECT_THRESH.ally.norm) return;
+    const hd = MATCH.heroData[an];
+    wrap.appendChild(mkEffIcon(srcUrl(hd?.image_path || ''), hd?.eng_name || an, 'eff-ally',
+      score >= EFFECT_THRESH.ally.super, `${hd?.eng_name || an}: ${fmtScore(score)}`));
+  });
+  effEnemies.forEach(en => {
+    const raw = S.tags.reduce((sum, tag) => {
+      if (SKIP_TAGS.has(tag.code)) return sum;
+      return sum + tv(it.values, tag.code) * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+    }, 0);
+    const score = -raw;
+    if (score <= 0 || score < EFFECT_THRESH.enemy.norm) return;
+    const hd = MATCH.heroData[en];
+    wrap.appendChild(mkEffIcon(srcUrl(hd?.image_path || ''), hd?.eng_name || en, 'eff-enemy',
+      score >= EFFECT_THRESH.enemy.super, `vs ${hd?.eng_name || en}: ${fmtScore(score)}`));
+  });
+  return wrap;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// BUILD DETAIL — EXTRA PANELS
+// ════════════════════════════════════════════════════════════════════════════
+
+function mkBestWorstVsPanel(b) {
+  const d = document.createElement('div');
+  d.className = 'calc-panel';
+  d.innerHTML = '<div class="calc-panel-title">Matchups</div>';
+
+  const goodVs = Object.entries(b.enemyBD    || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 3);
+  const badVs  = Object.entries(b.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 3);
+
+  if (!goodVs.length && !badVs.length) {
+    d.innerHTML += '<div class="calc-empty">No enemy matchup data.</div>';
+    return d;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'matchup-grid';
+
+  const mkCol = (label, cls, entries) => {
+    if (!entries.length) return;
+    const col = document.createElement('div');
+    col.className = `matchup-col ${cls}`;
+    col.innerHTML = `<div class="matchup-col-lbl">${label}</div>`;
+    entries.forEach(([name, score]) => {
+      const hd  = MATCH.heroData[name];
+      const img = srcUrl(hd?.image_path || '');
+      const row = document.createElement('div');
+      row.className = 'matchup-row';
+      row.innerHTML = `
+        ${img ? `<img class="matchup-img" src="${img}" alt="">` : '<div class="matchup-img no-img">🦸</div>'}
+        <span class="matchup-name">${hd?.eng_name || name}</span>
+        <span class="matchup-score">${fmtScore(score)}</span>`;
+      col.appendChild(row);
+    });
+    grid.appendChild(col);
+  };
+
+  mkCol('Good vs', 'best-col',  goodVs);
+  mkCol('Bad vs',  'worst-col', badVs);
+  d.appendChild(grid);
+  return d;
+}
+
+// heroName + buildIdx needed to access build.ally_weight / enemy_weight for correct scoring
+function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
+  const d = document.createElement('div');
+  d.className = 'calc-panel';
+  d.innerHTML = `<div class="calc-panel-title">Situational Items</div>
+    <div class="sit-panel-note">
+      <span class="sit-note-ally">Ally Items</span> — items teammates should buy when playing alongside this hero &nbsp;|&nbsp;
+      <span class="sit-note-enemy">Counter Items</span> — items opponents should buy to counter this hero
+    </div>`;
+
+  const buildData = MATCH.heroData[heroName]?.builds[buildIdx];
+  const allyW  = buildData?.values?.ally_weight  || {};
+  const enemyW = buildData?.values?.enemy_weight || {};
+
+  // assistScore: Σ(item.self_score × build.ally_weight) — items allies should buy
+  // counterScore: Σ(item.self_score × build.enemy_weight) — LOWEST = items enemies buy to counter this build
+  const scored = b.items.map(it => {
+    let assistScore = 0, counterScore = 0;
+    S.tags.forEach(tag => {
+      if (SKIP_TAGS.has(tag.code)) return;
+      const is = tv(it.values, tag.code);
+      assistScore  += is * tv(allyW,  tag.code);
+      counterScore += is * tv(enemyW, tag.code);
+    });
+    return { ...it, assistScore, counterScore };
+  });
+
+  const assistItems  = [...scored].sort((a, x) => x.assistScore  - a.assistScore ).slice(0, 15);
+  const counterItems = [...scored].sort((a, x) => a.counterScore - x.counterScore).slice(0, 15); // lowest first
+
+  if (!assistItems.length && !counterItems.length) {
+    d.innerHTML += '<div class="calc-empty">No situational item data.</div>';
+    return d;
+  }
+
+  const row = document.createElement('div');
+  row.className = 'sit-items-row';
+
+  const mkCol = (label, cls, items, scoreKey) => {
+    if (!items.length) return;
+    const col = document.createElement('div');
+    col.className = `sit-col ${cls}`;
+    col.innerHTML = `<div class="sit-col-lbl">${label}</div>`;
+    items.forEach(it => {
+      const img  = srcUrl(it.imagePath);
+      const item = document.createElement('div');
+      item.className = 'sit-item';
+      item.innerHTML = `
+        ${img ? `<img class="sc-ac-img" src="${img}" alt="">` : ''}
+        <span class="sc-ac-name">${it.name}</span>
+        <span class="sit-score">${fmtScore(it[scoreKey])}</span>`;
+      col.appendChild(item);
+    });
+    row.appendChild(col);
+  };
+
+  mkCol('Ally Items',    'sit-assist',  assistItems,  'assistScore');
+  mkCol('Counter Items', 'sit-counter', counterItems, 'counterScore');
+  d.appendChild(row);
+  return d;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// BUILD PATH GUIDE
+// ════════════════════════════════════════════════════════════════════════════
+
+// Phase definitions — addBudget is the ADDITIONAL souls earned entering this phase.
+// maxSells: max sell operations allowed this phase (0 = no selling in Lane/Early).
+const BUILD_PHASES = [
+  { name: 'Lane',       addBudget: 3200,    totalSlots: 9,  minSlots: 3,  maxSells: 0 },
+  { name: 'Early',      addBudget: 6400,    totalSlots: 9,  minSlots: 7,  maxSells: 0 },
+  { name: 'Mid',        addBudget: 12800,   totalSlots: 10, minSlots: 9,  maxSells: 2 },
+  { name: 'Late',       addBudget: 19800,   totalSlots: 12, minSlots: 11, maxSells: 3 },
+  { name: 'Extra Late', addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 5 },
+];
+
+// Per-phase tier preference multipliers — edit to tune which item tiers are preferred per phase.
+//   index 0=T1(800), 1=T2(1600), 2=T3(3200), 3=T4(6400+)
+const PHASE_TIER_MULTS = {
+  //              T1(800)  T2(1600)  T3(3200)  T4(6400+)
+  'Lane':       [ 1.4,     0.8,      0.15,     0.0  ],
+  'Early':      [ 0.85,    0.9,      0.5,      0.05 ],
+  'Mid':        [ 0.5,     0.75,     1.0,      0.6  ],
+  'Late':       [ 0.1,     0.25,     1.0,      1.5  ],
+  'Extra Late': [ 0.0,     0.1,      0.5,      2.0  ],
+};
+
+function getPhaseTierMult(phaseName, tier) {
+  const m = PHASE_TIER_MULTS[phaseName] ?? PHASE_TIER_MULTS['Mid'];
+  if (tier <= 800)  return m[0];
+  if (tier <= 1600) return m[1];
+  if (tier <= 3200) return m[2];
+  return m[3];
+}
+
+// Build-path score: strips the global tier mult, applies phase tier mult, uses 0.75× ally/enemy
+// so self-score drives the path more than team synergy numbers.
+function bpScore(it, phaseName) {
+  const tier    = bpItemMap[it.key]?.tier ?? 800;
+  const gm      = tierMult(tier) || 1;
+  const base    = (it.ally / gm) * 0.75 + (it.self / gm) + (it.enemy / gm) * 0.75;
+  return base * getPhaseTierMult(phaseName, tier);
+}
+
+// Module-level map populated at the start of each computeBuildPath call.
+let bpItemMap = {};
+
+function computeBuildPath(b) {
+  bpItemMap = {};
+  MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+
+  const scoredMap = {};
+  b.items.forEach(it => { scoredMap[it.key] = it; });
+
+  // Reverse map: component key → upgrades that consume it
+  const upgradesTo = {};
+  Object.keys(bpItemMap).forEach(k => {
+    (bpItemMap[k].upgrades_from || []).forEach(comp => {
+      if (!upgradesTo[comp]) upgradesTo[comp] = [];
+      upgradesTo[comp].push(k);
+    });
+  });
+
+  // Item k is pointless to buy if we already own one of its upgrades
+  function isSubsumed(k, owned) {
+    return (upgradesTo[k] || []).some(u => owned.has(u));
+  }
+
+  // Budget to acquire k from current state.
+  // When no prereqs are owned: = item.tier (prereq cost + upgrade cost nets to item.tier).
+  // When some prereqs are owned: = item.tier − (sum of owned prereq tiers).
+  function chainCost(k, owned) {
+    const item = bpItemMap[k];
+    if (!item) return Infinity;
+    const disc = (item.upgrades_from || [])
+      .filter(c => owned.has(c))
+      .reduce((s, c) => s + (bpItemMap[c]?.tier ?? 0), 0);
+    return item.tier - disc;
+  }
+
+  // Emit the full purchase chain for k, mutate owned+changes, return souls spent.
+  function emitChain(k, owned, changes) {
+    const item = bpItemMap[k];
+    if (!item) return 0;
+    let spent = 0;
+    // Buy unowned prerequisites first (Deadlock upgrade chains are depth-1)
+    (item.upgrades_from || []).forEach(c => {
+      if (!owned.has(c) && bpItemMap[c]) {
+        const cCost = bpItemMap[c].tier;
+        owned.add(c);
+        spent += cCost;
+        changes.push({ action: 'buy', key: c, components: [], cost: cCost });
+      }
+    });
+    const comps    = (item.upgrades_from || []).filter(c => owned.has(c));
+    const mainCost = item.tier - comps.reduce((s, c) => s + (bpItemMap[c]?.tier ?? 0), 0);
+    comps.forEach(c => owned.delete(c));
+    owned.add(k);
+    spent += mainCost;
+    changes.push({ action: comps.length ? 'upgrade' : 'buy', key: k, components: comps, cost: mainCost });
+    return spent;
+  }
+
+  // ── Main greedy for one phase ─────────────────────────────────────────────
+  function greedyMain(ownedIn, budget, maxSlots, minSlots, phaseName, maxSells) {
+    const owned       = new Set(ownedIn);
+    let   remaining   = budget;
+    const changes     = [];
+    const soldInPhase = new Set();   // items sold this phase — never re-buy
+    let   sellCount   = 0;
+
+    for (let iter = 0; iter < 100; iter++) {
+      const slots   = owned.size;
+      const filling = slots < minSlots;
+      let bestKey = null, bestVal = -Infinity;
+
+      for (const k of Object.keys(scoredMap)) {
+        const it = scoredMap[k];
+        if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k)) continue;
+        const cost = chainCost(k, owned);
+        if (cost <= 0 || cost > remaining || slots + 1 > maxSlots) continue;
+        const ps = bpScore(it, phaseName);
+        if (ps <= 0) continue;   // item has no value in this phase — skip
+        // Fill mode: phase-score per soul spent (prefers cheap, phase-appropriate items)
+        // Quality mode: absolute phase-score
+        const val = filling ? (ps / cost) : ps;
+        if (val > bestVal) { bestVal = val; bestKey = k; }
+      }
+
+      if (bestKey) {
+        remaining -= emitChain(bestKey, owned, changes);
+        continue;
+      }
+
+      // No affordable buy — try sell-swap ONLY when slots are at the hard cap
+      if (maxSells > 0 && sellCount < maxSells && owned.size >= maxSlots) {
+        let worstKey = null, worstPS = Infinity;
+        owned.forEach(k => {
+          if (soldInPhase.has(k)) return;
+          const ps = scoredMap[k] ? bpScore(scoredMap[k], phaseName) : 0;
+          if (ps < worstPS) { worstPS = ps; worstKey = k; }
+        });
+        if (!worstKey) break;
+
+        const refund     = Math.floor((bpItemMap[worstKey]?.tier ?? 0) / 2);
+        const testOwned  = new Set(owned); testOwned.delete(worstKey);
+        const testBudget = remaining + refund;
+
+        let swapKey = null, swapPS = -Infinity;
+        for (const k of Object.keys(scoredMap)) {
+          const it = scoredMap[k];
+          if (testOwned.has(k) || isSubsumed(k, testOwned) || soldInPhase.has(k)) continue;
+          const cost = chainCost(k, testOwned);
+          if (cost <= 0 || cost > testBudget || testOwned.size + 1 > maxSlots) continue;
+          const ps = bpScore(it, phaseName);
+          if (ps > swapPS) { swapPS = ps; swapKey = k; }
+        }
+
+        // Require 2× phase-score improvement — selling costs 50% of item value, so bar is high
+        if (swapKey && swapPS > worstPS * 2.0) {
+          owned.delete(worstKey);
+          soldInPhase.add(worstKey);
+          remaining += refund;
+          changes.push({ action: 'sell', key: worstKey, refund });
+          sellCount++;
+        } else { break; }
+      } else { break; }
+    }
+    return { changes, owned, remaining };
+  }
+
+  // ── Side columns: Assist / Counter ────────────────────────────────────────
+  // globalUsed persists across ALL phases to prevent duplicates between phases.
+  function greedyAssist(mainOwned, globalUsed, budget, maxSlots, scoreKey) {
+    const importanceTag = scoreKey === 'ally' ? 'assist_importance' : 'counter_importance';
+    const local = new Set();
+    let remaining = budget;
+    const changes = [];
+    for (let iter = 0; iter < 10; iter++) {
+      if (local.size >= maxSlots) break;
+      let bestKey = null, bestScore = -Infinity;
+      for (const k of Object.keys(scoredMap)) {
+        const it = scoredMap[k];
+        if (mainOwned.has(k) || globalUsed.has(k) || local.has(k)) continue;
+        const item = bpItemMap[k];
+        if (!item || item.tier > remaining) continue;
+        // Only consider items with a positive importance tag for this column
+        if (tv(it.values, importanceTag) <= 0) continue;
+        const score = scoreKey === 'ally' ? it.ally * 0.75 : it.enemy * 0.75;
+        if (score > bestScore && score > 0) { bestScore = score; bestKey = k; }
+      }
+      if (!bestKey) break;
+      local.add(bestKey);
+      globalUsed.add(bestKey);
+      remaining -= bpItemMap[bestKey].tier;
+      changes.push({ action: 'buy', key: bestKey, cost: bpItemMap[bestKey].tier });
+    }
+    return { changes };
+  }
+
+  // ── Phase loop ─────────────────────────────────────────────────────────────
+  let owned = new Set();
+  let remainingBudget = 0;
+  const phaseResults      = [];
+  const globalAssistUsed  = new Set();
+  const globalCounterUsed = new Set();
+
+  for (const phase of BUILD_PHASES) {
+    remainingBudget += phase.addBudget;
+    const { changes, owned: newOwned, remaining: newBudget } =
+      greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells);
+    owned           = newOwned;
+    remainingBudget = newBudget;
+
+    const sideBudget = Math.floor(phase.addBudget / 2);
+    const { changes: assistChanges  } = greedyAssist(owned, globalAssistUsed,  sideBudget, 2, 'ally');
+    const { changes: counterChanges } = greedyAssist(owned, globalCounterUsed, sideBudget, 2, 'enemy');
+
+    phaseResults.push({ phase: phase.name, changes, assistChanges, counterChanges });
+  }
+  return phaseResults;
+}
+
+function mkBuildPathPanel(b) {
+  const d = document.createElement('div');
+  d.className = 'calc-panel';
+
+  if (MATCH.lazyBuildPaths) {
+    d.innerHTML = '<div class="calc-panel-title">Build Path Guide</div>';
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary btn-sm';
+    btn.textContent = 'Calculate Build Path';
+    btn.addEventListener('click', () => {
+      btn.disabled = true; btn.textContent = 'Calculating…';
+      const pathData = computeBuildPath(b);
+      d.innerHTML = '';
+      d.appendChild(buildPathPanelContents(pathData, b));
+    });
+    d.appendChild(btn);
+    return d;
+  }
+
+  const pathData = b.buildPath || computeBuildPath(b);
+  d.appendChild(buildPathPanelContents(pathData, b));
+  return d;
+}
+
+// Builds the full panel contents (title bar + summary + detail toggle)
+function buildPathPanelContents(pathData, b) {
+  const wrap = document.createElement('div');
+
+  // ── Summary view (default): end-of-Late inventory ─────────────────────────
+  // Reconstruct the set of items owned after the Late phase
+  const latePhaseIdx = BUILD_PHASES.findIndex(p => p.name === 'Late');
+  const summaryOwned = new Set();
+  for (let i = 0; i <= latePhaseIdx && i < pathData.length; i++) {
+    pathData[i].changes.forEach(c => {
+      if (c.action === 'sell')    summaryOwned.delete(c.key);
+      else if (c.action === 'buy' || c.action === 'upgrade') summaryOwned.add(c.key);
+    });
+  }
+
+  const itemNameMap = {};
+  b.items.forEach(it => { itemNameMap[it.key] = it; });
+
+  // Title bar with toggle
+  let detailOpen = false;
+  const titleBar = document.createElement('div');
+  titleBar.className = 'bp-title-bar';
+  titleBar.innerHTML = `<span class="calc-panel-title" style="margin:0">Build Path Guide</span>
+    <button class="btn-ghost btn-sm bp-detail-toggle">Show Step-by-Step ▾</button>`;
+  wrap.appendChild(titleBar);
+
+  // Summary row of item icons (end of Late)
+  const summaryEl = document.createElement('div');
+  summaryEl.className = 'bp-summary-row';
+  if (summaryOwned.size) {
+    summaryOwned.forEach(k => {
+      const it  = itemNameMap[k];
+      const img = srcUrl(it?.imagePath || '');
+      const chip = document.createElement('span');
+      chip.className = 'bp-summary-chip';
+      chip.title = it?.name || k;
+      chip.innerHTML = img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`;
+      const nameLbl = document.createElement('span');
+      nameLbl.className = 'bp-summary-name';
+      nameLbl.textContent = it?.name || k;
+      chip.appendChild(nameLbl);
+      summaryEl.appendChild(chip);
+    });
+  } else {
+    summaryEl.innerHTML = '<div class="bp-empty">No items scored for build path.</div>';
+  }
+  wrap.appendChild(summaryEl);
+
+  // Detail view (hidden by default)
+  const detailEl = document.createElement('div');
+  detailEl.className = 'bp-detail hidden';
+  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap));
+  wrap.appendChild(detailEl);
+
+  titleBar.querySelector('.bp-detail-toggle').addEventListener('click', () => {
+    detailOpen = !detailOpen;
+    detailEl.classList.toggle('hidden', !detailOpen);
+    titleBar.querySelector('.bp-detail-toggle').textContent =
+      detailOpen ? 'Hide Step-by-Step ▴' : 'Show Step-by-Step ▾';
+  });
+
+  return wrap;
+}
+
+function renderBuildPath(pathData, b, itemNameMap) {
+  if (!itemNameMap) { itemNameMap = {}; b.items.forEach(it => { itemNameMap[it.key] = it; }); }
+  const container = document.createElement('div');
+  container.className = 'bp-container';
+
+  let hasAny = false;
+  pathData.forEach(({ phase, changes, assistChanges, counterChanges }) => {
+    const allEmpty = !changes.length && !assistChanges.length && !counterChanges.length;
+    if (allEmpty) return;
+    hasAny = true;
+
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'bp-phase';
+
+    const phaseHdr = document.createElement('div');
+    phaseHdr.className = 'bp-phase-hdr';
+    phaseHdr.textContent = phase;
+    phaseEl.appendChild(phaseHdr);
+
+    const cols = document.createElement('div');
+    cols.className = 'bp-cols';
+
+    const mainCol = document.createElement('div');
+    mainCol.className = 'bp-main-col';
+
+    if (changes.length) {
+      changes.forEach(c => {
+        const scored  = itemNameMap[c.key] || { name: c.key, imagePath: '' };
+        const img     = srcUrl(scored.imagePath || '');
+        const row     = document.createElement('div');
+        row.className = `bp-change bp-${c.action}`;
+        const badge   = c.action === 'sell' ? '−' : c.action === 'upgrade' ? '↑' : '+';
+        const costTxt = c.action === 'sell' ? `+${c.refund}s` : `-${c.cost}s`;
+        row.innerHTML = `
+          <span class="bp-action-badge bp-${c.action}-badge">${badge}</span>
+          ${img ? `<img class="bp-item-img" src="${img}" alt="">` : ''}
+          <span class="bp-item-name">${scored.name}</span>
+          <span class="bp-cost">${costTxt}</span>`;
+        mainCol.appendChild(row);
+        if (c.action === 'upgrade' && c.components?.length) {
+          const compNames = c.components.map(k => itemNameMap[k]?.name || k).join(', ');
+          const hint = document.createElement('div');
+          hint.className = 'bp-upgrade-from';
+          hint.textContent = `from: ${compNames}`;
+          mainCol.appendChild(hint);
+        }
+      });
+    } else {
+      mainCol.innerHTML = '<div class="bp-empty">— no changes —</div>';
+    }
+    cols.appendChild(mainCol);
+
+    const mkSideCol = (label, cls, sideChanges) => {
+      const col = document.createElement('div');
+      col.className = `bp-side-col ${cls}`;
+      col.innerHTML = `<div class="bp-side-lbl">${label}</div>`;
+      if (sideChanges.length) {
+        sideChanges.forEach(c => {
+          const scored = itemNameMap[c.key] || { name: c.key, imagePath: '' };
+          const img    = srcUrl(scored.imagePath || '');
+          const row    = document.createElement('div');
+          row.className = 'bp-side-item';
+          row.innerHTML = `${img ? `<img class="bp-item-img" src="${img}" alt="">` : ''}
+            <span class="bp-item-name">${scored.name}</span>`;
+          const icons = mkEffIcons(scored, null);
+          if (icons.children.length) row.appendChild(icons);
+          col.appendChild(row);
+        });
+      } else {
+        col.innerHTML += '<div class="bp-empty">—</div>';
+      }
+      return col;
+    };
+
+    cols.appendChild(mkSideCol('Assist',  'bp-assist-col',  assistChanges));
+    cols.appendChild(mkSideCol('Counter', 'bp-counter-col', counterChanges));
+    phaseEl.appendChild(cols);
+    container.appendChild(phaseEl);
+  });
+
+  if (!hasAny) {
+    container.innerHTML = '<div class="calc-empty">Not enough scored items for build path.</div>';
+  }
+  return container;
 }
 
 function mkItemRow(item, hiCol, isNotRec = false) {
