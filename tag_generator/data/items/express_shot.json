@@ -61,8 +61,31 @@
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "spirit_proc": null,
+      "assist_importance": null,
+      "counter_importance": null,
+      "ult_focused": null,
+      "spirit_burst_damage": null,
+      "spirit_burst_resistance": null,
+      "spirit_continuous_damage": null,
+      "spirit_continuous_resistance": null,
+      "gun_burst_damage": null,
+      "gun_burst_resistance": null,
+      "gun_continuous_damage": null,
+      "gun_continuous_resistance": null,
+      "damage_sponge": null,
+      "anti_air": null,
+      "trap_block_obstruct": null,
+      "displace": null,
+      "hybrid_damage_usage": null,
+      "single_ability_focus": null,
+      "multi_ability_focus": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Express_Shot"
+  "wiki_url": "https://deadlock.wiki/Express_Shot",
+  "upgrades_from": [
+    "high_velocity_rounds"
+  ],
+  "remarks": ""
 }
