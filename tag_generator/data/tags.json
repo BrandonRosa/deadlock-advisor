@@ -378,5 +378,30 @@
     "code": "interrupt",
     "name": "Interrupt",
     "description": ""
+  },
+  {
+    "code": "spirit_burst_proc",
+    "name": "Spirit Burst Proc",
+    "description": ""
+  },
+  {
+    "code": "spirit_continuous_proc",
+    "name": "Spirit Continuous Proc",
+    "description": ""
+  },
+  {
+    "code": "gun_burst_proc",
+    "name": "Gun Burst Proc",
+    "description": ""
+  },
+  {
+    "code": "gun_continuous_proc",
+    "name": "Gun Continuous Proc",
+    "description": ""
+  },
+  {
+    "code": "ability_spam",
+    "name": "Ability Spam",
+    "description": ""
   }
 ]

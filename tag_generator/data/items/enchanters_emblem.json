@@ -24,7 +24,7 @@
       "close_to_team": null,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.1,
+      "cooldown_reduction": 0.15,
       "debuff": null,
       "debuff_resistance": null,
       "disarm": null,
@@ -61,8 +61,29 @@
       "spirit_resistance": 0.66,
       "stun": null,
       "team_heal": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "spirit_proc": null,
+      "assist_importance": null,
+      "counter_importance": 0.15,
+      "ult_focused": null,
+      "spirit_burst_damage": 0.15,
+      "spirit_burst_resistance": 0.6,
+      "spirit_continuous_damage": 0.15,
+      "spirit_continuous_resistance": 0.66,
+      "gun_burst_damage": null,
+      "gun_burst_resistance": null,
+      "gun_continuous_damage": null,
+      "gun_continuous_resistance": null,
+      "damage_sponge": null,
+      "anti_air": null,
+      "trap_block_obstruct": null,
+      "displace": null,
+      "hybrid_damage_usage": null,
+      "single_ability_focus": null,
+      "multi_ability_focus": null,
+      "interrupt": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Enchanter%27s_Emblem"
+  "wiki_url": "https://deadlock.wiki/Enchanter%27s_Emblem",
+  "upgrades_from": []
 }
