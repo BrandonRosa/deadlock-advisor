@@ -403,5 +403,25 @@
     "code": "ability_spam",
     "name": "Ability Spam",
     "description": ""
+  },
+  {
+    "code": "high_assist_count",
+    "name": "High Assist Count",
+    "description": ""
+  },
+  {
+    "code": "high_kill_count",
+    "name": "High Kill Count",
+    "description": ""
+  },
+  {
+    "code": "engage",
+    "name": "Engage",
+    "description": ""
+  },
+  {
+    "code": "escape",
+    "name": "Escape",
+    "description": ""
   }
 ]

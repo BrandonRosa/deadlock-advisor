@@ -3,6 +3,7 @@
   "image_path": "/resources/items/escalating_exposure/escalating_exposure.png",
   "name": "Escalating Exposure",
   "normalized_name": "escalating_exposure",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "mystic_vulnerability"
@@ -39,7 +40,7 @@
       "displace": null,
       "dot": 0.1,
       "duration_dependant": 0.1,
-      "farmer": null,
+      "farmer": 0.2,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -89,9 +90,12 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Escalating_Exposure",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Escalating_Exposure"
 }

@@ -86,7 +86,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -169,7 +171,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": -0.5
+          "vertical_mobility": -0.5,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_score": {
           "ability_spam": null,
@@ -252,7 +256,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 0.15,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -335,7 +341,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 0.15,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         }
       }
     },
@@ -425,7 +433,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -496,7 +506,7 @@
           "spawn_minions": 0.25,
           "spirit_burst_damage": null,
           "spirit_burst_proc": null,
-          "spirit_burst_resistance": null,
+          "spirit_burst_resistance": -2,
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
@@ -508,7 +518,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": -0.5
+          "vertical_mobility": -0.5,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_score": {
           "ability_spam": null,
@@ -577,8 +589,8 @@
           "single_target": 0.75,
           "small_hitbox": -0.75,
           "spawn_minions": null,
-          "spirit_burst_damage": null,
-          "spirit_burst_proc": null,
+          "spirit_burst_damage": 2,
+          "spirit_burst_proc": 1,
           "spirit_burst_resistance": null,
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
@@ -591,7 +603,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 0.05,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -660,8 +674,8 @@
           "single_target": 0.75,
           "small_hitbox": null,
           "spawn_minions": null,
-          "spirit_burst_damage": null,
-          "spirit_burst_proc": null,
+          "spirit_burst_damage": 1.25,
+          "spirit_burst_proc": 1,
           "spirit_burst_resistance": null,
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
@@ -674,7 +688,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         }
       }
     },
@@ -764,7 +780,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -847,7 +865,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": -0.25
+          "vertical_mobility": -0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_score": {
           "ability_spam": null,
@@ -930,7 +950,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 1.25,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -1013,7 +1035,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 1,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "high_assist_count": null,
+          "high_kill_count": null
         }
       }
     },
@@ -1103,7 +1127,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -1186,7 +1212,9 @@
           "team_heal": -0.75,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_score": {
           "ability_spam": null,
@@ -1269,7 +1297,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -1352,7 +1382,9 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": -0.33,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "high_assist_count": null,
+          "high_kill_count": null
         }
       }
     }
