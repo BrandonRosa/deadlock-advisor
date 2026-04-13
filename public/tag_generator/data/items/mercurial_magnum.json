@@ -3,6 +3,7 @@
   "image_path": "/resources/items/mercurial_magnum/mercurial_magnum.png",
   "name": "Mercurial Magnum",
   "normalized_name": "mercurial_magnum",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "quicksilver_reload"
@@ -83,9 +84,16 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": 0.15,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": 0.15,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Mercurial_Magnum",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Mercurial_Magnum"
 }

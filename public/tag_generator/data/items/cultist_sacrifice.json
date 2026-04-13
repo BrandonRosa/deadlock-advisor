@@ -3,7 +3,11 @@
   "image_path": "/resources/items/cultist_sacrifice/cultist_sacrifice.png",
   "name": "Cultist Sacrifice",
   "normalized_name": "cultist_sacrifice",
+  "remarks": "",
   "tier": 3200,
+  "upgrades_from": [
+    "monster_rounds"
+  ],
   "values": {
     "self_score": {
       "aerial": null,
@@ -35,7 +39,7 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "farmer": 1,
+      "farmer": 1.25,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -55,6 +59,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
+      "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": 0.25,
       "scaling_early": 0.05,
@@ -80,12 +85,17 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "multi_ability_focus": null
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Cultist_Sacrifice",
-  "upgrades_from": [
-    "monster_rounds"
-  ],
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Cultist_Sacrifice"
 }
