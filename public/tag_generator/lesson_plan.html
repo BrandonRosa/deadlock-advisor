@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadlock Advisor — Rebuild Lesson Plan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sidebar-w: 260px;
+    --bg: #0d0e18; --surface: #13141f; --card: #1a1b2e;
+    --accent: #7c8cf8; --text: #dde3f0; --muted: #5c6680;
+    --green: #22c55e; --amber: #f59e0b; --purple: #a855f7; --red: #ef4444; --blue: #3b82f6;
+  }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg);
+    color: var(--text); line-height: 1.7; font-size: 15px; }
+  #app { display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  #sidebar { width: var(--sidebar-w); background: #0a0b14; position: fixed;
+    top: 0; left: 0; height: 100vh; overflow-y: auto; border-right: 1px solid #1e2035;
+    scrollbar-width: thin; scrollbar-color: #2a2b40 transparent; }
+  .sb-head { padding: 22px 18px 14px; border-bottom: 1px solid #1e2035; }
+  .sb-head h1 { color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; }
+  .sb-head p  { color: var(--muted); font-size: 11px; margin-top: 3px; }
+  .sb-group { padding: 10px 0; border-bottom: 1px solid #141525; }
+  .sb-gLabel { color: #2e3055; font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 0 18px 5px; display: block; }
+  .sb-link { display: flex; align-items: center; gap-8px; padding: 6px 18px;
+    color: #6b7490; text-decoration: none; font-size: 12.5px; transition: all 0.12s;
+    border-left: 3px solid transparent; }
+  .sb-link:hover { color: #c5cae0; background: #13141f; }
+  .sb-link.active { border-left-color: var(--accent); color: var(--accent); background: #13141f; }
+  .sb-mod { font-weight: 700; color: #444766; font-size: 10px; margin-right: 6px; }
+
+  /* Content */
+  #content { margin-left: var(--sidebar-w); flex: 1; padding: 44px 52px;
+    max-width: calc(var(--sidebar-w) + 860px); }
+
+  /* Module card */
+  .module { background: var(--card); border-radius: 12px; margin-bottom: 36px;
+    border: 1px solid #1e2035; overflow: hidden; }
+  .mod-head { padding: 26px 32px; background: linear-gradient(135deg,#0c0d1a,#1a1d3a); }
+  .mod-num  { display: inline-block; background: var(--accent); color: #fff; font-size: 10px;
+    font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px;
+    border-radius: 20px; margin-bottom: 8px; }
+  .mod-head h2 { color: #fff; font-size: 21px; font-weight: 700; margin-bottom: 3px; }
+  .mod-head p  { color: #7a83a8; font-size: 13px; }
+  .mod-body { padding: 28px 32px; }
+
+  /* Callout boxes */
+  .box { border-radius: 8px; padding: 14px 18px; margin: 18px 0; border-left: 4px solid; }
+  .box-lbl { font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 7px; opacity: 0.75; }
+  .concept { background: #0d1e38; border-color: var(--blue); }
+  .hint    { background: #201a0d; border-color: var(--amber); }
+  .task    { background: #0d2018; border-color: var(--green); }
+  .prebuilt{ background: #1a0d2e; border-color: var(--purple); }
+  .warn    { background: #200d0d; border-color: var(--red); }
+
+  /* Code blocks */
+  pre { background: #080910; color: #cdd6f4; border-radius: 8px; padding: 18px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.65; margin: 14px 0;
+    font-family: 'Consolas','Monaco','Cascadia Code',monospace;
+    border: 1px solid #1a1b30; }
+  code { font-family: 'Consolas','Monaco',monospace; font-size: 12.5px; }
+  p code, li code { background: #181928; color: #9cdcfe; padding: 2px 6px;
+    border-radius: 4px; font-size: 12px; }
+  .kw { color: #569cd6; } .ty { color: #4ec9b0; } .st { color: #ce9178; }
+  .cm { color: #6a9955; } .fn { color: #dcdcaa; }
+
+  /* File reference pill */
+  .file-ref { display: inline-flex; align-items: center; gap: 6px;
+    background: #0d0e1c; border: 1px solid #2a2d50; border-radius: 6px;
+    padding: 4px 12px; font-family: 'Consolas', monospace; font-size: 12px;
+    color: #9cdcfe; margin: 4px 0; text-decoration: none; }
+  .file-ref:hover { border-color: var(--accent); }
+
+  /* Step list */
+  .steps { list-style: none; padding: 0; }
+  .steps li { display: flex; gap: 12px; margin-bottom: 12px; }
+  .sn { display: inline-flex; align-items: center; justify-content: center;
+    background: #6366f1; color: #fff; min-width: 24px; height: 24px;
+    border-radius: 50%; font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 2px; }
+
+  /* Checklist */
+  .checklist { background: #0f1020; border: 1px solid #1e2035; border-radius: 8px;
+    padding: 18px 22px; margin-top: 24px; }
+  .checklist h3 { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; }
+  .checklist label { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 7px;
+    font-size: 13.5px; cursor: pointer; }
+  .checklist input[type=checkbox] { margin-top: 3px; width: 15px; height: 15px;
+    accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  .checklist label:has(input:checked) { color: var(--muted); text-decoration: line-through; }
+
+  /* Typography */
+  h3 { font-size: 16px; font-weight: 700; margin: 22px 0 8px; color: #e0e6f8; }
+  p  { margin-bottom: 12px; }
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  li { margin-bottom: 5px; }
+  a  { color: var(--accent); }
+  strong { font-weight: 600; color: #c8d0e8; }
+  hr { border: none; border-top: 1px solid #1e2035; margin: 22px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th { background: #131428; padding: 8px 12px; text-align: left; font-weight: 600;
+    border: 1px solid #2a2d50; color: #8892b0; }
+  td { padding: 8px 12px; border: 1px solid #2a2d50; vertical-align: top; }
+  .answer-ref { display: inline-block; background: #1a1b2e; border: 1px solid #2a2d50;
+    color: var(--muted); font-size: 12px; padding: 3px 10px; border-radius: 20px; margin-top: 6px; }
+
+  .page-head { margin-bottom: 40px; }
+  .page-head h1 { font-size: 30px; font-weight: 800; color: #fff; }
+  .page-head p  { color: var(--muted); margin-top: 6px; font-size: 15px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-head"><h1>Deadlock Advisor</h1><p>Full Rebuild Walkthrough</p></div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Setup</span>
+    <a class="sb-link" href="#mod0"><span class="sb-mod">0</span>Environment &amp; Project</a>
+    <a class="sb-link" href="#mod1"><span class="sb-mod">1</span>Web Fundamentals</a>
+  </div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Core Languages</span>
+    <a class="sb-link" href="#mod2"><span class="sb-mod">2</span>TypeScript for C# Devs</a>
+    <a class="sb-link" href="#mod3"><span class="sb-mod">3</span>React Fundamentals</a>
+  </div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Project Foundation</span>
+    <a class="sb-link" href="#mod4"><span class="sb-mod">4</span>App Shell &amp; Routing</a>
+    <a class="sb-link" href="#mod5"><span class="sb-mod">5</span>Data Layer &amp; State</a>
+  </div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Editor Features</span>
+    <a class="sb-link" href="#mod6"><span class="sb-mod">6</span>Tag Manager</a>
+    <a class="sb-link" href="#mod7"><span class="sb-mod">7</span>Item Editor</a>
+    <a class="sb-link" href="#mod8"><span class="sb-mod">8</span>Hero Editor</a>
+  </div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Calculator</span>
+    <a class="sb-link" href="#mod9"><span class="sb-mod">9</span>Calculator Engine</a>
+    <a class="sb-link" href="#mod10"><span class="sb-mod">10</span>Calculator UI</a>
+  </div>
+  <div class="sb-group">
+    <span class="sb-gLabel">Finish</span>
+    <a class="sb-link" href="#mod11"><span class="sb-mod">11</span>Settings &amp; Data Mode</a>
+    <a class="sb-link" href="#mod12"><span class="sb-mod">12</span>Deploy to GitHub Pages</a>
+  </div>
+</nav>
+
+<main id="content">
+<div class="page-head">
+  <h1>Deadlock Advisor — Full Rebuild</h1>
+  <p>A skeleton-file walkthrough for C# developers. Fill in the TODOs, guided by this document.</p>
+</div>
+
+<!-- HOW TO USE -->
+<div class="module" id="overview">
+  <div class="mod-head"><h2>How This Works</h2></div>
+  <div class="mod-body">
+    <p>In the <code>skeleton/src/</code> folder inside this same <code>tag_generator/</code> directory, you'll find pre-structured TypeScript and React files. They have all the imports, interfaces, and function signatures written out. The logic has been replaced with <code>// TODO:</code> comments and pseudocode.</p>
+    <p><strong>Your job each module:</strong> copy the skeleton file(s) into the correct location in your new project, then fill in each TODO. This guide explains what each TODO should do and why, including C# analogies where helpful.</p>
+    <p>When you're completely stuck, open <strong>lesson_plan_answers.html</strong> to see the finished version of that file.</p>
+
+    <table>
+      <tr><th>What it means</th><th>What to do</th></tr>
+      <tr><td><code>// TODO: description</code></td><td>Write the code described — this guide explains how</td></tr>
+      <tr><td><code>// HINT: ...</code></td><td>Specific tip — read before writing</td></tr>
+      <tr><td><code>return null as never; // placeholder</code></td><td>Replace with your real implementation</td></tr>
+      <tr><td><code>never</code> in a type position</td><td>Replace with the correct type</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ MODULE 0 ══════════════════════════════ -->
+<section class="module" id="mod0">
+  <div class="mod-head">
+    <div class="mod-num">Module 0</div>
+    <h2>Environment &amp; Project Setup</h2>
+    <p>Node.js · VS Code extensions · GitHub repo · Vite project · first run</p>
+  </div>
+  <div class="mod-body">
+    <p>No skeleton files yet — this is pure setup. Do each step in order.</p>
+
+    <h3>1. Verify Node.js</h3>
+    <pre>node -v    # needs 18 or higher
+npm -v</pre>
+    <p>Download LTS from <strong>nodejs.org</strong> if not installed.</p>
+
+    <h3>2. VS Code Extensions</h3>
+    <p>Install from the Extensions panel (<code>Ctrl+Shift+X</code>):</p>
+    <ul>
+      <li><strong>ESLint</strong> — catches bugs as you type</li>
+      <li><strong>Prettier</strong> — auto-formats on save (also set as Default Formatter in Settings)</li>
+      <li><strong>TypeScript Error Lens</strong> — shows type errors inline instead of on hover</li>
+      <li><strong>Tailwind CSS IntelliSense</strong> — autocomplete for class names</li>
+      <li><strong>Auto Rename Tag</strong> — renames closing tag when you rename opening</li>
+      <li><strong>ES7+ React snippets</strong> — type <code>rfce</code> → scaffolds a component</li>
+    </ul>
+
+    <h3>3. Create GitHub Repo &amp; Clone</h3>
+    <ol class="steps">
+      <li><span class="sn">1</span><span>github.com → <strong>+</strong> → New repository → name: <code>deadlock-advisor</code> → Public → add README + Node .gitignore → Create</span></li>
+      <li><span class="sn">2</span><span>On the repo page click the green <strong>Code</strong> button → copy HTTPS URL</span></li>
+      <li><span class="sn">3</span><span><pre>git clone https://github.com/YOUR_GITHUB_USERNAME/deadlock-advisor.git
+cd deadlock-advisor</pre></span></li>
+    </ol>
+
+    <h3>4. Initialize Vite Project</h3>
+    <pre>npm create vite@latest . -- --template react-ts
+# Say yes to overwrite
+npm install</pre>
+
+    <h3>5. Install All Packages</h3>
+    <pre>npm install zustand react-router-dom @tanstack/react-table
+npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+npm install tailwindcss @tailwindcss/vite</pre>
+    <p>Then init shadcn/ui (answer the prompts: Default style, Slate color, Yes to CSS variables):</p>
+    <pre>npx shadcn@latest init
+npx shadcn@latest add button input label badge dialog select tabs card table slider switch</pre>
+
+    <h3>6. Configure Tailwind</h3>
+    <p>Open <code>src/index.css</code>, delete everything, replace with:</p>
+    <pre>@import "tailwindcss";</pre>
+    <p>Replace <code>vite.config.ts</code> with (from lesson_plan_answers.html → vite.config.ts):</p>
+    <pre><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="st">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="st">'@vitejs/plugin-react'</span>
+<span class="kw">import</span> tailwindcss <span class="kw">from</span> <span class="st">'@tailwindcss/vite'</span>
+
+<span class="kw">export default</span> defineConfig({
+  plugins: [tailwindcss(), react()],
+  base: <span class="st">'/deadlock-advisor/'</span>,
+})</pre>
+
+    <h3>7. Copy Data &amp; Images</h3>
+    <p>From the old project, copy into the new project:</p>
+    <table>
+      <tr><th>From (old project)</th><th>To (new project)</th></tr>
+      <tr><td><code>public/tag_generator/data/heroes/*.json</code></td><td><code>src/data/heroes/</code></td></tr>
+      <tr><td><code>public/tag_generator/data/items/*.json</code></td><td><code>src/data/items/</code></td></tr>
+      <tr><td><code>public/tag_generator/data/tags.json</code></td><td><code>src/data/tags.json</code></td></tr>
+      <tr><td><code>public/resources/</code> (entire folder)</td><td><code>public/resources/</code></td></tr>
+    </table>
+
+    <h3>8. GitHub Actions Deployment</h3>
+    <p>Create <code>.github/workflows/deploy.yml</code>. Copy the content from <strong>lesson_plan_answers.html → deploy.yml</strong>. Then on GitHub: repo Settings → Pages → Source → GitHub Actions.</p>
+
+    <h3>9. First Run</h3>
+    <pre>npm run dev</pre>
+    <p>Open <a href="http://localhost:5173">localhost:5173</a>. You should see the default Vite starter page. Setup complete.</p>
+
+    <div class="checklist">
+      <h3>Module 0 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> node -v shows 18+</label>
+      <label><input type="checkbox" class="progress-check"> All VS Code extensions installed, Prettier set as default formatter</label>
+      <label><input type="checkbox" class="progress-check"> GitHub repo created and cloned</label>
+      <label><input type="checkbox" class="progress-check"> npm create vite ran, npm install complete</label>
+      <label><input type="checkbox" class="progress-check"> All extra packages installed (zustand, dnd-kit, tanstack, tailwind, shadcn)</label>
+      <label><input type="checkbox" class="progress-check"> src/index.css has only @import "tailwindcss"</label>
+      <label><input type="checkbox" class="progress-check"> vite.config.ts updated with tailwindcss plugin and base</label>
+      <label><input type="checkbox" class="progress-check"> Data JSON files copied to src/data/</label>
+      <label><input type="checkbox" class="progress-check"> Images copied to public/resources/</label>
+      <label><input type="checkbox" class="progress-check"> deploy.yml in place, GitHub Pages set to GitHub Actions source</label>
+      <label><input type="checkbox" class="progress-check"> npm run dev shows the Vite starter page</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 1 ══════════════════════════════ -->
+<section class="module" id="mod1">
+  <div class="mod-head">
+    <div class="mod-num">Module 1</div>
+    <h2>Web Fundamentals Crash Course</h2>
+    <p>No coding — just the mental model you need before writing React</p>
+  </div>
+  <div class="mod-body">
+    <div class="concept box">
+      <div class="box-lbl">HTML &amp; the DOM</div>
+      <p>HTML is markup — nested elements forming a tree (like XML or XAML). The browser parses it into the <strong>DOM</strong> — a live tree of objects in memory, like Unity's scene hierarchy. React generates and updates this tree for you — you rarely touch the DOM directly.</p>
+    </div>
+    <div class="concept box">
+      <div class="box-lbl">CSS &amp; Tailwind</div>
+      <p>CSS styles DOM elements. We use <strong>Tailwind CSS</strong>, which means you apply utility class names directly in JSX instead of writing CSS files: <code>className="flex items-center gap-4 bg-slate-800 rounded-lg p-4"</code>. Tailwind IntelliSense will autocomplete these. You'll learn them by doing.</p>
+    </div>
+    <div class="concept box">
+      <div class="box-lbl">JavaScript vs C# — key differences</div>
+      <table>
+        <tr><th>C#</th><th>TypeScript equivalent</th></tr>
+        <tr><td><code>string name = "x";</code></td><td><code>const name = "x";</code></td></tr>
+        <tr><td><code>Dictionary&lt;string, int&gt;</code></td><td><code>Record&lt;string, number&gt;</code></td></tr>
+        <tr><td><code>list.Where(x => x.hp > 0)</code></td><td><code>arr.filter(x => x.hp > 0)</code></td></tr>
+        <tr><td><code>list.Select(x => x.name)</code></td><td><code>arr.map(x => x.name)</code></td></tr>
+        <tr><td><code>list.FirstOrDefault(x => ...)</code></td><td><code>arr.find(x => ...)</code></td></tr>
+        <tr><td><code>list.Aggregate(seed, fn)</code></td><td><code>arr.reduce((acc, x) => fn, seed)</code></td></tr>
+        <tr><td><code>Task&lt;T&gt;</code></td><td><code>Promise&lt;T&gt;</code></td></tr>
+        <tr><td><code>a ?? b</code></td><td><code>a ?? b</code> (identical!)</td></tr>
+        <tr><td><code>obj?.Prop</code></td><td><code>obj?.prop</code> (identical!)</td></tr>
+      </table>
+      <p>Key difference: JavaScript is <strong>single-threaded</strong> with an event loop. No threads. <code>async/await</code> works similarly to C# but resolution happens on the same thread via callbacks.</p>
+    </div>
+    <div class="concept box">
+      <div class="box-lbl">npm, Vite, React</div>
+      <p><strong>npm</strong> = NuGet. <strong>Vite</strong> = build tool (like Unity's build pipeline — compiles TypeScript, bundles files, hot-reloads in dev). <strong>React</strong> = UI library. Instead of manually updating DOM elements (like the old tag generator's vanilla JS), you <em>declare</em> what the UI should look like given current state and React diffs + patches the DOM automatically.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 2 ══════════════════════════════ -->
+<section class="module" id="mod2">
+  <div class="mod-head">
+    <div class="mod-num">Module 2</div>
+    <h2>TypeScript — Define All Data Types</h2>
+    <p>Skeleton file: <code>skeleton/src/types/index.ts</code></p>
+  </div>
+  <div class="mod-body">
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <p>Copy <code>skeleton/src/types/index.ts</code> → your project's <code>src/types/index.ts</code>.<br>
+      Open it alongside <code>src/data/heroes/abrams.json</code> and <code>src/data/items/headshot_booster.json</code>.<br>
+      Fill in every TODO. When done, there should be zero TypeScript errors in this file.</p>
+      <span class="answer-ref">Stuck? See "src/types/index.ts" in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">TypeScript interfaces are structural (not nominal)</div>
+      <p>In C# a class must explicitly <code>implement IHero</code>. In TypeScript, any object that has the right shape <em>automatically</em> satisfies the interface — no <code>implements</code> keyword. This makes JSON data fit interfaces naturally.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Record&lt;K, V&gt; — TypeScript's typed dictionary</div>
+      <pre><span class="cm">// C#:  Dictionary&lt;string, float?&gt;</span>
+<span class="cm">// TS:  Record&lt;string, number | null&gt;</span>
+<span class="kw">type</span> <span class="ty">TagWeights</span> = <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="kw">number</span> | <span class="kw">null</span>&gt;;</pre>
+      <p>The <code>|</code> is a union type — the value is either a number OR null. <code>null</code> in this project means "this tag is not applicable."</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">String literal unions replace enums</div>
+      <pre><span class="cm">// C#:  enum ItemCategory { Weapon, Vitality, Spirit }</span>
+<span class="cm">// TS:  string literal union:</span>
+<span class="kw">type</span> <span class="ty">ItemCategory</span> = <span class="st">'Weapon'</span> | <span class="st">'Vitality'</span> | <span class="st">'Spirit'</span>;</pre>
+      <p>TypeScript will enforce that only one of those three strings is ever assigned to an <code>ItemCategory</code> variable.</p>
+    </div>
+
+    <div class="hint box">
+      <div class="box-lbl">Hint — BuildValues</div>
+      <p>A hero build's <code>values</code> field contains four maps, all of type <code>TagWeights</code>: <code>ally_weight</code>, <code>self_weight</code>, <code>enemy_weight</code>, <code>self_score</code>. Open abrams.json and look at the <code>builds[0].values</code> structure.</p>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 2 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> src/types/index.ts has no TypeScript errors</label>
+      <label><input type="checkbox" class="progress-check"> Tag, TagWeights, BuildValues, HeroBuild, Hero all defined</label>
+      <label><input type="checkbox" class="progress-check"> ItemCategory is a string literal union (not an enum)</label>
+      <label><input type="checkbox" class="progress-check"> Item, AppData, DataMode all defined</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 3 ══════════════════════════════ -->
+<section class="module" id="mod3">
+  <div class="mod-head">
+    <div class="mod-num">Module 3</div>
+    <h2>React Fundamentals</h2>
+    <p>Components · Props · State · Effects — the reactive mental model</p>
+  </div>
+  <div class="mod-body">
+    <p>No skeleton file for this module. Read the concepts and then write a small practice component.</p>
+
+    <div class="concept box">
+      <div class="box-lbl">Components are functions that return JSX</div>
+      <pre><span class="cm">// JSX = HTML-in-JavaScript. The compiler turns it into function calls.</span>
+<span class="kw">function</span> <span class="fn">HeroCard</span>({ hero }: { hero: <span class="ty">Hero</span> }) {
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"bg-slate-800 p-4 rounded"</span>&gt;
+      &lt;h2&gt;{hero.eng_name}&lt;/h2&gt;   <span class="cm">// {} embeds any JS expression</span>
+    &lt;/div&gt;
+  );
+}</pre>
+      <p>In JSX: <code>className</code> instead of <code>class</code>, <code>onClick</code> instead of <code>onclick</code>. Everything else is normal HTML.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">State — the key mental shift</div>
+      <p>To make a variable change update the UI, you must use <code>useState</code>. Assigning to a plain variable does <em>not</em> re-render.</p>
+      <pre><span class="kw">const</span> [search, setSearch] = useState(<span class="st">''</span>);
+<span class="cm">// search = current value (read this)
+// setSearch = setter (call this to change the value + trigger re-render)</span>
+
+<span class="cm">// WRONG — does nothing visually:</span>
+search = <span class="st">'new value'</span>;
+
+<span class="cm">// CORRECT:</span>
+<span class="fn">setSearch</span>(<span class="st">'new value'</span>);</pre>
+      <p>Think of it like a Unity <code>[SerializeField]</code> backed by an <code>OnValueChanged</code> event that automatically re-renders the component when called.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Rendering lists — always use .map() with a key</div>
+      <pre>{heroes.map(hero =&gt; (
+  &lt;<span class="ty">HeroCard</span>
+    key={hero.normalized_name}  <span class="cm">// must be unique — React uses this to track items</span>
+    hero={hero}
+  /&gt;
+))}</pre>
+    </div>
+
+    <div class="task box">
+      <div class="box-lbl">Practice Task — Write TagBadge.tsx</div>
+      <p>Create <code>src/components/TagBadge.tsx</code> from scratch (no skeleton). It should:</p>
+      <ul>
+        <li>Accept props: <code>tag: Tag</code> and optional <code>weight?: number | null</code></li>
+        <li>Display the tag's <code>name</code></li>
+        <li>If weight is not null, show it next to the name with a <code>+</code> prefix for positives</li>
+        <li>Color: green for high weights, red for negative, gray for null</li>
+      </ul>
+      <span class="answer-ref">Stuck? See "src/components/TagBadge.tsx" in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 3 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Understand: state changes → re-render, plain variable changes → nothing</label>
+      <label><input type="checkbox" class="progress-check"> Can write a component that renders a list with .map() and key</label>
+      <label><input type="checkbox" class="progress-check"> TagBadge.tsx created and renders in dev server</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 4 ══════════════════════════════ -->
+<section class="module" id="mod4">
+  <div class="mod-head">
+    <div class="mod-num">Module 4</div>
+    <h2>App Shell &amp; Routing</h2>
+    <p>Skeleton files: <code>skeleton/src/App.tsx</code> · <code>skeleton/src/components/Layout.tsx</code> · <code>skeleton/src/utils/assetPath.ts</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <ol>
+        <li>Copy <code>skeleton/src/utils/assetPath.ts</code> → <code>src/utils/assetPath.ts</code> and fill in the TODOs</li>
+        <li>Copy <code>skeleton/src/components/Layout.tsx</code> → <code>src/components/Layout.tsx</code> and fill in the TODOs</li>
+        <li>Copy <code>skeleton/src/App.tsx</code> → <code>src/App.tsx</code> and fill in the TODOs</li>
+        <li>For each page route, create a stub file that just returns <code>&lt;div&gt;PageName&lt;/div&gt;</code> so routing works before building the real pages</li>
+      </ol>
+      <span class="answer-ref">Stuck? See App.tsx and Layout.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">HashRouter vs BrowserRouter</div>
+      <p>GitHub Pages serves only static files. A URL like <code>/heroes/abrams</code> hard-refreshed returns a 404 because there's no such file. <code>HashRouter</code> puts the path after <code>#</code> — the browser never sends that part to the server, so it always loads <code>index.html</code> and React handles the rest. URLs look like <code>/#/heroes/abrams</code>.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">NavLink's active className — function syntax</div>
+      <pre>&lt;<span class="ty">NavLink</span>
+  to=<span class="st">"/heroes"</span>
+  className={({ isActive }) =&gt;
+    isActive ? <span class="st">'bg-indigo-600 text-white'</span> : <span class="st">'text-slate-400 hover:text-white'</span>
+  }
+&gt;</pre>
+      <p>When the URL matches <code>/heroes</code>, <code>isActive</code> is <code>true</code>. Add <code>end</code> prop to the <code>/</code> Calculator link so it only highlights when exactly on <code>/</code>, not when on <code>/heroes</code>.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Layout Route + Outlet</div>
+      <p>React Router's "layout route" pattern: a parent route renders a shared UI shell (the sidebar), and child routes render inside <code>&lt;Outlet /&gt;</code> — the placeholder that gets replaced with whichever child route matched.</p>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 4 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> assetPath.ts implemented (test: assetPath('/resources/x') returns correct URL)</label>
+      <label><input type="checkbox" class="progress-check"> Layout.tsx renders sidebar with all 5 nav links</label>
+      <label><input type="checkbox" class="progress-check"> Active nav link highlights when on that route</label>
+      <label><input type="checkbox" class="progress-check"> App.tsx uses HashRouter</label>
+      <label><input type="checkbox" class="progress-check"> All routes defined, stub pages render</label>
+      <label><input type="checkbox" class="progress-check"> npm run dev shows sidebar navigation working</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 5 ══════════════════════════════ -->
+<section class="module" id="mod5">
+  <div class="mod-head">
+    <div class="mod-num">Module 5</div>
+    <h2>Data Layer &amp; Global State</h2>
+    <p>Skeleton files: <code>skeleton/src/data/loader.ts</code> · <code>skeleton/src/store/dataStore.ts</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <ol>
+        <li>Copy <code>skeleton/src/data/loader.ts</code> → <code>src/data/loader.ts</code> and fill in all TODOs</li>
+        <li>Copy <code>skeleton/src/store/dataStore.ts</code> → <code>src/store/dataStore.ts</code> and fill in all TODOs</li>
+        <li>In your stub pages, add <code>const data = useDataStore(s =&gt; s.getData())</code> and <code>console.log(data)</code> — verify heroes and items load in the browser console</li>
+      </ol>
+      <span class="answer-ref">Stuck? See loader.ts and dataStore.ts in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">import.meta.glob — Vite's bulk importer</div>
+      <p>This is a Vite-specific feature — the pattern is replaced at build time with code that imports all matching files. Think of it as <code>Resources.LoadAll&lt;HeroData&gt;("Heroes")</code> in Unity. The result is a plain object keyed by file path.</p>
+      <pre><span class="kw">const</span> heroFiles = import.meta.glob&lt;<span class="ty">Hero</span>&gt;(<span class="st">'./heroes/*.json'</span>, { eager: <span class="kw">true</span>, import: <span class="st">'default'</span> });
+<span class="cm">// heroFiles = { './heroes/abrams.json': { eng_name: 'Abrams', ... }, ... }</span>
+
+<span class="kw">for</span> (<span class="kw">const</span> hero <span class="kw">of</span> Object.values(heroFiles)) {
+  heroes[hero.normalized_name] = hero;
+}</pre>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Zustand — reading and writing from any component</div>
+      <pre><span class="cm">// Subscribe to a slice of the store (re-renders only when that slice changes):</span>
+<span class="kw">const</span> mode = useDataStore(s =&gt; s.mode);
+<span class="kw">const</span> data = useDataStore(s =&gt; s.getData());
+
+<span class="cm">// Get actions (functions don't change, no re-renders):</span>
+<span class="kw">const</span> updateHero = useDataStore(s =&gt; s.updateHero);
+updateHero(modifiedHero);</pre>
+    </div>
+
+    <div class="hint box">
+      <div class="box-lbl">Hint — Immutable updates in Zustand</div>
+      <p>When you call <code>set({ customData: ... })</code>, you replace the whole object. Use spread to copy everything and only change what you need:</p>
+      <pre><span class="cm">// Update one hero inside customData:</span>
+<span class="fn">set</span>({
+  customData: {
+    ...customData,              <span class="cm">// copy tags, items</span>
+    heroes: {
+      ...customData.heroes,    <span class="cm">// copy all other heroes</span>
+      [hero.normalized_name]: hero  <span class="cm">// replace just this one</span>
+    }
+  }
+});</pre>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 5 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> loadDefaultData() returns AppData with all heroes and items</label>
+      <label><input type="checkbox" class="progress-check"> console.log in a stub page shows heroes/items loaded</label>
+      <label><input type="checkbox" class="progress-check"> useDataStore works from a component (no TypeScript errors)</label>
+      <label><input type="checkbox" class="progress-check"> Switching mode in browser console updates what getData() returns</label>
+      <label><input type="checkbox" class="progress-check"> Store persists across page refresh (check localStorage in DevTools)</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 6 ══════════════════════════════ -->
+<section class="module" id="mod6">
+  <div class="mod-head">
+    <div class="mod-num">Module 6</div>
+    <h2>Tag Manager</h2>
+    <p>Skeleton file: <code>skeleton/src/pages/TagsPage.tsx</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <p>Copy <code>skeleton/src/pages/TagsPage.tsx</code> → <code>src/pages/TagsPage.tsx</code> and fill in all TODOs. The skeleton already has the component structure, drag handle, and form — you need to wire up the DnD, the store calls, and the CRUD handlers.</p>
+      <span class="answer-ref">Stuck? See TagsPage.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">@dnd-kit/sortable — the three parts</div>
+      <pre><span class="cm">// 1. Wrap the list in DndContext + SortableContext:</span>
+&lt;<span class="ty">DndContext</span> collisionDetection={closestCenter} onDragEnd={handleDragEnd}&gt;
+  &lt;<span class="ty">SortableContext</span> items={tags.map(t =&gt; t.code)} strategy={verticalListSortingStrategy}&gt;
+    {tags.map(tag =&gt; &lt;<span class="ty">SortableRow</span> key={tag.code} tag={tag} /&gt;)}
+  &lt;/<span class="ty">SortableContext</span>&gt;
+&lt;/<span class="ty">DndContext</span>&gt;
+
+<span class="cm">// 2. Inside each row, use the hook:</span>
+<span class="kw">const</span> { attributes, listeners, setNodeRef, transform, transition } = <span class="fn">useSortable</span>({ id: tag.code });
+
+<span class="cm">// 3. In onDragEnd, reorder and save:</span>
+<span class="kw">const</span> oldIdx = tags.findIndex(t =&gt; t.code === active.id);
+<span class="kw">const</span> newIdx = tags.findIndex(t =&gt; t.code === over.id);
+<span class="fn">updateTags</span>(<span class="fn">arrayMove</span>(tags, oldIdx, newIdx));</pre>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 6 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Tags list renders all tags from the store</label>
+      <label><input type="checkbox" class="progress-check"> Drag to reorder works and persists after page refresh</label>
+      <label><input type="checkbox" class="progress-check"> Add dialog opens, creates a new tag, list updates</label>
+      <label><input type="checkbox" class="progress-check"> Edit dialog pre-fills, saves changes</label>
+      <label><input type="checkbox" class="progress-check"> Delete removes the tag</label>
+      <label><input type="checkbox" class="progress-check"> Warning banner shows in defaults mode, buttons disabled</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 7 ══════════════════════════════ -->
+<section class="module" id="mod7">
+  <div class="mod-head">
+    <div class="mod-num">Module 7</div>
+    <h2>Item Editor</h2>
+    <p>Skeleton files: <code>skeleton/src/pages/ItemsPage.tsx</code> · <code>skeleton/src/pages/ItemDetailPage.tsx</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <ol>
+        <li>Copy and fill <code>skeleton/src/pages/ItemsPage.tsx</code> — the grid with search/filter</li>
+        <li>Copy and fill <code>skeleton/src/pages/ItemDetailPage.tsx</code> — the tag weight editor</li>
+      </ol>
+      <span class="answer-ref">Stuck? See ItemsPage.tsx and ItemDetailPage.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">useMemo — cached derived state</div>
+      <pre><span class="cm">// Without useMemo: filtering recalculates on EVERY re-render (including typing elsewhere)
+// With useMemo: only recalculates when data, category, or search changes</span>
+<span class="kw">const</span> filtered = useMemo(() =&gt; {
+  <span class="kw">return</span> Object.values(data.items)
+    .filter(i =&gt; category === <span class="st">'All'</span> || i.category === category)
+    .filter(i =&gt; i.name.toLowerCase().includes(search.toLowerCase()));
+}, [data, category, search]);</pre>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Local copy pattern for editing</div>
+      <p>Load the item from the store into local state on mount. Edits modify the local copy. Save writes the whole item back to the store. This prevents half-edited data from showing elsewhere while you're editing.</p>
+      <pre><span class="kw">const</span> [localItem, setLocalItem] = useState&lt;<span class="ty">Item</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+useEffect(() =&gt; {
+  <span class="kw">const</span> item = data.items[name ?? <span class="st">''</span>];
+  <span class="kw">if</span> (!item) navigate(<span class="st">'/items'</span>);
+  <span class="kw">else</span> setLocalItem(item);
+}, [name, data]);</pre>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 7 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Item grid shows all items with images</label>
+      <label><input type="checkbox" class="progress-check"> Search and category filter work</label>
+      <label><input type="checkbox" class="progress-check"> Clicking an item navigates to its detail page</label>
+      <label><input type="checkbox" class="progress-check"> Detail page loads correct item from URL param</label>
+      <label><input type="checkbox" class="progress-check"> Weight inputs show current values (null = empty input)</label>
+      <label><input type="checkbox" class="progress-check"> Save updates the store, persists to localStorage</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 8 ══════════════════════════════ -->
+<section class="module" id="mod8">
+  <div class="mod-head">
+    <div class="mod-num">Module 8</div>
+    <h2>Hero Editor</h2>
+    <p>Skeleton files: <code>skeleton/src/pages/HeroesPage.tsx</code> · <code>skeleton/src/pages/HeroDetailPage.tsx</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <ol>
+        <li>Copy and fill <code>skeleton/src/pages/HeroesPage.tsx</code></li>
+        <li>Copy and fill <code>skeleton/src/pages/HeroDetailPage.tsx</code> — the most complex editor</li>
+      </ol>
+      <span class="answer-ref">Stuck? See HeroDetailPage.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Immutable nested updates</div>
+      <p>Changing one weight deep inside <code>hero.builds[i].values.self_score[tagCode]</code> requires spreading at every level. The skeleton file has the exact pattern written out in the comment at the top. Key rule: <strong>never mutate in place.</strong></p>
+    </div>
+
+    <div class="hint box">
+      <div class="box-lbl">Hint — creating an all-null TagWeights for a new build</div>
+      <pre><span class="kw">const</span> emptyWeights = Object.fromEntries(data.tags.map(t =&gt; [t.code, <span class="kw">null</span>]));
+<span class="cm">// Result: { bullet_damage: null, spirit_damage: null, ... }</span></pre>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 8 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Hero grid shows all heroes</label>
+      <label><input type="checkbox" class="progress-check"> Hero detail page loads from URL param</label>
+      <label><input type="checkbox" class="progress-check"> Build tabs switch correctly</label>
+      <label><input type="checkbox" class="progress-check"> Four-column weight table renders all tags</label>
+      <label><input type="checkbox" class="progress-check"> Editing a weight and saving updates the store</label>
+      <label><input type="checkbox" class="progress-check"> Adding a new build creates a tab with all-null weights</label>
+      <label><input type="checkbox" class="progress-check"> General build (index 0) cannot be deleted</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 9 ══════════════════════════════ -->
+<section class="module" id="mod9">
+  <div class="mod-head">
+    <div class="mod-num">Module 9</div>
+    <h2>Calculator Engine</h2>
+    <p>Skeleton file: <code>skeleton/src/utils/calculator.ts</code> · Pre-written: <code>buildPath.ts</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <ol>
+        <li>Copy and fill <code>skeleton/src/utils/calculator.ts</code></li>
+        <li>Copy the complete <code>buildPath.ts</code> from lesson_plan_answers.html → <code>src/utils/buildPath.ts</code> (pre-written, no changes needed)</li>
+        <li>Write a quick test in a component: run <code>runCalculation</code> with a test hero and log the results</li>
+      </ol>
+      <span class="answer-ref">Stuck? See calculator.ts in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">The dot product — this is all the math</div>
+      <p>For each tag, multiply the item's weight by the build's weight for that tag, and sum them all. This is a standard vector dot product. The skeleton has every step broken into clear pseudocode comments.</p>
+      <pre><span class="kw">function</span> <span class="fn">dotProduct</span>(weights: <span class="ty">TagWeights</span>, scores: <span class="ty">TagWeights</span>): <span class="kw">number</span> {
+  <span class="kw">let</span> sum = 0;
+  <span class="kw">for</span> (<span class="kw">const</span> [tag, weight] <span class="kw">of</span> Object.entries(weights)) {
+    <span class="kw">if</span> (weight == <span class="kw">null</span>) <span class="kw">continue</span>;   <span class="cm">// null = skip</span>
+    sum += weight * (scores[tag] ?? 0); <span class="cm">// missing = treat as 0</span>
+  }
+  <span class="kw">return</span> sum;
+}</pre>
+    </div>
+
+    <div class="prebuilt box">
+      <div class="box-lbl">Pre-Written — buildPath.ts</div>
+      <p>Copy verbatim from lesson_plan_answers.html → "src/utils/buildPath.ts". This ports the original greedy algorithm to TypeScript. Do not modify it.</p>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 9 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> dotProduct returns correct values (can test with known numbers)</label>
+      <label><input type="checkbox" class="progress-check"> scoreItem returns 4 fields, total uses tier multiplier</label>
+      <label><input type="checkbox" class="progress-check"> runCalculation returns results sorted highest buildScore first</label>
+      <label><input type="checkbox" class="progress-check"> buildPath.ts copied from answer key, no TypeScript errors</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 10 ══════════════════════════════ -->
+<section class="module" id="mod10">
+  <div class="mod-head">
+    <div class="mod-num">Module 10</div>
+    <h2>Calculator UI</h2>
+    <p>Skeleton file: <code>skeleton/src/pages/CalculatorPage.tsx</code> · Pre-written: <code>BuildPathView.tsx</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task — build in four phases</div>
+      <p>Copy <code>skeleton/src/pages/CalculatorPage.tsx</code> → <code>src/pages/CalculatorPage.tsx</code>. Work through the four phases in the skeleton, testing after each:</p>
+      <ol>
+        <li><strong>Phase A</strong> — team setup drag-and-drop + Calculate button</li>
+        <li><strong>Phase B</strong> — top 3 items per category summary</li>
+        <li><strong>Phase C</strong> — full item table using TanStack Table</li>
+        <li><strong>Phase D</strong> — build path via <code>computeBuildPath()</code> + <code>BuildPathView</code></li>
+      </ol>
+      <p>Also copy <code>BuildPathView.tsx</code> from lesson_plan_answers.html → <code>src/components/calculator/BuildPathView.tsx</code>.</p>
+      <span class="answer-ref">Stuck? See CalculatorPage.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">TanStack Table — headless sortable table</div>
+      <p>TanStack Table handles sort state and provides row/cell iterators — you write the HTML/JSX. The skeleton has the column definition pattern and the render loop written out in comments. Key: clicking a header calls <code>h.column.getToggleSortingHandler()</code> which manages the sort state for you.</p>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">useDraggable vs useSortable</div>
+      <p>In the tag manager we used <code>useSortable</code> (items in a list reordering). The calculator uses <code>useDraggable</code> (dragging from a pool to a zone) + <code>useDroppable</code> (the drop zones). The skeleton uses <code>useDraggable</code> for hero cards and <code>useDroppable</code> for each team zone.</p>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 10 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Phase A: drag heroes to team zones, Calculate button works</label>
+      <label><input type="checkbox" class="progress-check"> Phase B: top items per category display after Calculate</label>
+      <label><input type="checkbox" class="progress-check"> Phase C: item table sortable by clicking column headers</label>
+      <label><input type="checkbox" class="progress-check"> Phase D: build path phases render with BuildPathView</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 11 ══════════════════════════════ -->
+<section class="module" id="mod11">
+  <div class="mod-head">
+    <div class="mod-num">Module 11</div>
+    <h2>Settings &amp; Data Mode</h2>
+    <p>Skeleton file: <code>skeleton/src/pages/SettingsPage.tsx</code></p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task</div>
+      <p>Copy and fill <code>skeleton/src/pages/SettingsPage.tsx</code>. The import/export pattern and file picker are commented in detail in the skeleton.</p>
+      <span class="answer-ref">Stuck? See SettingsPage.tsx in lesson_plan_answers.html</span>
+    </div>
+
+    <div class="concept box">
+      <div class="box-lbl">Browser file download &amp; upload</div>
+      <pre><span class="cm">// DOWNLOAD (export):</span>
+<span class="kw">const</span> blob = <span class="kw">new</span> Blob([JSON.stringify(data, <span class="kw">null</span>, 2)], { type: <span class="st">'application/json'</span> });
+<span class="kw">const</span> url  = URL.createObjectURL(blob);
+<span class="kw">const</span> a    = document.createElement(<span class="st">'a'</span>);
+a.href = url; a.download = <span class="st">'filename.json'</span>;
+a.click(); URL.revokeObjectURL(url);
+
+<span class="cm">// UPLOAD (import):</span>
+<span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+reader.onload = (ev) =&gt; { importData(JSON.parse(ev.target.result)); };
+reader.readAsText(file);</pre>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 11 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> Mode toggle switches between defaults and custom</label>
+      <label><input type="checkbox" class="progress-check"> Export downloads a valid JSON file</label>
+      <label><input type="checkbox" class="progress-check"> Import reads the file and loads it into the store</label>
+      <label><input type="checkbox" class="progress-check"> Reset clears custom data after confirmation</label>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MODULE 12 ══════════════════════════════ -->
+<section class="module" id="mod12">
+  <div class="mod-head">
+    <div class="mod-num">Module 12</div>
+    <h2>Deploy to GitHub Pages</h2>
+    <p>Pre-written: <code>deploy.yml</code> (already set up in Module 0)</p>
+  </div>
+  <div class="mod-body">
+
+    <div class="task box">
+      <div class="box-lbl">Task — First Deploy</div>
+      <ol>
+        <li>Make sure everything works locally: <code>npm run build &amp;&amp; npm run preview</code></li>
+        <li>Commit: <pre>git add -A
+git commit -m "Initial React rebuild"
+git push origin main</pre></li>
+        <li>Go to GitHub → your repo → <strong>Actions</strong> tab → watch the workflow run</li>
+        <li>When it goes green, visit <code>https://YOUR_GITHUB_USERNAME.github.io/deadlock-advisor/</code></li>
+      </ol>
+    </div>
+
+    <div class="warn box">
+      <div class="box-lbl">Important — if images are broken on the live site</div>
+      <p>Check that <code>assetPath()</code> is used on every <code>&lt;img&gt;</code> src. If images work locally but not on Pages, the <code>base</code> path is not being prepended. The dev server uses <code>/</code> as base, so bare paths work locally but break on the <code>/deadlock-advisor/</code> subdirectory.</p>
+    </div>
+
+    <div class="checklist">
+      <h3>Module 12 Checklist</h3>
+      <label><input type="checkbox" class="progress-check"> npm run build completes without errors</label>
+      <label><input type="checkbox" class="progress-check"> npm run preview shows the site correctly at localhost</label>
+      <label><input type="checkbox" class="progress-check"> Pushed to main, GitHub Actions workflow went green</label>
+      <label><input type="checkbox" class="progress-check"> Live site accessible at github.io URL</label>
+      <label><input type="checkbox" class="progress-check"> Navigation, images, calculator all work on the live site</label>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const boxes = document.querySelectorAll('.progress-check');
+  boxes.forEach((cb, i) => {
+    const saved = localStorage.getItem('lp2-check-' + i);
+    if (saved === 'true') cb.checked = true;
+    cb.addEventListener('change', () => localStorage.setItem('lp2-check-' + i, cb.checked));
+  });
+  const sections = document.querySelectorAll('section[id], div[id]');
+  const links = document.querySelectorAll('.sb-link');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.25 });
+  sections.forEach(s => io.observe(s));
+});
+</script>
+</body>
+</html>

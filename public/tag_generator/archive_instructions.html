@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archive Instructions — Deadlock Advisor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117;
+    color: #e2e8f0; line-height: 1.7; font-size: 15px; padding: 48px; max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .subtitle { color: #64748b; margin-bottom: 40px; }
+  h2 { font-size: 18px; font-weight: 700; color: #fff; margin: 36px 0 12px;
+    padding-bottom: 8px; border-bottom: 1px solid #2a2b40; }
+  h3 { font-size: 15px; font-weight: 600; color: #a5b4fc; margin: 20px 0 8px; }
+  p  { margin-bottom: 12px; color: #cbd5e1; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; }
+  li { margin-bottom: 6px; color: #cbd5e1; }
+  pre, code { font-family: 'Consolas', 'Monaco', monospace; }
+  pre { background: #1a1b2e; border: 1px solid #2a2b40; border-radius: 8px;
+    padding: 16px; overflow-x: auto; font-size: 13px; color: #cdd6f4; margin: 12px 0; }
+  code { background: #1e2040; color: #9cdcfe; padding: 2px 6px;
+    border-radius: 4px; font-size: 13px; }
+  .step { background: #1a1b2e; border: 1px solid #2a2b40; border-radius: 10px;
+    padding: 20px 24px; margin: 16px 0; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center;
+    background: #6366f1; color: white; width: 28px; height: 28px;
+    border-radius: 50%; font-size: 13px; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+  .step-title { display: flex; align-items: center; font-weight: 600;
+    font-size: 16px; color: #fff; margin-bottom: 10px; }
+  .warn { background: #2d1515; border: 1px solid #7f1d1d; border-radius: 8px;
+    padding: 14px 18px; margin: 16px 0; color: #fca5a5; }
+  .warn strong { color: #f87171; }
+  .info { background: #0f2040; border: 1px solid #1d4ed8; border-radius: 8px;
+    padding: 14px 18px; margin: 16px 0; color: #93c5fd; }
+  a { color: #818cf8; }
+</style>
+</head>
+<body>
+
+<h1>Archive Instructions</h1>
+<p class="subtitle">How to archive the old Deadlock Advisor repo and hand off GitHub Pages to the new project.</p>
+
+<div class="info">
+  <strong>Situation:</strong> The old <code>deadlock-advisor</code> repo hosts your current Flask + vanilla JS tag generator site on GitHub Pages. The new project will be a separate repo with the same name. These steps walk you through archiving the old one without losing any work.
+</div>
+
+<h2>Overview</h2>
+<ol>
+  <li>Rename the old repo to something like <code>deadlock-advisor-legacy</code></li>
+  <li>Create the new repo as <code>deadlock-advisor</code></li>
+  <li>The GitHub Pages URL moves automatically to the new repo</li>
+  <li>Old repo stays accessible at the renamed URL for reference</li>
+</ol>
+
+<h2>Step-by-Step</h2>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">1</span>Back Up Your Old Repo (Optional but Recommended)</div>
+  <p>If you want a local backup before renaming, clone it or just verify you already have it locally:</p>
+  <pre>cd path/to/old/deadlock-advisor
+git status   # make sure everything is committed</pre>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">2</span>Rename the Old Repo on GitHub</div>
+  <ol>
+    <li>Go to <strong>github.com/YOUR_GITHUB_USERNAME/deadlock-advisor</strong></li>
+    <li>Click <strong>Settings</strong> (the gear icon near the top)</li>
+    <li>Under "General", find the <strong>Repository name</strong> field</li>
+    <li>Change it to <code>deadlock-advisor-legacy</code></li>
+    <li>Click <strong>Rename</strong></li>
+  </ol>
+  <p>GitHub will automatically redirect old links. The Pages URL <code>YOUR_GITHUB_USERNAME.github.io/deadlock-advisor</code> will stop serving (since the repo name changed) — this is what you want.</p>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">3</span>Update Your Local Clone (Old Project)</div>
+  <p>If you have the old project cloned locally, update its remote URL so git doesn't get confused:</p>
+  <pre>cd path/to/old/deadlock-advisor
+git remote set-url origin https://github.com/YOUR_GITHUB_USERNAME/deadlock-advisor-legacy.git</pre>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">4</span>Create the New Repo</div>
+  <p>Follow Module 0 of the lesson plan: create a new repo named exactly <code>deadlock-advisor</code> on GitHub, then follow the setup steps to initialize the Vite project.</p>
+  <p>Once the new project is pushed and GitHub Actions deploys it, the URL <code>YOUR_GITHUB_USERNAME.github.io/deadlock-advisor</code> will serve the new app.</p>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">5</span>Enable GitHub Pages on the New Repo</div>
+  <ol>
+    <li>Go to the new <code>deadlock-advisor</code> repo on GitHub</li>
+    <li>Click <strong>Settings → Pages</strong></li>
+    <li>Under "Build and deployment", set Source to <strong>GitHub Actions</strong></li>
+    <li>Save — the next push to <code>main</code> will trigger the deploy workflow</li>
+  </ol>
+</div>
+
+<div class="step">
+  <div class="step-title"><span class="step-num">6</span>Archive the Old Repo (Optional)</div>
+  <p>If you want to mark the legacy repo as read-only and clearly outdated:</p>
+  <ol>
+    <li>Go to <strong>github.com/YOUR_GITHUB_USERNAME/deadlock-advisor-legacy → Settings</strong></li>
+    <li>Scroll to the "Danger Zone" at the bottom</li>
+    <li>Click <strong>Archive this repository</strong></li>
+    <li>Confirm — the repo becomes read-only and shows an "Archived" banner</li>
+  </ol>
+  <p>Archiving is reversible. The code and history remain fully accessible.</p>
+</div>
+
+<h2>Data Migration</h2>
+<p>The JSON data files (heroes, items, tags) in the old project live at:</p>
+<pre>public/tag_generator/data/heroes/*.json
+public/tag_generator/data/items/*.json
+public/tag_generator/data/tags.json</pre>
+<p>Copy these into the new project at:</p>
+<pre>src/data/heroes/*.json
+src/data/items/*.json
+src/data/tags.json</pre>
+<p>Also copy the image resources:</p>
+<pre>public/resources/  →  (new project) public/resources/</pre>
+
+<div class="warn">
+  <strong>Image paths in JSON files:</strong> The <code>image_path</code> fields reference paths like <code>/resources/heroes/abrams/...</code>. These work as-is in the new project because the <code>assetPath()</code> helper (Module 4) prepends the correct base URL. Do not change the paths in the JSON files.
+</div>
+
+<h2>After Both Projects Are Up</h2>
+<ul>
+  <li>Old project: <code>github.com/YOUR_GITHUB_USERNAME/deadlock-advisor-legacy</code> (archived, reference only)</li>
+  <li>New project: <code>github.com/YOUR_GITHUB_USERNAME/deadlock-advisor</code> (active, live at github.io)</li>
+  <li>The tag generator Flask tool still works locally — run <code>python app.py</code> from the old project folder as before</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deadlock Advisor — Answer Key</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sidebar-w: 240px; --bg: #0f1117; --surface: #1a1b2e;
+    --accent: #7c8cf8; --text: #e2e8f0; --muted: #64748b;
+    --green: #22c55e; --blue: #3b82f6; --purple: #a855f7;
+  }
+  body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text);
+    line-height: 1.6; font-size: 14px; }
+  #app { display: flex; min-height: 100vh; }
+  #sidebar { width: var(--sidebar-w); background: #13141f; position: fixed; top: 0;
+    left: 0; height: 100vh; overflow-y: auto; padding-bottom: 40px;
+    border-right: 1px solid #2a2b40; }
+  .sb-head { padding: 20px 16px; border-bottom: 1px solid #2a2b40; }
+  .sb-head h1 { color: #fff; font-size: 13px; font-weight: 700; }
+  .sb-head p  { color: var(--muted); font-size: 11px; margin-top: 3px; }
+  .sb-group { padding: 8px 0; border-bottom: 1px solid #1e1f30; }
+  .sb-label { color: #3a3d5c; font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 0 16px 4px; }
+  .sb-link { display: block; padding: 5px 16px; color: #8892a4; text-decoration: none;
+    font-size: 12px; font-family: 'Consolas', monospace; transition: color 0.15s; }
+  .sb-link:hover { color: var(--accent); }
+  #content { margin-left: var(--sidebar-w); flex: 1; padding: 32px 40px; max-width: 960px; }
+  .page-head { margin-bottom: 32px; }
+  .page-head h1 { font-size: 26px; font-weight: 800; color: #fff; }
+  .page-head p  { color: var(--muted); margin-top: 6px; }
+  .file-section { background: var(--surface); border-radius: 10px; margin-bottom: 28px;
+    overflow: hidden; border: 1px solid #2a2b40; }
+  .file-header { background: #13141f; padding: 14px 20px; display: flex;
+    align-items: center; gap: 12px; border-bottom: 1px solid #2a2b40; }
+  .file-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+  .tag-write   { background: #1a3a2a; color: var(--green); }
+  .tag-prebuilt{ background: #2d1a4a; color: var(--purple); }
+  .tag-config  { background: #1a2a3a; color: var(--blue); }
+  .file-path { font-family: 'Consolas', monospace; font-size: 13px; color: #9cdcfe; }
+  .file-desc { padding: 10px 20px; font-size: 13px; color: #8892a4;
+    border-bottom: 1px solid #2a2b40; }
+  pre { background: #0d0e1a; color: #cdd6f4; padding: 20px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.65;
+    font-family: 'Consolas', 'Monaco', monospace; margin: 0; }
+  .kw  { color: #569cd6; }
+  .ty  { color: #4ec9b0; }
+  .st  { color: #ce9178; }
+  .cm  { color: #6a9955; }
+  .fn  { color: #dcdcaa; }
+  h2 { font-size: 18px; color: #fff; margin: 40px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid #2a2b40; }
+  .module-label { display: inline-block; background: #1e2040; color: var(--accent);
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<nav id="sidebar">
+  <div class="sb-head"><h1>Answer Key</h1><p>Complete code for all files</p></div>
+  <div class="sb-group">
+    <div class="sb-label">Foundation</div>
+    <a class="sb-link" href="#types">types/index.ts</a>
+    <a class="sb-link" href="#assetpath">utils/assetPath.ts</a>
+    <a class="sb-link" href="#loader">data/loader.ts</a>
+    <a class="sb-link" href="#store">store/dataStore.ts</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">App Shell</div>
+    <a class="sb-link" href="#app-tsx">App.tsx</a>
+    <a class="sb-link" href="#layout">components/Layout.tsx</a>
+    <a class="sb-link" href="#tagbadge">components/TagBadge.tsx</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Pages</div>
+    <a class="sb-link" href="#tags-page">pages/TagsPage.tsx</a>
+    <a class="sb-link" href="#items-page">pages/ItemsPage.tsx</a>
+    <a class="sb-link" href="#item-detail">pages/ItemDetailPage.tsx</a>
+    <a class="sb-link" href="#heroes-page">pages/HeroesPage.tsx</a>
+    <a class="sb-link" href="#hero-detail">pages/HeroDetailPage.tsx</a>
+    <a class="sb-link" href="#calc-page">pages/CalculatorPage.tsx</a>
+    <a class="sb-link" href="#settings-page">pages/SettingsPage.tsx</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Utils</div>
+    <a class="sb-link" href="#calculator">utils/calculator.ts</a>
+    <a class="sb-link" href="#buildpath">utils/buildPath.ts</a>
+    <a class="sb-link" href="#buildpathview">calculator/BuildPathView.tsx</a>
+  </div>
+  <div class="sb-group">
+    <div class="sb-label">Config</div>
+    <a class="sb-link" href="#vite-config">vite.config.ts</a>
+    <a class="sb-link" href="#deploy-yml">deploy.yml</a>
+  </div>
+</nav>
+
+<main id="content">
+<div class="page-head">
+  <h1>Answer Key — Complete Code</h1>
+  <p>Every file you need to write, fully implemented. Use this when stuck for 15+ minutes. Type the code — don't paste it.</p>
+</div>
+
+<!-- ═══════════════════ TYPES ═══════════════════ -->
+<div class="file-section" id="types">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/types/index.ts</span>
+  </div>
+  <div class="file-desc">All TypeScript interfaces for the data model. Module 2.</div>
+<pre>
+<span class="cm">// src/types/index.ts</span>
+
+<span class="kw">export interface</span> <span class="ty">Tag</span> {
+  code: <span class="kw">string</span>;
+  name: <span class="kw">string</span>;
+  description: <span class="kw">string</span>;
+}
+
+<span class="cm">// Maps tag codes to weights. null = tag is not applicable to this hero/item.</span>
+<span class="kw">export type</span> <span class="ty">TagWeights</span> = <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="kw">number</span> | <span class="kw">null</span>&gt;;
+
+<span class="kw">export interface</span> <span class="ty">BuildValues</span> {
+  ally_weight:   <span class="ty">TagWeights</span>;
+  self_weight:   <span class="ty">TagWeights</span>;
+  enemy_weight:  <span class="ty">TagWeights</span>;
+  self_score:    <span class="ty">TagWeights</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">HeroBuild</span> {
+  name:                   <span class="kw">string</span>;
+  normalized_build_name:  <span class="kw">string</span>;
+  build_description_eng:  <span class="kw">string</span>;
+  values:                 <span class="ty">BuildValues</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">Hero</span> {
+  eng_name:         <span class="kw">string</span>;
+  normalized_name:  <span class="kw">string</span>;
+  desc_eng:         <span class="kw">string</span>;
+  image_path:       <span class="kw">string</span>;
+  mini_image_path:  <span class="kw">string</span>;
+  wiki_url:         <span class="kw">string</span>;
+  builds:           <span class="ty">HeroBuild</span>[];
+}
+
+<span class="kw">export type</span> <span class="ty">ItemCategory</span> = <span class="st">'Weapon'</span> | <span class="st">'Vitality'</span> | <span class="st">'Spirit'</span>;
+
+<span class="kw">export interface</span> <span class="ty">Item</span> {
+  name:             <span class="kw">string</span>;
+  normalized_name:  <span class="kw">string</span>;
+  category:         <span class="ty">ItemCategory</span>;
+  tier:             <span class="kw">number</span>;
+  image_path:       <span class="kw">string</span>;
+  wiki_url:         <span class="kw">string</span>;
+  remarks:          <span class="kw">string</span>;
+  upgrades_from:    <span class="kw">string</span>[];
+  values: {
+    self_score: <span class="ty">TagWeights</span>;
+  };
+}
+
+<span class="kw">export interface</span> <span class="ty">AppData</span> {
+  tags:   <span class="ty">Tag</span>[];
+  heroes: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Hero</span>&gt;;
+  items:  <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Item</span>&gt;;
+}
+
+<span class="kw">export type</span> <span class="ty">DataMode</span> = <span class="st">'defaults'</span> | <span class="st">'custom'</span>;
+</pre>
+</div>
+
+<!-- ═══════════════════ ASSET PATH ═══════════════════ -->
+<div class="file-section" id="assetpath">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/utils/assetPath.ts</span>
+  </div>
+  <div class="file-desc">Prepends the Vite base URL to image paths so they work on GitHub Pages. Module 4.</div>
+<pre>
+<span class="cm">// src/utils/assetPath.ts</span>
+
+<span class="kw">export function</span> <span class="fn">assetPath</span>(path: <span class="kw">string</span>): <span class="kw">string</span> {
+  <span class="kw">const</span> base = import.meta.env.BASE_URL.replace(/\/$/, <span class="st">''</span>);
+  <span class="kw">const</span> clean = path.startsWith(<span class="st">'/'</span>) ? path.slice(1) : path;
+  <span class="kw">return</span> <span class="st">`${base}/${clean}`</span>;
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ LOADER ═══════════════════ -->
+<div class="file-section" id="loader">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/data/loader.ts</span>
+  </div>
+  <div class="file-desc">Uses Vite's import.meta.glob to load all JSON files at build time. Module 5.</div>
+<pre>
+<span class="cm">// src/data/loader.ts</span>
+<span class="kw">import type</span> { <span class="ty">AppData</span>, <span class="ty">Hero</span>, <span class="ty">Item</span>, <span class="ty">Tag</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+<span class="kw">import</span> tagsData <span class="kw">from</span> <span class="st">'./tags.json'</span>;
+
+<span class="cm">// Vite resolves these globs at build time — like Resources.LoadAll() in Unity.
+// eager: true  = synchronous (no await)
+// import: 'default' = get the JSON object itself, not the module wrapper</span>
+<span class="kw">const</span> heroFiles = import.meta.glob&lt;<span class="ty">Hero</span>&gt;(
+  <span class="st">'./heroes/*.json'</span>,
+  { eager: <span class="kw">true</span>, import: <span class="st">'default'</span> }
+);
+
+<span class="kw">const</span> itemFiles = import.meta.glob&lt;<span class="ty">Item</span>&gt;(
+  <span class="st">'./items/*.json'</span>,
+  { eager: <span class="kw">true</span>, import: <span class="st">'default'</span> }
+);
+
+<span class="kw">export function</span> <span class="fn">loadDefaultData</span>(): <span class="ty">AppData</span> {
+  <span class="kw">const</span> heroes: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Hero</span>&gt; = {};
+  <span class="kw">for</span> (<span class="kw">const</span> hero <span class="kw">of</span> Object.values(heroFiles)) {
+    heroes[hero.normalized_name] = hero;
+  }
+
+  <span class="kw">const</span> items: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Item</span>&gt; = {};
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> Object.values(itemFiles)) {
+    items[item.normalized_name] = item;
+  }
+
+  <span class="kw">return</span> {
+    tags:   tagsData <span class="kw">as</span> <span class="ty">Tag</span>[],
+    heroes,
+    items,
+  };
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ STORE ═══════════════════ -->
+<div class="file-section" id="store">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/store/dataStore.ts</span>
+  </div>
+  <div class="file-desc">Zustand store with localStorage persistence. Holds defaults/custom mode and all editing actions. Module 5.</div>
+<pre>
+<span class="cm">// src/store/dataStore.ts</span>
+<span class="kw">import</span> { create } <span class="kw">from</span> <span class="st">'zustand'</span>;
+<span class="kw">import</span> { persist } <span class="kw">from</span> <span class="st">'zustand/middleware'</span>;
+<span class="kw">import type</span> { <span class="ty">AppData</span>, <span class="ty">DataMode</span>, <span class="ty">Tag</span>, <span class="ty">Hero</span>, <span class="ty">Item</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+<span class="kw">import</span> { loadDefaultData } <span class="kw">from</span> <span class="st">'../data/loader'</span>;
+
+<span class="cm">// Load defaults once at module level — not inside a function.</span>
+<span class="kw">const</span> defaultData = <span class="fn">loadDefaultData</span>();
+
+<span class="kw">interface</span> <span class="ty">DataState</span> {
+  mode:        <span class="ty">DataMode</span>;
+  customData:  <span class="ty">AppData</span> | <span class="kw">null</span>;
+  getData:          () =&gt; <span class="ty">AppData</span>;
+  setMode:          (mode: <span class="ty">DataMode</span>) =&gt; <span class="kw">void</span>;
+  activateCustomMode: () =&gt; <span class="kw">void</span>;
+  resetToDefaults:  () =&gt; <span class="kw">void</span>;
+  updateTags:       (tags: <span class="ty">Tag</span>[]) =&gt; <span class="kw">void</span>;
+  updateHero:       (hero: <span class="ty">Hero</span>) =&gt; <span class="kw">void</span>;
+  updateItem:       (item: <span class="ty">Item</span>) =&gt; <span class="kw">void</span>;
+  exportData:       () =&gt; <span class="kw">void</span>;
+  importData:       (data: <span class="ty">AppData</span>) =&gt; <span class="kw">void</span>;
+}
+
+<span class="kw">export const</span> useDataStore = <span class="fn">create</span>&lt;<span class="ty">DataState</span>&gt;()(
+  <span class="fn">persist</span>(
+    (set, get) =&gt; ({
+      mode:       <span class="st">'defaults'</span>,
+      customData: <span class="kw">null</span>,
+
+      getData: () =&gt; {
+        <span class="kw">const</span> { mode, customData } = <span class="fn">get</span>();
+        <span class="kw">return</span> mode === <span class="st">'custom'</span> &amp;&amp; customData ? customData : defaultData;
+      },
+
+      setMode: (mode) =&gt; <span class="fn">set</span>({ mode }),
+
+      activateCustomMode: () =&gt; {
+        <span class="kw">const</span> { customData } = <span class="fn">get</span>();
+        <span class="kw">if</span> (!customData) {
+          <span class="cm">// Deep-clone defaults as the starting point for custom data</span>
+          <span class="fn">set</span>({ mode: <span class="st">'custom'</span>, customData: JSON.parse(JSON.stringify(defaultData)) });
+        } <span class="kw">else</span> {
+          <span class="fn">set</span>({ mode: <span class="st">'custom'</span> });
+        }
+      },
+
+      resetToDefaults: () =&gt; <span class="fn">set</span>({ mode: <span class="st">'defaults'</span>, customData: <span class="kw">null</span> }),
+
+      updateTags: (tags) =&gt; {
+        <span class="kw">const</span> { customData } = <span class="fn">get</span>();
+        <span class="kw">if</span> (!customData) <span class="kw">return</span>;
+        <span class="fn">set</span>({ customData: { ...customData, tags } });
+      },
+
+      updateHero: (hero) =&gt; {
+        <span class="kw">const</span> { customData } = <span class="fn">get</span>();
+        <span class="kw">if</span> (!customData) <span class="kw">return</span>;
+        <span class="fn">set</span>({
+          customData: {
+            ...customData,
+            heroes: { ...customData.heroes, [hero.normalized_name]: hero },
+          },
+        });
+      },
+
+      updateItem: (item) =&gt; {
+        <span class="kw">const</span> { customData } = <span class="fn">get</span>();
+        <span class="kw">if</span> (!customData) <span class="kw">return</span>;
+        <span class="fn">set</span>({
+          customData: {
+            ...customData,
+            items: { ...customData.items, [item.normalized_name]: item },
+          },
+        });
+      },
+
+      exportData: () =&gt; {
+        <span class="kw">const</span> data = <span class="fn">get</span>().customData;
+        <span class="kw">if</span> (!data) <span class="kw">return</span>;
+        <span class="kw">const</span> blob = <span class="kw">new</span> <span class="ty">Blob</span>([JSON.stringify(data, <span class="kw">null</span>, 2)], { type: <span class="st">'application/json'</span> });
+        <span class="kw">const</span> url  = URL.createObjectURL(blob);
+        <span class="kw">const</span> a   = document.createElement(<span class="st">'a'</span>);
+        a.href     = url;
+        a.download = <span class="st">`deadlock-advisor-custom-${new Date().toISOString().slice(0, 10)}.json`</span>;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+
+      importData: (data) =&gt; <span class="fn">set</span>({ customData: data, mode: <span class="st">'custom'</span> }),
+    }),
+    {
+      name: <span class="st">'deadlock-advisor-data'</span>,
+      <span class="cm">// Only persist mode and customData — defaults are always re-loaded from bundled files</span>
+      partialize: (state) =&gt; ({ mode: state.mode, customData: state.customData }),
+    }
+  )
+);
+</pre>
+</div>
+
+<!-- ═══════════════════ APP.TSX ═══════════════════ -->
+<div class="file-section" id="app-tsx">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/App.tsx</span>
+  </div>
+  <div class="file-desc">Router setup. Uses HashRouter for GitHub Pages compatibility. Module 4.</div>
+<pre>
+<span class="cm">// src/App.tsx</span>
+<span class="kw">import</span> { HashRouter, Routes, Route } <span class="kw">from</span> <span class="st">'react-router-dom'</span>;
+<span class="kw">import</span> Layout <span class="kw">from</span> <span class="st">'./components/Layout'</span>;
+<span class="kw">import</span> CalculatorPage  <span class="kw">from</span> <span class="st">'./pages/CalculatorPage'</span>;
+<span class="kw">import</span> HeroesPage      <span class="kw">from</span> <span class="st">'./pages/HeroesPage'</span>;
+<span class="kw">import</span> HeroDetailPage  <span class="kw">from</span> <span class="st">'./pages/HeroDetailPage'</span>;
+<span class="kw">import</span> ItemsPage       <span class="kw">from</span> <span class="st">'./pages/ItemsPage'</span>;
+<span class="kw">import</span> ItemDetailPage  <span class="kw">from</span> <span class="st">'./pages/ItemDetailPage'</span>;
+<span class="kw">import</span> TagsPage        <span class="kw">from</span> <span class="st">'./pages/TagsPage'</span>;
+<span class="kw">import</span> SettingsPage    <span class="kw">from</span> <span class="st">'./pages/SettingsPage'</span>;
+
+<span class="kw">export default function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="ty">HashRouter</span>&gt;
+      &lt;<span class="ty">Routes</span>&gt;
+        &lt;<span class="ty">Route</span> path=<span class="st">"/"</span> element={&lt;<span class="ty">Layout</span> /&gt;}&gt;
+          &lt;<span class="ty">Route</span> index          element={&lt;<span class="ty">CalculatorPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"heroes"</span>         element={&lt;<span class="ty">HeroesPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"heroes/:name"</span>   element={&lt;<span class="ty">HeroDetailPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"items"</span>          element={&lt;<span class="ty">ItemsPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"items/:name"</span>    element={&lt;<span class="ty">ItemDetailPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"tags"</span>           element={&lt;<span class="ty">TagsPage</span> /&gt;} /&gt;
+          &lt;<span class="ty">Route</span> path=<span class="st">"settings"</span>       element={&lt;<span class="ty">SettingsPage</span> /&gt;} /&gt;
+        &lt;/<span class="ty">Route</span>&gt;
+      &lt;/<span class="ty">Routes</span>&gt;
+    &lt;/<span class="ty">HashRouter</span>&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ LAYOUT ═══════════════════ -->
+<div class="file-section" id="layout">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/components/Layout.tsx</span>
+  </div>
+  <div class="file-desc">App shell: fixed sidebar nav + main content area via Outlet. Module 4.</div>
+<pre>
+<span class="cm">// src/components/Layout.tsx</span>
+<span class="kw">import</span> { NavLink, Outlet } <span class="kw">from</span> <span class="st">'react-router-dom'</span>;
+<span class="kw">import</span> { useDataStore } <span class="kw">from</span> <span class="st">'../store/dataStore'</span>;
+
+<span class="kw">const</span> navItems = [
+  { to: <span class="st">'/'</span>,         label: <span class="st">'Calculator'</span> },
+  { to: <span class="st">'/heroes'</span>,   label: <span class="st">'Heroes'</span> },
+  { to: <span class="st">'/items'</span>,    label: <span class="st">'Items'</span> },
+  { to: <span class="st">'/tags'</span>,     label: <span class="st">'Tags'</span> },
+  { to: <span class="st">'/settings'</span>, label: <span class="st">'Settings'</span> },
+];
+
+<span class="kw">export default function</span> <span class="fn">Layout</span>() {
+  <span class="kw">const</span> mode = useDataStore(s =&gt; s.mode);
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"flex min-h-screen bg-slate-950"</span>&gt;
+      {<span class="cm">/* Sidebar */</span>}
+      &lt;aside className=<span class="st">"w-56 bg-slate-900 border-r border-slate-800 fixed top-0 left-0 h-full flex flex-col"</span>&gt;
+        &lt;div className=<span class="st">"p-4 border-b border-slate-800"</span>&gt;
+          &lt;h1 className=<span class="st">"text-white font-bold text-sm"</span>&gt;Deadlock Advisor&lt;/h1&gt;
+          &lt;div className={<span class="st">`text-xs mt-1 px-2 py-0.5 rounded-full inline-block ${
+            mode === 'custom'
+              ? 'bg-violet-900 text-violet-300'
+              : 'bg-slate-800 text-slate-400'
+          }`</span>}&gt;
+            {mode === <span class="st">'custom'</span> ? <span class="st">'Custom Data'</span> : <span class="st">'Defaults'</span>}
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;nav className=<span class="st">"flex-1 p-2"</span>&gt;
+          {navItems.map(item =&gt; (
+            &lt;<span class="ty">NavLink</span>
+              key={item.to}
+              to={item.to}
+              end={item.to === <span class="st">'/'</span>}
+              className={({ isActive }) =&gt;
+                <span class="st">`block px-3 py-2 rounded-md text-sm font-medium mb-1 transition-colors ${
+                  isActive
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`</span>
+              }
+            &gt;
+              {item.label}
+            &lt;/<span class="ty">NavLink</span>&gt;
+          ))}
+        &lt;/nav&gt;
+      &lt;/aside&gt;
+
+      {<span class="cm">/* Main content */</span>}
+      &lt;main className=<span class="st">"ml-56 flex-1 p-6 text-slate-200"</span>&gt;
+        &lt;<span class="ty">Outlet</span> /&gt;
+      &lt;/main&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ TAGBADGE ═══════════════════ -->
+<div class="file-section" id="tagbadge">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/components/TagBadge.tsx</span>
+  </div>
+  <div class="file-desc">Warmup component. Displays a tag name and optional weight value with color coding. Module 3.</div>
+<pre>
+<span class="cm">// src/components/TagBadge.tsx</span>
+<span class="kw">import type</span> { <span class="ty">Tag</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+
+<span class="kw">interface</span> <span class="ty">TagBadgeProps</span> {
+  tag:     <span class="ty">Tag</span>;
+  weight?: <span class="kw">number</span> | <span class="kw">null</span>;
+}
+
+<span class="kw">function</span> <span class="fn">weightColor</span>(w: <span class="kw">number</span> | <span class="kw">null</span> | <span class="kw">undefined</span>): <span class="kw">string</span> {
+  <span class="kw">if</span> (w == <span class="kw">null</span>)  <span class="kw">return</span> <span class="st">'bg-slate-800 text-slate-400'</span>;
+  <span class="kw">if</span> (w &lt; 0)     <span class="kw">return</span> <span class="st">'bg-red-900 text-red-300'</span>;
+  <span class="kw">if</span> (w &gt;= 1.0)  <span class="kw">return</span> <span class="st">'bg-emerald-900 text-emerald-200'</span>;
+  <span class="kw">if</span> (w &gt;= 0.5)  <span class="kw">return</span> <span class="st">'bg-green-900 text-green-300'</span>;
+  <span class="kw">return</span> <span class="st">'bg-slate-700 text-slate-300'</span>;
+}
+
+<span class="kw">export default function</span> <span class="fn">TagBadge</span>({ tag, weight }: <span class="ty">TagBadgeProps</span>) {
+  <span class="kw">return</span> (
+    &lt;span className={<span class="st">`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${weightColor(weight)}`</span>}&gt;
+      {tag.name}
+      {weight != <span class="kw">null</span> &amp;&amp; (
+        &lt;span className=<span class="st">"font-bold"</span>&gt;{weight &gt; 0 ? <span class="st">'+'</span> : <span class="st">''</span>}{weight.toFixed(2)}&lt;/span&gt;
+      )}
+    &lt;/span&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ CALCULATOR ENGINE ═══════════════════ -->
+<div class="file-section" id="calculator">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/utils/calculator.ts</span>
+  </div>
+  <div class="file-desc">The scoring engine. Pure TypeScript — no React. Module 9.</div>
+<pre>
+<span class="cm">// src/utils/calculator.ts</span>
+<span class="kw">import type</span> { <span class="ty">Hero</span>, <span class="ty">Item</span>, <span class="ty">Tag</span>, <span class="ty">HeroBuild</span>, <span class="ty">TagWeights</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+
+<span class="kw">export const</span> TIER_MULTIPLIERS: <span class="ty">Record</span>&lt;<span class="kw">number</span>, <span class="kw">number</span>&gt; = {
+  800:  1.0,
+  1600: 1.2,
+  3200: 1.4,
+  6400: 1.6,
+  9999: 2.0,
+};
+
+<span class="kw">export interface</span> <span class="ty">TeamSetup</span> {
+  self:    <span class="ty">Hero</span>;
+  allies:  <span class="ty">Hero</span>[];
+  enemies: <span class="ty">Hero</span>[];
+}
+
+<span class="kw">export interface</span> <span class="ty">CalculatorConfig</span> {
+  allyMult:  <span class="kw">number</span>;
+  enemyMult: <span class="kw">number</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">ItemScore</span> {
+  item:       <span class="ty">Item</span>;
+  allyScore:  <span class="kw">number</span>;
+  selfScore:  <span class="kw">number</span>;
+  enemyScore: <span class="kw">number</span>;
+  total:      <span class="kw">number</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">BuildResult</span> {
+  hero:        <span class="ty">Hero</span>;
+  build:       <span class="ty">HeroBuild</span>;
+  buildScore:  <span class="kw">number</span>;
+  itemScores:  <span class="ty">ItemScore</span>[];
+}
+
+<span class="kw">const</span> DEFAULT_CONFIG: <span class="ty">CalculatorConfig</span> = { allyMult: 1.0, enemyMult: 1.0 };
+
+<span class="cm">// Σ(weights[tag] × scores[tag]) — the core dot product</span>
+<span class="kw">function</span> <span class="fn">dotProduct</span>(weights: <span class="ty">TagWeights</span>, scores: <span class="ty">TagWeights</span>): <span class="kw">number</span> {
+  <span class="kw">let</span> sum = 0;
+  <span class="kw">for</span> (<span class="kw">const</span> [tag, weight] <span class="kw">of</span> Object.entries(weights)) {
+    <span class="kw">if</span> (weight == <span class="kw">null</span>) <span class="kw">continue</span>;
+    sum += weight * (scores[tag] ?? 0);
+  }
+  <span class="kw">return</span> sum;
+}
+
+<span class="kw">export function</span> <span class="fn">scoreItem</span>(
+  item:   <span class="ty">Item</span>,
+  build:  <span class="ty">HeroBuild</span>,
+  config: <span class="ty">CalculatorConfig</span> = DEFAULT_CONFIG
+): <span class="ty">ItemScore</span> {
+  <span class="kw">const</span> s    = item.values.self_score;
+  <span class="kw">const</span> v    = build.values;
+  <span class="kw">const</span> tier = TIER_MULTIPLIERS[item.tier] ?? 1.0;
+
+  <span class="kw">const</span> allyScore  = <span class="fn">dotProduct</span>(v.ally_weight,  s);
+  <span class="kw">const</span> selfScore  = <span class="fn">dotProduct</span>(v.self_weight,  s);
+  <span class="kw">const</span> enemyScore = <span class="fn">dotProduct</span>(v.enemy_weight, s);
+  <span class="kw">const</span> total      = (allyScore * config.allyMult + selfScore + enemyScore * config.enemyMult) * tier;
+
+  <span class="kw">return</span> { item, allyScore, selfScore, enemyScore, total };
+}
+
+<span class="kw">export function</span> <span class="fn">scoreBuild</span>(
+  build:   <span class="ty">HeroBuild</span>,
+  allies:  <span class="ty">Hero</span>[],
+  enemies: <span class="ty">Hero</span>[]
+): <span class="kw">number</span> {
+  <span class="kw">let</span> score = 0;
+  <span class="kw">for</span> (<span class="kw">const</span> ally <span class="kw">of</span> allies) {
+    <span class="kw">for</span> (<span class="kw">const</span> ab <span class="kw">of</span> ally.builds) {
+      score += <span class="fn">dotProduct</span>(build.values.ally_weight, ab.values.self_score);
+    }
+  }
+  <span class="kw">for</span> (<span class="kw">const</span> enemy <span class="kw">of</span> enemies) {
+    <span class="kw">for</span> (<span class="kw">const</span> eb <span class="kw">of</span> enemy.builds) {
+      score += <span class="fn">dotProduct</span>(build.values.enemy_weight, eb.values.self_score);
+    }
+  }
+  <span class="kw">return</span> score;
+}
+
+<span class="kw">export function</span> <span class="fn">runCalculation</span>(
+  setup:  <span class="ty">TeamSetup</span>,
+  items:  <span class="ty">Item</span>[],
+  _tags:  <span class="ty">Tag</span>[],
+  config: <span class="ty">CalculatorConfig</span> = DEFAULT_CONFIG
+): <span class="ty">BuildResult</span>[] {
+  <span class="kw">return</span> setup.self.builds
+    .map(build =&gt; {
+      <span class="kw">const</span> buildScore = <span class="fn">scoreBuild</span>(build, setup.allies, setup.enemies);
+      <span class="kw">const</span> itemScores = items
+        .map(item =&gt; <span class="fn">scoreItem</span>(item, build, config))
+        .sort((a, b) =&gt; b.total - a.total);
+      <span class="kw">return</span> { hero: setup.self, build, buildScore, itemScores };
+    })
+    .sort((a, b) =&gt; b.buildScore - a.buildScore);
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ BUILDPATH (PRE-WRITTEN) ═══════════════════ -->
+<div class="file-section" id="buildpath">
+  <div class="file-header">
+    <span class="file-tag tag-prebuilt">Pre-Written</span>
+    <span class="file-path">src/utils/buildPath.ts</span>
+  </div>
+  <div class="file-desc">TypeScript port of the original greedy build-path algorithm. Copy verbatim.</div>
+<pre>
+<span class="cm">// src/utils/buildPath.ts — PRE-WRITTEN, do not modify</span>
+<span class="kw">import type</span> { <span class="ty">Item</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+<span class="kw">import</span> { TIER_MULTIPLIERS } <span class="kw">from</span> <span class="st">'./calculator'</span>;
+<span class="kw">import type</span> { <span class="ty">ItemScore</span> } <span class="kw">from</span> <span class="st">'./calculator'</span>;
+
+<span class="kw">export interface</span> <span class="ty">BuildChange</span> {
+  action:      <span class="st">'buy'</span> | <span class="st">'upgrade'</span> | <span class="st">'sell'</span>;
+  key:         <span class="kw">string</span>;
+  components?: <span class="kw">string</span>[];
+  cost?:       <span class="kw">number</span>;
+  refund?:     <span class="kw">number</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">PhaseResult</span> {
+  phase:          <span class="kw">string</span>;
+  changes:        <span class="ty">BuildChange</span>[];
+  assistChanges:  <span class="ty">BuildChange</span>[];
+  counterChanges: <span class="ty">BuildChange</span>[];
+}
+
+<span class="kw">const</span> BUILD_PHASES = [
+  { name: <span class="st">'Lane'</span>,       addBudget: 3200,    totalSlots: 9,  minSlots: 3,  maxSells: 0 },
+  { name: <span class="st">'Early'</span>,      addBudget: 6400,    totalSlots: 9,  minSlots: 7,  maxSells: 0 },
+  { name: <span class="st">'Mid'</span>,        addBudget: 12800,   totalSlots: 10, minSlots: 9,  maxSells: 2 },
+  { name: <span class="st">'Late'</span>,       addBudget: 19800,   totalSlots: 12, minSlots: 11, maxSells: 3 },
+  { name: <span class="st">'Extra Late'</span>, addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 5 },
+];
+
+<span class="kw">const</span> PHASE_TIER_MULTS: <span class="ty">Record</span>&lt;<span class="kw">string</span>, [<span class="kw">number</span>, <span class="kw">number</span>, <span class="kw">number</span>, <span class="kw">number</span>]&gt; = {
+  <span class="st">'Lane'</span>:       [1.4,  0.8,  0.15, 0.0 ],
+  <span class="st">'Early'</span>:      [0.85, 0.9,  0.5,  0.05],
+  <span class="st">'Mid'</span>:        [0.5,  0.75, 1.0,  0.6 ],
+  <span class="st">'Late'</span>:       [0.1,  0.25, 1.0,  1.5 ],
+  <span class="st">'Extra Late'</span>: [0.0,  0.1,  0.5,  2.0 ],
+};
+
+<span class="kw">function</span> <span class="fn">getPhaseTierMult</span>(phase: <span class="kw">string</span>, tier: <span class="kw">number</span>): <span class="kw">number</span> {
+  <span class="kw">const</span> m = PHASE_TIER_MULTS[phase] ?? PHASE_TIER_MULTS[<span class="st">'Mid'</span>];
+  <span class="kw">if</span> (tier &lt;= 800)  <span class="kw">return</span> m[0];
+  <span class="kw">if</span> (tier &lt;= 1600) <span class="kw">return</span> m[1];
+  <span class="kw">if</span> (tier &lt;= 3200) <span class="kw">return</span> m[2];
+  <span class="kw">return</span> m[3];
+}
+
+<span class="kw">export function</span> <span class="fn">computeBuildPath</span>(
+  scoredItems: <span class="ty">ItemScore</span>[],
+  allItems:    <span class="ty">Item</span>[]
+): <span class="ty">PhaseResult</span>[] {
+  <span class="kw">const</span> itemMap: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Item</span>&gt; = {};
+  allItems.forEach(it =&gt; { itemMap[it.normalized_name] = it; });
+
+  <span class="kw">const</span> scoredMap: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">ItemScore</span>&gt; = {};
+  scoredItems.forEach(s =&gt; { scoredMap[s.item.normalized_name] = s; });
+
+  <span class="kw">const</span> upgradesTo: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="kw">string</span>[]&gt; = {};
+  Object.keys(itemMap).forEach(k =&gt; {
+    (itemMap[k].upgrades_from || []).forEach(comp =&gt; {
+      <span class="kw">if</span> (!upgradesTo[comp]) upgradesTo[comp] = [];
+      upgradesTo[comp].push(k);
+    });
+  });
+
+  <span class="kw">const</span> <span class="fn">isSubsumed</span> = (k: <span class="kw">string</span>, owned: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;) =&gt;
+    (upgradesTo[k] || []).some(u =&gt; owned.has(u));
+
+  <span class="kw">const</span> <span class="fn">chainCost</span> = (k: <span class="kw">string</span>, owned: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;): <span class="kw">number</span> =&gt; {
+    <span class="kw">const</span> item = itemMap[k];
+    <span class="kw">if</span> (!item) <span class="kw">return</span> Infinity;
+    <span class="kw">const</span> disc = (item.upgrades_from || [])
+      .filter(c =&gt; owned.has(c))
+      .reduce((s, c) =&gt; s + (itemMap[c]?.tier ?? 0), 0);
+    <span class="kw">return</span> item.tier - disc;
+  };
+
+  <span class="kw">const</span> <span class="fn">emitChain</span> = (k: <span class="kw">string</span>, owned: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;, changes: <span class="ty">BuildChange</span>[]): <span class="kw">number</span> =&gt; {
+    <span class="kw">const</span> item = itemMap[k];
+    <span class="kw">if</span> (!item) <span class="kw">return</span> 0;
+    <span class="kw">let</span> spent = 0;
+    (item.upgrades_from || []).forEach(c =&gt; {
+      <span class="kw">if</span> (!owned.has(c) &amp;&amp; itemMap[c]) {
+        owned.add(c); spent += itemMap[c].tier;
+        changes.push({ action: <span class="st">'buy'</span>, key: c, cost: itemMap[c].tier });
+      }
+    });
+    <span class="kw">const</span> comps    = (item.upgrades_from || []).filter(c =&gt; owned.has(c));
+    <span class="kw">const</span> mainCost = item.tier - comps.reduce((s, c) =&gt; s + (itemMap[c]?.tier ?? 0), 0);
+    comps.forEach(c =&gt; owned.delete(c));
+    owned.add(k); spent += mainCost;
+    changes.push({ action: comps.length ? <span class="st">'upgrade'</span> : <span class="st">'buy'</span>, key: k, components: comps, cost: mainCost });
+    <span class="kw">return</span> spent;
+  };
+
+  <span class="kw">const</span> <span class="fn">bpScore</span> = (s: <span class="ty">ItemScore</span>, phase: <span class="kw">string</span>): <span class="kw">number</span> =&gt; {
+    <span class="kw">const</span> tier = itemMap[s.item.normalized_name]?.tier ?? 800;
+    <span class="kw">const</span> gm   = TIER_MULTIPLIERS[tier] || 1;
+    <span class="kw">return</span> ((s.allyScore / gm) * 0.75 + (s.selfScore / gm) + (s.enemyScore / gm) * 0.75)
+      * <span class="fn">getPhaseTierMult</span>(phase, tier);
+  };
+
+  <span class="kw">function</span> <span class="fn">greedyMain</span>(ownedIn: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;, budget: <span class="kw">number</span>, maxSlots: <span class="kw">number</span>,
+    minSlots: <span class="kw">number</span>, phase: <span class="kw">string</span>, maxSells: <span class="kw">number</span>) {
+    <span class="kw">const</span> owned = <span class="kw">new</span> <span class="ty">Set</span>(ownedIn);
+    <span class="kw">let</span> remaining = budget;
+    <span class="kw">const</span> changes: <span class="ty">BuildChange</span>[] = [], soldInPhase = <span class="kw">new</span> <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;();
+    <span class="kw">let</span> sellCount = 0;
+    <span class="kw">for</span> (<span class="kw">let</span> iter = 0; iter &lt; 100; iter++) {
+      <span class="kw">const</span> slots = owned.size, filling = slots &lt; minSlots;
+      <span class="kw">let</span> bestKey: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>, bestVal = -Infinity;
+      <span class="kw">for</span> (<span class="kw">const</span> k <span class="kw">of</span> Object.keys(scoredMap)) {
+        <span class="kw">const</span> s = scoredMap[k];
+        <span class="kw">if</span> (owned.has(k) || <span class="fn">isSubsumed</span>(k, owned) || soldInPhase.has(k)) <span class="kw">continue</span>;
+        <span class="kw">const</span> cost = <span class="fn">chainCost</span>(k, owned);
+        <span class="kw">if</span> (cost &lt;= 0 || cost &gt; remaining || slots + 1 &gt; maxSlots) <span class="kw">continue</span>;
+        <span class="kw">const</span> ps = <span class="fn">bpScore</span>(s, phase);
+        <span class="kw">if</span> (ps &lt;= 0) <span class="kw">continue</span>;
+        <span class="kw">const</span> val = filling ? ps / cost : ps;
+        <span class="kw">if</span> (val &gt; bestVal) { bestVal = val; bestKey = k; }
+      }
+      <span class="kw">if</span> (bestKey) { remaining -= <span class="fn">emitChain</span>(bestKey, owned, changes); <span class="kw">continue</span>; }
+      <span class="kw">if</span> (maxSells &gt; 0 &amp;&amp; sellCount &lt; maxSells &amp;&amp; owned.size &gt;= maxSlots) {
+        <span class="kw">let</span> worstKey: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>, worstPS = Infinity;
+        owned.forEach(k =&gt; {
+          <span class="kw">if</span> (soldInPhase.has(k)) <span class="kw">return</span>;
+          <span class="kw">const</span> ps = scoredMap[k] ? <span class="fn">bpScore</span>(scoredMap[k], phase) : 0;
+          <span class="kw">if</span> (ps &lt; worstPS) { worstPS = ps; worstKey = k; }
+        });
+        <span class="kw">if</span> (!worstKey) <span class="kw">break</span>;
+        <span class="kw">const</span> refund = Math.floor((itemMap[worstKey]?.tier ?? 0) / 2);
+        <span class="kw">const</span> test = <span class="kw">new</span> <span class="ty">Set</span>(owned); test.delete(worstKey);
+        <span class="kw">const</span> tb = remaining + refund;
+        <span class="kw">let</span> swapKey: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>, swapPS = -Infinity;
+        <span class="kw">for</span> (<span class="kw">const</span> k <span class="kw">of</span> Object.keys(scoredMap)) {
+          <span class="kw">const</span> s = scoredMap[k];
+          <span class="kw">if</span> (test.has(k) || <span class="fn">isSubsumed</span>(k, test) || soldInPhase.has(k)) <span class="kw">continue</span>;
+          <span class="kw">const</span> cost = <span class="fn">chainCost</span>(k, test);
+          <span class="kw">if</span> (cost &lt;= 0 || cost &gt; tb || test.size + 1 &gt; maxSlots) <span class="kw">continue</span>;
+          <span class="kw">const</span> ps = <span class="fn">bpScore</span>(s, phase);
+          <span class="kw">if</span> (ps &gt; swapPS) { swapPS = ps; swapKey = k; }
+        }
+        <span class="kw">if</span> (swapKey &amp;&amp; swapPS &gt; worstPS * 2.0) {
+          owned.delete(worstKey); soldInPhase.add(worstKey);
+          remaining += refund; sellCount++;
+          changes.push({ action: <span class="st">'sell'</span>, key: worstKey, refund });
+        } <span class="kw">else</span> { <span class="kw">break</span>; }
+      } <span class="kw">else</span> { <span class="kw">break</span>; }
+    }
+    <span class="kw">return</span> { changes, owned, remaining };
+  }
+
+  <span class="kw">function</span> <span class="fn">greedyAssist</span>(mainOwned: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;, globalUsed: <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;,
+    budget: <span class="kw">number</span>, maxSlots: <span class="kw">number</span>, key: <span class="st">'ally'</span> | <span class="st">'enemy'</span>) {
+    <span class="kw">const</span> tag   = key === <span class="st">'ally'</span> ? <span class="st">'assist_importance'</span> : <span class="st">'counter_importance'</span>;
+    <span class="kw">const</span> local = <span class="kw">new</span> <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;();
+    <span class="kw">let</span> remaining = budget;
+    <span class="kw">const</span> changes: <span class="ty">BuildChange</span>[] = [];
+    <span class="kw">for</span> (<span class="kw">let</span> i = 0; i &lt; 10; i++) {
+      <span class="kw">if</span> (local.size &gt;= maxSlots) <span class="kw">break</span>;
+      <span class="kw">let</span> bestKey: <span class="kw">string</span> | <span class="kw">null</span> = <span class="kw">null</span>, bestScore = -Infinity;
+      <span class="kw">for</span> (<span class="kw">const</span> k <span class="kw">of</span> Object.keys(scoredMap)) {
+        <span class="kw">const</span> s = scoredMap[k];
+        <span class="kw">if</span> (mainOwned.has(k) || globalUsed.has(k) || local.has(k)) <span class="kw">continue</span>;
+        <span class="kw">if</span> (!itemMap[k] || itemMap[k].tier &gt; remaining) <span class="kw">continue</span>;
+        <span class="kw">if</span> ((s.item.values.self_score[tag] ?? 0) &lt;= 0) <span class="kw">continue</span>;
+        <span class="kw">const</span> score = key === <span class="st">'ally'</span> ? s.allyScore * 0.75 : s.enemyScore * 0.75;
+        <span class="kw">if</span> (score &gt; bestScore &amp;&amp; score &gt; 0) { bestScore = score; bestKey = k; }
+      }
+      <span class="kw">if</span> (!bestKey) <span class="kw">break</span>;
+      local.add(bestKey); globalUsed.add(bestKey);
+      remaining -= itemMap[bestKey].tier;
+      changes.push({ action: <span class="st">'buy'</span>, key: bestKey, cost: itemMap[bestKey].tier });
+    }
+    <span class="kw">return</span> { changes };
+  }
+
+  <span class="kw">let</span> owned = <span class="kw">new</span> <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;(), remainingBudget = 0;
+  <span class="kw">const</span> phaseResults: <span class="ty">PhaseResult</span>[] = [];
+  <span class="kw">const</span> globalAssist = <span class="kw">new</span> <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;(), globalCounter = <span class="kw">new</span> <span class="ty">Set</span>&lt;<span class="kw">string</span>&gt;();
+
+  <span class="kw">for</span> (<span class="kw">const</span> phase <span class="kw">of</span> BUILD_PHASES) {
+    remainingBudget += phase.addBudget;
+    <span class="kw">const</span> { changes, owned: newOwned, remaining: newBudget } =
+      <span class="fn">greedyMain</span>(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells);
+    owned = newOwned; remainingBudget = newBudget;
+    <span class="kw">const</span> side = Math.floor(phase.addBudget / 2);
+    phaseResults.push({
+      phase: phase.name, changes,
+      assistChanges:  <span class="fn">greedyAssist</span>(owned, globalAssist,  side, 2, <span class="st">'ally'</span>).changes,
+      counterChanges: <span class="fn">greedyAssist</span>(owned, globalCounter, side, 2, <span class="st">'enemy'</span>).changes,
+    });
+  }
+  <span class="kw">return</span> phaseResults;
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ BUILDPATHVIEW ═══════════════════ -->
+<div class="file-section" id="buildpathview">
+  <div class="file-header">
+    <span class="file-tag tag-prebuilt">Pre-Written</span>
+    <span class="file-path">src/components/calculator/BuildPathView.tsx</span>
+  </div>
+  <div class="file-desc">Renders the phase-by-phase build path guide. Copy verbatim.</div>
+<pre>
+<span class="cm">// src/components/calculator/BuildPathView.tsx — PRE-WRITTEN</span>
+<span class="kw">import type</span> { <span class="ty">PhaseResult</span>, <span class="ty">BuildChange</span> } <span class="kw">from</span> <span class="st">'../../utils/buildPath'</span>;
+<span class="kw">import type</span> { <span class="ty">Item</span> } <span class="kw">from</span> <span class="st">'../../types'</span>;
+<span class="kw">import</span> { assetPath } <span class="kw">from</span> <span class="st">'../../utils/assetPath'</span>;
+
+<span class="kw">interface</span> <span class="ty">Props</span> {
+  phases:  <span class="ty">PhaseResult</span>[];
+  itemMap: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Item</span>&gt;;
+}
+
+<span class="kw">function</span> <span class="fn">ChangeRow</span>({ change, itemMap }: { change: <span class="ty">BuildChange</span>; itemMap: <span class="ty">Record</span>&lt;<span class="kw">string</span>, <span class="ty">Item</span>&gt; }) {
+  <span class="kw">const</span> item = itemMap[change.key];
+  <span class="kw">const</span> color = change.action === <span class="st">'sell'</span>    ? <span class="st">'text-red-400'</span>
+               : change.action === <span class="st">'upgrade'</span> ? <span class="st">'text-yellow-400'</span>
+               :                                 <span class="st">'text-green-400'</span>;
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"flex items-center gap-2 py-1"</span>&gt;
+      {item?.image_path &amp;&amp; (
+        &lt;img src={<span class="fn">assetPath</span>(item.image_path)} className=<span class="st">"w-6 h-6 rounded"</span> alt="" /&gt;
+      )}
+      &lt;span className={<span class="st">`text-xs font-mono ${color}`</span>}&gt;
+        [{change.action.toUpperCase()}]
+      &lt;/span&gt;
+      &lt;span className=<span class="st">"text-sm text-slate-300"</span>&gt;{item?.name ?? change.key}&lt;/span&gt;
+      {change.cost != <span class="kw">null</span> &amp;&amp; (
+        &lt;span className=<span class="st">"text-xs text-slate-500 ml-auto"</span>&gt;{change.cost} souls&lt;/span&gt;
+      )}
+      {change.refund != <span class="kw">null</span> &amp;&amp; (
+        &lt;span className=<span class="st">"text-xs text-red-400 ml-auto"</span>&gt;+{change.refund} refund&lt;/span&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+<span class="kw">export default function</span> <span class="fn">BuildPathView</span>({ phases, itemMap }: <span class="ty">Props</span>) {
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"space-y-4"</span>&gt;
+      {phases.map(phase =&gt; (
+        &lt;div key={phase.phase} className=<span class="st">"bg-slate-800 rounded-lg overflow-hidden"</span>&gt;
+          &lt;div className=<span class="st">"bg-slate-700 px-4 py-2 font-semibold text-sm text-white"</span>&gt;
+            {phase.phase}
+          &lt;/div&gt;
+          &lt;div className=<span class="st">"grid grid-cols-3 gap-4 p-4"</span>&gt;
+            &lt;div&gt;
+              &lt;div className=<span class="st">"text-xs text-slate-500 font-semibold uppercase mb-2"</span>&gt;Main Build&lt;/div&gt;
+              {phase.changes.length === 0
+                ? &lt;div className=<span class="st">"text-slate-600 text-xs"</span>&gt;No purchases&lt;/div&gt;
+                : phase.changes.map((c, i) =&gt; (
+                    &lt;<span class="ty">ChangeRow</span> key={i} change={c} itemMap={itemMap} /&gt;
+                  ))
+              }
+            &lt;/div&gt;
+            &lt;div&gt;
+              &lt;div className=<span class="st">"text-xs text-slate-500 font-semibold uppercase mb-2"</span>&gt;Assist&lt;/div&gt;
+              {phase.assistChanges.map((c, i) =&gt; (
+                &lt;<span class="ty">ChangeRow</span> key={i} change={c} itemMap={itemMap} /&gt;
+              ))}
+            &lt;/div&gt;
+            &lt;div&gt;
+              &lt;div className=<span class="st">"text-xs text-slate-500 font-semibold uppercase mb-2"</span>&gt;Counter&lt;/div&gt;
+              {phase.counterChanges.map((c, i) =&gt; (
+                &lt;<span class="ty">ChangeRow</span> key={i} change={c} itemMap={itemMap} /&gt;
+              ))}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ SETTINGS PAGE ═══════════════════ -->
+<div class="file-section" id="settings-page">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/SettingsPage.tsx</span>
+  </div>
+  <div class="file-desc">Mode toggle, export/import, reset. Module 11.</div>
+<pre>
+<span class="cm">// src/pages/SettingsPage.tsx</span>
+<span class="kw">import</span> { useRef } <span class="kw">from</span> <span class="st">'react'</span>;
+<span class="kw">import</span> { useDataStore } <span class="kw">from</span> <span class="st">'../store/dataStore'</span>;
+<span class="kw">import</span> { Switch }  <span class="kw">from</span> <span class="st">'@/components/ui/switch'</span>;
+<span class="kw">import</span> { Button }  <span class="kw">from</span> <span class="st">'@/components/ui/button'</span>;
+<span class="kw">import</span> { Label }   <span class="kw">from</span> <span class="st">'@/components/ui/label'</span>;
+<span class="kw">import type</span> { <span class="ty">AppData</span> } <span class="kw">from</span> <span class="st">'../types'</span>;
+
+<span class="kw">export default function</span> <span class="fn">SettingsPage</span>() {
+  <span class="kw">const</span> { mode, activateCustomMode, setMode, exportData, importData, resetToDefaults } = useDataStore();
+  <span class="kw">const</span> fileRef = useRef&lt;HTMLInputElement&gt;(<span class="kw">null</span>);
+
+  <span class="kw">function</span> <span class="fn">handleImport</span>(e: React.ChangeEvent&lt;HTMLInputElement&gt;) {
+    <span class="kw">const</span> file = e.target.files?.[0];
+    <span class="kw">if</span> (!file) <span class="kw">return</span>;
+    <span class="kw">const</span> reader = <span class="kw">new</span> FileReader();
+    reader.onload = (ev) =&gt; {
+      <span class="kw">try</span> {
+        <span class="kw">const</span> data = JSON.parse(ev.target?.result <span class="kw">as</span> <span class="kw">string</span>) <span class="kw">as</span> <span class="ty">AppData</span>;
+        <span class="fn">importData</span>(data);
+        alert(<span class="st">'Data imported successfully!'</span>);
+      } <span class="kw">catch</span> {
+        alert(<span class="st">'Failed to import: invalid JSON file.'</span>);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = <span class="st">''</span>;
+  }
+
+  <span class="kw">function</span> <span class="fn">handleReset</span>() {
+    <span class="kw">if</span> (confirm(<span class="st">'This will delete all your custom data and revert to defaults. Are you sure?'</span>)) {
+      <span class="fn">resetToDefaults</span>();
+    }
+  }
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="st">"max-w-lg space-y-8"</span>&gt;
+      &lt;h1 className=<span class="st">"text-2xl font-bold"</span>&gt;Settings&lt;/h1&gt;
+
+      &lt;section className=<span class="st">"bg-slate-800 rounded-lg p-6 space-y-4"</span>&gt;
+        &lt;h2 className=<span class="st">"font-semibold text-lg"</span>&gt;Data Mode&lt;/h2&gt;
+        &lt;div className=<span class="st">"flex items-center gap-3"</span>&gt;
+          &lt;<span class="ty">Switch</span>
+            checked={mode === <span class="st">'custom'</span>}
+            onCheckedChange={(v) =&gt; v ? <span class="fn">activateCustomMode</span>() : <span class="fn">setMode</span>(<span class="st">'defaults'</span>)}
+          /&gt;
+          &lt;<span class="ty">Label</span>&gt;{mode === <span class="st">'custom'</span> ? <span class="st">'Using My Custom Data'</span> : <span class="st">'Using Defaults'</span>}&lt;/<span class="ty">Label</span>&gt;
+        &lt;/div&gt;
+        &lt;p className=<span class="st">"text-slate-400 text-sm"</span>&gt;
+          In <strong>Defaults</strong> mode the data is read-only and always reflects the latest deployed weights.
+          Switch to <strong>Custom</strong> to edit heroes, items, and tags — your changes are saved locally in your browser.
+        &lt;/p&gt;
+      &lt;/section&gt;
+
+      &lt;section className=<span class="st">"bg-slate-800 rounded-lg p-6 space-y-4"</span>&gt;
+        &lt;h2 className=<span class="st">"font-semibold text-lg"</span>&gt;Export / Import&lt;/h2&gt;
+        &lt;div className=<span class="st">"flex gap-3"</span>&gt;
+          &lt;<span class="ty">Button</span> onClick={exportData} disabled={mode !== <span class="st">'custom'</span>} variant=<span class="st">"outline"</span>&gt;
+            Export My Data
+          &lt;/<span class="ty">Button</span>&gt;
+          &lt;<span class="ty">Button</span> onClick={() =&gt; fileRef.current?.click()} variant=<span class="st">"outline"</span>&gt;
+            Import Data
+          &lt;/<span class="ty">Button</span>&gt;
+          &lt;input ref={fileRef} type=<span class="st">"file"</span> accept=<span class="st">".json"</span> className=<span class="st">"hidden"</span>
+            onChange={handleImport} /&gt;
+        &lt;/div&gt;
+        &lt;p className=<span class="st">"text-slate-400 text-sm"</span>&gt;
+          Export your custom data as a JSON file to back it up or transfer to another device.
+          Import a previously exported file to restore your data.
+        &lt;/p&gt;
+      &lt;/section&gt;
+
+      &lt;section className=<span class="st">"bg-slate-800 rounded-lg p-6 space-y-4"</span>&gt;
+        &lt;h2 className=<span class="st">"font-semibold text-lg text-red-400"</span>&gt;Reset&lt;/h2&gt;
+        &lt;<span class="ty">Button</span> variant=<span class="st">"destructive"</span> onClick={handleReset}&gt;Reset to Defaults&lt;/<span class="ty">Button</span>&gt;
+        &lt;p className=<span class="st">"text-slate-400 text-sm"</span>&gt;
+          Deletes all custom data from your browser and reverts to the bundled defaults. This cannot be undone — export first if you want to keep your data.
+        &lt;/p&gt;
+      &lt;/section&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ VITE CONFIG ═══════════════════ -->
+<div class="file-section" id="vite-config">
+  <div class="file-header">
+    <span class="file-tag tag-config">Config</span>
+    <span class="file-path">vite.config.ts</span>
+  </div>
+<pre>
+<span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="st">'vite'</span>
+<span class="kw">import</span> react <span class="kw">from</span> <span class="st">'@vitejs/plugin-react'</span>
+<span class="kw">import</span> tailwindcss <span class="kw">from</span> <span class="st">'@tailwindcss/vite'</span>
+
+<span class="kw">export default</span> defineConfig({
+  plugins: [
+    tailwindcss(),
+    react(),
+  ],
+  base: <span class="st">'/deadlock-advisor/'</span>,
+})
+</pre>
+</div>
+
+<!-- ═══════════════════ DEPLOY.YML ═══════════════════ -->
+<div class="file-section" id="deploy-yml">
+  <div class="file-header">
+    <span class="file-tag tag-config">Config</span>
+    <span class="file-path">.github/workflows/deploy.yml</span>
+  </div>
+<pre>
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+</pre>
+</div>
+
+<p style="color:#4a5568; font-size:13px; margin-top:40px; padding-top:20px; border-top: 1px solid #2a2b40;">
+  The remaining pages (TagsPage, ItemsPage, ItemDetailPage, HeroesPage, HeroDetailPage, CalculatorPage) follow the same patterns shown above. Refer to the lesson plan module descriptions for what each page needs, and use the patterns from SettingsPage (store access, Zustand hooks, local state copy for editing) as the template.
+</p>
+
+</main>
+</div>
+</body>
+</html>
