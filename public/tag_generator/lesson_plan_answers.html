@@ -1036,9 +1036,955 @@ jobs:
 </pre>
 </div>
 
-<p style="color:#4a5568; font-size:13px; margin-top:40px; padding-top:20px; border-top: 1px solid #2a2b40;">
-  The remaining pages (TagsPage, ItemsPage, ItemDetailPage, HeroesPage, HeroDetailPage, CalculatorPage) follow the same patterns shown above. Refer to the lesson plan module descriptions for what each page needs, and use the patterns from SettingsPage (store access, Zustand hooks, local state copy for editing) as the template.
-</p>
+<!-- ═══════════════════ ITEMS PAGE ═══════════════════ -->
+<div class="file-section" id="items-page">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/ItemsPage.tsx</span>
+  </div>
+  <div class="file-desc">Item grid with category filter, search, and tier label badges. Module 7. Clicking navigates to ItemDetailPage.</div>
+<pre>
+// src/pages/ItemsPage.tsx
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { useDataStore } from '../store/dataStore';
+import { assetPath } from '../utils/assetPath';
+
+const CATEGORIES = ['All', 'Weapon', 'Vitality', 'Spirit'] as const;
+const TIER_LABELS: Record&lt;number, string&gt; = { 800: 'T1', 1600: 'T2', 3200: 'T3', 6400: 'T4', 9999: 'SB' };
+const CATEGORY_COLORS: Record&lt;string, string&gt; = {
+  Weapon:   'bg-orange-900 text-orange-300',
+  Vitality: 'bg-green-900 text-green-300',
+  Spirit:   'bg-purple-900 text-purple-300',
+};
+
+export default function ItemsPage() {
+  const navigate = useNavigate();
+  const data = useDataStore(s =&gt; s.getData());
+  const [search, setSearch]     = useState('');
+  const [category, setCategory] = useState&lt;typeof CATEGORIES[number]&gt;('All');
+
+  const items = useMemo(() =&gt; {
+    return Object.values(data.items)
+      .filter(i =&gt; category === 'All' || i.category === category)
+      .filter(i =&gt; i.name.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) =&gt; a.tier - b.tier || a.name.localeCompare(b.name));
+  }, [data, category, search]);
+
+  return (
+    &lt;div&gt;
+      &lt;div className="flex items-center gap-4 mb-6"&gt;
+        &lt;h1 className="text-2xl font-bold"&gt;Items&lt;/h1&gt;
+        &lt;Input
+          value={search}
+          onChange={e =&gt; setSearch(e.target.value)}
+          placeholder="Search items..."
+          className="max-w-xs"
+        /&gt;
+        &lt;div className="flex gap-1"&gt;
+          {CATEGORIES.map(cat =&gt; (
+            &lt;button
+              key={cat}
+              onClick={() =&gt; setCategory(cat)}
+              className={`px-3 py-1 rounded text-sm ${
+                category === cat ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300'
+              }`}
+            &gt;
+              {cat}
+            &lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"&gt;
+        {items.map(item =&gt; (
+          &lt;div
+            key={item.normalized_name}
+            onClick={() =&gt; navigate(`/items/${item.normalized_name}`)}
+            className="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700 transition-colors"
+          &gt;
+            &lt;img
+              src={assetPath(item.image_path)}
+              className="w-full h-14 object-contain"
+              alt={item.name}
+            /&gt;
+            &lt;div className="text-xs font-medium text-slate-200 mt-2 truncate"&gt;{item.name}&lt;/div&gt;
+            &lt;div className="flex justify-between mt-1"&gt;
+              &lt;span className={`text-xs px-1.5 py-0.5 rounded ${CATEGORY_COLORS[item.category] ?? ''}`}&gt;
+                {item.category[0]}
+              &lt;/span&gt;
+              &lt;span className="text-xs text-slate-400"&gt;
+                {TIER_LABELS[item.tier] ?? item.tier}
+              &lt;/span&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+
+      {items.length === 0 &amp;&amp; (
+        &lt;div className="text-slate-500 text-center py-12"&gt;No items match your filter.&lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ HEROES PAGE ═══════════════════ -->
+<div class="file-section" id="heroes-page">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/HeroesPage.tsx</span>
+  </div>
+  <div class="file-desc">Hero portrait grid with search. Module 8. Clicking navigates to HeroDetailPage.</div>
+<pre>
+// src/pages/HeroesPage.tsx
+import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
+import { useDataStore } from '../store/dataStore';
+import { assetPath } from '../utils/assetPath';
+
+export default function HeroesPage() {
+  const navigate = useNavigate();
+  const data = useDataStore(s =&gt; s.getData());
+  const [search, setSearch] = useState('');
+
+  const heroes = useMemo(() =&gt; {
+    return Object.values(data.heroes)
+      .filter(h =&gt; h.eng_name.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) =&gt; a.eng_name.localeCompare(b.eng_name));
+  }, [data, search]);
+
+  return (
+    &lt;div&gt;
+      &lt;div className="flex items-center gap-4 mb-6"&gt;
+        &lt;h1 className="text-2xl font-bold"&gt;Heroes&lt;/h1&gt;
+        &lt;Input
+          value={search}
+          onChange={e =&gt; setSearch(e.target.value)}
+          placeholder="Search heroes..."
+          className="max-w-xs"
+        /&gt;
+      &lt;/div&gt;
+
+      &lt;div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4"&gt;
+        {heroes.map(hero =&gt; (
+          &lt;div
+            key={hero.normalized_name}
+            onClick={() =&gt; navigate(`/heroes/${hero.normalized_name}`)}
+            className="bg-slate-800 rounded-lg p-3 cursor-pointer hover:bg-slate-700 transition-colors text-center"
+          &gt;
+            &lt;img
+              src={assetPath(hero.image_path)}
+              className="w-full h-20 object-contain mx-auto"
+              alt={hero.eng_name}
+            /&gt;
+            &lt;div className="text-sm font-medium mt-2"&gt;{hero.eng_name}&lt;/div&gt;
+            &lt;div className="text-xs text-slate-400"&gt;
+              {hero.builds.length} build{hero.builds.length !== 1 ? 's' : ''}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ ITEM DETAIL PAGE ═══════════════════ -->
+<div class="file-section" id="item-detail">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/ItemDetailPage.tsx</span>
+  </div>
+  <div class="file-desc">Per-tag weight editor for one item. Works only in custom mode. Module 9. KEY PATTERN: keep a local copy of weights in useState, write back to the store only on Save.</div>
+<pre>
+// src/pages/ItemDetailPage.tsx
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useDataStore } from '../store/dataStore';
+import { assetPath } from '../utils/assetPath';
+
+export default function ItemDetailPage() {
+  const { name } = useParams&lt;{ name: string }&gt;();
+  const navigate = useNavigate();
+  const { getData, updateItem, mode } = useDataStore();
+  const data = getData();
+  const item = name ? data.items[name] : undefined;
+
+  // Local editable copy — only written to the store when user clicks Save
+  const [weights, setWeights] = useState(
+    () =&gt; ({ ...item?.values.self_score ?? {} })
+  );
+  const [saved, setSaved] = useState(false);
+
+  if (!item) return &lt;div className="p-8 text-slate-400"&gt;Item not found.&lt;/div&gt;;
+
+  function handleSave() {
+    if (!item) return;
+    updateItem({ ...item, values: { self_score: weights } });
+    setSaved(true);
+    setTimeout(() =&gt; setSaved(false), 2000);
+  }
+
+  return (
+    &lt;div className="max-w-2xl"&gt;
+      &lt;button
+        onClick={() =&gt; navigate(-1)}
+        className="text-slate-400 hover:text-white mb-4 text-sm"
+      &gt;
+        ← Back to Items
+      &lt;/button&gt;
+
+      &lt;div className="flex items-center gap-4 mb-6"&gt;
+        &lt;img src={assetPath(item.image_path)} className="w-16 h-16 object-contain" alt={item.name} /&gt;
+        &lt;div&gt;
+          &lt;h1 className="text-2xl font-bold"&gt;{item.name}&lt;/h1&gt;
+          &lt;div className="text-slate-400 text-sm"&gt;{item.category} · Tier {item.tier}&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {mode !== 'custom' &amp;&amp; (
+        &lt;div className="bg-amber-900/30 border border-amber-700 rounded-lg p-3 mb-6 text-sm text-amber-300"&gt;
+          Switch to Custom mode in Settings to edit weights.
+        &lt;/div&gt;
+      )}
+
+      &lt;div className="bg-slate-800 rounded-lg overflow-hidden mb-6"&gt;
+        &lt;div className="bg-slate-700 px-4 py-2 text-sm font-semibold"&gt;
+          Tag Weights — self_score
+        &lt;/div&gt;
+        &lt;div className="divide-y divide-slate-700"&gt;
+          {data.tags.map(tag =&gt; {
+            const w = weights[tag.code];
+            return (
+              &lt;div key={tag.code} className="flex items-center gap-4 px-4 py-2"&gt;
+                &lt;div className="flex-1"&gt;
+                  &lt;div className="text-sm font-medium"&gt;{tag.name}&lt;/div&gt;
+                  &lt;div className="text-xs text-slate-500 font-mono"&gt;{tag.code}&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;Input
+                  type="number"
+                  step="0.1"
+                  disabled={mode !== 'custom'}
+                  value={w ?? ''}
+                  placeholder="null"
+                  onChange={e =&gt; {
+                    const v = e.target.value === '' ? null : parseFloat(e.target.value);
+                    setWeights(prev =&gt; ({ ...prev, [tag.code]: v }));
+                  }}
+                  className="w-24 text-right"
+                /&gt;
+              &lt;/div&gt;
+            );
+          })}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {mode === 'custom' &amp;&amp; (
+        &lt;Button onClick={handleSave}&gt;
+          {saved ? '✓ Saved!' : 'Save Changes'}
+        &lt;/Button&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ HERO DETAIL PAGE ═══════════════════ -->
+<div class="file-section" id="hero-detail">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/HeroDetailPage.tsx</span>
+  </div>
+  <div class="file-desc">Per-build weight editor for a hero. Four weight grids per build (ally/self/enemy weights + self_score). Module 10.</div>
+<pre>
+// src/pages/HeroDetailPage.tsx
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useDataStore } from '../store/dataStore';
+import { assetPath } from '../utils/assetPath';
+import type { HeroBuild } from '../types';
+
+// The four weight tables every build has
+const WEIGHT_FIELDS = [
+  { key: 'ally_weight'  as const, label: 'Ally Weight'  },
+  { key: 'self_weight'  as const, label: 'Self Weight'  },
+  { key: 'enemy_weight' as const, label: 'Enemy Weight' },
+  { key: 'self_score'   as const, label: 'Self Score'   },
+];
+
+export default function HeroDetailPage() {
+  const { name } = useParams&lt;{ name: string }&gt;();
+  const navigate = useNavigate();
+  const { getData, updateHero, mode } = useDataStore();
+  const data = getData();
+  const hero = name ? data.heroes[name] : undefined;
+
+  // Deep-clone builds into local state — edits don't touch the store until Save
+  const [builds, setBuilds] = useState&lt;HeroBuild[]&gt;(
+    () =&gt; hero ? JSON.parse(JSON.stringify(hero.builds)) : []
+  );
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [saved, setSaved] = useState(false);
+
+  if (!hero) return &lt;div className="p-8 text-slate-400"&gt;Hero not found.&lt;/div&gt;;
+
+  const build = builds[activeIdx];
+
+  function setWeight(
+    field: typeof WEIGHT_FIELDS[number]['key'],
+    tagCode: string,
+    value: number | null
+  ) {
+    setBuilds(prev =&gt; {
+      const next: HeroBuild[] = JSON.parse(JSON.stringify(prev));
+      next[activeIdx].values[field] = {
+        ...next[activeIdx].values[field],
+        [tagCode]: value,
+      };
+      return next;
+    });
+  }
+
+  function handleSave() {
+    updateHero({ ...hero, builds });
+    setSaved(true);
+    setTimeout(() =&gt; setSaved(false), 2000);
+  }
+
+  return (
+    &lt;div className="max-w-4xl"&gt;
+      &lt;button onClick={() =&gt; navigate(-1)} className="text-slate-400 hover:text-white mb-4 text-sm"&gt;
+        ← Back to Heroes
+      &lt;/button&gt;
+
+      &lt;div className="flex items-center gap-4 mb-6"&gt;
+        &lt;img src={assetPath(hero.image_path)} className="w-16 h-16 object-contain" alt={hero.eng_name} /&gt;
+        &lt;div&gt;
+          &lt;h1 className="text-2xl font-bold"&gt;{hero.eng_name}&lt;/h1&gt;
+          &lt;div className="text-slate-400 text-sm"&gt;{hero.builds.length} build(s)&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {mode !== 'custom' &amp;&amp; (
+        &lt;div className="bg-amber-900/30 border border-amber-700 rounded-lg p-3 mb-4 text-sm text-amber-300"&gt;
+          Switch to Custom mode in Settings to edit weights.
+        &lt;/div&gt;
+      )}
+
+      {/* Build selector tabs */}
+      &lt;div className="flex gap-2 mb-4"&gt;
+        {builds.map((b, i) =&gt; (
+          &lt;button
+            key={b.normalized_build_name}
+            onClick={() =&gt; setActiveIdx(i)}
+            className={`px-3 py-1.5 rounded text-sm ${
+              i === activeIdx
+                ? 'bg-indigo-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          &gt;
+            {b.name}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+
+      {/* Four weight grids in a 2×2 layout */}
+      &lt;div className="grid grid-cols-2 gap-4 mb-6"&gt;
+        {WEIGHT_FIELDS.map(({ key, label }) =&gt; (
+          &lt;div key={key} className="bg-slate-800 rounded-lg overflow-hidden"&gt;
+            &lt;div className="bg-slate-700 px-4 py-2 text-sm font-semibold"&gt;{label}&lt;/div&gt;
+            &lt;div className="divide-y divide-slate-700 max-h-64 overflow-y-auto"&gt;
+              {data.tags.map(tag =&gt; {
+                const w = build.values[key][tag.code];
+                return (
+                  &lt;div key={tag.code} className="flex items-center gap-2 px-3 py-1.5"&gt;
+                    &lt;div className="flex-1 text-sm text-slate-300 truncate"&gt;{tag.name}&lt;/div&gt;
+                    &lt;Input
+                      type="number"
+                      step="0.1"
+                      disabled={mode !== 'custom'}
+                      value={w ?? ''}
+                      placeholder="null"
+                      onChange={e =&gt; {
+                        const v = e.target.value === '' ? null : parseFloat(e.target.value);
+                        setWeight(key, tag.code, v);
+                      }}
+                      className="w-20 text-right text-sm"
+                    /&gt;
+                  &lt;/div&gt;
+                );
+              })}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+
+      {mode === 'custom' &amp;&amp; (
+        &lt;Button onClick={handleSave}&gt;{saved ? '✓ Saved!' : 'Save Changes'}&lt;/Button&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ TAGS PAGE ═══════════════════ -->
+<div class="file-section" id="tags-page">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/TagsPage.tsx</span>
+  </div>
+  <div class="file-desc">Drag-to-reorder tag list. Add / edit / delete tags. Uses @dnd-kit/sortable. Module 11. KEY PATTERN: SortableContext wraps the list; useSortable() handles the drag handle on each row.</div>
+<pre>
+// src/pages/TagsPage.tsx
+import { useState } from 'react';
+import {
+  DndContext, closestCenter, PointerSensor, KeyboardSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext, sortableKeyboardCoordinates,
+  verticalListSortingStrategy, useSortable, arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Button } from '@/components/ui/button';
+import { Input }  from '@/components/ui/input';
+import { useDataStore } from '../store/dataStore';
+import type { Tag } from '../types';
+
+// ── Sortable row ──────────────────────────────────────────────
+function SortableRow({
+  tag, canEdit,
+  onEdit, onDelete,
+}: {
+  tag: Tag; canEdit: boolean;
+  onEdit: (t: Tag) =&gt; void;
+  onDelete: (code: string) =&gt; void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: tag.code });
+
+  return (
+    &lt;div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center gap-3 bg-slate-800 rounded-lg px-4 py-3 mb-2"
+    &gt;
+      {canEdit &amp;&amp; (
+        &lt;button
+          {...attributes} {...listeners}
+          className="text-slate-600 hover:text-slate-400 cursor-grab active:cursor-grabbing select-none"
+          title="Drag to reorder"
+        &gt;
+          ⠿
+        &lt;/button&gt;
+      )}
+      &lt;div className="flex-1"&gt;
+        &lt;div className="font-medium text-sm"&gt;{tag.name}&lt;/div&gt;
+        &lt;div className="text-xs text-slate-500 font-mono"&gt;{tag.code}&lt;/div&gt;
+        {tag.description &amp;&amp; (
+          &lt;div className="text-xs text-slate-400 mt-0.5"&gt;{tag.description}&lt;/div&gt;
+        )}
+      &lt;/div&gt;
+      {canEdit &amp;&amp; (
+        &lt;div className="flex gap-2"&gt;
+          &lt;Button variant="ghost" size="sm" onClick={() =&gt; onEdit(tag)}&gt;Edit&lt;/Button&gt;
+          &lt;Button variant="ghost" size="sm"
+            className="text-red-400 hover:text-red-300"
+            onClick={() =&gt; onDelete(tag.code)}
+          &gt;Delete&lt;/Button&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+// ── Edit / New modal ─────────────────────────────────────────
+function TagModal({
+  tag, isNew,
+  onSave, onCancel,
+}: {
+  tag: Tag; isNew: boolean;
+  onSave: (t: Tag) =&gt; void;
+  onCancel: () =&gt; void;
+}) {
+  const [form, setForm] = useState&lt;Tag&gt;({ ...tag });
+  return (
+    &lt;div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"&gt;
+      &lt;div className="bg-slate-800 rounded-xl p-6 w-full max-w-md space-y-4"&gt;
+        &lt;h2 className="font-bold text-lg"&gt;{isNew ? 'New Tag' : 'Edit Tag'}&lt;/h2&gt;
+        &lt;div className="space-y-3"&gt;
+          &lt;div&gt;
+            &lt;label className="text-xs text-slate-400 block mb-1"&gt;Code (snake_case, unique)&lt;/label&gt;
+            &lt;Input value={form.code} disabled={!isNew}
+              onChange={e =&gt; setForm(p =&gt; ({ ...p, code: e.target.value }))}
+              placeholder="e.g. burst_damage" /&gt;
+          &lt;/div&gt;
+          &lt;div&gt;
+            &lt;label className="text-xs text-slate-400 block mb-1"&gt;Display Name&lt;/label&gt;
+            &lt;Input value={form.name}
+              onChange={e =&gt; setForm(p =&gt; ({ ...p, name: e.target.value }))}
+              placeholder="e.g. Burst Damage" /&gt;
+          &lt;/div&gt;
+          &lt;div&gt;
+            &lt;label className="text-xs text-slate-400 block mb-1"&gt;Description (optional)&lt;/label&gt;
+            &lt;Input value={form.description ?? ''}
+              onChange={e =&gt; setForm(p =&gt; ({ ...p, description: e.target.value }))}
+              placeholder="Short description..." /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div className="flex gap-3"&gt;
+          &lt;Button onClick={() =&gt; onSave(form)} disabled={!form.code || !form.name}&gt;
+            {isNew ? 'Create' : 'Update'}
+          &lt;/Button&gt;
+          &lt;Button variant="ghost" onClick={onCancel}&gt;Cancel&lt;/Button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// ── Main page ────────────────────────────────────────────────
+export default function TagsPage() {
+  const { getData, updateTags, mode } = useDataStore();
+  const data = getData();
+
+  const [tags, setTags]     = useState&lt;Tag[]&gt;(() =&gt; [...data.tags]);
+  const [editing, setEditing] = useState&lt;Tag | null&gt;(null);
+  const [isNew, setIsNew]   = useState(false);
+  const [saved, setSaved]   = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over &amp;&amp; active.id !== over.id) {
+      setTags(prev =&gt; {
+        const oldIdx = prev.findIndex(t =&gt; t.code === active.id);
+        const newIdx = prev.findIndex(t =&gt; t.code === over.id);
+        return arrayMove(prev, oldIdx, newIdx);
+      });
+    }
+  }
+
+  function handleSaveOrder() {
+    updateTags(tags);
+    setSaved(true);
+    setTimeout(() =&gt; setSaved(false), 2000);
+  }
+
+  function handleEditSave(updated: Tag) {
+    setTags(prev =&gt;
+      isNew ? [...prev, updated] : prev.map(t =&gt; t.code === updated.code ? updated : t)
+    );
+    setEditing(null);
+    setIsNew(false);
+  }
+
+  function handleDelete(code: string) {
+    if (confirm(`Delete tag "${code}"? Any heroes or items using it will keep the old value until edited.`)) {
+      setTags(prev =&gt; prev.filter(t =&gt; t.code !== code));
+    }
+  }
+
+  const canEdit = mode === 'custom';
+
+  return (
+    &lt;div className="max-w-2xl"&gt;
+      &lt;div className="flex items-center gap-3 mb-6"&gt;
+        &lt;h1 className="text-2xl font-bold"&gt;Tags&lt;/h1&gt;
+        {canEdit &amp;&amp; (
+          &lt;&gt;
+            &lt;Button variant="outline" size="sm"
+              onClick={() =&gt; { setEditing({ code: '', name: '', description: '' }); setIsNew(true); }}&gt;
+              + New Tag
+            &lt;/Button&gt;
+            &lt;Button size="sm" onClick={handleSaveOrder}&gt;
+              {saved ? '✓ Saved!' : 'Save Order'}
+            &lt;/Button&gt;
+          &lt;/&gt;
+        )}
+        {!canEdit &amp;&amp; &lt;span className="text-xs text-slate-500"&gt;Switch to Custom mode to edit&lt;/span&gt;}
+      &lt;/div&gt;
+
+      {editing &amp;&amp; (
+        &lt;TagModal
+          tag={editing}
+          isNew={isNew}
+          onSave={handleEditSave}
+          onCancel={() =&gt; { setEditing(null); setIsNew(false); }}
+        /&gt;
+      )}
+
+      &lt;DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}&gt;
+        &lt;SortableContext items={tags.map(t =&gt; t.code)} strategy={verticalListSortingStrategy}&gt;
+          {tags.map(tag =&gt; (
+            &lt;SortableRow
+              key={tag.code}
+              tag={tag}
+              canEdit={canEdit}
+              onEdit={t =&gt; { setEditing(t); setIsNew(false); }}
+              onDelete={handleDelete}
+            /&gt;
+          ))}
+        &lt;/SortableContext&gt;
+      &lt;/DndContext&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
+
+<!-- ═══════════════════ CALCULATOR PAGE ═══════════════════ -->
+<div class="file-section" id="calc-page">
+  <div class="file-header">
+    <span class="file-tag tag-write">You Write</span>
+    <span class="file-path">src/pages/CalculatorPage.tsx</span>
+  </div>
+  <div class="file-desc">
+    The flagship feature — four phases. Phase A: drag heroes to team. Phase B: top-3 items per category.
+    Phase C: sortable TanStack Table. Phase D: build-path display. Build one phase at a time and test before proceeding.
+  </div>
+<pre>
+// src/pages/CalculatorPage.tsx
+import { useState, useMemo } from 'react';
+import {
+  DndContext, DragOverlay,
+  PointerSensor, useSensor, useSensors,
+  useDraggable, useDroppable,
+  type DragEndEvent, type DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  useReactTable, getCoreRowModel, getSortedRowModel,
+  flexRender, createColumnHelper, type SortingState,
+} from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
+import { useDataStore } from '../store/dataStore';
+import { runCalculation, computeBuildPath } from '../utils/calculator';
+import BuildPathView from '../components/calculator/BuildPathView';
+import { assetPath } from '../utils/assetPath';
+import type { Hero, Item } from '../types';
+import type { BuildResult, ItemScore } from '../utils/calculator';
+
+// NOTE: computeBuildPath is imported from utils/buildPath, not calculator.
+// Fix the import above to:
+//   import { runCalculation } from '../utils/calculator';
+//   import { computeBuildPath } from '../utils/buildPath';
+
+interface TeamState {
+  self:    Hero | null;
+  allies:  Hero[];
+  enemies: Hero[];
+}
+
+// ── Draggable hero card (hero pool) ──────────────────────────
+function DraggableHeroCard({ hero }: { hero: Hero }) {
+  const { attributes, listeners, setNodeRef, isDragging } =
+    useDraggable({ id: hero.normalized_name });
+  return (
+    &lt;div
+      ref={setNodeRef} {...attributes} {...listeners}
+      style={{ opacity: isDragging ? 0.3 : 1 }}
+      className="w-14 h-14 rounded overflow-hidden cursor-grab active:cursor-grabbing bg-slate-700 shrink-0"
+      title={hero.eng_name}
+    &gt;
+      &lt;img src={assetPath(hero.mini_image_path)} className="w-full h-full object-cover" alt={hero.eng_name} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+// ── Drop zone (Self / Allies / Enemies) ──────────────────────
+function DropZone({
+  id, label, heroes, onRemove,
+}: {
+  id: string; label: string;
+  heroes: (Hero | null)[];
+  onRemove: (name: string) =&gt; void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    &lt;div
+      ref={setNodeRef}
+      className={`bg-slate-800 rounded-lg p-3 min-h-20 border-2 transition-colors ${
+        isOver ? 'border-indigo-400' : 'border-transparent'
+      }`}
+    &gt;
+      &lt;div className="text-xs text-slate-400 font-semibold uppercase mb-2"&gt;{label}&lt;/div&gt;
+      &lt;div className="flex flex-wrap gap-2"&gt;
+        {heroes.map((h, i) =&gt;
+          h ? (
+            &lt;div key={h.normalized_name} className="relative group w-12 h-12"&gt;
+              &lt;img src={assetPath(h.mini_image_path)} className="w-full h-full object-cover rounded" alt={h.eng_name} /&gt;
+              &lt;button
+                onClick={() =&gt; onRemove(h.normalized_name)}
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full text-white text-xs opacity-0 group-hover:opacity-100 flex items-center justify-center"
+              &gt;×&lt;/button&gt;
+            &lt;/div&gt;
+          ) : (
+            &lt;div key={i} className="w-12 h-12 border-2 border-dashed border-slate-600 rounded" /&gt;
+          )
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// ── TanStack Table for item scores ───────────────────────────
+const colHelper = createColumnHelper&lt;ItemScore&gt;();
+const COLUMNS = [
+  colHelper.accessor(row =&gt; row.item.name, {
+    id: 'name', header: 'Item',
+    cell: ({ row }) =&gt; (
+      &lt;div className="flex items-center gap-2"&gt;
+        &lt;img src={assetPath(row.original.item.image_path)} className="w-6 h-6 object-contain" alt="" /&gt;
+        &lt;span className="text-sm"&gt;{row.original.item.name}&lt;/span&gt;
+      &lt;/div&gt;
+    ),
+  }),
+  colHelper.accessor(row =&gt; row.item.category, { id: 'cat', header: 'Cat',
+    cell: ({ getValue }) =&gt; &lt;span className="text-xs text-slate-400"&gt;{getValue()}&lt;/span&gt; }),
+  colHelper.accessor(row =&gt; row.item.tier, { id: 'tier', header: 'Tier',
+    cell: ({ getValue }) =&gt; &lt;span className="text-xs text-slate-400"&gt;{getValue()}&lt;/span&gt; }),
+  colHelper.accessor('allyScore',  { header: 'Ally',  cell: ({ getValue }) =&gt; getValue().toFixed(2) }),
+  colHelper.accessor('selfScore',  { header: 'Self',  cell: ({ getValue }) =&gt; getValue().toFixed(2) }),
+  colHelper.accessor('enemyScore', { header: 'Enemy', cell: ({ getValue }) =&gt; getValue().toFixed(2) }),
+  colHelper.accessor('total', { header: 'Total',
+    cell: ({ getValue }) =&gt; &lt;span className="font-bold"&gt;{getValue().toFixed(2)}&lt;/span&gt; }),
+];
+
+function ItemTable({ result }: { result: BuildResult }) {
+  const [sorting, setSorting] = useState&lt;SortingState&gt;([{ id: 'total', desc: true }]);
+  const table = useReactTable({
+    data: result.itemScores,
+    columns: COLUMNS,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+  return (
+    &lt;div className="overflow-x-auto"&gt;
+      &lt;table className="w-full text-sm"&gt;
+        &lt;thead&gt;
+          {table.getHeaderGroups().map(hg =&gt; (
+            &lt;tr key={hg.id} className="border-b border-slate-700"&gt;
+              {hg.headers.map(h =&gt; (
+                &lt;th
+                  key={h.id}
+                  onClick={h.column.getToggleSortingHandler()}
+                  className="px-3 py-2 text-left text-xs text-slate-400 font-semibold cursor-pointer select-none hover:text-slate-200"
+                &gt;
+                  {flexRender(h.column.columnDef.header, h.getContext())}
+                  {h.column.getIsSorted() === 'asc' ? ' ▲' : h.column.getIsSorted() === 'desc' ? ' ▼' : ''}
+                &lt;/th&gt;
+              ))}
+            &lt;/tr&gt;
+          ))}
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+          {table.getRowModel().rows.slice(0, 40).map(row =&gt; (
+            &lt;tr key={row.id} className="border-b border-slate-800 hover:bg-slate-800/50"&gt;
+              {row.getVisibleCells().map(cell =&gt; (
+                &lt;td key={cell.id} className="px-3 py-2"&gt;
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                &lt;/td&gt;
+              ))}
+            &lt;/tr&gt;
+          ))}
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────
+const CATEGORY_COLORS: Record&lt;string, string&gt; = {
+  Weapon: 'text-orange-300', Vitality: 'text-green-300', Spirit: 'text-purple-300',
+};
+
+export default function CalculatorPage() {
+  const data = useDataStore(s =&gt; s.getData());
+  const [team, setTeam]       = useState&lt;TeamState&gt;({ self: null, allies: [], enemies: [] });
+  const [results, setResults] = useState&lt;BuildResult[] | null&gt;(null);
+  const [buildIdx, setBuildIdx] = useState(0);
+  const [activeHero, setActiveHero] = useState&lt;Hero | null&gt;(null);
+
+  const heroes = useMemo(() =&gt;
+    Object.values(data.heroes).sort((a, b) =&gt; a.eng_name.localeCompare(b.eng_name)),
+    [data]
+  );
+  const items = useMemo(() =&gt; Object.values(data.items), [data]);
+  const itemMap = useMemo(
+    () =&gt; Object.fromEntries(items.map(i =&gt; [i.normalized_name, i])),
+    [items]
+  );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
+
+  function handleDragStart(event: DragStartEvent) {
+    const h = heroes.find(h =&gt; h.normalized_name === event.active.id);
+    setActiveHero(h ?? null);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveHero(null);
+    const hero = heroes.find(h =&gt; h.normalized_name === event.active.id);
+    if (!hero || !event.over) return;
+    const zone = event.over.id as string;
+    if (zone === 'self') {
+      setTeam(t =&gt; ({ ...t, self: hero }));
+    } else if (zone === 'allies' &amp;&amp; team.allies.length &lt; 4
+      &amp;&amp; !team.allies.find(a =&gt; a.normalized_name === hero.normalized_name)) {
+      setTeam(t =&gt; ({ ...t, allies: [...t.allies, hero] }));
+    } else if (zone === 'enemies' &amp;&amp; team.enemies.length &lt; 6
+      &amp;&amp; !team.enemies.find(e =&gt; e.normalized_name === hero.normalized_name)) {
+      setTeam(t =&gt; ({ ...t, enemies: [...t.enemies, hero] }));
+    }
+  }
+
+  function removeFromZone(zone: 'self' | 'allies' | 'enemies', name: string) {
+    if (zone === 'self') setTeam(t =&gt; ({ ...t, self: null }));
+    else if (zone === 'allies')  setTeam(t =&gt; ({ ...t, allies:  t.allies.filter(h =&gt;  h.normalized_name !== name) }));
+    else if (zone === 'enemies') setTeam(t =&gt; ({ ...t, enemies: t.enemies.filter(h =&gt; h.normalized_name !== name) }));
+  }
+
+  function handleCalculate() {
+    if (!team.self) return;
+    const result = runCalculation(
+      { self: team.self, allies: team.allies, enemies: team.enemies },
+      items,
+      data.tags
+    );
+    setResults(result);
+    setBuildIdx(0);
+  }
+
+  const activeResult = results?.[buildIdx] ?? null;
+  const buildPath = useMemo(
+    () =&gt; activeResult ? computeBuildPath(activeResult.itemScores, items) : null,
+    [activeResult, items]
+  );
+
+  return (
+    &lt;div&gt;
+      &lt;DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}&gt;
+        &lt;h1 className="text-2xl font-bold mb-6"&gt;Calculator&lt;/h1&gt;
+
+        {/* PHASE A: Team setup */}
+        &lt;div className="grid grid-cols-3 gap-4 mb-6"&gt;
+          {/* Hero pool */}
+          &lt;div className="col-span-2 bg-slate-800 rounded-lg p-4"&gt;
+            &lt;div className="text-sm text-slate-400 mb-3"&gt;Hero Pool — drag to team&lt;/div&gt;
+            &lt;div className="flex flex-wrap gap-2"&gt;
+              {heroes.map(h =&gt; (
+                &lt;DraggableHeroCard key={h.normalized_name} hero={h} /&gt;
+              ))}
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          {/* Drop zones */}
+          &lt;div className="space-y-3"&gt;
+            &lt;DropZone id="self" label="You"
+              heroes={[team.self]}
+              onRemove={n =&gt; removeFromZone('self', n)} /&gt;
+            &lt;DropZone id="allies" label="Allies (max 4)"
+              heroes={[...team.allies, null]}
+              onRemove={n =&gt; removeFromZone('allies', n)} /&gt;
+            &lt;DropZone id="enemies" label="Enemies (max 6)"
+              heroes={[...team.enemies, null]}
+              onRemove={n =&gt; removeFromZone('enemies', n)} /&gt;
+            &lt;Button onClick={handleCalculate} disabled={!team.self} className="w-full"&gt;
+              Calculate
+            &lt;/Button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        {/* Ghost card while dragging */}
+        &lt;DragOverlay&gt;
+          {activeHero &amp;&amp; (
+            &lt;div className="w-14 h-14 rounded overflow-hidden shadow-xl ring-2 ring-indigo-400"&gt;
+              &lt;img src={assetPath(activeHero.mini_image_path)} className="w-full h-full object-cover" alt="" /&gt;
+            &lt;/div&gt;
+          )}
+        &lt;/DragOverlay&gt;
+      &lt;/DndContext&gt;
+
+      {/* PHASES B / C / D — only shown after Calculate */}
+      {results &amp;&amp; activeResult &amp;&amp; (
+        &lt;div className="space-y-6"&gt;
+
+          {/* Build tabs */}
+          &lt;div className="flex gap-2 flex-wrap"&gt;
+            {results.map((r, i) =&gt; (
+              &lt;button
+                key={i}
+                onClick={() =&gt; setBuildIdx(i)}
+                className={`px-3 py-1 rounded text-sm ${
+                  i === buildIdx ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-300'
+                }`}
+              &gt;
+                {r.build.name} ({r.buildScore.toFixed(1)})
+              &lt;/button&gt;
+            ))}
+          &lt;/div&gt;
+
+          {/* PHASE B: Top 3 per category */}
+          &lt;div className="grid grid-cols-3 gap-4"&gt;
+            {(['Weapon', 'Vitality', 'Spirit'] as const).map(cat =&gt; {
+              const top3 = activeResult.itemScores
+                .filter(s =&gt; s.item.category === cat)
+                .slice(0, 3);
+              return (
+                &lt;div key={cat} className="bg-slate-800 rounded-lg p-4"&gt;
+                  &lt;div className={`text-sm font-bold mb-3 ${CATEGORY_COLORS[cat]}`}&gt;{cat}&lt;/div&gt;
+                  {top3.map((s, i) =&gt; (
+                    &lt;div key={s.item.normalized_name} className="flex items-center gap-2 mb-2"&gt;
+                      &lt;div className="text-xs text-slate-500 w-4"&gt;{i + 1}.&lt;/div&gt;
+                      &lt;img src={assetPath(s.item.image_path)} className="w-6 h-6 object-contain" alt="" /&gt;
+                      &lt;div className="flex-1 text-sm truncate"&gt;{s.item.name}&lt;/div&gt;
+                      &lt;div className="text-xs text-slate-400"&gt;{s.total.toFixed(1)}&lt;/div&gt;
+                    &lt;/div&gt;
+                  ))}
+                &lt;/div&gt;
+              );
+            })}
+          &lt;/div&gt;
+
+          {/* PHASE C: Full sortable item table */}
+          &lt;div className="bg-slate-800 rounded-lg overflow-hidden"&gt;
+            &lt;div className="bg-slate-700 px-4 py-2 text-sm font-semibold"&gt;All Items (top 40 shown)&lt;/div&gt;
+            &lt;ItemTable result={activeResult} /&gt;
+          &lt;/div&gt;
+
+          {/* PHASE D: Build path */}
+          {buildPath &amp;&amp; (
+            &lt;div&gt;
+              &lt;h2 className="text-lg font-semibold mb-3"&gt;Suggested Build Path&lt;/h2&gt;
+              &lt;BuildPathView phases={buildPath} itemMap={itemMap} /&gt;
+            &lt;/div&gt;
+          )}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre>
+</div>
 
 </main>
 </div>
