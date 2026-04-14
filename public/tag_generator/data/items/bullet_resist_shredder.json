@@ -3,6 +3,7 @@
   "image_path": "/resources/items/bullet_resist_shredder/bullet_resist_shredder.png",
   "name": "Bullet Resist Shredder",
   "normalized_name": "bullet_resist_shredder",
+  "remarks": "Only buy if your character can reliably deal both gun and spirit damage at the same time!",
   "tier": 1600,
   "values": {
     "self_score": {
@@ -55,6 +56,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
+      "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -72,7 +74,7 @@
       "spirit_continuous_damage": 0.25,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.15,
-      "spirit_proc": 0.5,
+      "spirit_proc": 0.33,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
       "stun": null,
@@ -80,9 +82,18 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "multi_ability_focus": null
+      "interrupt": null,
+      "spirit_burst_proc": -0.15,
+      "spirit_continuous_proc": 0.75,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Bullet_Resist_Shredder",
-  "remarks": "Only buy if your character can reliably deal both gun and spirit damage at the same time!"
+  "upgrades_from": []
 }

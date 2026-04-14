@@ -80,7 +80,17 @@
           "team_heal": null,
           "trap_block_obstruct": 0.1,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "interrupt": null,
+          "spirit_burst_proc": null,
+          "spirit_continuous_proc": null,
+          "gun_burst_proc": null,
+          "gun_continuous_proc": null,
+          "ability_spam": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
+          "engage": null,
+          "escape": null
         },
         "enemy_weight": {
           "aerial": 0.15,
@@ -140,7 +150,7 @@
           "self_buff": null,
           "self_heal": null,
           "shield": -0.15,
-          "silence": -0.25,
+          "silence": -0.33,
           "single_ability_focus": null,
           "single_target": -0.25,
           "small_hitbox": null,
@@ -157,7 +167,17 @@
           "team_heal": -0.25,
           "trap_block_obstruct": 0.2,
           "ult_focused": null,
-          "vertical_mobility": -0.05
+          "vertical_mobility": -0.05,
+          "interrupt": null,
+          "spirit_burst_proc": null,
+          "spirit_continuous_proc": null,
+          "gun_burst_proc": null,
+          "gun_continuous_proc": null,
+          "ability_spam": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
+          "engage": null,
+          "escape": null
         },
         "self_score": {
           "aerial": 0.33,
@@ -234,7 +254,17 @@
           "team_heal": null,
           "trap_block_obstruct": 0,
           "ult_focused": 0.15,
-          "vertical_mobility": 1.33
+          "vertical_mobility": 1.33,
+          "interrupt": null,
+          "spirit_burst_proc": null,
+          "spirit_continuous_proc": null,
+          "gun_burst_proc": null,
+          "gun_continuous_proc": null,
+          "ability_spam": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
+          "engage": null,
+          "escape": null
         },
         "self_weight": {
           "aerial": 0.15,
@@ -311,7 +341,17 @@
           "team_heal": null,
           "trap_block_obstruct": 0,
           "ult_focused": 0.15,
-          "vertical_mobility": 0.66
+          "vertical_mobility": 0.66,
+          "interrupt": null,
+          "spirit_burst_proc": null,
+          "spirit_continuous_proc": null,
+          "gun_burst_proc": null,
+          "gun_continuous_proc": null,
+          "ability_spam": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
+          "engage": null,
+          "escape": null
         }
       }
     }
