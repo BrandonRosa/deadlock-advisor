@@ -15,7 +15,7 @@
       "away_from_team": null,
       "bullet_damage": 0.1,
       "bullet_evasion": null,
-      "bullet_proc": null,
+      "bullet_proc": 0.75,
       "bullet_resist_shred": null,
       "bullet_resistance": null,
       "burst_damage": 0.1,
@@ -80,8 +80,19 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Quicksilver_Reload"
+  "wiki_url": "https://deadlock.wiki/Quicksilver_Reload",
+  "upgrades_from": []
 }

@@ -5,6 +5,9 @@
   "normalized_name": "spirit_rend",
   "remarks": "Only get if you can consistently hit headshots with the build. ",
   "tier": 3200,
+  "upgrades_from": [
+    "spirit_shredder_bullets"
+  ],
   "values": {
     "self_score": {
       "aerial": null,
@@ -47,7 +50,7 @@
       "headshot_damage": 0.66,
       "high_max_hp": null,
       "horizontal_mobility": null,
-      "hybrid_damage_usage": 0.66,
+      "hybrid_damage_usage": 0.5,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -56,6 +59,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
+      "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -81,11 +85,17 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "multi_ability_focus": null
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Spirit_Rend",
-  "upgrades_from": [
-    "spirit_shredder_bullets"
-  ]
+  "wiki_url": "https://deadlock.wiki/Spirit_Rend"
 }
