@@ -423,5 +423,25 @@
     "code": "escape",
     "name": "Escape",
     "description": ""
+  },
+  {
+    "code": "burst_heal",
+    "name": "Burst Heal",
+    "description": ""
+  },
+  {
+    "code": "continous_heal",
+    "name": "Continous Heal",
+    "description": ""
+  },
+  {
+    "code": "spirit_lifesteal",
+    "name": "Spirit Lifesteal",
+    "description": ""
+  },
+  {
+    "code": "bullet_lifesteal",
+    "name": "Bullet Lifesteal",
+    "description": ""
   }
 ]
