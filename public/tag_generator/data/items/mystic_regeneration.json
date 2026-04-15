@@ -77,8 +77,26 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "hybrid_damage_usage": null,
+      "single_ability_focus": null,
+      "multi_ability_focus": null,
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": 0.66,
+      "spirit_lifesteal": 0.25,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Mystic_Regeneration"
+  "wiki_url": "https://deadlock.wiki/Mystic_Regeneration",
+  "upgrades_from": []
 }
