@@ -3,9 +3,14 @@
   "image_path": "/resources/items/radiant_regeneration/radiant_regeneration.png",
   "name": "Radiant Regeneration",
   "normalized_name": "radiant_regeneration",
+  "remarks": "",
   "tier": 3200,
+  "upgrades_from": [
+    "mystic_regeneration"
+  ],
   "values": {
     "self_score": {
+      "ability_spam": 1,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -40,13 +45,16 @@
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": null,
+      "gun_burst_proc": null,
       "gun_burst_resistance": null,
       "gun_continuous_damage": null,
+      "gun_continuous_proc": null,
       "gun_continuous_resistance": 0.2,
       "headshot_damage": null,
       "high_max_hp": 0.25,
       "horizontal_mobility": 0.45,
       "hybrid_damage_usage": null,
+      "interrupt": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": 0.1,
@@ -69,8 +77,10 @@
       "small_hitbox": null,
       "spawn_minions": null,
       "spirit_burst_damage": 0.1,
+      "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.25,
+      "spirit_continuous_proc": null,
       "spirit_continuous_resistance": 0.2,
       "spirit_damage": 0.25,
       "spirit_proc": 0.75,
@@ -81,17 +91,15 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": 0.2,
-      "interrupt": null,
-      "spirit_burst_proc": null,
-      "spirit_continuous_proc": null,
-      "gun_burst_proc": null,
-      "gun_continuous_proc": null,
-      "ability_spam": null
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": 0.75,
+      "continous_heal": 0.25,
+      "spirit_lifesteal": 0.25,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Radiant_Regeneration",
-  "upgrades_from": [
-    "mystic_regeneration"
-  ],
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Radiant_Regeneration"
 }

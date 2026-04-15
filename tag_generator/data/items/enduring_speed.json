@@ -3,6 +3,7 @@
   "image_path": "/resources/items/enduring_speed/enduring_speed.png",
   "name": "Enduring Speed",
   "normalized_name": "enduring_speed",
+  "remarks": "",
   "tier": 1600,
   "upgrades_from": [
     "sprint_boots"
@@ -50,6 +51,8 @@
       "gun_continuous_proc": null,
       "gun_continuous_resistance": null,
       "headshot_damage": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
       "high_max_hp": 0.15,
       "horizontal_mobility": 1.1,
       "hybrid_damage_usage": null,
@@ -90,10 +93,13 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "high_assist_count": null,
-      "high_kill_count": null
+      "engage": null,
+      "escape": 1,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Enduring_Speed",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Enduring_Speed"
 }

@@ -37,6 +37,8 @@
       "displace": 0.1,
       "dot": null,
       "duration_dependant": null,
+      "engage": 0.5,
+      "escape": 0.5,
       "farmer": 0.05,
       "fire_rate": 0.1,
       "fire_rate_slow": null,
@@ -48,6 +50,8 @@
       "gun_continuous_proc": null,
       "gun_continuous_resistance": null,
       "headshot_damage": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
       "high_max_hp": null,
       "horizontal_mobility": 0.75,
       "hybrid_damage_usage": null,
@@ -88,10 +92,10 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "high_assist_count": null,
-      "high_kill_count": null,
-      "engage": 0.33,
-      "escape": 0.33
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Fleetfoot"
