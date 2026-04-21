@@ -3,7 +3,11 @@
   "image_path": "/resources/items/crippling_headshot/crippling_headshot.png",
   "name": "Crippling Headshot",
   "normalized_name": "crippling_headshot",
+  "remarks": "",
   "tier": 6400,
+  "upgrades_from": [
+    "weakening_headshot"
+  ],
   "values": {
     "self_score": {
       "aerial": null,
@@ -15,7 +19,7 @@
       "away_from_team": null,
       "bullet_damage": 0.25,
       "bullet_evasion": null,
-      "bullet_proc": 0.15,
+      "bullet_proc": 0.25,
       "bullet_resist_shred": 0.66,
       "bullet_resistance": null,
       "burst_damage": null,
@@ -43,8 +47,8 @@
       "gun_burst_resistance": null,
       "gun_continuous_damage": null,
       "gun_continuous_resistance": null,
-      "headshot_damage": 0.75,
-      "high_max_hp": 0.15,
+      "headshot_damage": 0.66,
+      "high_max_hp": 0.5,
       "horizontal_mobility": null,
       "hybrid_damage_usage": 0.66,
       "large_hitbox": null,
@@ -55,6 +59,7 @@
       "melee_resistance": null,
       "mid_range": 0.15,
       "movement_slow": null,
+      "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -80,12 +85,21 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "multi_ability_focus": null
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": 0.25,
+      "gun_continuous_proc": 0.25,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Crippling_Headshot",
-  "upgrades_from": [
-    "weakening_headshot"
-  ],
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Crippling_Headshot"
 }
