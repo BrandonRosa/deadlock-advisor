@@ -3,6 +3,7 @@
   "image_path": "/resources/items/superior_duration/superior_duration.png",
   "name": "Superior Duration",
   "normalized_name": "superior_duration",
+  "remarks": "",
   "tier": 3200,
   "upgrades_from": [
     "duration_extender"
@@ -37,8 +38,8 @@
       "debuff_resistance": null,
       "disarm": null,
       "displace": null,
-      "dot": 0.15,
-      "duration_dependant": 1.25,
+      "dot": 0.25,
+      "duration_dependant": 2,
       "farmer": null,
       "fire_rate": null,
       "fire_rate_slow": null,
@@ -78,7 +79,7 @@
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
-      "spirit_continuous_damage": 0.25,
+      "spirit_continuous_damage": 0.5,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.25,
@@ -89,9 +90,16 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": 0.2,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Superior_Duration",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Superior_Duration"
 }
