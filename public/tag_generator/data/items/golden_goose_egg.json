@@ -51,7 +51,7 @@
       "gun_continuous_resistance": null,
       "headshot_damage": null,
       "high_assist_count": null,
-      "high_kill_count": null,
+      "high_kill_count": -0.33,
       "high_max_hp": 0.2,
       "horizontal_mobility": 0.33,
       "hybrid_damage_usage": 0.15,
@@ -91,7 +91,11 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.15
+      "vertical_mobility": 0.15,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Golden_Goose_Egg"
