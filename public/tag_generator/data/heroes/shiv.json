@@ -304,7 +304,7 @@
           "continuous_damage": 0.5,
           "continuous_resistance": 0.75,
           "cooldown_reduction": 0.25,
-          "counter_importance": 0.5,
+          "counter_importance": 0.4,
           "damage_sponge": 0.75,
           "debuff": 0.2,
           "debuff_resistance": 0.75,
