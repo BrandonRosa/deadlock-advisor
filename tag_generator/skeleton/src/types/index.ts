@@ -20,10 +20,16 @@ export interface Tag {
 // TAG WEIGHTS
 // Maps tag codes → weight values.
 // null means "this tag is not relevant to this hero/item".
+//
+// NEW: values can also be strings to encode follow relationships:
+//   plain number  → override (= rel)       e.g.  0.5
+//   "+<n>" string → add to parent          e.g.  "+0.25"  or "+-0.1"
+//   "x<n>" string → multiply parent        e.g.  "x0.5"
+//
 // HINT: TypeScript's typed dictionary is  Record<KeyType, ValueType>
 //       like Dictionary<string, float?> in C#.
 // -----------------------------------------------------------
-export type TagWeights = Record<string, /* TODO: number or null */ never>;
+export type TagWeights = Record<string, /* TODO: number | string | null */ never>;
 
 // -----------------------------------------------------------
 // BUILD VALUES
@@ -42,12 +48,16 @@ export interface BuildValues {
 // One strategy for a hero (e.g. "General", "Aggressive").
 // Fields in the JSON:
 //   name, normalized_build_name, build_description_eng, values
+//
+// NEW: followed_build — optional name of another build this one
+//      inherits values from.  null/undefined = no parent.
 // -----------------------------------------------------------
 export interface HeroBuild {
   name: string;
   // TODO: normalized_build_name  (string)
   // TODO: build_description_eng  (string)
   // TODO: values  (BuildValues)
+  followed_build?: string;   // name of the build this one follows (optional)
 }
 
 // -----------------------------------------------------------
@@ -77,6 +87,9 @@ export type ItemCategory = /* TODO: 'Weapon' | ... */ never;
 //   name, normalized_name, category, tier,
 //   image_path, wiki_url, remarks, upgrades_from, values
 // NOTE: values is an object with ONE field: self_score (TagWeights)
+//
+// NEW: compare_to — optional list of item keys to compare against
+//      in the item editor weight table.
 // -----------------------------------------------------------
 export interface Item {
   name: string;
@@ -84,6 +97,7 @@ export interface Item {
   // TODO: remaining fields
   // HINT: upgrades_from is string[]  (list of item keys this one upgrades from)
   // HINT: values is  { self_score: TagWeights }
+  compare_to?: string[];   // item keys shown as comparison columns in the editor
 }
 
 // -----------------------------------------------------------

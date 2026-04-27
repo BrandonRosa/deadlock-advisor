@@ -1,5 +1,9 @@
 {
   "category": "Vitality",
+  "compare_to": [
+    "rescue_beam",
+    "lifestrike"
+  ],
   "image_path": "/resources/items/healing_nova/healing_nova.png",
   "name": "Healing Nova",
   "normalized_name": "healing_nova",

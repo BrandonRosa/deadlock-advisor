@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ============================================================
 // src/pages/HeroDetailPage.tsx  —  MODULE 8
 // Edit a hero's builds and tag weights.
@@ -6,6 +7,7 @@
 //   - Heroes have MULTIPLE builds (not just one weight column)
 //   - Each build has FOUR weight columns (ally/self/enemy/self_score)
 //   - Builds can be added and deleted
+//   - Builds can follow another build (inherit + override values)
 //   - Same local-copy-then-save pattern applies
 //
 // IMMUTABLE UPDATE PATTERN (important!):
@@ -29,6 +31,13 @@
 //       }
 //     )
 //   })
+//
+// FOLLOW CHAIN PATTERN:
+//   When a build has followed_build set, its raw stored values are
+//   overrides/deltas on top of the parent.  Before any math, call
+//   resolveBuildValues(build, localHero.builds) to get plain numbers.
+//   For display, show the resolved parent value alongside the stored
+//   raw value so the user can see what they're overriding.
 // ============================================================
 
 import { useState, useEffect } from 'react';
@@ -38,6 +47,13 @@ import { useState, useEffect } from 'react';
 // TODO: import useDataStore from '../store/dataStore'
 // TODO: import type { Hero, HeroBuild, BuildValues, TagWeights } from '../types'
 // TODO: import assetPath from '../utils/assetPath'
+// TODO: import {
+//         resolveBuildValues,
+//         getAvailableFollowOptions,
+//         parseWeightEntry,
+//         formatWeightEntry,
+//       } from '../utils/buildFollow'
+// TODO: import type { ResolvedBuildValues } from '../utils/buildFollow'
 
 // Column definitions for the weight table
 const WEIGHT_COLUMNS: { key: keyof BuildValues; label: string }[] = [
@@ -46,6 +62,110 @@ const WEIGHT_COLUMNS: { key: keyof BuildValues; label: string }[] = [
   { key: 'enemy_weight', label: 'Enemy' },
   { key: 'self_score',   label: 'Score' },
 ];
+
+// -----------------------------------------------------------
+// WeightCell — renders one weight cell for a NON-General build.
+//
+// The cell has three parts stacked vertically:
+//   TOP:    diff indicator (^^/^/=/v/vv) + resolved parent value
+//   MIDDLE: number input for the raw stored value
+//   BOTTOM: rel-toggle button cycling = → + → × → =
+//
+// Props:
+//   raw      — the stored TagWeights value (number | string | null)
+//              e.g. 0.5, "+0.25", "x1.5", null
+//   parentVal — the resolved value from the parent build (number | null)
+//              null if this build has no parent (standalone)
+//   hasParent — true when this build follows another build
+//   onChange  — called with (newRaw: number | string | null)
+//               whenever the input or toggle changes
+//   disabled  — true when not in custom mode
+//
+// IMPLEMENTATION HINT — computing diff for top row:
+//   const { value: numVal, rel } = parseWeightEntry(raw)
+//   const resolvedSelf = applyRelation(parentVal, numVal, rel)  ← what this cell evaluates to
+//   const diff = resolvedSelf - (parentVal ?? 0)               ← delta vs parent
+//   diff >  0.5 → class "diff-up2"  symbol "^^"
+//   diff >  0   → class "diff-up1"  symbol "^"
+//   diff === 0  → class "diff-eq"   symbol "="
+//   diff < -0.5 → class "diff-dn2"  symbol "vv"
+//   diff <  0   → class "diff-dn1"  symbol "v"
+//
+// IMPLEMENTATION HINT — rel toggle:
+//   const cycle = { '=': '+', '+': 'x', 'x': '=' }
+//   onClick: newRel = cycle[rel]; onChange(formatWeightEntry(numVal, newRel))
+// -----------------------------------------------------------
+// TODO: function WeightCell({ raw, parentVal, hasParent, onChange, disabled }) {
+//   // 1. parseWeightEntry(raw) → { value: numVal, rel }
+//   // 2. Compute resolvedSelf and diff for the diff indicator:
+//   //      resolvedSelf = rel='+' ? (parentVal??0)+(numVal??0)
+//   //                   : rel='x' ? (parentVal??0)*(numVal??0)
+//   //                   : numVal
+//   //      diff = resolvedSelf - (parentVal ?? 0)
+//   //      diffClass:  diff > 0.5 → 'diff-up2', > 0 → 'diff-up1', 0 → 'diff-eq',
+//   //                  < -0.5 → 'diff-dn2', < 0 → 'diff-dn1'
+//   //      diffSymbol: '^^' / '^' / '=' / 'v' / 'vv'
+//   //
+//   // 3. Return JSX — layout: [input] [side-column]
+//   //
+//   //    <div className="semicell">
+//   //      <input
+//   //        type="number" step="0.05"
+//   //        value={numVal ?? ''}
+//   //        onChange={e => {
+//   //          const n = e.target.value === '' ? null : parseFloat(e.target.value)
+//   //          onChange(formatWeightEntry(n, rel))
+//   //        }}
+//   //        disabled={disabled}
+//   //      />
+//   //      {hasParent && (
+//   //        <div className="semicell-side">
+//   //          <span className={`diff-ind ${diffClass}`}>{diffSymbol}</span>
+//   //          <span className="parent-val">{parentVal?.toFixed(2) ?? '—'}</span>
+//   //          <button className="rel-toggle" onClick={() => {
+//   //            const cycle = { '=': '+', '+': 'x', 'x': '=' }
+//   //            onChange(formatWeightEntry(numVal, cycle[rel]))
+//   //          }} disabled={disabled}>{rel === 'x' ? '×' : rel}</button>
+//   //        </div>
+//   //      )}
+//   //    </div>
+//   //
+//   //  The side column is narrow (26px). Its three items stack top-to-bottom:
+//   //    1. diff symbol (colored)      e.g. "^"
+//   //    2. parent resolved value      e.g. "1.00"
+//   //    3. rel toggle button          e.g. "="
+// }
+
+// -----------------------------------------------------------
+// GeneralBuildCell — renders one weight cell for the General build.
+//
+// The General build shows aggregate stats from all other builds:
+//   TOP:    "min – max" range in subdued color
+//   MIDDLE: number input (the General build's own stored value)
+//   BOTTOM: average of other builds' RESOLVED values
+//
+// Props: same as WeightCell minus rel/parent props, plus:
+//   stats — { min: number, max: number, avg: number } computed
+//           from all non-General builds for this tag+column
+//
+// IMPLEMENTATION HINT — computing stats:
+//   For each non-General build, call resolveBuildValues, then read
+//   resolved[weightKey][tagCode] (or 0 if null).
+//   min = Math.min(...values), max = Math.max(...), avg = mean
+// -----------------------------------------------------------
+// TODO: function GeneralBuildCell({ raw, stats, onChange, disabled }) {
+//   // Return JSX:
+//   //   <div className="semicell">
+//   //     <div className="gen-range">{stats.min.toFixed(2)} – {stats.max.toFixed(2)}</div>
+//   //     <input
+//   //       type="number" step="0.05"
+//   //       value={raw ?? ''}
+//   //       onChange={e => onChange(e.target.value === '' ? null : parseFloat(e.target.value))}
+//   //       disabled={disabled}
+//   //     />
+//   //     <div className="gen-avg">avg {stats.avg.toFixed(2)}</div>
+//   //   </div>
+// }
 
 export default function HeroDetailPage() {
   // TODO: const { name } = useParams()
@@ -70,14 +190,31 @@ export default function HeroDetailPage() {
     buildIdx: number,
     weightKey: keyof BuildValues,  // 'ally_weight' | 'self_weight' | 'enemy_weight' | 'self_score'
     tagCode: string,
-    raw: string
+    newRaw: number | string | null  // already formatted by WeightCell/GeneralBuildCell
   ) {
     if (!localHero) return;
-    const value = raw === '' ? null : parseFloat(raw);
-
     // TODO: Update localHero immutably using the pattern described at the top.
-    //       localHero.builds[buildIdx].values[weightKey][tagCode] = value
+    //       localHero.builds[buildIdx].values[weightKey][tagCode] = newRaw
     //       But immutably! Spread at every level.
+  }
+
+  // --- Follow build change ---
+  function handleFollowChange(buildIdx: number, newFollowName: string) {
+    if (!localHero) return;
+    // TODO: Update localHero immutably:
+    //   builds[buildIdx].followed_build = newFollowName || undefined
+    //   (empty string means "no follow" → set to undefined)
+    //
+    // HINT: same spread pattern as handleWeightChange but at the build level:
+    //   setLocalHero({
+    //     ...localHero,
+    //     builds: localHero.builds.map((b, idx) =>
+    //       idx !== buildIdx ? b : {
+    //         ...b,
+    //         followed_build: newFollowName || undefined,
+    //       }
+    //     )
+    //   })
   }
 
   // --- Add build ---
@@ -88,6 +225,7 @@ export default function HeroDetailPage() {
     //   name: newBuildName
     //   normalized_build_name: `${localHero.normalized_name}_${newBuildName.toLowerCase().replace(/\s+/g, '_')}`
     //   build_description_eng: ''
+    //   followed_build: undefined
     //   values: {
     //     ally_weight:  { ...all tags from data.tags set to null }
     //     self_weight:  { ... same }
@@ -122,6 +260,40 @@ export default function HeroDetailPage() {
   const tags = /* TODO: data.tags */ [];
   const isCustom = /* TODO: mode === 'custom' */ false;
 
+  // Pre-compute General stats for all tag+column combinations.
+  // These show in GeneralBuildCell (index 0 = General build).
+  //
+  // TODO: const nonGeneralBuilds = localHero.builds.slice(1)
+  // TODO: const generalStats: Record<string, Record<keyof BuildValues, { min: number, max: number, avg: number }>> = {}
+  //         For each tag.code and each WEIGHT_COLUMNS entry:
+  //           const vals = nonGeneralBuilds.map(b => {
+  //             const resolved = resolveBuildValues(b, localHero.builds)
+  //             return resolved[col.key][tag.code] ?? 0
+  //           })
+  //           generalStats[tag.code][col.key] = {
+  //             min: Math.min(...vals),
+  //             max: Math.max(...vals),
+  //             avg: vals.reduce((a, b) => a + b, 0) / (vals.length || 1)
+  //           }
+
+  const build = localHero.builds[activeBuild];
+
+  // Resolve the parent build's values for semicell display.
+  // null parentResolved = this build is standalone (no follow).
+  //
+  // TODO: const parentResolved: ResolvedBuildValues | null =
+  //         build.followed_build
+  //           ? resolveBuildValues(
+  //               localHero.builds.find(b => b.name === build.followed_build)!,
+  //               localHero.builds
+  //             )
+  //           : null
+
+  // Available follow options (excludes options that would create a cycle).
+  //
+  // TODO: const followOptions = getAvailableFollowOptions(localHero.builds, activeBuild)
+  //       Returns HeroBuild[] that are safe to follow.
+
   return (
     <div>
       {/* Hero header */}
@@ -141,18 +313,99 @@ export default function HeroDetailPage() {
               ))}
             </TabsList>
 
-            {localHero.builds.map((build, buildIdx) => (
+            {localHero.builds.map((b, buildIdx) => (
               <TabsContent key={buildIdx} value={String(buildIdx)}>
-                [weight table goes here]
+                [build-meta row + weight table go here — see below]
               </TabsContent>
             ))}
           </Tabs> */}
 
+      {/* Build meta row — shown above the weight table */}
+      <div className="build-meta-row">
+        {/* Build name and description inputs (same as before) */}
+        {/* TODO: inputs for build.name and build.build_description_eng */}
+
+        {/* Follow-build dropdown — hidden for the General build (buildIdx === 0) */}
+        {activeBuild !== 0 && (
+          <div className="field-row">
+            <label>Follows Build</label>
+            {/* TODO: <select
+                  value={build.followed_build ?? ''}
+                  onChange={e => handleFollowChange(activeBuild, e.target.value)}
+                  disabled={!isCustom}
+                >
+                  <option value="">— none —</option>
+                  {followOptions.map(opt => (
+                    <option key={opt.name} value={opt.name}>{opt.name}</option>
+                  ))}
+                </select>
+
+              HINT: followOptions comes from getAvailableFollowOptions(localHero.builds, activeBuild)
+                    It already excludes options that would create a cycle, so no extra filtering needed. */}
+          </div>
+        )}
+
+        {/* Delete build button — hidden for General build */}
+        {activeBuild !== 0 && isCustom && (
+          <button onClick={() => handleDeleteBuild(activeBuild)}>
+            Delete Build
+          </button>
+        )}
+      </div>
+
       {/* Weight table for the active build */}
-      {/* TODO: Table with columns: Tag | Ally | Self | Enemy | Score
-               One row per tag, each weight cell has a number input
-               Inputs disabled when !isCustom
-               HINT: use handleWeightChange(activeBuild, weightKey, tag.code, e.target.value) */}
+      {/* TODO: <table>
+              <thead>
+                <tr>
+                  <th>Tag</th>
+                  {WEIGHT_COLUMNS.map(col => <th key={col.key}>{col.label}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {tags.map(tag => (
+                  <tr key={tag.code}>
+                    <td>{tag.name}</td>
+
+                    {WEIGHT_COLUMNS.map(col => {
+                      const raw = build.values[col.key][tag.code]  ← raw stored value
+
+                      if (activeBuild === 0) {
+                        // General build → show range / avg across other builds
+                        return (
+                          <td key={col.key}>
+                            <GeneralBuildCell
+                              raw={raw}
+                              stats={generalStats[tag.code][col.key]}
+                              onChange={newRaw => handleWeightChange(0, col.key, tag.code, newRaw)}
+                              disabled={!isCustom}
+                            />
+                          </td>
+                        )
+                      } else {
+                        // Non-General build → show semicell with diff and rel toggle
+                        const parentVal = parentResolved?.[col.key][tag.code] ?? null
+                        return (
+                          <td key={col.key}>
+                            <WeightCell
+                              raw={raw}
+                              parentVal={parentVal}
+                              hasParent={!!build.followed_build}
+                              onChange={newRaw => handleWeightChange(activeBuild, col.key, tag.code, newRaw)}
+                              disabled={!isCustom}
+                            />
+                          </td>
+                        )
+                      }
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+        HINT: null weights display as empty string ('')
+              Empty string input means null (not applicable)
+              WeightCell / GeneralBuildCell call onChange with the
+              already-formatted value — just pass it to handleWeightChange. */}
 
       {/* Add build section */}
       {isCustom && (

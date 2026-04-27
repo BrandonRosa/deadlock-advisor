@@ -17,9 +17,18 @@
 //     ) × tierMultiplier
 //
 // This is a DOT PRODUCT — the same math as vector multiplication.
+//
+// NOTE ON FOLLOW CHAINS:
+//   Build values may contain follow-chain overrides (strings like "+0.25").
+//   The calculator never handles raw TagWeights directly.
+//   Instead, call resolveBuildValues(build, hero.builds) from buildFollow.ts
+//   BEFORE passing anything here. All functions accept ResolvedBuildValues
+//   which are always plain  Record<string, number | null> — no strings.
 // ============================================================
 
-// TODO: import type { Hero, Item, Tag, HeroBuild, TagWeights } from '../types'
+// TODO: import type { Hero, Item, Tag, HeroBuild } from '../types'
+// TODO: import type { ResolvedBuildValues } from './buildFollow'
+// TODO: import { resolveBuildValues } from './buildFollow'
 
 // Tier multipliers — higher tier items are inherently stronger
 // T800 = 1.0 baseline, T9999 = 2.0 (Street Brawl)
@@ -67,9 +76,12 @@ export interface BuildResult {
 // Σ(weights[tag] × scores[tag]) for all tags
 // Skip tags where weight is null (not applicable)
 // Treat missing score entries as 0
+//
+// IMPORTANT: both parameters are Record<string, number | null>
+// (resolved values — no strings). Call resolveBuildValues first.
 function dotProduct(
-  weights: /* TODO: TagWeights */ never,
-  scores:  /* TODO: TagWeights */ never
+  weights: Record<string, number | null>,
+  scores:  Record<string, number | null>
 ): number {
   // TODO: let sum = 0
   // TODO: for (const [tag, weight] of Object.entries(weights))
@@ -82,18 +94,22 @@ function dotProduct(
 
 // -----------------------------------------------------------
 // scoreItem — how good is this item for this build + team?
+//
+// CHANGED: now accepts ResolvedBuildValues instead of HeroBuild directly,
+// because build values may contain follow-chain strings that must be
+// resolved before numeric math.
 // -----------------------------------------------------------
 export function scoreItem(
-  item:   /* TODO: Item         */ never,
-  build:  /* TODO: HeroBuild    */ never,
-  config: CalculatorConfig = { allyMult: 1.0, enemyMult: 1.0 }
+  item:     /* TODO: Item            */ never,
+  resolved: /* TODO: ResolvedBuildValues */ never,
+  config:   CalculatorConfig = { allyMult: 1.0, enemyMult: 1.0 }
 ): ItemScore {
   // TODO: Get the item's self_score weights: item.values.self_score
-  // TODO: Get the build's four weight maps from build.values
+  //       Cast to Record<string, number | null> — item scores are never strings.
 
-  // TODO: allyScore  = dotProduct(build.values.ally_weight,  itemScores)
-  // TODO: selfScore  = dotProduct(build.values.self_weight,  itemScores)
-  // TODO: enemyScore = dotProduct(build.values.enemy_weight, itemScores)
+  // TODO: allyScore  = dotProduct(resolved.ally_weight,  itemScores)
+  // TODO: selfScore  = dotProduct(resolved.self_weight,  itemScores)
+  // TODO: enemyScore = dotProduct(resolved.enemy_weight, itemScores)
 
   // TODO: Get the tier multiplier: TIER_MULTIPLIERS[item.tier] ?? 1.0
 
@@ -105,19 +121,24 @@ export function scoreItem(
 
 // -----------------------------------------------------------
 // scoreBuild — how well does this build fit the team composition?
+//
+// CHANGED: resolves all build values through the follow chain.
 // -----------------------------------------------------------
 export function scoreBuild(
-  build:   /* TODO: HeroBuild */ never,
-  allies:  /* TODO: Hero[]    */ never,
-  enemies: /* TODO: Hero[]    */ never
+  build:      /* TODO: HeroBuild */ never,
+  heroBuilds: /* TODO: HeroBuild[] */ never,
+  allies:     /* TODO: Hero[]    */ never,
+  enemies:    /* TODO: Hero[]    */ never
 ): number {
-  // TODO: let score = 0
+  // TODO: const resolved = resolveBuildValues(build, heroBuilds)
   //
   // For each ally hero, for each of that ally's builds:
-  //   score += dotProduct(build.values.ally_weight, allyBuild.values.self_score)
+  //   const allyResolved = resolveBuildValues(allyBuild, allyHero.builds)
+  //   score += dotProduct(resolved.ally_weight, allyResolved.self_score)
   //
   // For each enemy hero, for each of that enemy's builds:
-  //   score += dotProduct(build.values.enemy_weight, enemyBuild.values.self_score)
+  //   const enemyResolved = resolveBuildValues(enemyBuild, enemyHero.builds)
+  //   score += dotProduct(resolved.enemy_weight, enemyResolved.self_score)
   //
   // TODO: return score
   return 0; // placeholder
@@ -133,10 +154,11 @@ export function runCalculation(
   config: CalculatorConfig = { allyMult: 1.0, enemyMult: 1.0 }
 ): BuildResult[] {
   // TODO: For each build in setup.self.builds:
-  //   1. buildScore = scoreBuild(build, setup.allies, setup.enemies)
-  //   2. itemScores = items.map(item => scoreItem(item, build, config))
+  //   1. const resolved = resolveBuildValues(build, setup.self.builds)
+  //   2. buildScore = scoreBuild(build, setup.self.builds, setup.allies, setup.enemies)
+  //   3. itemScores = items.map(item => scoreItem(item, resolved, config))
   //                       .sort((a, b) => b.total - a.total)   ← highest score first
-  //   3. Return { hero: setup.self, build, buildScore, itemScores }
+  //   4. Return { hero: setup.self, build, buildScore, itemScores }
   //
   // TODO: Sort the final array by buildScore descending
   // TODO: return the sorted array

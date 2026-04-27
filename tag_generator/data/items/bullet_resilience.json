@@ -33,7 +33,7 @@
       "continuous_resistance": null,
       "cooldown_reduction": null,
       "counter_importance": 1,
-      "damage_sponge": null,
+      "damage_sponge": 1,
       "debuff": null,
       "debuff_resistance": null,
       "disarm": null,
@@ -98,5 +98,8 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Bullet_Resilience"
+  "wiki_url": "https://deadlock.wiki/Bullet_Resilience",
+  "compare_to": [
+    "spirit_resilience"
+  ]
 }

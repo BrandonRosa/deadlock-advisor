@@ -89,6 +89,10 @@
             <label>Description</label>
             <input id="bf-desc" type="text" />
           </div>
+          <div class="field-row" id="bf-follow-row">
+            <label>Follows Build</label>
+            <select id="bf-follow"><option value="">— none —</option></select>
+          </div>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
         <!-- Shown only when General build is empty -->
@@ -180,6 +184,14 @@
           <div class="field-row">
             <label>Upgrades From</label>
             <input id="if-upgrades-from" type="text" placeholder="e.g. item_key_a, item_key_b" />
+          </div>
+          <div class="field-row compare-to-row">
+            <label>Compare To</label>
+            <div class="compare-to-inner">
+              <input id="compare-to-search" type="text" placeholder="item key…" class="compare-to-input" />
+              <button id="btn-compare-add" class="btn-ghost btn-sm" onclick="addCompareTo()">+ Add</button>
+              <div id="compare-to-chips" class="compare-chips"></div>
+            </div>
           </div>
         </div>
       </div>

@@ -88,6 +88,85 @@ function valToInput(input, val) {
   applyValClass(input);
 }
 
+// ── Follow-chain utilities ─────────────────────────────────────────────────────
+function parseWeightEntry(raw) {
+  if (raw === null || raw === undefined) return { value: null, rel: '=' };
+  if (typeof raw === 'number')           return { value: raw,  rel: '=' };
+  if (typeof raw === 'string') {
+    if (raw[0] === '+') return { value: parseFloat(raw.slice(1)), rel: '+' };
+    if (raw[0] === 'x') return { value: parseFloat(raw.slice(1)), rel: 'x' };
+  }
+  return { value: null, rel: '=' };
+}
+
+function formatWeightEntry(value, rel) {
+  if (value === null || value === undefined) return null;
+  if (rel === '+') return `+${value}`;
+  if (rel === 'x') return `x${value}`;
+  return value; // '='
+}
+
+function applyRelation(parent, child, rel) {
+  if (child === null || child === undefined) return parent ?? null;
+  if (rel === '+') return (parent ?? 0) + child;
+  if (rel === 'x') return (parent ?? 0) * child;
+  return child; // '='
+}
+
+function resolveBuildValues(build, heroBuilds, visited) {
+  visited = visited || new Set();
+  const COLS = ['ally_weight','self_weight','enemy_weight','self_score'];
+  if (visited.has(build.name)) {
+    const r = {};
+    COLS.forEach(col => {
+      r[col] = {};
+      Object.entries(build.values[col] || {}).forEach(([tag, raw]) => {
+        r[col][tag] = parseWeightEntry(raw).value;
+      });
+    });
+    return r;
+  }
+  visited.add(build.name);
+  let parent = null;
+  if (build.followed_build) {
+    const pb = heroBuilds.find(b => b.name === build.followed_build);
+    if (pb) parent = resolveBuildValues(pb, heroBuilds, new Set(visited));
+  }
+  const r = {};
+  COLS.forEach(col => {
+    r[col] = {};
+    const allTags = new Set([
+      ...Object.keys(build.values[col] || {}),
+      ...(parent ? Object.keys(parent[col] || {}) : []),
+    ]);
+    allTags.forEach(tag => {
+      const raw = (build.values[col] || {})[tag];
+      const { value, rel } = parseWeightEntry(raw !== undefined ? raw : null);
+      r[col][tag] = applyRelation(parent ? (parent[col][tag] ?? null) : null, value, rel);
+    });
+  });
+  return r;
+}
+
+function wouldCreateCycleJS(builds, buildIdx, targetName) {
+  const selfName = builds[buildIdx].name;
+  let cur = builds.find(b => b.name === targetName);
+  const seen = new Set();
+  while (cur && cur.followed_build) {
+    if (cur.followed_build === selfName) return true;
+    if (seen.has(cur.followed_build)) break;
+    seen.add(cur.followed_build);
+    cur = builds.find(b => b.name === cur.followed_build);
+  }
+  return false;
+}
+
+function getAvailableFollowOptionsJS(builds, buildIdx) {
+  return builds.filter((b, i) =>
+    i !== buildIdx && !wouldCreateCycleJS(builds, buildIdx, b.name)
+  );
+}
+
 // ── Ensure all tags present in a values dict ──────────────────────────────────
 function ensureTags(valuesObj, columns) {
   columns.forEach(col => {
@@ -354,6 +433,22 @@ function renderBuildContent() {
   document.getElementById('bf-desc').value = build.build_description_eng || '';
   document.getElementById('btn-delete-build').style.display = S.currentBuildIdx === 0 ? 'none' : '';
 
+  // Follow dropdown
+  const isGeneral  = (build.name === 'General');
+  const followRow  = document.getElementById('bf-follow-row');
+  const followSel  = document.getElementById('bf-follow');
+  if (followRow) followRow.style.display = isGeneral ? 'none' : '';
+  if (followSel && !isGeneral) {
+    followSel.innerHTML = '<option value="">— none —</option>';
+    getAvailableFollowOptionsJS(S.currentHero.builds, S.currentBuildIdx).forEach(b => {
+      const o = document.createElement('option');
+      o.value = b.name;
+      o.textContent = b.name;
+      followSel.appendChild(o);
+    });
+    followSel.value = build.followed_build || '';
+  }
+
   const showBanner = S.currentBuildIdx === 0 && !S.currentHero.is_preset && isBuildEmpty(build);
   const banner = document.getElementById('preset-banner');
   banner.classList.toggle('hidden', !showBanner);
@@ -445,6 +540,15 @@ document.getElementById('pb-apply').addEventListener('click', async () => {
   });
 });
 
+document.getElementById('bf-follow').addEventListener('change', () => {
+  const b = S.currentHero.builds[S.currentBuildIdx];
+  if (!b) return;
+  const val = document.getElementById('bf-follow').value;
+  b.followed_build = val || undefined;
+  setHeroDirty(true);
+  renderHeroTagTable(b);
+});
+
 // ── Delete build ──────────────────────────────────────────────────────────────
 document.getElementById('btn-delete-build').addEventListener('click', () => {
   if (S.currentBuildIdx === 0) return;
@@ -468,11 +572,39 @@ const HERO_COLS = [
 ];
 
 function renderHeroTagTable(build) {
-  const tbody = document.getElementById('hero-tag-body');
+  const tbody    = document.getElementById('hero-tag-body');
   tbody.innerHTML = '';
+  const allBuilds  = S.currentHero.builds;
+  const isGeneral  = (build.name === 'General');
+
+  // Pre-resolve parent values for non-General builds that follow another
+  let parentResolved = null;
+  if (!isGeneral && build.followed_build) {
+    const pb = allBuilds.find(b => b.name === build.followed_build);
+    if (pb) parentResolved = resolveBuildValues(pb, allBuilds);
+  }
+
+  // Pre-compute range/avg stats for the General build cell
+  let generalStats = null;
+  if (isGeneral) {
+    const nonGen = allBuilds.filter(b => b.name !== 'General');
+    if (nonGen.length) {
+      const resolved = nonGen.map(b => resolveBuildValues(b, allBuilds));
+      generalStats = {};
+      HERO_COLS.forEach(col => {
+        generalStats[col.key] = {};
+        S.tags.forEach(tag => {
+          const vals = resolved.map(r => r[col.key][tag.code] ?? null).filter(v => v !== null);
+          if (!vals.length) { generalStats[col.key][tag.code] = null; return; }
+          const min = Math.min(...vals), max = Math.max(...vals);
+          generalStats[col.key][tag.code] = { min, max, avg: vals.reduce((s, v) => s + v, 0) / vals.length };
+        });
+      });
+    }
+  }
+
   S.tags.forEach(tag => {
     const tr = document.createElement('tr');
-    // Tag name cell
     const nameTd = document.createElement('td');
     nameTd.className = 'col-tag';
     nameTd.dataset.colIdx = '0';
@@ -482,36 +614,115 @@ function renderHeroTagTable(build) {
     HERO_COLS.forEach((col, ci) => {
       const td = document.createElement('td');
       td.dataset.colIdx = String(ci + 1);
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.step = 'any';
-      input.placeholder = '—';
-      input.className = 'val-input';
-      input.dataset.col = col.key;
-      input.dataset.tag = tag.code;
-      valToInput(input, (build.values[col.key] || {})[tag.code]);
-      input.addEventListener('input', () => {
-        const b = S.currentHero.builds[S.currentBuildIdx];
-        if (!b.values[col.key]) b.values[col.key] = {};
-        b.values[col.key][tag.code] = inputToVal(input);
+
+      const rawVal = (build.values[col.key] || {})[tag.code];
+      const { value: numVal, rel } = parseWeightEntry(rawVal !== undefined ? rawVal : null);
+
+      if (isGeneral) {
+        const stats = generalStats && generalStats[col.key][tag.code];
+        td.innerHTML = _buildGeneralCell(stats, numVal);
+      } else {
+        const parentVal = parentResolved ? (parentResolved[col.key][tag.code] ?? null) : null;
+        td.innerHTML = _buildSemiCell(numVal, rel, parentVal, !!build.followed_build);
+      }
+
+      const input  = td.querySelector('.val-input');
+      const relBtn = td.querySelector('.rel-toggle');
+
+      if (input) {
         applyValClass(input);
-        setHeroDirty(true);
-      });
-      input.addEventListener('focus', () => {
-        tr.classList.add('row-active');
-        const table = tr.closest('table');
-        table.querySelectorAll(`[data-col-idx="${td.dataset.colIdx}"]`).forEach(el => el.classList.add('col-active'));
-      });
-      input.addEventListener('blur', () => {
-        tr.classList.remove('row-active');
-        const table = tr.closest('table');
-        table.querySelectorAll('.col-active').forEach(el => el.classList.remove('col-active'));
-      });
-      td.appendChild(input);
+        input.addEventListener('input', () => {
+          const b = S.currentHero.builds[S.currentBuildIdx];
+          if (!b.values[col.key]) b.values[col.key] = {};
+          const curRel = relBtn ? relBtn.dataset.rel : '=';
+          const v = inputToVal(input);
+          b.values[col.key][tag.code] = formatWeightEntry(v, curRel);
+          applyValClass(input);
+          setHeroDirty(true);
+          if (relBtn) _refreshDiff(td, v, curRel, parentResolved ? (parentResolved[col.key][tag.code] ?? null) : null);
+        });
+        input.addEventListener('focus', () => {
+          tr.classList.add('row-active');
+          tr.closest('table').querySelectorAll(`[data-col-idx="${ci + 1}"]`).forEach(el => el.classList.add('col-active'));
+        });
+        input.addEventListener('blur', () => {
+          tr.classList.remove('row-active');
+          tr.closest('table').querySelectorAll('.col-active').forEach(el => el.classList.remove('col-active'));
+        });
+      }
+
+      if (relBtn) {
+        relBtn.addEventListener('click', () => {
+          const b = S.currentHero.builds[S.currentBuildIdx];
+          if (!b.values[col.key]) b.values[col.key] = {};
+          const cycle = { '=': '+', '+': 'x', 'x': '=' };
+          const newRel = cycle[relBtn.dataset.rel] || '=';
+          relBtn.dataset.rel = newRel;
+          relBtn.textContent = newRel === 'x' ? '×' : newRel;
+          const v = inputToVal(input);
+          b.values[col.key][tag.code] = formatWeightEntry(v, newRel);
+          setHeroDirty(true);
+          _refreshDiff(td, v, newRel, parentResolved ? (parentResolved[col.key][tag.code] ?? null) : null);
+        });
+      }
+
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
   });
+}
+
+function _buildSemiCell(numVal, rel, parentVal, hasParent) {
+  const relLabel = rel === 'x' ? '×' : rel;
+  const inputVal = numVal !== null && numVal !== undefined ? numVal : '';
+  let sideHtml = '';
+  if (hasParent) {
+    const resolved = rel === '+' ? (parentVal ?? 0) + (numVal ?? 0)
+                   : rel === 'x' ? (parentVal ?? 0) * (numVal ?? 0)
+                   : numVal;
+    const dc = _diffClass(resolved, parentVal);
+    const ds = _diffSymbol(resolved, parentVal);
+    const pv = parentVal !== null ? parentVal.toFixed(2) : '—';
+    sideHtml = `<div class="semicell-side"><span class="diff-ind ${dc}">${ds}</span><span class="parent-val">${pv}</span><button class="rel-toggle" data-rel="${rel}">${relLabel}</button></div>`;
+  }
+  return `<div class="semicell"><input type="number" step="any" placeholder="—" class="val-input" value="${inputVal}" />${sideHtml}</div>`;
+}
+
+function _buildGeneralCell(stats, numVal) {
+  const inputVal = numVal !== null && numVal !== undefined ? numVal : '';
+  const rangeHtml = stats ? `<div class="gen-range">${stats.min.toFixed(2)} – ${stats.max.toFixed(2)}</div>` : '';
+  const avgHtml   = stats ? `<div class="gen-avg">avg ${stats.avg.toFixed(2)}</div>` : '';
+  return `<div class="semicell">${rangeHtml}<input type="number" step="any" placeholder="—" class="val-input" value="${inputVal}" />${avgHtml}</div>`;
+}
+
+function _diffClass(resolved, parent) {
+  if (resolved === null || parent === null) return 'diff-eq';
+  const d = resolved - parent;
+  if (d > 0.5) return 'diff-up2';
+  if (d > 0)   return 'diff-up1';
+  if (d < -0.5) return 'diff-dn2';
+  if (d < 0)   return 'diff-dn1';
+  return 'diff-eq';
+}
+
+function _diffSymbol(resolved, parent) {
+  if (resolved === null || parent === null) return '=';
+  const d = resolved - parent;
+  if (d > 0.5)  return '^^';
+  if (d > 0)    return '^';
+  if (d < -0.5) return 'vv';
+  if (d < 0)    return 'v';
+  return '=';
+}
+
+function _refreshDiff(td, numVal, rel, parentVal) {
+  const diffEl = td.querySelector('.diff-ind');
+  if (!diffEl) return;
+  const resolved = rel === '+' ? (parentVal ?? 0) + (numVal ?? 0)
+                 : rel === 'x' ? (parentVal ?? 0) * (numVal ?? 0)
+                 : numVal;
+  diffEl.className = `diff-ind ${_diffClass(resolved, parentVal)}`;
+  diffEl.textContent = _diffSymbol(resolved, parentVal);
 }
 
 // ── Dirty state ───────────────────────────────────────────────────────────────
@@ -525,6 +736,7 @@ document.getElementById('btn-save-hero').addEventListener('click', saveHero);
 async function saveHero() {
   const res = await api.put(`/api/heroes/${S.currentHero.normalized_name}`, S.currentHero);
   if (res.error) { toast(res.error, 'error'); return; }
+  delete _rsvCache[S.currentHero.normalized_name];
   setHeroDirty(false);
   toast('Hero saved ✓');
 }
@@ -712,15 +924,21 @@ document.getElementById('item-search').addEventListener('input', e => {
 async function openItemEdit(name) {
   if (!S.tags.length) S.tags = await api.get('/api/tags');
   S.currentItem = await api.get(`/api/items/${name}`);
+  S.compareItems = [];
   S.itemDirty = false;
 
-  // Ensure all tags present
   if (!S.currentItem.values) S.currentItem.values = {};
   if (!S.currentItem.values.self_score) S.currentItem.values.self_score = {};
   if (!S.currentItem.upgrades_from) S.currentItem.upgrades_from = [];
+  if (!S.currentItem.compare_to) S.currentItem.compare_to = [];
   S.tags.forEach(t => {
     if (!(t.code in S.currentItem.values.self_score)) S.currentItem.values.self_score[t.code] = null;
   });
+
+  // Load compare_to items in parallel
+  if (S.currentItem.compare_to.length) {
+    S.compareItems = await Promise.all(S.currentItem.compare_to.map(k => api.get(`/api/items/${k}`)));
+  }
 
   renderItemEditPage();
   showPage('item-edit');
@@ -744,6 +962,45 @@ function renderItemEditPage() {
   document.getElementById('item-tier-badge').textContent = it.tier ? `${it.tier} souls` : '';
   setImg('item-icon-img', it.image_path);
   setItemDirty(false);
+  renderCompareTo();
+  renderItemTagTable();
+}
+
+function renderCompareTo() {
+  const chips = document.getElementById('compare-to-chips');
+  if (!chips) return;
+  chips.innerHTML = '';
+  (S.currentItem.compare_to || []).forEach(key => {
+    const chip = document.createElement('span');
+    chip.className = 'compare-chip';
+    chip.innerHTML = `${key} <button class="chip-x" data-key="${key}">×</button>`;
+    chip.querySelector('.chip-x').addEventListener('click', () => removeCompareTo(key));
+    chips.appendChild(chip);
+  });
+}
+
+async function addCompareTo() {
+  const sel = document.getElementById('compare-to-search');
+  if (!sel) return;
+  const key = sel.value.trim();
+  if (!key || key === S.currentItem.normalized_name) return;
+  if ((S.currentItem.compare_to || []).includes(key)) return;
+  const item = await api.get(`/api/items/${key}`);
+  if (item.error) { toast('Item not found', 'error'); return; }
+  if (!S.currentItem.compare_to) S.currentItem.compare_to = [];
+  S.currentItem.compare_to.push(key);
+  S.compareItems.push(item);
+  sel.value = '';
+  setItemDirty(true);
+  renderCompareTo();
+  renderItemTagTable();
+}
+
+async function removeCompareTo(key) {
+  S.currentItem.compare_to = (S.currentItem.compare_to || []).filter(k => k !== key);
+  S.compareItems = S.compareItems.filter(it => it.normalized_name !== key);
+  setItemDirty(true);
+  renderCompareTo();
   renderItemTagTable();
 }
 
@@ -769,6 +1026,17 @@ function renderItemEditPage() {
 });
 
 function renderItemTagTable() {
+  // Rebuild column headers
+  const thead = document.querySelector('#item-tag-table thead tr');
+  thead.innerHTML = '<th class="col-tag" data-col-idx="0">Tag</th><th data-col-idx="1" title="Used in item recommendation scoring.">Item Score</th>';
+  (S.compareItems || []).forEach((cit, ci) => {
+    const th = document.createElement('th');
+    th.dataset.colIdx = String(ci + 2);
+    th.title = cit.name;
+    th.textContent = cit.name;
+    thead.appendChild(th);
+  });
+
   const tbody = document.getElementById('item-tag-body');
   tbody.innerHTML = '';
   const scores = S.currentItem.values.self_score;
@@ -780,6 +1048,7 @@ function renderItemTagTable() {
     nameTd.innerHTML = `<div class="tag-name">${tag.name}</div><div class="tag-code">${tag.code}</div>`;
     tr.appendChild(nameTd);
 
+    // Editable score column
     const td = document.createElement('td');
     td.dataset.colIdx = '1';
     const input = document.createElement('input');
@@ -796,16 +1065,28 @@ function renderItemTagTable() {
     });
     input.addEventListener('focus', () => {
       tr.classList.add('row-active');
-      const table = tr.closest('table');
-      table.querySelectorAll('[data-col-idx="1"]').forEach(el => el.classList.add('col-active'));
+      tr.closest('table').querySelectorAll('[data-col-idx="1"]').forEach(el => el.classList.add('col-active'));
     });
     input.addEventListener('blur', () => {
       tr.classList.remove('row-active');
-      const table = tr.closest('table');
-      table.querySelectorAll('.col-active').forEach(el => el.classList.remove('col-active'));
+      tr.closest('table').querySelectorAll('.col-active').forEach(el => el.classList.remove('col-active'));
     });
     td.appendChild(input);
     tr.appendChild(td);
+
+    // Read-only compare columns
+    (S.compareItems || []).forEach((cit, ci) => {
+      const ctd = document.createElement('td');
+      ctd.dataset.colIdx = String(ci + 2);
+      const cval = (cit.values?.self_score || {})[tag.code] ?? null;
+      const ci2 = document.createElement('input');
+      ci2.type = 'number'; ci2.readOnly = true; ci2.tabIndex = -1;
+      ci2.className = 'val-input'; ci2.placeholder = '—';
+      valToInput(ci2, cval);
+      ctd.appendChild(ci2);
+      tr.appendChild(ctd);
+    });
+
     tbody.appendChild(tr);
   });
 }
@@ -1037,6 +1318,7 @@ async function runCalculation() {
   toast('Loading data...');
   for (const name of allNames) {
     MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
+    cacheHeroBuilds(name);
   }
   MATCH.itemData = await api.get('/api/items/all');
   MATCH.results = computeResults();
@@ -1054,6 +1336,29 @@ function srcBuild(name) {
   if (!hero) return null;
   const idx = MATCH.selectedBuilds[name] ?? 0;
   return hero.builds[idx] || hero.builds[0];
+}
+
+// _rsvCache[heroName][buildName] = fully-resolved numeric values for that build.
+// Populated when hero data is fetched; invalidated on save.
+let _rsvCache = {};
+
+function cacheHeroBuilds(name) {
+  const hero = MATCH.heroData[name];
+  if (!hero) return;
+  _rsvCache[name] = {};
+  hero.builds.forEach(build => {
+    _rsvCache[name][build.name] = resolveBuildValues(build, hero.builds);
+  });
+}
+
+// Returns resolved values for the currently-selected build of a hero. O(1) lookup.
+function resolvedSrcBuildVals(name) {
+  const hero = MATCH.heroData[name];
+  if (!hero) return null;
+  const idx  = MATCH.selectedBuilds[name] ?? 0;
+  const build = hero.builds[idx] || hero.builds[0];
+  if (!build) return null;
+  return _rsvCache[name]?.[build.name] ?? resolveBuildValues(build, hero.builds);
 }
 
 function computeResults() {
@@ -1079,23 +1384,26 @@ function computeResults() {
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
     const buildResults = heroData.builds.map((build, bi) => {
+      // Use pre-computed cache; fall back to live resolve if cache miss.
+      const rv = _rsvCache[name]?.[build.name] ?? resolveBuildValues(build, heroData.builds);
+
       let allyScore = 0, enemyScore = 0;
       const allyBD = {}, enemyBD = {};
 
       S.tags.forEach(tag => {
         const t  = tag.code;
-        const aw = tv(build.values?.ally_weight,  t);
-        const ew = tv(build.values?.enemy_weight, t);
+        const aw = rv.ally_weight[t]  ?? 0;
+        const ew = rv.enemy_weight[t] ?? 0;
 
         myAllies.forEach(an => {
-          const ss = tv(srcBuild(an)?.values?.self_score, t);
+          const ss = resolvedSrcBuildVals(an)?.self_score?.[t] ?? 0;
           const c  = aw * ss;
           allyScore += c;
           allyBD[an] = (allyBD[an] || 0) + c;
         });
 
         myEnemies.forEach(en => {
-          const ss = tv(srcBuild(en)?.values?.self_score, t);
+          const ss = resolvedSrcBuildVals(en)?.self_score?.[t] ?? 0;
           const c  = ew * ss;
           enemyScore += c;
           enemyBD[en] = (enemyBD[en] || 0) + c;
@@ -1114,9 +1422,9 @@ function computeResults() {
       // = Σ_t(build.self_score[t] × enemy.enemy_weight[t])
       const vsBreakdown = {};
       S.tags.forEach(tag => {
-        const ss = tv(build.values?.self_score, tag.code);
+        const ss = rv.self_score[tag.code] ?? 0;
         myEnemies.forEach(en => {
-          vsBreakdown[en] = (vsBreakdown[en] || 0) + ss * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+          vsBreakdown[en] = (vsBreakdown[en] || 0) + ss * (resolvedSrcBuildVals(en)?.enemy_weight?.[tag.code] ?? 0);
         });
       });
 
@@ -1126,13 +1434,13 @@ function computeResults() {
         S.tags.forEach(tag => {
           const t  = tag.code;
           const is = tv(item.values?.self_score, t);
-          const sw = tv(build.values?.self_weight, t);
+          const sw = rv.self_weight[t] ?? 0;
           iSelf += is * sw;
           myAllies.forEach(an => {
-            iAlly += is * tv(srcBuild(an)?.values?.ally_weight, t);
+            iAlly += is * (resolvedSrcBuildVals(an)?.ally_weight?.[t] ?? 0);
           });
           myEnemies.forEach(en => {
-            iEnemy += is * tv(srcBuild(en)?.values?.enemy_weight, t) * -1;
+            iEnemy += is * (resolvedSrcBuildVals(en)?.enemy_weight?.[t] ?? 0) * -1;
           });
         });
         iAlly  /= numAllies;
@@ -1156,7 +1464,7 @@ function computeResults() {
         S.tags.forEach(tag => {
           const t = tag.code;
           if (t === 'assist_importance' || t === 'counter_importance') return;
-          score += tv(item.values?.self_score, t) * tv(build.values?.ally_weight, t);
+          score += tv(item.values?.self_score, t) * (rv.ally_weight[t] ?? 0);
         });
         const aImp = tv(item.values?.self_score, 'assist_importance');
         return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1), _assist_imp: aImp };
@@ -1168,7 +1476,7 @@ function computeResults() {
         S.tags.forEach(tag => {
           const t = tag.code;
           if (t === 'assist_importance' || t === 'counter_importance') return;
-          score += tv(item.values?.self_score, t) * tv(build.values?.enemy_weight, t);
+          score += tv(item.values?.self_score, t) * (rv.enemy_weight[t] ?? 0);
         });
         const cImp = tv(item.values?.self_score, 'counter_importance');
         return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1), _raw_values: item.values?.self_score || {} };
@@ -1209,18 +1517,19 @@ function computeResults() {
 // ════════════════════════════════════════════════════════════════════════════
 
 // Per-build: strengths = top self_score tags, weaknesses = lowest enemy_weight tags
-function computeStrengthsWeaknesses(buildData) {
-  const selfScores   = buildData?.values?.self_score   || {};
-  const enemyWeights = buildData?.values?.enemy_weight || {};
+function computeStrengthsWeaknesses(heroName, buildName) {
+  const rv = _rsvCache[heroName]?.[buildName] || {};
+  const selfScores   = rv.self_score   || {};
+  const enemyWeights = rv.enemy_weight || {};
 
   const strengths = S.tags
-    .map(t => ({ code: t.code, name: t.name, val: tv(selfScores, t.code) }))
+    .map(t => ({ code: t.code, name: t.name, val: selfScores[t.code] ?? 0 }))
     .filter(x => x.val > 0)
     .sort((a, b) => b.val - a.val)
     .slice(0, 3);
 
   const weaknesses = S.tags
-    .map(t => ({ code: t.code, name: t.name, val: tv(enemyWeights, t.code) }))
+    .map(t => ({ code: t.code, name: t.name, val: enemyWeights[t.code] ?? 0 }))
     .sort((a, b) => a.val - b.val)
     .filter(x => x.val !== 0)
     .slice(0, 3);
@@ -1233,12 +1542,12 @@ function computeTeamStrengthsWeaknesses(heroNames) {
   const n = heroNames.length || 1;
   const strengths = S.tags.map(t => ({
     code: t.code, name: t.name,
-    val: heroNames.reduce((s, nm) => s + tv(srcBuild(nm)?.values?.self_score,   t.code), 0) / n,
+    val: heroNames.reduce((s, nm) => s + (resolvedSrcBuildVals(nm)?.self_score?.[t.code] ?? 0), 0) / n,
   })).filter(x => x.val > 0).sort((a, b) => b.val - a.val).slice(0, 3);
 
   const weaknesses = S.tags.map(t => ({
     code: t.code, name: t.name,
-    val: heroNames.reduce((s, nm) => s + tv(srcBuild(nm)?.values?.enemy_weight, t.code), 0) / n,
+    val: heroNames.reduce((s, nm) => s + (resolvedSrcBuildVals(nm)?.enemy_weight?.[t.code] ?? 0), 0) / n,
   })).sort((a, b) => a.val - b.val).filter(x => x.val !== 0).slice(0, 3);
 
   return { strengths, weaknesses };
@@ -1419,7 +1728,7 @@ function makeSummaryCard(r) {
     ? MATCH.heroData[r.name]?.builds[r.topBuilds[0].buildIdx]
     : null;
   if (topBuildData) {
-    const sw = computeStrengthsWeaknesses(topBuildData);
+    const sw = computeStrengthsWeaknesses(r.name, topBuildData.name);
     if (sw.strengths.length || sw.weaknesses.length) {
       const swEl = mkStrengthsWeaknessesEl(sw, true);
       swEl.classList.add('sc-tags');
@@ -1537,7 +1846,7 @@ function openCalcHero(name) {
 
     const buildData = MATCH.heroData[name]?.builds[b.buildIdx];
     if (buildData) {
-      const sw = computeStrengthsWeaknesses(buildData);
+      const sw = computeStrengthsWeaknesses(name, buildData.name);
       if (sw.strengths.length || sw.weaknesses.length) {
         const swEl = mkStrengthsWeaknessesEl(sw, true);
         swEl.classList.add('ch-ta-row');
@@ -1625,7 +1934,7 @@ function mkTagPanel(heroName, buildIdx) {
   d.className     = 'calc-panel';
   d.innerHTML     = '<div class="calc-panel-title">Tag Profile</div>';
   if (buildData) {
-    const sw = computeStrengthsWeaknesses(buildData);
+    const sw = computeStrengthsWeaknesses(heroName, buildData.name);
     d.appendChild(mkStrengthsWeaknessesEl(sw));
   }
   return d;
@@ -1727,7 +2036,7 @@ function mkItemsPanel(b, heroName) {
     effAllies.forEach(an => {
       const score = S.tags.reduce((sum, tag) => {
         if (SKIP_TAGS.has(tag.code)) return sum;
-        return sum + tv(it.values, tag.code) * tv(srcBuild(an)?.values?.ally_weight, tag.code);
+        return sum + tv(it.values, tag.code) * (resolvedSrcBuildVals(an)?.ally_weight?.[tag.code] ?? 0);
       }, 0);
       if (score < EFFECT_THRESH.ally.norm) return;
       const hd = MATCH.heroData[an];
@@ -1744,7 +2053,7 @@ function mkItemsPanel(b, heroName) {
     effEnemies.forEach(en => {
       const raw = S.tags.reduce((sum, tag) => {
         if (SKIP_TAGS.has(tag.code)) return sum;
-        return sum + tv(it.values, tag.code) * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+        return sum + tv(it.values, tag.code) * (resolvedSrcBuildVals(en)?.enemy_weight?.[tag.code] ?? 0);
       }, 0);
       const score = -raw;   // mirror iEnemy which uses ×-1 in total calc
       if (score <= 0 || score < EFFECT_THRESH.enemy.norm) return;
@@ -1959,7 +2268,7 @@ function mkEffIcons(it, heroName) {
   effAllies.forEach(an => {
     const score = S.tags.reduce((sum, tag) => {
       if (SKIP_TAGS.has(tag.code)) return sum;
-      return sum + tv(it.values, tag.code) * tv(srcBuild(an)?.values?.ally_weight, tag.code);
+      return sum + tv(it.values, tag.code) * (resolvedSrcBuildVals(an)?.ally_weight?.[tag.code] ?? 0);
     }, 0);
     if (score < EFFECT_THRESH.ally.norm) return;
     const hd = MATCH.heroData[an];
@@ -1969,7 +2278,7 @@ function mkEffIcons(it, heroName) {
   effEnemies.forEach(en => {
     const raw = S.tags.reduce((sum, tag) => {
       if (SKIP_TAGS.has(tag.code)) return sum;
-      return sum + tv(it.values, tag.code) * tv(srcBuild(en)?.values?.enemy_weight, tag.code);
+      return sum + tv(it.values, tag.code) * (resolvedSrcBuildVals(en)?.enemy_weight?.[tag.code] ?? 0);
     }, 0);
     const score = -raw;
     if (score <= 0 || score < EFFECT_THRESH.enemy.norm) return;
@@ -2036,8 +2345,9 @@ function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
     </div>`;
 
   const buildData = MATCH.heroData[heroName]?.builds[buildIdx];
-  const allyW  = buildData?.values?.ally_weight  || {};
-  const enemyW = buildData?.values?.enemy_weight || {};
+  const rv     = _rsvCache[heroName]?.[buildData?.name] || {};
+  const allyW  = rv.ally_weight  || {};
+  const enemyW = rv.enemy_weight || {};
 
   // assistScore: Σ(item.self_score × build.ally_weight) — items allies should buy
   // counterScore: Σ(item.self_score × build.enemy_weight) — LOWEST = items enemies buy to counter this build
@@ -2046,8 +2356,8 @@ function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
     S.tags.forEach(tag => {
       if (SKIP_TAGS.has(tag.code)) return;
       const is = tv(it.values, tag.code);
-      assistScore  += is * tv(allyW,  tag.code);
-      counterScore += is * tv(enemyW, tag.code);
+      assistScore  += is * (allyW[tag.code]  ?? 0);
+      counterScore += is * (enemyW[tag.code] ?? 0);
     });
     return { ...it, assistScore, counterScore };
   });
@@ -2137,6 +2447,7 @@ function computeBuildPath(b) {
   MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
 
   const scoredMap = {};
+  const consumedComponents = new Set();
   b.items.forEach(it => { scoredMap[it.key] = it; });
 
   // Reverse map: component key → upgrades that consume it
@@ -2181,7 +2492,7 @@ function computeBuildPath(b) {
     });
     const comps    = (item.upgrades_from || []).filter(c => owned.has(c));
     const mainCost = item.tier - comps.reduce((s, c) => s + (bpItemMap[c]?.tier ?? 0), 0);
-    comps.forEach(c => owned.delete(c));
+    comps.forEach(c => { owned.delete(c); consumedComponents.add(c); });
     owned.add(k);
     spent += mainCost;
     changes.push({ action: comps.length ? 'upgrade' : 'buy', key: k, components: comps, cost: mainCost });
@@ -2203,7 +2514,7 @@ function computeBuildPath(b) {
 
       for (const k of Object.keys(scoredMap)) {
         const it = scoredMap[k];
-        if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k)) continue;
+        if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumedComponents.has(k)) continue;
         const cost = chainCost(k, owned);
         if (cost <= 0 || cost > remaining || slots + 1 > maxSlots) continue;
         const ps = bpScore(it, phaseName);
