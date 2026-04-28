@@ -3,6 +3,7 @@
   "image_path": "/resources/items/infuser/infuser.png",
   "name": "Infuser",
   "normalized_name": "infuser",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "spirit_lifesteal"
@@ -92,7 +93,7 @@
       "spirit_lifesteal": 2,
       "spirit_proc": 0.66,
       "spirit_resist_shred": null,
-      "spirit_resistance": 0.15,
+      "spirit_resistance": 0.4,
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
@@ -101,5 +102,5 @@
     }
   },
   "wiki_url": "https://deadlock.wiki/Infuser",
-  "remarks": ""
+  "compare_to": []
 }
