@@ -3,6 +3,7 @@
   "image_path": "/resources/items/spirit_sap/spirit_sap.png",
   "name": "Spirit Sap",
   "normalized_name": "spirit_sap",
+  "remarks": "Use against spirit heavy characters to squash their damage. ",
   "tier": 1600,
   "values": {
     "self_score": {
@@ -27,9 +28,9 @@
       "continuous_damage": null,
       "continuous_resistance": 0.1,
       "cooldown_reduction": 0.05,
-      "counter_importance": 0.33,
+      "counter_importance": 0.5,
       "damage_sponge": 0.1,
-      "debuff": 0.5,
+      "debuff": 0.75,
       "debuff_resistance": null,
       "disarm": null,
       "displace": null,
@@ -44,7 +45,7 @@
       "gun_continuous_damage": null,
       "gun_continuous_resistance": null,
       "headshot_damage": null,
-      "high_max_hp": 0.1,
+      "high_max_hp": 0.3,
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "large_hitbox": null,
@@ -71,18 +72,37 @@
       "spirit_burst_damage": null,
       "spirit_burst_resistance": 0.33,
       "spirit_continuous_damage": null,
-      "spirit_continuous_resistance": 0.45,
+      "spirit_continuous_resistance": 0.66,
       "spirit_damage": 0.2,
       "spirit_proc": null,
-      "spirit_resist_shred": null,
-      "spirit_resistance": 0.45,
+      "spirit_resist_shred": 0.85,
+      "spirit_resistance": 0.15,
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": 0.33,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Spirit_Sap",
-  "remarks": "Use against spirit heavy characters to squash their damage. "
+  "upgrades_from": [],
+  "compare_to": [
+    "slowing_hex",
+    "mystic_vulnerability",
+    "improved_spirit"
+  ]
 }

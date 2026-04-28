@@ -46,6 +46,7 @@
       "headshot_damage": null,
       "high_max_hp": null,
       "horizontal_mobility": null,
+      "hybrid_damage_usage": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -62,6 +63,7 @@
       "self_heal": null,
       "shield": null,
       "silence": null,
+      "single_ability_focus": 0.25,
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
@@ -78,9 +80,24 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "hybrid_damage_usage": null,
-      "single_ability_focus": 0.25
+      "multi_ability_focus": 0.25,
+      "interrupt": null,
+      "spirit_burst_proc": null,
+      "spirit_continuous_proc": null,
+      "gun_burst_proc": null,
+      "gun_continuous_proc": null,
+      "ability_spam": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Extra_Charge"
+  "wiki_url": "https://deadlock.wiki/Extra_Charge",
+  "upgrades_from": [],
+  "compare_to": []
 }
