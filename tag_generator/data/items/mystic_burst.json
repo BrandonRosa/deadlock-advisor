@@ -73,11 +73,11 @@
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 1,
-      "spirit_burst_proc": 1,
+      "spirit_burst_damage": 1.25,
+      "spirit_burst_proc": 1.25,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": -0.25,
-      "spirit_continuous_proc": -1,
+      "spirit_continuous_proc": -0.5,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.33,
       "spirit_proc": 0.35,
@@ -87,8 +87,17 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "high_assist_count": null,
+      "high_kill_count": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Mystic_Burst"
+  "wiki_url": "https://deadlock.wiki/Mystic_Burst",
+  "compare_to": []
 }
