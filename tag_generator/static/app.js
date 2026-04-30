@@ -2405,7 +2405,7 @@ function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
 // maxSells: max sell operations allowed this phase (0 = no selling in Lane/Early).
 const BUILD_PHASES = [
   { name: 'Lane',       addBudget: 3200,    totalSlots: 9,  minSlots: 3,  maxSells: 0 },
-  { name: 'Early',      addBudget: 6400,    totalSlots: 9,  minSlots: 7,  maxSells: 0 },
+  { name: 'Early',      addBudget: 6400,    totalSlots: 9,  minSlots: 6,  maxSells: 0 },
   { name: 'Mid',        addBudget: 12800,   totalSlots: 10, minSlots: 9,  maxSells: 2 },
   { name: 'Late',       addBudget: 19800,   totalSlots: 12, minSlots: 11, maxSells: 3 },
   { name: 'Extra Late', addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 5 },
@@ -2415,11 +2415,11 @@ const BUILD_PHASES = [
 //   index 0=T1(800), 1=T2(1600), 2=T3(3200), 3=T4(6400+)
 const PHASE_TIER_MULTS = {
   //              T1(800)  T2(1600)  T3(3200)  T4(6400+)
-  'Lane':       [ 1.4,     0.8,      0.15,     0.0  ],
-  'Early':      [ 0.85,    0.9,      0.5,      0.05 ],
-  'Mid':        [ 0.5,     0.75,     1.0,      0.6  ],
-  'Late':       [ 0.1,     0.25,     1.0,      1.5  ],
-  'Extra Late': [ 0.0,     0.1,      0.5,      2.0  ],
+  'Lane':       [ 1.3,     0.95,      0.15,     0.0  ],
+  'Early':      [ 0.8,    0.95,      0.55,      0.05 ],
+  'Mid':        [ 0.45,     0.8,     1.05,      0.65  ],
+  'Late':       [ 0.0,     0.2,     1.1,      1.55  ],
+  'Extra Late': [ 0.0,     0,      0.55,      2.05  ],
 };
 
 function getPhaseTierMult(phaseName, tier) {
