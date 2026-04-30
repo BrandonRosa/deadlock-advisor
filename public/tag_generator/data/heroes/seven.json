@@ -740,7 +740,8 @@
           "ult_focused": 0.15,
           "vertical_mobility": 0.15
         }
-      }
+      },
+      "followed_build": "General"
     },
     {
       "build_description_eng": "Focuses on Seven's Stun. Great for Aerial/Diving characters. Doest deal allot of damage, but great for countering dives.",
@@ -1111,7 +1112,8 @@
           "ult_focused": 0.33,
           "vertical_mobility": 0.25
         }
-      }
+      },
+      "followed_build": "General"
     },
     {
       "build_description_eng": "Closest thing to hybrid Seven has. Great at shredding groups and tanks. Awful against Aerial/TinyHitBox/Fast enemies.",
@@ -1482,7 +1484,8 @@
           "ult_focused": 0.1,
           "vertical_mobility": 0.2
         }
-      }
+      },
+      "followed_build": "General"
     },
     {
       "build_description_eng": "",
@@ -1853,7 +1856,8 @@
           "ult_focused": 2,
           "vertical_mobility": 0.3
         }
-      }
+      },
+      "followed_build": "Farmer"
     },
     {
       "build_description_eng": "",
@@ -2224,7 +2228,8 @@
           "ult_focused": 0,
           "vertical_mobility": 0.4
         }
-      }
+      },
+      "followed_build": "Power Surge"
     }
   ],
   "desc_eng": "",
