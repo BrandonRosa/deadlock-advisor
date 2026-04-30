@@ -1148,6 +1148,7 @@ const MATCH = {
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
+  bpAlgo: 'greedy-phase',
 };
 
 // ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
@@ -1183,6 +1184,7 @@ function renderCalcSetup() {
   document.getElementById('mult-build-enemy').value     = MATCH.mult.buildEnemy;
   document.getElementById('mult-item-ally').value       = MATCH.mult.itemAlly;
   document.getElementById('mult-item-enemy').value      = MATCH.mult.itemEnemy;
+  document.getElementById('bp-algo-sel').value          = MATCH.bpAlgo;
   renderTeamBars();
   renderCalcRoster();
 }
@@ -1488,8 +1490,9 @@ function computeResults() {
         total: allyScore * MATCH.mult.buildAlly + enemyScore * MATCH.mult.buildEnemy,
         ally: allyScore, enemy: enemyScore,
         allyBD, enemyBD, vsBreakdown, items, assistItems, counterItems,
+        rv, heroName: name,
       };
-      buildResult.buildPath = computeBuildPath(buildResult);
+      buildResult.buildPath = computeBuildPath(buildResult, MATCH.bpAlgo);
       return buildResult;
     });
 
@@ -2439,16 +2442,69 @@ function bpScore(it, phaseName) {
   return base * getPhaseTierMult(phaseName, tier);
 }
 
+// ── Build-path algorithm utilities ────────────────────────────────────────
+const COSINE_MATCH_MULT = 0.5;
+
+function vecMagBP(v, keys) {
+  return Math.sqrt(keys.reduce((s, t) => s + (v[t] || 0) ** 2, 0));
+}
+function cosineSimBP(a, b, keys) {
+  const dot = keys.reduce((s, t) => s + (a[t] || 0) * (b[t] || 0), 0);
+  const mag  = vecMagBP(a, keys) * vecMagBP(b, keys);
+  return mag > 0 ? dot / mag : 0;
+}
+function vecNormalizeBP(v, keys) {
+  const mag = vecMagBP(v, keys);
+  const out = {};
+  keys.forEach(t => { out[t] = mag > 0 ? (v[t] || 0) / mag : 0; });
+  return out;
+}
+function bpDeficit(targetNorm, owned, scoredMap, keys) {
+  const invVec = {};
+  keys.forEach(t => { invVec[t] = 0; });
+  owned.forEach(k => {
+    const it = scoredMap[k];
+    if (!it) return;
+    keys.forEach(t => { invVec[t] += (it.values?.[t] || 0); });
+  });
+  const invNorm = vecNormalizeBP(invVec, keys);
+  const deficit = {};
+  keys.forEach(t => { deficit[t] = Math.max(0, (targetNorm[t] || 0) - invNorm[t]); });
+  return deficit;
+}
+function bpSoulIncome(totalEarned) {
+  if (totalEarned < 3200)  return 200;
+  if (totalEarned < 9600)  return 533;
+  if (totalEarned < 22400) return 1280;
+  return 1067;
+}
+function bpAvgRsvVec(heroNames, weightKey) {
+  const vectors = heroNames.map(n => {
+    const hero  = MATCH.heroData[n];
+    if (!hero) return null;
+    const idx   = MATCH.selectedBuilds[n] ?? 0;
+    const build = hero.builds[idx] || hero.builds[0];
+    return build ? (_rsvCache[n]?.[build.name]?.[weightKey] || null) : null;
+  }).filter(Boolean);
+  if (!vectors.length) return {};
+  const avg = {};
+  vectors.forEach(v => Object.keys(v).forEach(t => { avg[t] = (avg[t] || 0) + v[t]; }));
+  Object.keys(avg).forEach(t => { avg[t] /= vectors.length; });
+  return avg;
+}
+
 // Module-level map populated at the start of each computeBuildPath call.
 let bpItemMap = {};
 
-function computeBuildPath(b) {
+function computeBuildPath(b, algo = 'greedy-phase') {
   bpItemMap = {};
   MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
 
   const scoredMap = {};
   const consumedComponents = new Set();
   b.items.forEach(it => { scoredMap[it.key] = it; });
+
+  const tagKeys = S.tags.map(t => t.code);
 
   // Reverse map: component key → upgrades that consume it
   const upgradesTo = {};
@@ -2499,8 +2555,136 @@ function computeBuildPath(b) {
     return spent;
   }
 
+  // ── Algorithm: marginal value ──────────────────────────────────────────────
+  // When scoring an upgrade whose component is already owned, subtract the component's
+  // phase-score so only the *incremental* gain is compared against other candidates.
+  function marginalScoreFn(k, it, phaseName, owned) {
+    const base = bpScore(it, phaseName);
+    const comps = bpItemMap[k]?.upgrades_from || [];
+    const ownedCompScore = comps
+      .filter(c => owned.has(c) && scoredMap[c])
+      .reduce((sum, c) => sum + bpScore(scoredMap[c], phaseName), 0);
+    return Math.max(0, base - ownedCompScore);
+  }
+
+  // ── Algorithms: cosine deficit & cosine match ──────────────────────────────
+  const rv = b.rv || {};
+
+  // Lazily computed raw guide vector (NOT normalized — preserves magnitude).
+  // cosine:       rv.self_weight
+  // cosine-match: self_weight + 0.5*allyAvg - 0.5*enemyAvg, clamped ≥ 0
+  let _cosineGuide = null;
+  function getCosineGuide() {
+    if (_cosineGuide) return _cosineGuide;
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myAllies  = onAlly ? MATCH.allies.filter(n => n !== heroName) : MATCH.enemies.filter(n => n !== heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+
+    if (algo === 'cosine-match') {
+      const allyAvg  = bpAvgRsvVec(myAllies,  'ally_weight');
+      const enemyAvg = bpAvgRsvVec(myEnemies, 'enemy_weight');
+      const guide = {};
+      tagKeys.forEach(t => {
+        guide[t] = Math.max(0,
+          (rv.self_weight?.[t] || 0)
+          + COSINE_MATCH_MULT * (allyAvg[t] || 0)
+          - COSINE_MATCH_MULT * (enemyAvg[t] || 0)
+        );
+      });
+      _cosineGuide = guide;
+    } else {
+      _cosineGuide = rv.self_weight || {};
+    }
+    return _cosineGuide;
+  }
+
+  function cosineScoreFn(k, it, phaseName, owned, totalEarned) {
+    const guide = getCosineGuide();
+    const tier  = bpItemMap[k]?.tier ?? 800;
+
+    // Target magnitude grows with souls earned so coverage never saturates — the build
+    // keeps accumulating power rather than locking into one direction after a few items.
+    // At lane start (~3200) soulScale≈3; by extra-late (~42200) soulScale≈27.
+    const soulScale = 1 + totalEarned / 1600;
+
+    // Inventory contribution in guide-space: sum(self_score[t] × guide[t]) for owned items.
+    const invContrib = {};
+    tagKeys.forEach(t => { invContrib[t] = 0; });
+    owned.forEach(ok => {
+      const oit = scoredMap[ok];
+      if (!oit) return;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t)) return;
+        invContrib[t] += (oit.values?.[t] || 0) * (guide[t] || 0);
+      });
+    });
+
+    // Item contribution vector in the same space.
+    let itemContrib = {};
+    tagKeys.forEach(t => {
+      if (SKIP_TAGS.has(t)) return;
+      itemContrib[t] = (it.values?.[t] || 0) * (guide[t] || 0);
+    });
+
+    // cosine-match: scale item vector by assist/counter importance tags.
+    if (algo === 'cosine-match') {
+      const assistImp  = Math.max(0, it.values?.assist_importance  || 0);
+      const counterImp = Math.max(0, it.values?.counter_importance || 0);
+      if (assistImp > 0 || counterImp > 0) {
+        const scale  = 1 + COSINE_MATCH_MULT * (assistImp + counterImp);
+        const scaled = {};
+        tagKeys.forEach(t => { scaled[t] = (itemContrib[t] || 0) * scale; });
+        itemContrib = scaled;
+      }
+    }
+
+    // Diversity-weighted score.
+    // coverage[t] = invContrib[t] / (guide[t] × soulScale)
+    //   → 0 when tag is empty, 1 when we've matched the soul-scaled target.
+    // deficitMult[t] = 1 / (1 + coverage) → 1.0 when empty, never reaches 0.
+    // Items that fill undercovered tags score higher; but high-contrib items in
+    // well-covered tags still score well because itemContrib[t] is large.
+    let baseScore = 0;
+    tagKeys.forEach(t => {
+      if (SKIP_TAGS.has(t) || (guide[t] || 0) <= 0) return;
+      const coverage    = invContrib[t] / (guide[t] * soulScale);
+      const deficitMult = 1 / (1 + coverage);
+      baseScore += (itemContrib[t] || 0) * deficitMult;
+    });
+
+    // Phase-aware tier preference (same table as greedy).
+    baseScore *= getPhaseTierMult(phaseName, tier);
+
+    // Cost-normalisation blend: early → efficient cheap items, late → raw power.
+    const gamePhase = Math.min(1.0, totalEarned / 42200);
+    const costNorm  = baseScore / Math.log2(Math.max(2, tier));
+    const blended   = baseScore * gamePhase + costNorm * (1 - gamePhase);
+
+    // Path value: best upgrade this item enables, discounted by time to afford.
+    const income = bpSoulIncome(totalEarned);
+    let pathValue = 0;
+    (upgradesTo[k] || []).forEach(uk => {
+      const upgrade = scoredMap[uk];
+      if (!upgrade) return;
+      let upgradeScore = 0;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t) || (guide[t] || 0) <= 0) return;
+        const coverage    = invContrib[t] / (guide[t] * soulScale);
+        const deficitMult = 1 / (1 + coverage);
+        upgradeScore += (upgrade.values?.[t] || 0) * (guide[t] || 0) * deficitMult;
+      });
+      const testOwned = new Set([...owned, k]);
+      const upgCost   = Math.max(0, chainCost(uk, testOwned));
+      const minutes   = income > 0 ? upgCost / income : 10;
+      pathValue = Math.max(pathValue, upgradeScore * Math.exp(-0.1 * minutes));
+    });
+    const futureWeight = 1.0 - gamePhase * 0.6;
+    return blended + pathValue * futureWeight;
+  }
+
   // ── Main greedy for one phase ─────────────────────────────────────────────
-  function greedyMain(ownedIn, budget, maxSlots, minSlots, phaseName, maxSells) {
+  function greedyMain(ownedIn, budget, maxSlots, minSlots, phaseName, maxSells, scoreFn, sellThreshold = 2.0) {
     const owned       = new Set(ownedIn);
     let   remaining   = budget;
     const changes     = [];
@@ -2517,8 +2701,8 @@ function computeBuildPath(b) {
         if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumedComponents.has(k)) continue;
         const cost = chainCost(k, owned);
         if (cost <= 0 || cost > remaining || slots + 1 > maxSlots) continue;
-        const ps = bpScore(it, phaseName);
-        if (ps <= 0) continue;   // item has no value in this phase — skip
+        const ps = scoreFn(k, it, phaseName, owned);
+        if (ps <= 0) continue;
         // Fill mode: phase-score per soul spent (prefers cheap, phase-appropriate items)
         // Quality mode: absolute phase-score
         const val = filling ? (ps / cost) : ps;
@@ -2535,7 +2719,7 @@ function computeBuildPath(b) {
         let worstKey = null, worstPS = Infinity;
         owned.forEach(k => {
           if (soldInPhase.has(k)) return;
-          const ps = scoredMap[k] ? bpScore(scoredMap[k], phaseName) : 0;
+          const ps = scoredMap[k] ? scoreFn(k, scoredMap[k], phaseName, owned) : 0;
           if (ps < worstPS) { worstPS = ps; worstKey = k; }
         });
         if (!worstKey) break;
@@ -2550,12 +2734,12 @@ function computeBuildPath(b) {
           if (testOwned.has(k) || isSubsumed(k, testOwned) || soldInPhase.has(k)) continue;
           const cost = chainCost(k, testOwned);
           if (cost <= 0 || cost > testBudget || testOwned.size + 1 > maxSlots) continue;
-          const ps = bpScore(it, phaseName);
+          const ps = scoreFn(k, it, phaseName, testOwned);
           if (ps > swapPS) { swapPS = ps; swapKey = k; }
         }
 
         // Require 2× phase-score improvement — selling costs 50% of item value, so bar is high
-        if (swapKey && swapPS > worstPS * 2.0) {
+        if (swapKey && swapPS > worstPS * sellThreshold) {
           owned.delete(worstKey);
           soldInPhase.add(worstKey);
           remaining += refund;
@@ -2596,17 +2780,202 @@ function computeBuildPath(b) {
     return { changes };
   }
 
+  // ── Shared helpers for Beam Search & Lookahead ────────────────────────────
+  // Beam-local emit: same as emitChain but takes `consumed` explicitly instead of
+  // mutating the outer consumedComponents — required for parallel beam simulation.
+  function beamEmit(k, owned, consumed, changes) {
+    const item = bpItemMap[k];
+    if (!item) return 0;
+    let spent = 0;
+    (item.upgrades_from || []).forEach(c => {
+      if (!owned.has(c) && bpItemMap[c]) {
+        owned.add(c); spent += bpItemMap[c].tier;
+        changes.push({ action: 'buy', key: c, components: [], cost: bpItemMap[c].tier });
+      }
+    });
+    const comps    = (item.upgrades_from || []).filter(c => owned.has(c));
+    const mainCost = item.tier - comps.reduce((s, c) => s + (bpItemMap[c]?.tier ?? 0), 0);
+    comps.forEach(c => { owned.delete(c); consumed.add(c); });
+    owned.add(k); spent += mainCost;
+    changes.push({ action: comps.length ? 'upgrade' : 'buy', key: k, components: comps, cost: mainCost });
+    return spent;
+  }
+
+  // Coverage-satisfaction holistic score: credit for filling guide-weighted tag targets
+  // up to a soul-scaled magnitude ceiling; over-coverage earns nothing (forces build breadth).
+  const _beamGuide = getCosineGuide();
+  function beamHolisticScore(ownedSet, totalEarned) {
+    const soulScale = 1 + totalEarned / 1600;
+    const inv = {};
+    tagKeys.forEach(t => { inv[t] = 0; });
+    ownedSet.forEach(ok => {
+      const oit = scoredMap[ok];
+      if (!oit) return;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t)) return;
+        inv[t] += (oit.values?.[t] || 0) * (_beamGuide[t] || 0);
+      });
+    });
+    let score = 0;
+    tagKeys.forEach(t => {
+      if (SKIP_TAGS.has(t) || (_beamGuide[t] || 0) <= 0) return;
+      score += Math.min(inv[t], (_beamGuide[t] || 0) * soulScale);
+    });
+    return score;
+  }
+
+  // ── Algorithm: 1-Step Lookahead ───────────────────────────────────────────
+  // Scores each candidate item by simulating: buy it, then greedily fill 2 more
+  // items using bpScore, then evaluate holistically. Catches synergies that a
+  // single-step greedy misses — e.g. buying a cheap component now unlocks a
+  // dominant T3 next step. Deterministic, O(N²) per phase (same asymptotic as
+  // greedy but with a more informed cost-per-step estimate).
+  function lookaheadScoreFn(k, phaseName, owned, budget, te, maxSlots) {
+    const simOwned    = new Set(owned);
+    const simConsumed = new Set(consumedComponents);
+    let   simBudget   = budget - chainCost(k, simOwned);
+    if (simBudget < 0) return -Infinity;
+    beamEmit(k, simOwned, simConsumed, []);
+    for (let i = 0; i < 2; i++) {
+      if (simOwned.size >= maxSlots) break;
+      let bk = null, bv = -Infinity;
+      for (const ck of Object.keys(scoredMap)) {
+        if (simOwned.has(ck) || isSubsumed(ck, simOwned) || simConsumed.has(ck)) continue;
+        const cc = chainCost(ck, simOwned);
+        if (cc <= 0 || cc > simBudget) continue;
+        const ps = bpScore(scoredMap[ck], phaseName);
+        if (ps > bv) { bv = ps; bk = ck; }
+      }
+      if (!bk) break;
+      simBudget -= chainCost(bk, simOwned);
+      beamEmit(bk, simOwned, simConsumed, []);
+    }
+    return beamHolisticScore(simOwned, te);
+  }
+
+  // ── Algorithm: Beam Search ─────────────────────────────────────────────────
+  // Maintains K=3 candidate builds simultaneously. At each phase, expands each
+  // beam with K scoring strategies (standard, tier-push, cost-efficient), producing
+  // up to K² candidates; prunes back to K by holistic coverage score. Explores
+  // item combinations that single-trajectory greedy cannot find because they appear
+  // locally suboptimal but produce superior inventories across phases.
+  // (Ref: Beam Search for Multi-Objective Combinatorial Opt., 2015; game AI literature)
+  function runBeamSearch() {
+    const K = 3;
+    const beamScorers = [
+      (_k, it, pn) => bpScore(it, pn),
+      ( k, it, pn) => bpScore(it, pn) * ((bpItemMap[k]?.tier ?? 800) >= 3200 ? 1.35 : (bpItemMap[k]?.tier ?? 800) <= 800 ? 0.65 : 1.0),
+      ( k, it, pn) => bpScore(it, pn) / Math.log2(Math.max(2, bpItemMap[k]?.tier ?? 800)),
+    ];
+
+    function beamPhase(ownedIn, consumedIn, budget, phase, scorerFn) {
+      const owned = new Set(ownedIn), consumed = new Set(consumedIn);
+      let remaining = budget;
+      const changes = [], soldInPhase = new Set();
+      let sellCount = 0;
+      for (let iter = 0; iter < 100; iter++) {
+        const slots = owned.size, filling = slots < phase.minSlots;
+        let bestKey = null, bestVal = -Infinity;
+        for (const k of Object.keys(scoredMap)) {
+          if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumed.has(k)) continue;
+          const cost = chainCost(k, owned);
+          if (cost <= 0 || cost > remaining || slots + 1 > phase.totalSlots) continue;
+          const ps = scorerFn(k, scoredMap[k], phase.name);
+          if (ps <= 0) continue;
+          const val = filling ? (ps / cost) : ps;
+          if (val > bestVal) { bestVal = val; bestKey = k; }
+        }
+        if (bestKey) { remaining -= beamEmit(bestKey, owned, consumed, changes); continue; }
+        if (phase.maxSells > 0 && sellCount < phase.maxSells && owned.size >= phase.totalSlots) {
+          let worstKey = null, worstPS = Infinity;
+          owned.forEach(k => {
+            if (soldInPhase.has(k)) return;
+            const ps = scoredMap[k] ? scorerFn(k, scoredMap[k], phase.name) : 0;
+            if (ps < worstPS) { worstPS = ps; worstKey = k; }
+          });
+          if (!worstKey) break;
+          const refund = Math.floor((bpItemMap[worstKey]?.tier ?? 0) / 2);
+          const testOwned = new Set(owned); testOwned.delete(worstKey);
+          let swapKey = null, swapPS = -Infinity;
+          for (const k of Object.keys(scoredMap)) {
+            if (testOwned.has(k) || isSubsumed(k, testOwned) || soldInPhase.has(k)) continue;
+            const cost = chainCost(k, testOwned);
+            if (cost <= 0 || cost > remaining + refund || testOwned.size + 1 > phase.totalSlots) continue;
+            const ps = scorerFn(k, scoredMap[k], phase.name);
+            if (ps > swapPS) { swapPS = ps; swapKey = k; }
+          }
+          if (swapKey && swapPS > worstPS * 2.5) {
+            owned.delete(worstKey); soldInPhase.add(worstKey);
+            remaining += refund;
+            changes.push({ action: 'sell', key: worstKey, refund });
+            sellCount++;
+          } else break;
+        } else break;
+      }
+      return { owned, consumed, remaining, changes };
+    }
+
+    let beams = beamScorers.map(sc => ({ owned: new Set(), consumed: new Set(), budget: 0, phaseData: [], scorer: sc }));
+    let bsTotal = 0;
+    const bsAssist = new Set(), bsCounter = new Set();
+
+    for (const phase of BUILD_PHASES) {
+      bsTotal += phase.addBudget;
+      beams.forEach(bm => { bm.budget += phase.addBudget; });
+
+      const candidates = [];
+      for (const bm of beams) {
+        for (const sc of beamScorers) {
+          const { owned, consumed, remaining, changes } = beamPhase(bm.owned, bm.consumed, bm.budget, phase, sc);
+          candidates.push({ owned, consumed, budget: remaining, phaseData: [...bm.phaseData, changes], scorer: sc, _h: beamHolisticScore(owned, bsTotal) });
+        }
+      }
+      const seen = new Set();
+      const unique = candidates.filter(c => { const fp = [...c.owned].sort().join(','); if (seen.has(fp)) return false; seen.add(fp); return true; });
+      unique.sort((a, b) => b._h - a._h);
+      beams = unique.slice(0, K);
+    }
+
+    const best = beams[0];
+    let snapOwned = new Set();
+    return best.phaseData.map((changes, i) => {
+      const phase = BUILD_PHASES[i];
+      changes.forEach(ch => {
+        if (ch.action === 'sell') { snapOwned.delete(ch.key); }
+        else { (ch.components || []).forEach(c => snapOwned.delete(c)); snapOwned.add(ch.key); }
+      });
+      const sideBudget = Math.floor(phase.addBudget / 2);
+      const { changes: ac } = greedyAssist(snapOwned, bsAssist,  sideBudget, 2, 'ally');
+      const { changes: cc } = greedyAssist(snapOwned, bsCounter, sideBudget, 2, 'enemy');
+      return { phase: phase.name, changes, assistChanges: ac, counterChanges: cc };
+    });
+  }
+
   // ── Phase loop ─────────────────────────────────────────────────────────────
+  if (algo === 'beam') return runBeamSearch();
+
   let owned = new Set();
   let remainingBudget = 0;
+  let totalEarned     = 0;
   const phaseResults      = [];
   const globalAssistUsed  = new Set();
   const globalCounterUsed = new Set();
 
+  const useCosine = algo === 'cosine' || algo === 'cosine-match';
+
   for (const phase of BUILD_PHASES) {
     remainingBudget += phase.addBudget;
+    totalEarned     += phase.addBudget;
+    const te = totalEarned; // capture for closure
+
+    const phaseScorerFn =
+      useCosine           ? (k, it, pn, ow) => cosineScoreFn(k, it, pn, ow, te) :
+      algo === 'marginal' ? marginalScoreFn :
+      algo === 'lookahead'? (k, it, pn, ow) => lookaheadScoreFn(k, pn, ow, remainingBudget, te, phase.totalSlots) :
+                            (_k, it, pn)    => bpScore(it, pn);
+
     const { changes, owned: newOwned, remaining: newBudget } =
-      greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells);
+      greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells, phaseScorerFn, useCosine ? 3.5 : 2.0);
     owned           = newOwned;
     remainingBudget = newBudget;
 
@@ -2630,7 +2999,7 @@ function mkBuildPathPanel(b) {
     btn.textContent = 'Calculate Build Path';
     btn.addEventListener('click', () => {
       btn.disabled = true; btn.textContent = 'Calculating…';
-      const pathData = computeBuildPath(b);
+      const pathData = computeBuildPath(b, MATCH.bpAlgo);
       d.innerHTML = '';
       d.appendChild(buildPathPanelContents(pathData, b));
     });
@@ -2876,3 +3245,4 @@ document.getElementById('btn-regen-run').addEventListener('click', () => {
 });
 document.getElementById('back-to-summary').addEventListener('click', () => showPage('calc-summary'));
 document.getElementById('back-to-hero').addEventListener('click', () => openCalcHero(MATCH.viewHeroName));
+document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; });
