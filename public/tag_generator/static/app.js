@@ -1145,10 +1145,13 @@ const MATCH = {
     buildEnemy: 1.5,
     itemAlly:   1.5,
     itemEnemy:  1.5,
+    allyBuild:  0.75,  // V2: allies benefit from my build
+    enemyBuild: 0.75,  // V2: enemies react to my build
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
-  bpAlgo: 'greedy-phase',
+  bpAlgo: 'cosine',
+  scoreFormula: 'v2',
 };
 
 // ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
@@ -1184,7 +1187,11 @@ function renderCalcSetup() {
   document.getElementById('mult-build-enemy').value     = MATCH.mult.buildEnemy;
   document.getElementById('mult-item-ally').value       = MATCH.mult.itemAlly;
   document.getElementById('mult-item-enemy').value      = MATCH.mult.itemEnemy;
+  document.getElementById('mult-ally-build').value      = MATCH.mult.allyBuild;
+  document.getElementById('mult-enemy-build').value     = MATCH.mult.enemyBuild;
   document.getElementById('bp-algo-sel').value          = MATCH.bpAlgo;
+  document.getElementById('score-formula-sel').value    = MATCH.scoreFormula;
+  document.getElementById('v2-mult-group').style.display = MATCH.scoreFormula === 'v2' ? '' : 'none';
   renderTeamBars();
   renderCalcRoster();
 }
@@ -1298,7 +1305,7 @@ document.getElementById('calc-uncap').addEventListener('change', e => {
   MATCH.uncapped = e.target.checked;
   renderTeamBars();
 });
-['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy'].forEach(id => {
+['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy','mult-ally-build','mult-enemy-build'].forEach(id => {
   document.getElementById(id).addEventListener('input', e => {
     const v = parseFloat(e.target.value);
     if (isNaN(v) || v < 0) return;
@@ -1365,7 +1372,7 @@ function resolvedSrcBuildVals(name) {
 
 function computeResults() {
   // Always read current input values so changes made without blur are captured
-  ['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy'].forEach(id => {
+  ['mult-build-ally','mult-build-enemy','mult-item-ally','mult-item-enemy','mult-ally-build','mult-enemy-build'].forEach(id => {
     const v = parseFloat(document.getElementById(id)?.value);
     if (!isNaN(v) && v >= 0) {
       const key = id.replace('mult-', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase());
@@ -1419,6 +1426,30 @@ function computeResults() {
       enemyScore /= numEnemies;
       Object.keys(allyBD).forEach(k  => allyBD[k]  /= numAllies);
       Object.keys(enemyBD).forEach(k => enemyBD[k] /= numEnemies);
+
+      // V2: symmetric perspectives — how allies/enemies react to this build's output
+      let allyScoreSelf = 0, enemyScoreSelf = 0;
+      const allyBDSelf = {}, enemyBDSelf = {};
+      if (MATCH.scoreFormula === 'v2') {
+        S.tags.forEach(tag => {
+          const t  = tag.code;
+          const ss = rv.self_score[t] ?? 0;
+          myAllies.forEach(an => {
+            const c = ss * (resolvedSrcBuildVals(an)?.ally_weight?.[t] ?? 0);
+            allyScoreSelf += c;
+            allyBDSelf[an] = (allyBDSelf[an] || 0) + c;
+          });
+          myEnemies.forEach(en => {
+            const c = ss * (resolvedSrcBuildVals(en)?.enemy_weight?.[t] ?? 0);
+            enemyScoreSelf += c;
+            enemyBDSelf[en] = (enemyBDSelf[en] || 0) + c;
+          });
+        });
+        allyScoreSelf  /= numAllies;
+        enemyScoreSelf /= numEnemies;
+        Object.keys(allyBDSelf).forEach(k  => allyBDSelf[k]  /= numAllies);
+        Object.keys(enemyBDSelf).forEach(k => enemyBDSelf[k] /= numEnemies);
+      }
 
       // vsBreakdown: how well each enemy counters this build (high = bad for us)
       // = Σ_t(build.self_score[t] × enemy.enemy_weight[t])
@@ -1485,10 +1516,18 @@ function computeResults() {
       }).filter(x => tv(x._raw_values, 'counter_importance') > 0)
         .sort((a, b) => a.score - b.score).slice(0, 3);
 
+      const total = MATCH.scoreFormula === 'v2'
+        ? allyScore     * MATCH.mult.buildAlly   +
+          allyScoreSelf * MATCH.mult.allyBuild   +
+          enemyScore    * MATCH.mult.buildEnemy  +
+          enemyScoreSelf * MATCH.mult.enemyBuild
+        : allyScore * MATCH.mult.buildAlly + enemyScore * MATCH.mult.buildEnemy;
+
       const buildResult = {
         buildIdx: bi, name: build.name || `Build ${bi + 1}`, isGeneral: bi === 0,
-        total: allyScore * MATCH.mult.buildAlly + enemyScore * MATCH.mult.buildEnemy,
+        total,
         ally: allyScore, enemy: enemyScore,
+        allyScoreSelf, enemyScoreSelf, allyBDSelf, enemyBDSelf,
         allyBD, enemyBD, vsBreakdown, items, assistItems, counterItems,
         rv, heroName: name,
       };
@@ -1821,9 +1860,12 @@ function openCalcHero(name) {
     el.appendChild(banner);
   }
 
+  const isV2 = MATCH.scoreFormula === 'v2';
   const hdr = document.createElement('div');
-  hdr.className = 'ch-header-row';
-  hdr.innerHTML = '<span>Build</span><span>Ally</span><span>Enemy</span><span>Total</span>';
+  hdr.className = 'ch-header-row' + (isV2 ? ' v2' : '');
+  hdr.innerHTML = isV2
+    ? '<span>Build</span><span title="Your build benefits from allies">Ally</span><span title="Allies benefit from your build">+Ally</span><span title="Your build counters enemies">Enemy</span><span title="Enemies react to your build">+Enemy</span><span>Total</span>'
+    : '<span>Build</span><span>Ally</span><span>Enemy</span><span>Total</span>';
   el.appendChild(hdr);
 
   const genBuild     = r.builds.find(x => x.isGeneral);
@@ -1840,12 +1882,18 @@ function openCalcHero(name) {
       totalHtml = `<span class="ch-score total-clr">${fmtScore(b.total)}</span>`;
     }
     const row = document.createElement('div');
-    row.className = 'ch-build-row' + (b.isGeneral ? ' is-general' : '');
-    row.innerHTML = `
-      <span class="ch-bname">${b.name}</span>
-      <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
-      <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
-      <div class="ch-total-wrap">${totalHtml}</div>`;
+    row.className = 'ch-build-row' + (b.isGeneral ? ' is-general' : '') + (isV2 ? ' v2' : '');
+    row.innerHTML = isV2
+      ? `<span class="ch-bname">${b.name}</span>
+         <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
+         <span class="ch-score ally-dim-clr">${fmtScore(b.allyScoreSelf)}</span>
+         <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
+         <span class="ch-score enemy-dim-clr">${fmtScore(b.enemyScoreSelf)}</span>
+         <div class="ch-total-wrap">${totalHtml}</div>`
+      : `<span class="ch-bname">${b.name}</span>
+         <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
+         <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
+         <div class="ch-total-wrap">${totalHtml}</div>`;
 
     const buildData = MATCH.heroData[name]?.builds[b.buildIdx];
     if (buildData) {
@@ -1923,10 +1971,13 @@ function mkPanel(title, inner) {
 }
 
 function mkScorePanel(b) {
+  const isV2 = MATCH.scoreFormula === 'v2';
   return mkPanel('Build Score', `
     <div class="score-trio">
       <div class="score-block"><div class="score-val ally-clr">${fmtScore(b.ally)}</div><div class="score-lbl">Ally</div></div>
+      ${isV2 ? `<div class="score-block"><div class="score-val ally-dim-clr">${fmtScore(b.allyScoreSelf)}</div><div class="score-lbl">+Ally</div></div>` : ''}
       <div class="score-block"><div class="score-val enemy-clr">${fmtScore(b.enemy)}</div><div class="score-lbl">Enemy</div></div>
+      ${isV2 ? `<div class="score-block"><div class="score-val enemy-dim-clr">${fmtScore(b.enemyScoreSelf)}</div><div class="score-lbl">+Enemy</div></div>` : ''}
       <div class="score-block"><div class="score-val total-clr">${fmtScore(b.total)}</div><div class="score-lbl">Total</div></div>
     </div>`);
 }
@@ -1962,8 +2013,14 @@ function mkBreakdownPanel(b) {
     d.appendChild(sec);
   }
 
-  addBD(Object.entries(b.allyBD).sort((a, x) => x[1] - a[1]),  'Ally Contributions',  'ally-clr');
-  addBD(Object.entries(b.enemyBD).sort((a, x) => x[1] - a[1]), 'Enemy Contributions', 'enemy-clr');
+  addBD(Object.entries(b.allyBD).sort((a, x) => x[1] - a[1]),  'Ally Contributions (you benefit from allies)',  'ally-clr');
+  if (MATCH.scoreFormula === 'v2') {
+    addBD(Object.entries(b.allyBDSelf || {}).sort((a, x) => x[1] - a[1]), '+Ally Contributions (allies benefit from you)', 'ally-dim-clr');
+  }
+  addBD(Object.entries(b.enemyBD).sort((a, x) => x[1] - a[1]), 'Enemy Contributions (you counter enemies)', 'enemy-clr');
+  if (MATCH.scoreFormula === 'v2') {
+    addBD(Object.entries(b.enemyBDSelf || {}).sort((a, x) => x[1] - a[1]), '+Enemy Contributions (enemies react to you)', 'enemy-dim-clr');
+  }
   return d;
 }
 
@@ -2221,7 +2278,7 @@ function mkItemsPanel(b, heroName) {
 
 function computeNotRec(items) {
   return items
-    .filter(it => (it.total < 1.0 && it.enemy < 0) || it.self < 0.5)
+    .filter(it => (it.total < 1.0 && it.enemy < 0) || (it.self < 0.5 && it.enemy < EFFECT_THRESH.enemy.norm))
     .sort((a, b) => a.total - b.total);
 }
 
@@ -2414,6 +2471,16 @@ const BUILD_PHASES = [
   { name: 'Extra Late', addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 5 },
 ];
 
+// Per-phase assist/counter tier options.
+// Multiple options are tried; the one with the highest total score is used.
+const ASSIST_PHASE_OPTIONS = {
+  'Lane':       [{ tier: 800,  max: 2 }, { tier: 1600, max: 1 }],
+  'Early':      [{ tier: 1600, max: 2 }, { tier: 3200, max: 1 }],
+  'Mid':        [{ tier: 3200, max: 2 }, { tier: 6400, max: 1 }],
+  'Late':       [{ tier: 6400, max: 2 }, { tier: 3200, max: 2 }],
+  'Extra Late': [{ tier: 6400, max: 2 }],
+};
+
 // Per-phase tier preference multipliers — edit to tune which item tiers are preferred per phase.
 //   index 0=T1(800), 1=T2(1600), 2=T3(3200), 3=T4(6400+)
 const PHASE_TIER_MULTS = {
@@ -2438,12 +2505,16 @@ function getPhaseTierMult(phaseName, tier) {
 function bpScore(it, phaseName) {
   const tier    = bpItemMap[it.key]?.tier ?? 800;
   const gm      = tierMult(tier) || 1;
-  const base    = (it.ally / gm) * 0.75 + (it.self / gm) + (it.enemy / gm) * 0.75;
+  const base    = (it.ally / gm) * 0.75 + (it.self / gm) + (it.enemy / gm);
   return base * getPhaseTierMult(phaseName, tier);
 }
 
 // ── Build-path algorithm utilities ────────────────────────────────────────
-const COSINE_MATCH_MULT = 0.5;
+const COSINE_MATCH_MULT  = 0.5;
+const COSINE_ENEMY_MULT  = 0.75;  // used by cosine-match (linear)
+const COSINE_ENEMY_K    = 1.37;   // power-func scale: matches 0.75× linear at |signal|=0.30
+const COSINE_ENEMY_POW  = 1.5;    // super-linear: amplifies strong enemy signals, spares weak ones
+const COSINE_SW_DAMP    = 4;      // dampens enemy correction when hero already has self_weight for that tag
 
 function vecMagBP(v, keys) {
   return Math.sqrt(keys.reduce((s, t) => s + (v[t] || 0) ** 2, 0));
@@ -2493,8 +2564,42 @@ function bpAvgRsvVec(heroNames, weightKey) {
   return avg;
 }
 
+// Enemy-team vector with convex team-fraction scaling for the adaptive algorithm.
+// Unlike bpAvgRsvVec, nulls/zeros are excluded from the significant-value count so
+// that 1 extremely spirit-heavy enemy out of 6 barely nudges spirit_resistance,
+// while 4-6 spirit-heavy enemies push it strongly (fraction^1.5 curve).
+function bpEnemyTeamVec(heroNames, threshold = 0.05) {
+  const N = heroNames.length;
+  if (!N) return {};
+  const vectors = heroNames.map(n => {
+    const hero  = MATCH.heroData[n];
+    if (!hero) return null;
+    const idx   = MATCH.selectedBuilds[n] ?? 0;
+    const build = hero.builds[idx] || hero.builds[0];
+    return build ? (_rsvCache[n]?.[build.name]?.['enemy_weight'] || null) : null;
+  }).filter(Boolean);
+  if (!vectors.length) return {};
+  const allTags = new Set();
+  vectors.forEach(v => Object.keys(v).forEach(t => allTags.add(t)));
+  const result = {};
+  if (_bpDbg) _bpDbg.enemyFactorDetail = {};
+  allTags.forEach(t => {
+    const vals    = vectors.map(v => v[t] || 0);
+    const sigVals = vals.filter(v => Math.abs(v) > threshold);
+    if (!sigVals.length) { result[t] = 0; return; }
+    const fraction = sigVals.length / N;
+    const scale    = Math.pow(fraction, 1.5);
+    const avgSig   = sigVals.reduce((s, v) => s + v, 0) / sigVals.length;
+    result[t]      = avgSig * scale;
+    if (_bpDbg) _bpDbg.enemyFactorDetail[t] = { sigCount: sigVals.length, N, fraction, scale, avgSig, result: result[t] };
+  });
+  return result;
+}
+
 // Module-level map populated at the start of each computeBuildPath call.
 let bpItemMap = {};
+// Set to a plain object before computeBuildPath to enable debug capture; null = off.
+let _bpDbg = null;
 
 function computeBuildPath(b, algo = 'greedy-phase') {
   bpItemMap = {};
@@ -2571,8 +2676,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   const rv = b.rv || {};
 
   // Lazily computed raw guide vector (NOT normalized — preserves magnitude).
-  // cosine:       rv.self_weight
-  // cosine-match: self_weight + 0.5*allyAvg - 0.5*enemyAvg, clamped ≥ 0
+  // cosine:       self_weight - 0.5*enemyAvg, clamped ≥ 0
+  // cosine-match: self_weight + 0.5*allyAvg - 0.75*enemyAvg, clamped ≥ 0
+  // adaptive:     blend like cosine-match but uses team-fraction-scaled enemy vec,
+  //               then normalized back to self_weight's magnitude (rotation, not inflation)
   let _cosineGuide = null;
   function getCosineGuide() {
     if (_cosineGuide) return _cosineGuide;
@@ -2581,20 +2688,76 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const myAllies  = onAlly ? MATCH.allies.filter(n => n !== heroName) : MATCH.enemies.filter(n => n !== heroName);
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
-    if (algo === 'cosine-match') {
-      const allyAvg  = bpAvgRsvVec(myAllies,  'ally_weight');
-      const enemyAvg = bpAvgRsvVec(myEnemies, 'enemy_weight');
-      const guide = {};
+    if (algo === 'adaptive') {
+      const allyAvg     = bpAvgRsvVec(myAllies, 'ally_weight');
+      const enemyFactor = bpEnemyTeamVec(myEnemies);
+      const blended = {};
       tagKeys.forEach(t => {
-        guide[t] = Math.max(0,
-          (rv.self_weight?.[t] || 0)
+        const ef = enemyFactor[t] || 0;
+        const sw = rv.self_weight?.[t] || 0;
+        const rawCorr = ef !== 0
+          ? Math.sign(-ef) * COSINE_ENEMY_K * Math.pow(Math.abs(ef), COSINE_ENEMY_POW)
+          : 0;
+        // Reduce the enemy push when the hero already has self_weight for this tag
+        const enemyCorr = rawCorr > 0 ? rawCorr / (1 + sw * COSINE_SW_DAMP) : rawCorr;
+        blended[t] = Math.max(0,
+          sw
           + COSINE_MATCH_MULT * (allyAvg[t] || 0)
-          - COSINE_MATCH_MULT * (enemyAvg[t] || 0)
+          + enemyCorr
         );
       });
+      // Normalize to self_weight's magnitude so the guide only rotates toward
+      // enemy-countering tags — the total "energy" stays constant, preventing
+      // any newly-amplified tag from making a single T4 item dominate mid-phase.
+      const selfMag    = vecMagBP(rv.self_weight || {}, tagKeys);
+      const blendedMag = vecMagBP(blended, tagKeys);
+      const normFactor = blendedMag > 0 ? selfMag / blendedMag : 1;
+      const guide = {};
+      tagKeys.forEach(t => { guide[t] = blended[t] * normFactor; });
       _cosineGuide = guide;
+      if (_bpDbg) {
+        _bpDbg.guide      = guide;
+        _bpDbg.selfWeight = rv.self_weight || {};
+        _bpDbg.allyAvg    = allyAvg;
+        _bpDbg.enemyFactor = enemyFactor;
+        _bpDbg.guideMeta  = { selfMag, blendedMag, normFactor, myAllies, myEnemies };
+      }
     } else {
-      _cosineGuide = rv.self_weight || {};
+      const enemyAvg = bpAvgRsvVec(myEnemies, 'enemy_weight');
+      if (algo === 'cosine-match') {
+        const allyAvg  = bpAvgRsvVec(myAllies,  'ally_weight');
+        const guide = {};
+        tagKeys.forEach(t => {
+          guide[t] = Math.max(0,
+            (rv.self_weight?.[t] || 0)
+            + COSINE_MATCH_MULT  * (allyAvg[t]  || 0)
+            - COSINE_ENEMY_MULT  * (enemyAvg[t] || 0)
+          );
+        });
+        _cosineGuide = guide;
+        if (_bpDbg) {
+          _bpDbg.guide      = guide;
+          _bpDbg.selfWeight = rv.self_weight || {};
+          _bpDbg.allyAvg    = allyAvg;
+          _bpDbg.enemyAvg   = enemyAvg;
+          _bpDbg.guideMeta  = { myAllies, myEnemies };
+        }
+      } else {
+        const guide = {};
+        tagKeys.forEach(t => {
+          guide[t] = Math.max(0,
+            (rv.self_weight?.[t] || 0)
+            - COSINE_MATCH_MULT * (enemyAvg[t] || 0)
+          );
+        });
+        _cosineGuide = guide;
+        if (_bpDbg) {
+          _bpDbg.guide      = guide;
+          _bpDbg.selfWeight = rv.self_weight || {};
+          _bpDbg.enemyAvg   = enemyAvg;
+          _bpDbg.guideMeta  = { myAllies, myEnemies };
+        }
+      }
     }
     return _cosineGuide;
   }
@@ -2627,8 +2790,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       itemContrib[t] = (it.values?.[t] || 0) * (guide[t] || 0);
     });
 
-    // cosine-match: scale item vector by assist/counter importance tags.
-    if (algo === 'cosine-match') {
+    // cosine-match + adaptive: scale item vector by assist/counter importance tags.
+    if (algo === 'cosine-match' || algo === 'adaptive') {
       const assistImp  = Math.max(0, it.values?.assist_importance  || 0);
       const counterImp = Math.max(0, it.values?.counter_importance || 0);
       if (assistImp > 0 || counterImp > 0) {
@@ -2691,10 +2854,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const soldInPhase = new Set();   // items sold this phase — never re-buy
     let   sellCount   = 0;
 
+    const _dbgPhase = _bpDbg ? { phaseName, steps: [], swaps: [] } : null;
+    if (_bpDbg) _bpDbg.phases.push(_dbgPhase);
+
     for (let iter = 0; iter < 100; iter++) {
       const slots   = owned.size;
       const filling = slots < minSlots;
       let bestKey = null, bestVal = -Infinity;
+      const _dbgCands = _dbgPhase ? [] : null;
 
       for (const k of Object.keys(scoredMap)) {
         const it = scoredMap[k];
@@ -2707,9 +2874,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         // Quality mode: absolute phase-score
         const val = filling ? (ps / cost) : ps;
         if (val > bestVal) { bestVal = val; bestKey = k; }
+        if (_dbgCands) _dbgCands.push({ key: k, ps, cost, val });
       }
 
       if (bestKey) {
+        if (_dbgPhase) {
+          _dbgCands.sort((a, b) => b.val - a.val);
+          _dbgPhase.steps.push({ type: filling ? 'fill' : 'quality', chosen: bestKey, top5: _dbgCands.slice(0, 5) });
+        }
         remaining -= emitChain(bestKey, owned, changes);
         continue;
       }
@@ -2740,6 +2912,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
         // Require 2× phase-score improvement — selling costs 50% of item value, so bar is high
         if (swapKey && swapPS > worstPS * sellThreshold) {
+          if (_dbgPhase) _dbgPhase.swaps.push({ sold: worstKey, soldPS: worstPS, bought: swapKey, boughtPS: swapPS, ratio: worstPS > 0 ? swapPS / worstPS : 99 });
           owned.delete(worstKey);
           soldInPhase.add(worstKey);
           remaining += refund;
@@ -2752,32 +2925,37 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Side columns: Assist / Counter ────────────────────────────────────────
+  // buildPathBlacklist = owned ∪ consumedComponents — items already in the main path.
   // globalUsed persists across ALL phases to prevent duplicates between phases.
-  function greedyAssist(mainOwned, globalUsed, budget, maxSlots, scoreKey) {
+  function greedyAssist(buildPathBlacklist, globalUsed, phaseName, scoreKey) {
     const importanceTag = scoreKey === 'ally' ? 'assist_importance' : 'counter_importance';
-    const local = new Set();
-    let remaining = budget;
-    const changes = [];
-    for (let iter = 0; iter < 10; iter++) {
-      if (local.size >= maxSlots) break;
-      let bestKey = null, bestScore = -Infinity;
-      for (const k of Object.keys(scoredMap)) {
-        const it = scoredMap[k];
-        if (mainOwned.has(k) || globalUsed.has(k) || local.has(k)) continue;
-        const item = bpItemMap[k];
-        if (!item || item.tier > remaining) continue;
-        // Only consider items with a positive importance tag for this column
-        if (tv(it.values, importanceTag) <= 0) continue;
-        const score = scoreKey === 'ally' ? it.ally * 0.75 : it.enemy * 0.75;
-        if (score > bestScore && score > 0) { bestScore = score; bestKey = k; }
-      }
-      if (!bestKey) break;
-      local.add(bestKey);
-      globalUsed.add(bestKey);
-      remaining -= bpItemMap[bestKey].tier;
-      changes.push({ action: 'buy', key: bestKey, cost: bpItemMap[bestKey].tier });
+    const options = ASSIST_PHASE_OPTIONS[phaseName] || [{ tier: 1600, max: 1 }];
+
+    function evalOption({ tier, max }) {
+      const pool = Object.keys(scoredMap)
+        .filter(k => {
+          if (buildPathBlacklist.has(k) || globalUsed.has(k)) return false;
+          if ((bpItemMap[k]?.tier ?? 0) !== tier) return false;
+          return tv(scoredMap[k].values, importanceTag) > 0;
+        })
+        .map(k => {
+          const it = scoredMap[k];
+          const score = scoreKey === 'ally' ? it.ally * 0.75 : it.enemy * 0.75;
+          return { key: k, score };
+        })
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, max);
+      return { pool, totalScore: pool.reduce((s, x) => s + x.score, 0) };
     }
-    return { changes };
+
+    let bestPool = [], bestScore = -Infinity;
+    for (const opt of options) {
+      const { pool, totalScore } = evalOption(opt);
+      if (totalScore > bestScore) { bestScore = totalScore; bestPool = pool; }
+    }
+    bestPool.forEach(x => globalUsed.add(x.key));
+    return { changes: bestPool.map(x => ({ action: 'buy', key: x.key, cost: bpItemMap[x.key]?.tier ?? 0 })) };
   }
 
   // ── Shared helpers for Beam Search & Lookahead ────────────────────────────
@@ -2937,16 +3115,20 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     }
 
     const best = beams[0];
-    let snapOwned = new Set();
+
+    // Full blacklist from ALL beam phases before computing any assist/counter.
+    const beamFullBPBlacklist = new Set();
+    best.phaseData.forEach(changes => {
+      changes.forEach(ch => {
+        beamFullBPBlacklist.add(ch.key);
+        (ch.components || []).forEach(c => beamFullBPBlacklist.add(c));
+      });
+    });
+
     return best.phaseData.map((changes, i) => {
       const phase = BUILD_PHASES[i];
-      changes.forEach(ch => {
-        if (ch.action === 'sell') { snapOwned.delete(ch.key); }
-        else { (ch.components || []).forEach(c => snapOwned.delete(c)); snapOwned.add(ch.key); }
-      });
-      const sideBudget = Math.floor(phase.addBudget / 2);
-      const { changes: ac } = greedyAssist(snapOwned, bsAssist,  sideBudget, 2, 'ally');
-      const { changes: cc } = greedyAssist(snapOwned, bsCounter, sideBudget, 2, 'enemy');
+      const { changes: ac } = greedyAssist(beamFullBPBlacklist, bsAssist,  phase.name, 'ally');
+      const { changes: cc } = greedyAssist(beamFullBPBlacklist, bsCounter, phase.name, 'enemy');
       return { phase: phase.name, changes, assistChanges: ac, counterChanges: cc };
     });
   }
@@ -2954,38 +3136,134 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   // ── Phase loop ─────────────────────────────────────────────────────────────
   if (algo === 'beam') return runBeamSearch();
 
+  const useCosine = algo === 'cosine' || algo === 'cosine-match' || algo === 'adaptive';
+
+  // Pass 1: run all main-path phases to get the complete purchase list.
   let owned = new Set();
   let remainingBudget = 0;
   let totalEarned     = 0;
-  const phaseResults      = [];
-  const globalAssistUsed  = new Set();
-  const globalCounterUsed = new Set();
-
-  const useCosine = algo === 'cosine' || algo === 'cosine-match';
+  const mainPhaseData = [];
 
   for (const phase of BUILD_PHASES) {
     remainingBudget += phase.addBudget;
     totalEarned     += phase.addBudget;
-    const te = totalEarned; // capture for closure
+    const te = totalEarned;
 
     const phaseScorerFn =
       useCosine           ? (k, it, pn, ow) => cosineScoreFn(k, it, pn, ow, te) :
       algo === 'marginal' ? marginalScoreFn :
-      algo === 'lookahead'? (k, it, pn, ow) => lookaheadScoreFn(k, pn, ow, remainingBudget, te, phase.totalSlots) :
+      algo === 'lookahead'? (k, _it, pn, ow) => lookaheadScoreFn(k, pn, ow, remainingBudget, te, phase.totalSlots) :
                             (_k, it, pn)    => bpScore(it, pn);
 
     const { changes, owned: newOwned, remaining: newBudget } =
       greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells, phaseScorerFn, useCosine ? 3.5 : 2.0);
     owned           = newOwned;
     remainingBudget = newBudget;
-
-    const sideBudget = Math.floor(phase.addBudget / 2);
-    const { changes: assistChanges  } = greedyAssist(owned, globalAssistUsed,  sideBudget, 2, 'ally');
-    const { changes: counterChanges } = greedyAssist(owned, globalCounterUsed, sideBudget, 2, 'enemy');
-
-    phaseResults.push({ phase: phase.name, changes, assistChanges, counterChanges });
+    mainPhaseData.push({ phase, changes });
   }
-  return phaseResults;
+
+  // Full blacklist from ALL phases (past and future) so assist/counter never
+  // recommends an item the main path already plans to buy at any point.
+  const fullBPBlacklist = new Set();
+  mainPhaseData.forEach(({ changes }) => {
+    changes.forEach(ch => {
+      fullBPBlacklist.add(ch.key);
+      (ch.components || []).forEach(c => fullBPBlacklist.add(c));
+    });
+  });
+
+  // Pass 2: compute assist/counter per phase using the full blacklist.
+  const globalAssistUsed  = new Set();
+  const globalCounterUsed = new Set();
+  return mainPhaseData.map(({ phase, changes }) => {
+    const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  phase.name, 'ally');
+    const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, phase.name, 'enemy');
+    if (_bpDbg) {
+      const ph = (_bpDbg.phases || []).find(p => p.phaseName === phase.name);
+      if (ph) {
+        ph.assistItems  = assistChanges.map(c => ({ key: c.key, cost: c.cost }));
+        ph.counterItems = counterChanges.map(c => ({ key: c.key, cost: c.cost }));
+      }
+    }
+    return { phase: phase.name, changes, assistChanges, counterChanges };
+  });
+}
+
+function formatBpDebug(allHeroDbgList) {
+  const iname = k => bpItemMap[k]?.name || k;
+  const itier = k => { const t = bpItemMap[k]?.tier || 0; return t ? `T${Math.round(t/800)}` : '?'; };
+  const lines = ['=== BUILD PATH DEBUG ==='];
+  const algo  = allHeroDbgList[0]?.algo || '?';
+  lines.push(`Algorithm: ${algo}`);
+  lines.push(`Allies:  ${(MATCH.allies  || []).join(', ') || '—'}`);
+  lines.push(`Enemies: ${(MATCH.enemies || []).join(', ') || '—'}`);
+
+  for (const dbg of allHeroDbgList) {
+    lines.push('', '─'.repeat(64));
+    const side = (MATCH.allies || []).includes(dbg.hero) ? 'ALLY' : 'ENEMY';
+    lines.push(`HERO: ${dbg.hero}  [${side}]  algo=${algo}`);
+
+    if (dbg.guide) {
+      lines.push('');
+      lines.push('  Guide vector (top 15 tags by guide value):');
+      Object.entries(dbg.guide)
+        .filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15)
+        .forEach(([t, v]) => {
+          const sw = (dbg.selfWeight?.[t]    || 0).toFixed(3);
+          const aa = (dbg.allyAvg?.[t]       || 0).toFixed(3);
+          const ef = (dbg.enemyFactor?.[t] ?? dbg.enemyAvg?.[t] ?? 0).toFixed(3);
+          lines.push(`    ${t.padEnd(32)} guide=${v.toFixed(4)}  sw=${sw}  ally=${aa}  enemy=${ef}`);
+        });
+      const m = dbg.guideMeta || {};
+      if (m.selfMag !== undefined)
+        lines.push(`  Mags: self=${m.selfMag.toFixed(4)}  blended=${m.blendedMag.toFixed(4)}  normFactor=${m.normFactor.toFixed(4)}`);
+      lines.push(`  My allies:  ${(m.myAllies  || []).join(', ') || '—'}`);
+      lines.push(`  My enemies: ${(m.myEnemies || []).join(', ') || '—'}`);
+    } else {
+      lines.push('  Guide: N/A (non-cosine algorithm)');
+    }
+
+    if (dbg.enemyFactorDetail) {
+      const sig = Object.entries(dbg.enemyFactorDetail)
+        .filter(([, d]) => Math.abs(d.result) > 0.005)
+        .sort((a, b) => Math.abs(b[1].result) - Math.abs(a[1].result))
+        .slice(0, 12);
+      if (sig.length) {
+        lines.push('', '  Enemy factor breakdown (adaptive — tags with |result|>0.005):');
+        sig.forEach(([t, d]) => {
+          lines.push(`    ${t.padEnd(32)} sig=${d.sigCount}/${d.N}  frac=${d.fraction.toFixed(2)}  scale=${d.scale.toFixed(3)}  avgSig=${d.avgSig.toFixed(3)}  result=${d.result.toFixed(4)}`);
+        });
+      }
+    }
+
+    for (const ph of (dbg.phases || [])) {
+      lines.push('', `  Phase: ${ph.phaseName}  (${ph.steps.length} buys, ${ph.swaps.length} swaps)`);
+      ph.steps.forEach((s, si) => {
+        const mode = s.type === 'fill' ? 'FILL' : 'QUAL';
+        const cn   = iname(s.chosen);
+        const ct   = itier(s.chosen);
+        lines.push(`    Step ${si+1} [${mode}] chose: ${cn} ${ct}`);
+        s.top5.forEach((c, ci) => {
+          const nt = itier(c.key);
+          lines.push(`      ${ci+1}. ${iname(c.key)} (${nt})  ps=${c.ps.toFixed(4)}  val=${c.val.toFixed(6)}  cost=${c.cost}`);
+        });
+      });
+      ph.swaps.forEach(sw => {
+        lines.push(`    [SWAP] sold ${iname(sw.sold)} ${itier(sw.sold)} (ps=${sw.soldPS.toFixed(4)}) => bought ${iname(sw.bought)} ${itier(sw.bought)} (ps=${sw.boughtPS.toFixed(4)})  ratio=${sw.ratio.toFixed(2)}x`);
+      });
+      if (ph.counterItems?.length) {
+        const cs = ph.counterItems.map(c => `${iname(c.key)} (${itier(c.key)})`).join(', ');
+        lines.push(`    [COUNTER] ${cs}`);
+      }
+      if (ph.assistItems?.length) {
+        const as = ph.assistItems.map(c => `${iname(c.key)} (${itier(c.key)})`).join(', ');
+        lines.push(`    [ASSIST]  ${as}`);
+      }
+    }
+  }
+  return lines.join('\n');
 }
 
 function mkBuildPathPanel(b) {
@@ -3030,13 +3308,41 @@ function buildPathPanelContents(pathData, b) {
   const itemNameMap = {};
   b.items.forEach(it => { itemNameMap[it.key] = it; });
 
-  // Title bar with toggle
+  // Title bar with toggle + debug
   let detailOpen = false;
   const titleBar = document.createElement('div');
   titleBar.className = 'bp-title-bar';
   titleBar.innerHTML = `<span class="calc-panel-title" style="margin:0">Build Path Guide</span>
-    <button class="btn-ghost btn-sm bp-detail-toggle">Show Step-by-Step ▾</button>`;
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn-ghost btn-sm bp-debug-btn">Debug Roster</button>
+      <button class="btn-ghost btn-sm bp-detail-toggle">Show Step-by-Step &#9662;</button>
+    </div>`;
   wrap.appendChild(titleBar);
+
+  titleBar.querySelector('.bp-debug-btn').addEventListener('click', () => {
+    const debugBtn = titleBar.querySelector('.bp-debug-btn');
+    debugBtn.disabled = true; debugBtn.textContent = 'Collecting…';
+    const allHeroes = [...(MATCH.allies || []), ...(MATCH.enemies || [])];
+    const allDbgData = [];
+    allHeroes.forEach(heroName => {
+      const r    = (MATCH.results || []).find(x => x.name === heroName);
+      const bidx = MATCH.selectedBuilds?.[heroName] ?? 0;
+      const b2   = r?.builds?.[bidx];
+      if (!b2) return;
+      _bpDbg = { hero: heroName, algo: MATCH.bpAlgo || 'greedy-phase', phases: [] };
+      try { computeBuildPath(b2, MATCH.bpAlgo); } catch (e) { _bpDbg.error = String(e); }
+      allDbgData.push(_bpDbg);
+      _bpDbg = null;
+    });
+    const text = formatBpDebug(allDbgData);
+    navigator.clipboard.writeText(text).then(() => {
+      debugBtn.disabled = false; debugBtn.textContent = 'Copied!';
+      setTimeout(() => { debugBtn.textContent = 'Debug Roster'; }, 2500);
+    }).catch(() => {
+      debugBtn.disabled = false; debugBtn.textContent = 'Failed';
+      setTimeout(() => { debugBtn.textContent = 'Debug Roster'; }, 2500);
+    });
+  });
 
   // Summary row of item icons (end of Late)
   const summaryEl = document.createElement('div');
@@ -3246,3 +3552,7 @@ document.getElementById('btn-regen-run').addEventListener('click', () => {
 document.getElementById('back-to-summary').addEventListener('click', () => showPage('calc-summary'));
 document.getElementById('back-to-hero').addEventListener('click', () => openCalcHero(MATCH.viewHeroName));
 document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; });
+document.getElementById('score-formula-sel').addEventListener('change', e => {
+  MATCH.scoreFormula = e.target.value;
+  document.getElementById('v2-mult-group').style.display = MATCH.scoreFormula === 'v2' ? '' : 'none';
+});
