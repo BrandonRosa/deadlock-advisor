@@ -226,34 +226,53 @@
     <section id="page-calc" class="page">
       <div class="page-header sticky-header">
         <h1>Match Calculator</h1>
-        <div class="header-actions">
-          <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
-          <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
-          <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include 9999 items</label>
-          <div class="mult-group">
-            <span class="mult-lbl">Build:</span>
-            <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
-            <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+        <div class="header-actions calc-actions">
+          <div class="calc-ctrl-row">
+            <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
+            <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
+            <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include 9999 items</label>
+            <div class="mult-group">
+              <span class="mult-lbl">Build:</span>
+              <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+              <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+            </div>
+            <div class="mult-group">
+              <span class="mult-lbl">Items:</span>
+              <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+              <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+            </div>
           </div>
-          <div class="mult-group">
-            <span class="mult-lbl">Items:</span>
-            <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
-            <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+          <div class="calc-ctrl-row">
+            <div class="mult-group">
+              <span class="mult-lbl">Build Path:</span>
+              <label class="mult-item">Algorithm
+                <select id="bp-algo-sel" class="mult-input">
+                  <option value="greedy-phase">Greedy (Phase)</option>
+                  <option value="marginal">Marginal Value</option>
+                  <option value="cosine">Cosine Deficit</option>
+                  <option value="cosine-match">Cosine Match</option>
+                  <option value="beam">Beam Search</option>
+                  <option value="lookahead">1-Step Lookahead</option>
+                  <option value="adaptive">Adaptive</option>
+                </select>
+              </label>
+            </div>
+            <div class="mult-group">
+              <span class="mult-lbl">Score:</span>
+              <label class="mult-item">Formula
+                <select id="score-formula-sel" class="mult-input">
+                  <option value="v1">V1 – Classic</option>
+                  <option value="v2">V2 – Symmetric</option>
+                </select>
+              </label>
+            </div>
+            <div class="mult-group" id="v2-mult-group" style="display:none">
+              <span class="mult-lbl" title="V2 only: symmetric build synergy terms">V2 Build:</span>
+              <label class="mult-item" title="How much your allies benefit from your build's output">Ally←Me <input type="number" id="mult-ally-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
+              <label class="mult-item" title="How much enemies react to (punish) your build's output">Enemy→Me <input type="number" id="mult-enemy-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
+            </div>
+            <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
           </div>
-          <div class="mult-group">
-            <span class="mult-lbl">Build Path:</span>
-            <label class="mult-item">Algorithm
-              <select id="bp-algo-sel" class="mult-input">
-                <option value="greedy-phase">Greedy (Phase)</option>
-                <option value="marginal">Marginal Value</option>
-                <option value="cosine">Cosine Deficit</option>
-                <option value="cosine-match">Cosine Match</option>
-                <option value="beam">Beam Search</option>
-                <option value="lookahead">1-Step Lookahead</option>
-              </select>
-            </label>
-          </div>
-          <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
         </div>
       </div>
       <div class="calc-teams-bar">
