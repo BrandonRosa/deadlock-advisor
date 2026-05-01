@@ -1772,7 +1772,7 @@
           "ally_buff": null,
           "anti_air": null,
           "anti_heal": 0.2,
-          "aoe_cluster": 0.25,
+          "aoe_cluster": 0.33,
           "assist_importance": 0.1,
           "away_from_team": -0.15,
           "bullet_damage": "+-0.25",
