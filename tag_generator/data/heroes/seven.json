@@ -373,6 +373,7 @@
     },
     {
       "build_description_eng": "Focuses on Seven's Lightning Ball ability. Great for farming, spawned minions, and slowing enemies. Awful vs High HP enemies, Aerial, or dispersed teams.",
+      "followed_build": "General",
       "name": "Ball",
       "normalized_build_name": "seven_ball",
       "values": {
@@ -740,11 +741,11 @@
           "ult_focused": 0.15,
           "vertical_mobility": 0.15
         }
-      },
-      "followed_build": "General"
+      }
     },
     {
       "build_description_eng": "Focuses on Seven's Stun. Great for Aerial/Diving characters. Doest deal allot of damage, but great for countering dives.",
+      "followed_build": "General",
       "name": "Stun",
       "normalized_build_name": "seven_stun",
       "values": {
@@ -1112,11 +1113,11 @@
           "ult_focused": 0.33,
           "vertical_mobility": 0.25
         }
-      },
-      "followed_build": "General"
+      }
     },
     {
       "build_description_eng": "Closest thing to hybrid Seven has. Great at shredding groups and tanks. Awful against Aerial/TinyHitBox/Fast enemies.",
+      "followed_build": "General",
       "name": "Power Surge",
       "normalized_build_name": "seven_power_surge",
       "values": {
@@ -1265,7 +1266,7 @@
           "hybrid_damage_usage": null,
           "interrupt": -0.15,
           "large_hitbox": null,
-          "long_range": -0.5,
+          "long_range": null,
           "low_max_hp": 0.15,
           "magazine_size_dependant": null,
           "melee_damage": null,
@@ -1484,11 +1485,11 @@
           "ult_focused": 0.1,
           "vertical_mobility": 0.2
         }
-      },
-      "followed_build": "General"
+      }
     },
     {
       "build_description_eng": "",
+      "followed_build": "Farmer",
       "name": "Ult",
       "normalized_build_name": "seven_ult",
       "values": {
@@ -1637,7 +1638,7 @@
           "hybrid_damage_usage": null,
           "interrupt": -2,
           "large_hitbox": null,
-          "long_range": -0.33,
+          "long_range": "+-0.1",
           "low_max_hp": 0.15,
           "magazine_size_dependant": null,
           "melee_damage": 0.1,
@@ -1655,7 +1656,7 @@
           "silence": -0.15,
           "single_ability_focus": null,
           "single_target": -0.2,
-          "small_hitbox": 0.2,
+          "small_hitbox": "+0.2",
           "spawn_minions": 0.5,
           "spirit_burst_damage": -0.2,
           "spirit_burst_proc": null,
@@ -1727,7 +1728,7 @@
           "horizontal_mobility": 0.3,
           "hybrid_damage_usage": -0.2,
           "interrupt": null,
-          "large_hitbox": null,
+          "large_hitbox": 0.5,
           "long_range": 0.1,
           "low_max_hp": -0.15,
           "magazine_size_dependant": 0.1,
@@ -1856,11 +1857,11 @@
           "ult_focused": 2,
           "vertical_mobility": 0.3
         }
-      },
-      "followed_build": "Farmer"
+      }
     },
     {
       "build_description_eng": "",
+      "followed_build": "Power Surge",
       "name": "Farmer",
       "normalized_build_name": "seven_farmer",
       "values": {
@@ -2228,8 +2229,7 @@
           "ult_focused": 0,
           "vertical_mobility": 0.4
         }
-      },
-      "followed_build": "Power Surge"
+      }
     }
   ],
   "desc_eng": "",

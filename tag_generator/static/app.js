@@ -865,6 +865,279 @@ document.getElementById('mb-confirm').addEventListener('click', async () => {
 });
 
 // ════════════════════════════════════════════════════════════════════════════
+// REVERSE ENGINEER BUILD
+// ════════════════════════════════════════════════════════════════════════════
+
+const RE = {
+  items: [],    // { key, name, tier, imagePath, selfScore }
+  enemies: [],  // normalized_names (up to 3)
+  allies: [],   // normalized_names (up to 3)
+  _itemData: null,
+};
+
+async function openReverseEngineer() {
+  if (!S.currentHero) return;
+  RE.items = []; RE.enemies = []; RE.allies = [];
+  document.getElementById('re-hero-label').textContent = S.currentHero.eng_name || S.currentHero.normalized_name;
+  document.getElementById('re-build-name').value = '';
+  document.getElementById('re-algo').value = 'items+context';
+  document.getElementById('re-item-search').value = '';
+  document.getElementById('re-item-dropdown').classList.add('hidden');
+  document.getElementById('re-preview').classList.add('hidden');
+  if (!RE._itemData) RE._itemData = await api.get('/api/items/all');
+  renderReHeroPicker('enemy');
+  renderReHeroPicker('ally');
+  renderReChips();
+  showPage('reverse-engineer');
+}
+
+function renderReHeroPicker(type) {
+  const grid = document.getElementById(`re-${type}-grid`);
+  if (!grid) return;
+  const filterEl = document.getElementById(`re-${type}-search`);
+  const q = (filterEl?.value || '').trim().toLowerCase();
+  const sel = type === 'enemy' ? RE.enemies : RE.allies;
+  grid.innerHTML = '';
+  S.heroList.filter(h => !h.is_preset && (!q || h.eng_name.toLowerCase().includes(q))).forEach(h => {
+    const btn = document.createElement('button');
+    btn.className = 're-hero-btn' + (sel.includes(h.normalized_name) ? ' on' : '');
+    const img = srcUrl(h.image_path);
+    btn.innerHTML = `${img ? `<img class="re-hero-btn-img" src="${img}" alt="">` : ''}<span>${h.eng_name || h.normalized_name}</span>`;
+    btn.addEventListener('click', () => {
+      const arr = type === 'enemy' ? RE.enemies : RE.allies;
+      const idx = arr.indexOf(h.normalized_name);
+      if (idx >= 0) arr.splice(idx, 1);
+      else if (arr.length < 3) arr.push(h.normalized_name);
+      renderReHeroPicker(type);
+      renderReChips();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function renderReChips() {
+  // Item chips (ordered list)
+  const itemCont = document.getElementById('re-item-chips');
+  itemCont.innerHTML = '';
+  RE.items.forEach((it, i) => {
+    const chip = document.createElement('div');
+    chip.className = 're-chip re-item-chip';
+    const img = srcUrl(it.imagePath);
+    chip.innerHTML = `
+      ${img ? `<img class="re-chip-img" src="${img}" alt="">` : ''}
+      <span class="re-chip-pos">${i + 1}</span>
+      <span class="re-chip-name">${it.name}</span>
+      <span class="re-chip-tier re-tier-${it.tier}">${it.tier}★</span>
+      <button class="re-chip-x" title="Remove">×</button>`;
+    chip.querySelector('.re-chip-x').addEventListener('click', () => { RE.items.splice(i, 1); renderReChips(); });
+    itemCont.appendChild(chip);
+  });
+
+  // Enemy / ally chips
+  ['enemy', 'ally'].forEach(type => {
+    const arr = type === 'enemy' ? RE.enemies : RE.allies;
+    const cont = document.getElementById(`re-${type}-chips`);
+    if (!cont) return;
+    cont.innerHTML = '';
+    arr.forEach(name => {
+      const hd = S.heroList.find(h => h.normalized_name === name);
+      if (!hd) return;
+      const chip = document.createElement('div');
+      chip.className = 're-chip';
+      const img = srcUrl(hd.image_path);
+      chip.innerHTML = `
+        ${img ? `<img class="re-chip-img" src="${img}" alt="">` : ''}
+        <span class="re-chip-name">${hd.eng_name || name}</span>
+        <button class="re-chip-x" title="Remove">×</button>`;
+      chip.querySelector('.re-chip-x').addEventListener('click', () => {
+        const a = type === 'enemy' ? RE.enemies : RE.allies;
+        a.splice(a.indexOf(name), 1);
+        renderReHeroPicker(type);
+        renderReChips();
+      });
+      cont.appendChild(chip);
+    });
+  });
+}
+
+async function submitReverseEngineer() {
+  if (!RE.items.length) { toast('Add at least one item to reverse engineer from.', true); return; }
+
+  const buildName = document.getElementById('re-build-name').value.trim() || 'Reverse Engineered';
+  const algo      = document.getElementById('re-algo').value;
+  const btn       = document.getElementById('btn-re-submit');
+  btn.disabled = true; btn.textContent = 'Working…';
+
+  try {
+    // Fetch hero data needed for enemy/ally inference
+    if (algo !== 'items-only') {
+      for (const name of [...RE.enemies, ...RE.allies]) {
+        if (!_rsvCache[name]) {
+          const data = await api.get(`/api/heroes/${name}`);
+          if (data && !data.error) { MATCH.heroData[name] = data; cacheHeroBuilds(name); }
+        }
+      }
+    }
+
+    const tagCodes = S.tags.map(t => t.code).filter(t => !SKIP_TAGS.has(t));
+    const TIER_W   = { 800: 1.0, 1600: 1.35, 3200: 1.75, 6400: 2.2, 9999: 3.0 };
+
+    // ── Self weight: revealed-preference delta from tier average ─────────
+    // For each item the player chose, compute how much its self_score exceeds
+    // the average for items at that tier. The delta reveals WHY they picked
+    // that item over alternatives at the same budget. Earlier purchases get
+    // higher positional weight (the core build intent is set early).
+    const VALID_TIERS = [800, 1600, 3200, 6400];
+    const tierAvg = {};
+    VALID_TIERS.forEach(tier => {
+      const pool = (RE._itemData || []).filter(it => it.tier === tier);
+      const avg  = {}; tagCodes.forEach(t => avg[t] = 0);
+      pool.forEach(it => { tagCodes.forEach(t => { avg[t] += it.values?.self_score?.[t] || 0; }); });
+      if (pool.length) tagCodes.forEach(t => { avg[t] /= pool.length; });
+      tierAvg[tier] = avg;
+    });
+
+    const swRaw = {}; tagCodes.forEach(t => swRaw[t] = 0);
+    let totalW = 0;
+    RE.items.forEach((it, i) => {
+      const posW  = 1 / (1 + i * 0.12);   // earlier = more weight; decay ~50% by item 6
+      const tierW = TIER_W[it.tier] || 1.0;
+      const w     = posW * tierW;
+      totalW += w;
+      const avg = tierAvg[it.tier] || {};
+      tagCodes.forEach(t => {
+        const delta = (it.selfScore[t] || 0) - (avg[t] || 0);
+        swRaw[t] += delta * w;
+      });
+    });
+    if (totalW > 0) tagCodes.forEach(t => { swRaw[t] /= totalW; });
+
+    // ── Enemy weight: top weaknesses of killed enemies, selection order = priority
+    // First selected enemy treated as "dominant" (2.5×), second 1.5×, third 1.0×.
+    // Pruned to top 4 tags so output is sparse: 1 strong value (~1.0) + 2-3 minor ones.
+    const ENEMY_PRI = [2.5, 1.5, 1.0];
+    const ewRaw = {}; tagCodes.forEach(t => ewRaw[t] = 0);
+    if (algo !== 'items-only' && RE.enemies.length) {
+      RE.enemies.forEach((en, i) => {
+        const ew = resolvedSrcBuildVals(en)?.enemy_weight || {};
+        const pw = ENEMY_PRI[i] ?? 1.0;
+        tagCodes.forEach(t => { ewRaw[t] += pw * Math.max(0, -(ew[t] || 0)); });
+      });
+      // subtract from self_weight — enemies countering a tag means player may have avoided it
+      const ePriSum = ENEMY_PRI.slice(0, RE.enemies.length).reduce((a, b) => a + b, 0);
+      tagCodes.forEach(t => { swRaw[t] -= Math.min(0.1, 0.04 * (ewRaw[t] / ePriSum)); });
+    }
+
+    // ── Ally weight: what allies need from teammates, selection order = priority
+    const ALLY_PRI = [2.0, 1.5, 1.0];
+    const awRaw = {}; tagCodes.forEach(t => awRaw[t] = 0);
+    if (algo !== 'items-only' && RE.allies.length) {
+      RE.allies.forEach((al, i) => {
+        const aw = resolvedSrcBuildVals(al)?.ally_weight || {};
+        const pw = ALLY_PRI[i] ?? 1.0;
+        tagCodes.forEach(t => { awRaw[t] += pw * Math.max(0, aw[t] || 0); });
+      });
+      // subtract from self_weight — ally covering a tag means player needed it less
+      const aPriSum = ALLY_PRI.slice(0, RE.allies.length).reduce((a, b) => a + b, 0);
+      tagCodes.forEach(t => { swRaw[t] -= Math.min(0.1, 0.03 * (awRaw[t] / aPriSum)); });
+    }
+
+    // ── Normalize + prune: keep top N tags, scale so peak ≈ maxCap ───────
+    function scaleVec(raw, maxCap) {
+      const absMax = Math.max(...Object.values(raw).map(Math.abs), 0.001);
+      if (absMax < 0.01) return {};
+      const scale = maxCap / absMax;
+      const out = {};
+      Object.keys(raw).forEach(t => {
+        const v = raw[t] * scale;
+        if (Math.abs(v) >= 0.05) out[t] = parseFloat(v.toFixed(3));
+      });
+      return out;
+    }
+    function prunedVec(raw, maxCap, keepTop) {
+      const sorted = Object.entries(raw).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+      if (!sorted.length) return {};
+      const topVal = Math.abs(sorted[0][1]) || 0.001;
+      const out = {};
+      sorted.slice(0, keepTop).forEach(([t, v]) => {
+        const scaled = (v / topVal) * maxCap;
+        if (Math.abs(scaled) >= 0.1) out[t] = parseFloat(scaled.toFixed(3));
+      });
+      return out;
+    }
+
+    const selfW  = scaleVec(swRaw, 1.5);
+    // Enemy/ally weights: top ~4 tags, peak ≤0.5; rest fall naturally below
+    const enemyW = (algo !== 'items-only' && RE.enemies.length) ? prunedVec(ewRaw, 0.5, 4) : {};
+    const allyW  = (algo !== 'items-only' && RE.allies.length)  ? prunedVec(awRaw, 0.75, 4) : {};
+
+    // ── Build values object ──────────────────────────────────────────────
+    const buildValues = { ally_weight: {}, self_weight: {}, enemy_weight: {}, self_score: {} };
+    S.tags.forEach(({ code: t }) => {
+      buildValues.self_weight[t]  = selfW[t]  ?? null;
+      buildValues.enemy_weight[t] = enemyW[t] ?? null;
+      buildValues.ally_weight[t]  = allyW[t]  ?? null;
+      buildValues.self_score[t]   = null;
+    });
+
+    // ── Construct build entry ────────────────────────────────────────────
+    const heroKey = S.currentHero.normalized_name;
+    const slug    = buildName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/, '');
+    let code      = `${heroKey}_${slug}`;
+    if (S.currentHero.builds.some(b => b.normalized_build_name === code)) code += '_re';
+
+    const itemList   = RE.items.slice(0, 5).map(it => it.name).join(', ') + (RE.items.length > 5 ? '…' : '');
+    const enemyList  = RE.enemies.map(n => S.heroList.find(h => h.normalized_name === n)?.eng_name || n).join(', ');
+    const allyList   = RE.allies.map(n => S.heroList.find(h => h.normalized_name === n)?.eng_name || n).join(', ');
+    let desc = `RE from: ${itemList}`;
+    if (enemyList) desc += ` | Enemies: ${enemyList}`;
+    if (allyList)  desc += ` | Allies: ${allyList}`;
+
+    S.currentHero.builds.push({
+      name: buildName, normalized_build_name: code,
+      build_description_eng: desc,
+      followed_build: 'General',
+      values: buildValues,
+    });
+    S.currentBuildIdx = S.currentHero.builds.length - 1;
+    setHeroDirty(true);
+
+    renderRePreview(selfW, enemyW, allyW);
+    toast(`Build "${buildName}" created`);
+    setTimeout(() => { renderBuildTabs(); renderBuildContent(); showPage('hero-edit'); }, 1500);
+
+  } finally {
+    btn.disabled = false; btn.textContent = 'Reverse Engineer Build →';
+  }
+}
+
+function renderRePreview(selfW, enemyW, allyW) {
+  document.getElementById('re-preview').classList.remove('hidden');
+  const body = document.getElementById('re-preview-body');
+  body.innerHTML = '';
+  [
+    { data: selfW,  label: 'Self Weight',  cls: '' },
+    { data: enemyW, label: 'Enemy Weight', cls: 'enemy-clr' },
+    { data: allyW,  label: 'Ally Weight',  cls: 'ally-clr' },
+  ].forEach(({ data, label, cls }) => {
+    const entries = Object.entries(data).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    if (!entries.length) return;
+    const col = document.createElement('div');
+    col.className = 're-prev-col';
+    col.innerHTML = `<div class="re-prev-lbl ${cls}">${label}</div>`;
+    entries.forEach(([code, val]) => {
+      const tag = S.tags.find(t => t.code === code);
+      const row = document.createElement('div');
+      row.className = 're-prev-row';
+      row.innerHTML = `<span class="re-prev-tag">${tag?.name || code}</span>
+        <span class="re-prev-val ${val >= 0 ? 'pct-pos' : 'pct-neg'}">${val >= 0 ? '+' : ''}${val.toFixed(2)}</span>`;
+      col.appendChild(row);
+    });
+    body.appendChild(col);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // ITEMS PAGE
 // ════════════════════════════════════════════════════════════════════════════
 async function loadItems() {
@@ -1191,7 +1464,7 @@ function renderCalcSetup() {
   document.getElementById('mult-enemy-build').value     = MATCH.mult.enemyBuild;
   document.getElementById('bp-algo-sel').value          = MATCH.bpAlgo;
   document.getElementById('score-formula-sel').value    = MATCH.scoreFormula;
-  document.getElementById('v2-mult-group').style.display = MATCH.scoreFormula === 'v2' ? '' : 'none';
+  document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
   renderTeamBars();
   renderCalcRoster();
 }
@@ -1396,6 +1669,25 @@ function computeResults() {
       // Use pre-computed cache; fall back to live resolve if cache miss.
       const rv = _rsvCache[name]?.[build.name] ?? resolveBuildValues(build, heroData.builds);
 
+      // V3: narrow enemy pool to top-2 targets this hero is best at countering.
+      let activeEnemies = myEnemies;
+      const v3Targets = [];
+      if (MATCH.scoreFormula === 'v3' && myEnemies.length > 1) {
+        const selfRaw = {};
+        S.tags.forEach(tag => { if (!SKIP_TAGS.has(tag.code)) selfRaw[tag.code] = Math.max(0, rv.self_weight?.[tag.code] || 0); });
+        const selfMag = Math.sqrt(S.tags.reduce((s, tag) => s + (selfRaw[tag.code]||0)**2, 0)) || 1;
+        const selfNorm = {};
+        S.tags.forEach(tag => selfNorm[tag.code] = (selfRaw[tag.code]||0) / selfMag);
+        const ranked = myEnemies.map(en => {
+          const ev = resolvedSrcBuildVals(en)?.enemy_weight || {};
+          let sc = 0;
+          S.tags.forEach(tag => { if (!SKIP_TAGS.has(tag.code)) sc += (selfNorm[tag.code]||0) * Math.max(0, -(ev[tag.code]||0)); });
+          return { name: en, score: sc };
+        }).sort((a, b) => b.score - a.score);
+        activeEnemies = ranked.slice(0, 2).map(x => x.name);
+        activeEnemies.forEach(n => v3Targets.push(n));
+      }
+
       let allyScore = 0, enemyScore = 0;
       const allyBD = {}, enemyBD = {};
 
@@ -1411,7 +1703,7 @@ function computeResults() {
           allyBD[an] = (allyBD[an] || 0) + c;
         });
 
-        myEnemies.forEach(en => {
+        activeEnemies.forEach(en => {
           const ss = resolvedSrcBuildVals(en)?.self_score?.[t] ?? 0;
           const c  = ew * ss;
           enemyScore += c;
@@ -1420,17 +1712,17 @@ function computeResults() {
       });
 
       // Average by team size
-      const numAllies  = myAllies.length  || 1;
-      const numEnemies = myEnemies.length || 1;
+      const numAllies  = myAllies.length       || 1;
+      const numEnemies = activeEnemies.length  || 1;
       allyScore  /= numAllies;
       enemyScore /= numEnemies;
       Object.keys(allyBD).forEach(k  => allyBD[k]  /= numAllies);
       Object.keys(enemyBD).forEach(k => enemyBD[k] /= numEnemies);
 
-      // V2: symmetric perspectives — how allies/enemies react to this build's output
+      // V2/V3: symmetric perspectives — how allies/enemies react to this build's output
       let allyScoreSelf = 0, enemyScoreSelf = 0;
       const allyBDSelf = {}, enemyBDSelf = {};
-      if (MATCH.scoreFormula === 'v2') {
+      if (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') {
         S.tags.forEach(tag => {
           const t  = tag.code;
           const ss = rv.self_score[t] ?? 0;
@@ -1439,7 +1731,7 @@ function computeResults() {
             allyScoreSelf += c;
             allyBDSelf[an] = (allyBDSelf[an] || 0) + c;
           });
-          myEnemies.forEach(en => {
+          activeEnemies.forEach(en => {
             const c = ss * (resolvedSrcBuildVals(en)?.enemy_weight?.[t] ?? 0);
             enemyScoreSelf += c;
             enemyBDSelf[en] = (enemyBDSelf[en] || 0) + c;
@@ -1472,7 +1764,7 @@ function computeResults() {
           myAllies.forEach(an => {
             iAlly += is * (resolvedSrcBuildVals(an)?.ally_weight?.[t] ?? 0);
           });
-          myEnemies.forEach(en => {
+          activeEnemies.forEach(en => {
             iEnemy += is * (resolvedSrcBuildVals(en)?.enemy_weight?.[t] ?? 0) * -1;
           });
         });
@@ -1516,7 +1808,7 @@ function computeResults() {
       }).filter(x => tv(x._raw_values, 'counter_importance') > 0)
         .sort((a, b) => a.score - b.score).slice(0, 3);
 
-      const total = MATCH.scoreFormula === 'v2'
+      const total = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3')
         ? allyScore     * MATCH.mult.buildAlly   +
           allyScoreSelf * MATCH.mult.allyBuild   +
           enemyScore    * MATCH.mult.buildEnemy  +
@@ -1529,7 +1821,7 @@ function computeResults() {
         ally: allyScore, enemy: enemyScore,
         allyScoreSelf, enemyScoreSelf, allyBDSelf, enemyBDSelf,
         allyBD, enemyBD, vsBreakdown, items, assistItems, counterItems,
-        rv, heroName: name,
+        rv, heroName: name, v3Targets,
       };
       buildResult.buildPath = computeBuildPath(buildResult, MATCH.bpAlgo);
       return buildResult;
@@ -1725,6 +2017,10 @@ function makeSummaryCard(r) {
   const img = srcUrl(r.imagePath);
   const genBuild = r.builds.find(x => x.isGeneral);
   const genTotal = genBuild?.total ?? 0;
+  const maxVsBreak = topBuild
+    ? Math.max(0, ...Object.values(topBuild.vsBreakdown || {}).filter(s => s > 0), 0)
+    : 0;
+  const isHeavilyCountered = maxVsBreak > 2.0;
 
   function scBuildRow(b) {
     let pctHtml = '';
@@ -1748,7 +2044,7 @@ function makeSummaryCard(r) {
         : ''}
       <div class="sc-img sc-no-img" ${img ? 'style="display:none"' : ''}>🦸</div>
       <div class="sc-info">
-        <div class="sc-name">${r.isSelf ? '★ ' : ''}${r.engName}</div>
+        <div class="sc-name">${r.isSelf ? '★ ' : ''}${r.engName}${isHeavilyCountered ? ' <span class="counter-warn" title="Heavily countered by enemy">!</span>' : ''}</div>
         <div class="sc-role">${r.isSelf ? 'You' : r.isEnemy ? 'Enemy' : 'Ally'}</div>
       </div>
     </div>
@@ -1805,20 +2101,21 @@ function makeSummaryCard(r) {
     card.appendChild(acEl);
   }
 
-  // Per-hero best/worst matchups from top build's enemyBD
-  if (topBuild && Object.keys(topBuild.enemyBD || {}).length) {
-    const sorted   = Object.entries(topBuild.enemyBD).sort((a, b) => b[1] - a[1]);
+  // Per-hero best/worst matchups (best from enemyBD, worst from vsBreakdown so V3 targeting doesn't overlap)
+  if (topBuild && (Object.keys(topBuild.enemyBD || {}).length || Object.keys(topBuild.vsBreakdown || {}).length)) {
+    const sorted   = Object.entries(topBuild.enemyBD || {}).sort((a, b) => b[1] - a[1]);
     const best     = sorted.slice(0, 2);
-    const worst    = sorted.slice(-2).reverse();
+    const worst    = Object.entries(topBuild.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]).slice(0, 2);
     const muEl     = document.createElement('div');
     muEl.className = 'sc-matchups';
 
-    const mkMuRow = (entries, label, cls) => {
-      if (!entries.length) return;
+    const mkMuRow = (names, label, cls) => {
+      if (!names.length) return;
       const sec = document.createElement('div');
       sec.className = `sc-mu-section ${cls}`;
       sec.innerHTML = `<span class="sc-mu-lbl">${label}</span>`;
-      entries.forEach(([eName]) => {
+      names.forEach(n => {
+        const eName = Array.isArray(n) ? n[0] : n;
         const hd  = MATCH.heroData[eName];
         const img = srcUrl(hd?.image_path || '');
         const span = document.createElement('span');
@@ -1829,7 +2126,11 @@ function makeSummaryCard(r) {
       muEl.appendChild(sec);
     };
 
-    mkMuRow(best,  'Best vs',  'mu-best');
+    if (MATCH.scoreFormula === 'v3' && topBuild.v3Targets?.length) {
+      mkMuRow(topBuild.v3Targets, 'Targeting', 'mu-target');
+    } else {
+      mkMuRow(best,  'Best vs',  'mu-best');
+    }
     mkMuRow(worst, 'Worst vs', 'mu-worst');
     card.appendChild(muEl);
   }
@@ -1852,15 +2153,20 @@ function openCalcHero(name) {
 
   // Hero portrait
   const heroData = MATCH.heroData[name];
+  const topBldForBanner = r.topBuilds[0];
+  const bannerMaxVs = topBldForBanner
+    ? Math.max(0, ...Object.values(topBldForBanner.vsBreakdown || {}).filter(s => s > 0), 0)
+    : 0;
+  const bannerCountered = bannerMaxVs > 2.0;
   if (heroData?.image_path) {
     const banner = document.createElement('div');
     banner.className = 'ch-hero-banner';
     banner.innerHTML = `<img class="ch-hero-img" src="${srcUrl(heroData.image_path)}" alt="${r.engName}">
-      <div class="ch-hero-banner-name">${r.engName}</div>`;
+      <div class="ch-hero-banner-name">${r.engName}${bannerCountered ? ' <span class="counter-warn" title="Heavily countered by enemy">!</span>' : ''}</div>`;
     el.appendChild(banner);
   }
 
-  const isV2 = MATCH.scoreFormula === 'v2';
+  const isV2 = MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3';
   const hdr = document.createElement('div');
   hdr.className = 'ch-header-row' + (isV2 ? ' v2' : '');
   hdr.innerHTML = isV2
@@ -1929,6 +2235,36 @@ function openCalcHero(name) {
     });
     if (itemsByType.children.length) row.appendChild(itemsByType);
 
+    // Per-build matchup chips
+    const bEnemyBD = Object.entries(b.enemyBD || {}).sort((a, x) => x[1] - a[1]);
+    const bGoodVs  = bEnemyBD.slice(0, 2);
+    const bBadVs   = Object.entries(b.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 2);
+    const bV3Tgts  = MATCH.scoreFormula === 'v3' && b.v3Targets?.length ? b.v3Targets : [];
+    if (bGoodVs.length || bBadVs.length || bV3Tgts.length) {
+      const muEl = document.createElement('div');
+      muEl.className = 'sc-matchups ch-mu-row';
+      const mkChips = (entries, label, cls, getName) => {
+        if (!entries.length) return;
+        const sec = document.createElement('div');
+        sec.className = `sc-mu-section ${cls}`;
+        sec.innerHTML = `<span class="sc-mu-lbl">${label}</span>`;
+        entries.forEach(e => {
+          const n = getName(e);
+          const hd = MATCH.heroData[n];
+          const img = srcUrl(hd?.image_path || '');
+          const span = document.createElement('span');
+          span.className = 'sc-mu-hero';
+          span.innerHTML = `${img ? `<img class="sc-mu-img" src="${img}" alt="">` : ''}${hd?.eng_name || n}`;
+          sec.appendChild(span);
+        });
+        muEl.appendChild(sec);
+      };
+      if (bV3Tgts.length) mkChips(bV3Tgts, 'Targeting', 'mu-target', n => n);
+      else mkChips(bGoodVs, 'Best vs', 'mu-best', ([n]) => n);
+      mkChips(bBadVs, 'Bad vs', 'mu-worst', ([n]) => n);
+      row.appendChild(muEl);
+    }
+
     row.addEventListener('click', () => openCalcBuild(name, b.buildIdx));
     el.appendChild(row);
   });
@@ -1971,8 +2307,8 @@ function mkPanel(title, inner) {
 }
 
 function mkScorePanel(b) {
-  const isV2 = MATCH.scoreFormula === 'v2';
-  return mkPanel('Build Score', `
+  const isV2 = MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3';
+  const panel = mkPanel('Build Score', `
     <div class="score-trio">
       <div class="score-block"><div class="score-val ally-clr">${fmtScore(b.ally)}</div><div class="score-lbl">Ally</div></div>
       ${isV2 ? `<div class="score-block"><div class="score-val ally-dim-clr">${fmtScore(b.allyScoreSelf)}</div><div class="score-lbl">+Ally</div></div>` : ''}
@@ -1980,6 +2316,11 @@ function mkScorePanel(b) {
       ${isV2 ? `<div class="score-block"><div class="score-val enemy-dim-clr">${fmtScore(b.enemyScoreSelf)}</div><div class="score-lbl">+Enemy</div></div>` : ''}
       <div class="score-block"><div class="score-val total-clr">${fmtScore(b.total)}</div><div class="score-lbl">Total</div></div>
     </div>`);
+  if (MATCH.scoreFormula === 'v3' && b.v3Targets?.length) {
+    const names = b.v3Targets.map(n => MATCH.heroData[n]?.eng_name || n).join(', ');
+    panel.innerHTML += `<div class="v3-targets-lbl">Targeting: <span class="v3-targets">${names}</span></div>`;
+  }
+  return panel;
 }
 
 function mkTagPanel(heroName, buildIdx) {
@@ -2014,11 +2355,11 @@ function mkBreakdownPanel(b) {
   }
 
   addBD(Object.entries(b.allyBD).sort((a, x) => x[1] - a[1]),  'Ally Contributions (you benefit from allies)',  'ally-clr');
-  if (MATCH.scoreFormula === 'v2') {
+  if (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') {
     addBD(Object.entries(b.allyBDSelf || {}).sort((a, x) => x[1] - a[1]), '+Ally Contributions (allies benefit from you)', 'ally-dim-clr');
   }
   addBD(Object.entries(b.enemyBD).sort((a, x) => x[1] - a[1]), 'Enemy Contributions (you counter enemies)', 'enemy-clr');
-  if (MATCH.scoreFormula === 'v2') {
+  if (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') {
     addBD(Object.entries(b.enemyBDSelf || {}).sort((a, x) => x[1] - a[1]), '+Enemy Contributions (enemies react to you)', 'enemy-dim-clr');
   }
   return d;
@@ -2358,8 +2699,8 @@ function mkBestWorstVsPanel(b) {
   d.className = 'calc-panel';
   d.innerHTML = '<div class="calc-panel-title">Matchups</div>';
 
-  const goodVs = Object.entries(b.enemyBD    || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 3);
-  const badVs  = Object.entries(b.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 3);
+  const goodVs = Object.entries(b.enemyBD    || {}).sort((a, x) => x[1] - a[1]).slice(0, 2);
+  const badVs  = Object.entries(b.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, x) => x[1] - a[1]).slice(0, 2);
 
   if (!goodVs.length && !badVs.length) {
     d.innerHTML += '<div class="calc-empty">No enemy matchup data.</div>';
@@ -2388,8 +2729,13 @@ function mkBestWorstVsPanel(b) {
     grid.appendChild(col);
   };
 
-  mkCol('Good vs', 'best-col',  goodVs);
-  mkCol('Bad vs',  'worst-col', badVs);
+  if (MATCH.scoreFormula === 'v3' && b.v3Targets?.length) {
+    const tgtEntries = b.v3Targets.map(n => [n, b.enemyBD?.[n] ?? 0]);
+    mkCol('Targeting', 'target-col', tgtEntries);
+  } else {
+    mkCol('Good vs', 'best-col', goodVs);
+  }
+  mkCol('Bad vs', 'worst-col', badVs);
   d.appendChild(grid);
   return d;
 }
@@ -2861,6 +3207,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       const slots   = owned.size;
       const filling = slots < minSlots;
       let bestKey = null, bestVal = -Infinity;
+      const altCands = []; // top runners-up sorted by val
       const _dbgCands = _dbgPhase ? [] : null;
 
       for (const k of Object.keys(scoredMap)) {
@@ -2874,6 +3221,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         // Quality mode: absolute phase-score
         const val = filling ? (ps / cost) : ps;
         if (val > bestVal) { bestVal = val; bestKey = k; }
+        altCands.push({ k, val });
         if (_dbgCands) _dbgCands.push({ key: k, ps, cost, val });
       }
 
@@ -2882,7 +3230,16 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           _dbgCands.sort((a, b) => b.val - a.val);
           _dbgPhase.steps.push({ type: filling ? 'fill' : 'quality', chosen: bestKey, top5: _dbgCands.slice(0, 5) });
         }
+        // Keep top 3 alts (excluding winner) that scored within 72% of best
+        const threshold = bestVal * 0.72;
+        const runnerUps = altCands
+          .filter(x => x.k !== bestKey && x.val >= threshold)
+          .sort((a, b) => b.val - a.val)
+          .slice(0, 3)
+          .map(x => x.k);
+        const beforeLen = changes.length;
         remaining -= emitChain(bestKey, owned, changes);
+        if (runnerUps.length && changes.length > beforeLen) changes[changes.length - 1].runnerUps = runnerUps;
         continue;
       }
 
@@ -3054,6 +3411,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       for (let iter = 0; iter < 100; iter++) {
         const slots = owned.size, filling = slots < phase.minSlots;
         let bestKey = null, bestVal = -Infinity;
+        const bsAltCands = [];
         for (const k of Object.keys(scoredMap)) {
           if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumed.has(k)) continue;
           const cost = chainCost(k, owned);
@@ -3062,8 +3420,15 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           if (ps <= 0) continue;
           const val = filling ? (ps / cost) : ps;
           if (val > bestVal) { bestVal = val; bestKey = k; }
+          bsAltCands.push({ k, val });
         }
-        if (bestKey) { remaining -= beamEmit(bestKey, owned, consumed, changes); continue; }
+        if (bestKey) {
+          const bsRunnerUps = bsAltCands.filter(x => x.k !== bestKey && x.val >= bestVal * 0.72).sort((a, b) => b.val - a.val).slice(0, 3).map(x => x.k);
+          const bsBefore = changes.length;
+          remaining -= beamEmit(bestKey, owned, consumed, changes);
+          if (bsRunnerUps.length && changes.length > bsBefore) changes[changes.length - 1].runnerUps = bsRunnerUps;
+          continue;
+        }
         if (phase.maxSells > 0 && sellCount < phase.maxSells && owned.size >= phase.totalSlots) {
           let worstKey = null, worstPS = Infinity;
           owned.forEach(k => {
@@ -3133,10 +3498,839 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     });
   }
 
-  // ── Phase loop ─────────────────────────────────────────────────────────────
-  if (algo === 'beam') return runBeamSearch();
+  // ── Algorithm: Hybrid Vector Rotation + Beam Search ─────────────────────
+  // Replaces 'adaptive'. Guide vector: normalised self_weight rotated toward
+  // allies' avg ally_weight by assistPct, then toward enemies' avg enemy_weight
+  // by counterPct. Both percentages derive from the build's own
+  // assist/counter_importance tag values.
+  //
+  // Simulation: tick-by-tick budget schedule. Items are scored by
+  // dot(self_score, guideAtTick) × tierMult; unaffordable items are discounted
+  // by ticks-until-affordable. A K=3 beam search explores buy/hold/swap paths
+  // simultaneously, pruning each tick by holistic inventory score.
+  // Sell-swap requires 1.8× score gain to offset the 50% refund loss penalty.
 
-  const useCosine = algo === 'cosine' || algo === 'cosine-match' || algo === 'adaptive';
+  // ── Expert Greedy ──────────────────────────────────────────────────────────
+  // Tick-based pure greedy (no beam). Uses cosine-deficit diversity scoring so
+  // already-covered tags score less, naturally promoting build breadth. Blends
+  // a consensus enemy-counter bonus (20%) into a static guide. Upgrade path
+  // value gives T1 components a forward-looking bonus for the chain they unlock.
+  // Sell only when at slot cap with nothing to buy, 4.5× threshold.
+  function runExpertGreedy() {
+    // ── Guide ────────────────────────────────────────────────────────────────
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+
+    const selfRaw = {};
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
+
+    // Consensus enemy counter: tags where ≥50% of enemies share weakness, top 6
+    const ctrRaw = {};
+    const N = myEnemies.length;
+    if (N > 0) {
+      const avg = {}, sig = {};
+      tagKeys.forEach(t => { avg[t] = 0; sig[t] = 0; });
+      myEnemies.forEach(en => {
+        const hero = MATCH.heroData[en]; if (!hero) return;
+        const idx  = MATCH.selectedBuilds[en] ?? 0;
+        const bld  = hero.builds[idx] || hero.builds[0]; if (!bld) return;
+        const v    = _rsvCache[en]?.[bld.name]?.['enemy_weight'] || {};
+        tagKeys.forEach(t => { const val = v[t]||0; avg[t]+=val; if(Math.abs(val)>=0.1) sig[t]++; });
+      });
+      tagKeys.forEach(t => { avg[t] /= N; });
+      const entries = [];
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t) || sig[t]/N < 0.5) return;
+        const val = Math.max(0, -(avg[t]));
+        if (val > 0) entries.push([t, val]);
+      });
+      entries.sort((a, b) => b[1]-a[1]).slice(0, 6).forEach(([t, v]) => { ctrRaw[t] = v; });
+    }
+    const ctrNorm = vecNormalizeBP(ctrRaw, tagKeys);
+
+    // Static guide: self + 20% enemy counter
+    const guideRaw = {};
+    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 0.20 * (ctrNorm[t]||0); });
+    const guide = vecNormalizeBP(guideRaw, tagKeys);
+
+    if (_bpDbg) {
+      _bpDbg.guide      = guide;
+      _bpDbg.selfWeight = rv.self_weight || {};
+      _bpDbg.enemyAvg   = ctrNorm;
+      _bpDbg.guideMeta  = { myEnemies };
+    }
+
+    // ── Tier multipliers (softer ceiling; T4 in mid is natural, not forced) ─
+    const EG_TIER = { 800:1.0, 1600:1.55, 3200:2.1, 6400:2.8, 9999:3.8 };
+    function egTierMult(k) { return EG_TIER[bpItemMap[k]?.tier||800] || 1.0; }
+
+    // ── Budget / slot schedule ───────────────────────────────────────────────
+    const TICK_INCOME    = [800,800,800,900,900,1100,1200,1200,1200,1300,1400,1400,1400,1500,1500,1600,1700,1800,1800,1900,2000,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000,4100,4200,4300];
+    const TICK_MAX_SLOTS = [1,2,3,4,5,6,8,9,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12];
+    const TICK_PHASE     = ['Lane','Lane','Lane','Lane','Lane','Lane','Early','Early','Early','Early','Early','Early','Mid','Mid','Mid','Mid','Mid','Mid','Late','Late','Late','Late','Late','Late','Late','Late','Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late'];
+    const NUM_TICKS      = TICK_INCOME.length;
+    const PHASE_NAMES    = ['Lane','Early','Mid','Late','Extra Late'];
+
+    // ── State ────────────────────────────────────────────────────────────────
+    const owned = new Set(), sold = new Set(), consumed = new Set();
+    let remaining = 0, totalEarned = 0;
+    const changes = { Lane:[], Early:[], Mid:[], Late:[], 'Extra Late':[] };
+
+    // ── Deficit scoring ──────────────────────────────────────────────────────
+    // deficitMult[t] = 1/(1 + invContrib[t]/(guide[t]*soulScale))
+    // Items that fill undercovered tags score higher; coverage grows with soulScale
+    // so the guide's "appetite" expands with income, preventing premature saturation.
+    function egDeficit(it, invContrib, soulScale) {
+      let s = 0;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t) || !(guide[t] > 0)) return;
+        const cov = (invContrib[t]||0) / (guide[t] * soulScale);
+        s += (it.values?.[t]||0) * guide[t] * (1 / (1 + cov));
+      });
+      return Math.max(0, s);
+    }
+    function egScore(k, it, invContrib, soulScale) {
+      return egDeficit(it, invContrib, soulScale) * egTierMult(k);
+    }
+    // Marginal for upgrades: net gain above the consumed component
+    function egMarginal(k, it, invContrib, soulScale) {
+      const base = egScore(k, it, invContrib, soulScale);
+      const compS = (bpItemMap[k]?.upgrades_from||[])
+        .filter(c => owned.has(c) && scoredMap[c])
+        .reduce((s, c) => s + egScore(c, scoredMap[c], invContrib, soulScale), 0);
+      return Math.max(0, base - compS);
+    }
+
+    // ── Tick loop ────────────────────────────────────────────────────────────
+    for (let tick = 0; tick < NUM_TICKS; tick++) {
+      remaining   += TICK_INCOME[tick];
+      totalEarned += TICK_INCOME[tick];
+      const maxSlots  = TICK_MAX_SLOTS[tick];
+      const phaseName = TICK_PHASE[tick];
+      const soulScale = 1 + totalEarned / 1600;
+      // Path value weight: forward-looking early game, purely immediate in late
+      const futureW = 0.5 * (1 - tick / NUM_TICKS);
+
+      // Current inventory contribution in guide-space (recomputed each tick)
+      const invContrib = {};
+      tagKeys.forEach(t => { invContrib[t] = 0; });
+      owned.forEach(k => {
+        const it = scoredMap[k]; if (!it) return;
+        tagKeys.forEach(t => {
+          if (!SKIP_TAGS.has(t)) invContrib[t] += (it.values?.[t]||0) * (guide[t]||0);
+        });
+      });
+
+      // Find best affordable item
+      let bestKey = null, bestScore = -Infinity;
+      const egAltCands = [];
+      for (const k of Object.keys(scoredMap)) {
+        if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
+        if (isSubsumed(k, owned)) continue;
+        if ((bpItemMap[k]?.upgrades_from||[]).some(c => !owned.has(c) && sold.has(c))) continue;
+        const cost = chainCost(k, owned);
+        if (cost <= 0 || cost > remaining) continue;
+        const hasComp = (bpItemMap[k]?.upgrades_from||[]).some(c => owned.has(c));
+        if (!hasComp && owned.size >= maxSlots) continue;
+        const it = scoredMap[k];
+        let s = hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale);
+        // Path value: bonus for components that unlock a strong next-tier upgrade
+        if (futureW > 0.01) {
+          (upgradesTo[k]||[]).forEach(uk => {
+            const upgIt = scoredMap[uk]; if (!upgIt) return;
+            const upgS    = egDeficit(upgIt, invContrib, soulScale) * egTierMult(uk);
+            const upgCost = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0));
+            const ticksAway = upgCost > 0 ? upgCost / 1500 : 0;
+            s += futureW * upgS * Math.exp(-0.12 * ticksAway);
+          });
+        }
+        if (s > bestScore) { bestScore = s; bestKey = k; }
+        egAltCands.push({ k, val: s });
+      }
+
+      if (bestKey) {
+        const egRunnerUps = egAltCands.filter(x => x.k !== bestKey && x.val >= bestScore * 0.72).sort((a, b) => b.val - a.val).slice(0, 3).map(x => x.k);
+        const egBefore = changes[phaseName].length;
+        remaining -= beamEmit(bestKey, owned, consumed, changes[phaseName]);
+        if (egRunnerUps.length && changes[phaseName].length > egBefore) changes[phaseName][changes[phaseName].length - 1].runnerUps = egRunnerUps;
+        continue;
+      }
+
+      // Sell-swap: slot cap, nothing to buy, 4.5× threshold
+      if (owned.size >= maxSlots) {
+        let worstKey = null, worstS = Infinity;
+        owned.forEach(k => {
+          if (!scoredMap[k]) return;
+          const s = egScore(k, scoredMap[k], invContrib, soulScale);
+          if (s < worstS) { worstS = s; worstKey = k; }
+        });
+        if (worstKey) {
+          const refund  = Math.floor((bpItemMap[worstKey]?.tier??0) / 2);
+          const tmpOwnd = new Set(owned); tmpOwnd.delete(worstKey);
+          const tmpSold = new Set([...sold, worstKey]);
+          let swapKey = null, swapS = -Infinity;
+          for (const k of Object.keys(scoredMap)) {
+            if (tmpOwnd.has(k)||tmpSold.has(k)||consumed.has(k)) continue;
+            if (isSubsumed(k, tmpOwnd)) continue;
+            if ((bpItemMap[k]?.upgrades_from||[]).some(c => !tmpOwnd.has(c) && tmpSold.has(c))) continue;
+            const cost = chainCost(k, tmpOwnd);
+            if (cost <= 0 || cost > remaining + refund) continue;
+            const s = egScore(k, scoredMap[k], invContrib, soulScale);
+            if (s > swapS) { swapS = s; swapKey = k; }
+          }
+          if (swapKey && swapS > worstS * 4.5) {
+            owned.delete(worstKey); sold.add(worstKey);
+            remaining += refund;
+            changes[phaseName].push({ action:'sell', key:worstKey, refund });
+            remaining -= beamEmit(swapKey, owned, consumed, changes[phaseName]);
+          }
+        }
+      }
+    }
+
+    // ── Assist / counter ─────────────────────────────────────────────────────
+    const fullBPBlacklist = new Set();
+    PHASE_NAMES.forEach(p => {
+      changes[p].forEach(ch => {
+        fullBPBlacklist.add(ch.key);
+        (ch.components||[]).forEach(c => fullBPBlacklist.add(c));
+      });
+    });
+    const globalAssistUsed = new Set(), globalCounterUsed = new Set();
+    return PHASE_NAMES.map(phaseName => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  phaseName, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, phaseName, 'enemy');
+      return { phase:phaseName, changes:changes[phaseName], assistChanges, counterChanges };
+    });
+  }
+
+  // ── Shared: build a counter vector from a specific list of target enemies ───
+  // Returns { ctrNorm, targets } where targets = top-k enemies by matchup score.
+  // matchup score = how well selfNorm exploits each enemy's weaknesses.
+  function findTargetCounter(selfNorm, myEnemies, k, topTags) {
+    const ranked = myEnemies.map(en => {
+      const hero = MATCH.heroData[en]; if (!hero) return { name: en, score: 0 };
+      const idx  = MATCH.selectedBuilds[en] ?? 0;
+      const bld  = hero.builds[idx] || hero.builds[0]; if (!bld) return { name: en, score: 0 };
+      const v    = _rsvCache[en]?.[bld.name]?.['enemy_weight'] || {};
+      let score  = 0;
+      tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) score += (selfNorm[t]||0) * Math.max(0, -(v[t]||0)); });
+      return { name: en, score };
+    }).sort((a, b) => b.score - a.score);
+    const targets = ranked.slice(0, Math.min(k, ranked.length)).map(e => e.name);
+
+    const avg = {};
+    tagKeys.forEach(t => { avg[t] = 0; });
+    targets.forEach(en => {
+      const hero = MATCH.heroData[en]; if (!hero) return;
+      const idx  = MATCH.selectedBuilds[en] ?? 0;
+      const bld  = hero.builds[idx] || hero.builds[0]; if (!bld) return;
+      const v    = _rsvCache[en]?.[bld.name]?.['enemy_weight'] || {};
+      tagKeys.forEach(t => { avg[t] += (v[t]||0); });
+    });
+    const Nt = targets.length || 1;
+    const entries = [];
+    tagKeys.forEach(t => {
+      if (SKIP_TAGS.has(t)) return;
+      const val = Math.max(0, -(avg[t] / Nt));
+      if (val > 0) entries.push([t, val]);
+    });
+    const ctrRaw = {};
+    entries.sort((a, b) => b[1]-a[1]).slice(0, topTags).forEach(([t, v]) => { ctrRaw[t] = v; });
+    return { ctrNorm: vecNormalizeBP(ctrRaw, tagKeys), targets };
+  }
+
+  // ── Play to Strengths ────────────────────────────────────────────────────────
+  // Finds the 2 enemies this hero naturally counters best and focuses the build
+  // on beating them. Guide = 65% self + 35% targeted enemy counter. Plays your
+  // kit but sharpens it toward your best matchups. Same scoring as Expert Greedy.
+  function runPlayToStrengths() {
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+
+    const selfRaw = {};
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
+
+    const { ctrNorm, targets } = findTargetCounter(selfNorm, myEnemies, 2, 8);
+
+    const guideRaw = {};
+    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 0.35 * (ctrNorm[t]||0); });
+    const guide = vecNormalizeBP(guideRaw, tagKeys);
+
+    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.self_weight||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
+
+    const EG_TIER = { 800:1.0, 1600:1.55, 3200:2.1, 6400:2.8, 9999:3.8 };
+    function egTierMult(k) { return EG_TIER[bpItemMap[k]?.tier||800] || 1.0; }
+    const TICK_INCOME    = [800,800,800,900,900,1100,1200,1200,1200,1300,1400,1400,1400,1500,1500,1600,1700,1800,1800,1900,2000,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000,4100,4200,4300];
+    const TICK_MAX_SLOTS = [1,2,3,4,5,6,8,9,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12];
+    const TICK_PHASE     = ['Lane','Lane','Lane','Lane','Lane','Lane','Early','Early','Early','Early','Early','Early','Mid','Mid','Mid','Mid','Mid','Mid','Late','Late','Late','Late','Late','Late','Late','Late','Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late'];
+    const NUM_TICKS      = TICK_INCOME.length;
+    const PHASE_NAMES    = ['Lane','Early','Mid','Late','Extra Late'];
+
+    const owned = new Set(), sold = new Set(), consumed = new Set();
+    let remaining = 0, totalEarned = 0;
+    const changes = { Lane:[], Early:[], Mid:[], Late:[], 'Extra Late':[] };
+
+    function egDeficit(it, invContrib, soulScale) {
+      let s = 0;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t) || !(guide[t] > 0)) return;
+        s += (it.values?.[t]||0) * guide[t] * (1 / (1 + (invContrib[t]||0) / (guide[t] * soulScale)));
+      });
+      return Math.max(0, s);
+    }
+    function egScore(k, it, ic, ss) { return egDeficit(it, ic, ss) * egTierMult(k); }
+    function egMarginal(k, it, ic, ss) {
+      return Math.max(0, egScore(k, it, ic, ss) - (bpItemMap[k]?.upgrades_from||[]).filter(c => owned.has(c) && scoredMap[c]).reduce((s, c) => s + egScore(c, scoredMap[c], ic, ss), 0));
+    }
+
+    for (let tick = 0; tick < NUM_TICKS; tick++) {
+      remaining += TICK_INCOME[tick]; totalEarned += TICK_INCOME[tick];
+      const maxSlots = TICK_MAX_SLOTS[tick], phaseName = TICK_PHASE[tick];
+      const soulScale = 1 + totalEarned / 1600, futureW = 0.5 * (1 - tick / NUM_TICKS);
+      const invContrib = {};
+      tagKeys.forEach(t => { invContrib[t] = 0; });
+      owned.forEach(k => { const it = scoredMap[k]; if (it) tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) invContrib[t] += (it.values?.[t]||0) * (guide[t]||0); }); });
+
+      let bestKey = null, bestScore = -Infinity;
+      for (const k of Object.keys(scoredMap)) {
+        if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
+        if (isSubsumed(k, owned)) continue;
+        if ((bpItemMap[k]?.upgrades_from||[]).some(c => !owned.has(c) && sold.has(c))) continue;
+        const cost = chainCost(k, owned);
+        if (cost <= 0 || cost > remaining) continue;
+        const hasComp = (bpItemMap[k]?.upgrades_from||[]).some(c => owned.has(c));
+        if (!hasComp && owned.size >= maxSlots) continue;
+        const it = scoredMap[k];
+        let s = hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale);
+        if (futureW > 0.01) (upgradesTo[k]||[]).forEach(uk => {
+          const upgIt = scoredMap[uk]; if (!upgIt) return;
+          const upgS = egDeficit(upgIt, invContrib, soulScale) * egTierMult(uk);
+          const ticksAway = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0)) / 1500;
+          s += futureW * upgS * Math.exp(-0.12 * ticksAway);
+        });
+        if (s > bestScore) { bestScore = s; bestKey = k; }
+        psAltCands.push({ k, val: s });
+      }
+      if (bestKey) {
+        const psRunnerUps = psAltCands.filter(x => x.k !== bestKey && x.val >= bestScore * 0.72).sort((a, b) => b.val - a.val).slice(0, 3).map(x => x.k);
+        const psBefore = changes[phaseName].length;
+        remaining -= beamEmit(bestKey, owned, consumed, changes[phaseName]);
+        if (psRunnerUps.length && changes[phaseName].length > psBefore) changes[phaseName][changes[phaseName].length - 1].runnerUps = psRunnerUps;
+        continue;
+      }
+
+      if (owned.size >= maxSlots) {
+        let worstKey = null, worstS = Infinity;
+        owned.forEach(k => { if (!scoredMap[k]) return; const s = egScore(k, scoredMap[k], invContrib, soulScale); if (s < worstS) { worstS = s; worstKey = k; } });
+        if (worstKey) {
+          const refund = Math.floor((bpItemMap[worstKey]?.tier??0) / 2);
+          const tmpOwnd = new Set(owned); tmpOwnd.delete(worstKey);
+          const tmpSold = new Set([...sold, worstKey]);
+          let swapKey = null, swapS = -Infinity;
+          for (const k of Object.keys(scoredMap)) {
+            if (tmpOwnd.has(k)||tmpSold.has(k)||consumed.has(k)) continue;
+            if (isSubsumed(k, tmpOwnd)) continue;
+            if ((bpItemMap[k]?.upgrades_from||[]).some(c => !tmpOwnd.has(c) && tmpSold.has(c))) continue;
+            const cost = chainCost(k, tmpOwnd);
+            if (cost <= 0 || cost > remaining + refund) continue;
+            const s = egScore(k, scoredMap[k], invContrib, soulScale);
+            if (s > swapS) { swapS = s; swapKey = k; }
+          }
+          if (swapKey && swapS > worstS * 4.5) {
+            owned.delete(worstKey); sold.add(worstKey); remaining += refund;
+            changes[phaseName].push({ action:'sell', key:worstKey, refund });
+            remaining -= beamEmit(swapKey, owned, consumed, changes[phaseName]);
+          }
+        }
+      }
+    }
+    const fullBPBlacklist = new Set();
+    PHASE_NAMES.forEach(p => { changes[p].forEach(ch => { fullBPBlacklist.add(ch.key); (ch.components||[]).forEach(c => fullBPBlacklist.add(c)); }); });
+    const globalAssistUsed2 = new Set(), globalCounterUsed2 = new Set();
+    return PHASE_NAMES.map(phaseName => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed2,  phaseName, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed2, phaseName, 'enemy');
+      return { phase:phaseName, changes:changes[phaseName], assistChanges, counterChanges };
+    });
+  }
+
+  // ── Target Assassin ──────────────────────────────────────────────────────────
+  // Same target selection as Play to Strengths but guide flips to 60% enemy-counter.
+  // You're building to KILL those two specific targets. More aggressive tier mults
+  // reward high-damage T3/T4 items. Slightly lower sell threshold (4.0×) so the
+  // build can pivot faster to better kill options.
+  function runTargetAssassin() {
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+
+    const selfRaw = {};
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
+
+    const { ctrNorm, targets } = findTargetCounter(selfNorm, myEnemies, 2, 8);
+
+    // Guide heavily weighted toward enemy weaknesses — you're building to kill them
+    const guideRaw = {};
+    tagKeys.forEach(t => { guideRaw[t] = 0.40 * (selfNorm[t]||0) + 0.60 * (ctrNorm[t]||0); });
+    const guide = vecNormalizeBP(guideRaw, tagKeys);
+
+    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.self_weight||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
+
+    // Steeper tier mults: reward investing in high-damage T3/T4 items
+    const EG_TIER = { 800:1.0, 1600:1.65, 3200:2.3, 6400:3.2, 9999:4.5 };
+    function egTierMult(k) { return EG_TIER[bpItemMap[k]?.tier||800] || 1.0; }
+    const TICK_INCOME    = [800,800,800,900,900,1100,1200,1200,1200,1300,1400,1400,1400,1500,1500,1600,1700,1800,1800,1900,2000,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000,4100,4200,4300];
+    const TICK_MAX_SLOTS = [1,2,3,4,5,6,8,9,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12];
+    const TICK_PHASE     = ['Lane','Lane','Lane','Lane','Lane','Lane','Early','Early','Early','Early','Early','Early','Mid','Mid','Mid','Mid','Mid','Mid','Late','Late','Late','Late','Late','Late','Late','Late','Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late'];
+    const NUM_TICKS      = TICK_INCOME.length;
+    const PHASE_NAMES    = ['Lane','Early','Mid','Late','Extra Late'];
+
+    const owned = new Set(), sold = new Set(), consumed = new Set();
+    let remaining = 0, totalEarned = 0;
+    const changes = { Lane:[], Early:[], Mid:[], Late:[], 'Extra Late':[] };
+
+    function egDeficit(it, invContrib, soulScale) {
+      let s = 0;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t) || !(guide[t] > 0)) return;
+        s += (it.values?.[t]||0) * guide[t] * (1 / (1 + (invContrib[t]||0) / (guide[t] * soulScale)));
+      });
+      return Math.max(0, s);
+    }
+    function egScore(k, it, ic, ss) { return egDeficit(it, ic, ss) * egTierMult(k); }
+    function egMarginal(k, it, ic, ss) {
+      return Math.max(0, egScore(k, it, ic, ss) - (bpItemMap[k]?.upgrades_from||[]).filter(c => owned.has(c) && scoredMap[c]).reduce((s, c) => s + egScore(c, scoredMap[c], ic, ss), 0));
+    }
+
+    for (let tick = 0; tick < NUM_TICKS; tick++) {
+      remaining += TICK_INCOME[tick]; totalEarned += TICK_INCOME[tick];
+      const maxSlots = TICK_MAX_SLOTS[tick], phaseName = TICK_PHASE[tick];
+      // Higher futureW starting point: prioritize chains that lead to kill-focused T4s
+      const soulScale = 1 + totalEarned / 1600, futureW = 0.6 * (1 - tick / NUM_TICKS);
+      const invContrib = {};
+      tagKeys.forEach(t => { invContrib[t] = 0; });
+      owned.forEach(k => { const it = scoredMap[k]; if (it) tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) invContrib[t] += (it.values?.[t]||0) * (guide[t]||0); }); });
+
+      let bestKey = null, bestScore = -Infinity;
+      for (const k of Object.keys(scoredMap)) {
+        if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
+        if (isSubsumed(k, owned)) continue;
+        if ((bpItemMap[k]?.upgrades_from||[]).some(c => !owned.has(c) && sold.has(c))) continue;
+        const cost = chainCost(k, owned);
+        if (cost <= 0 || cost > remaining) continue;
+        const hasComp = (bpItemMap[k]?.upgrades_from||[]).some(c => owned.has(c));
+        if (!hasComp && owned.size >= maxSlots) continue;
+        const it = scoredMap[k];
+        let s = hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale);
+        if (futureW > 0.01) (upgradesTo[k]||[]).forEach(uk => {
+          const upgIt = scoredMap[uk]; if (!upgIt) return;
+          const upgS = egDeficit(upgIt, invContrib, soulScale) * egTierMult(uk);
+          const ticksAway = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0)) / 1500;
+          s += futureW * upgS * Math.exp(-0.12 * ticksAway);
+        });
+        if (s > bestScore) { bestScore = s; bestKey = k; }
+      }
+      if (bestKey) { remaining -= beamEmit(bestKey, owned, consumed, changes[phaseName]); continue; }
+
+      // Sell threshold 4.0× — more willing to swap for a better kill item
+      if (owned.size >= maxSlots) {
+        let worstKey = null, worstS = Infinity;
+        owned.forEach(k => { if (!scoredMap[k]) return; const s = egScore(k, scoredMap[k], invContrib, soulScale); if (s < worstS) { worstS = s; worstKey = k; } });
+        if (worstKey) {
+          const refund = Math.floor((bpItemMap[worstKey]?.tier??0) / 2);
+          const tmpOwnd = new Set(owned); tmpOwnd.delete(worstKey);
+          const tmpSold = new Set([...sold, worstKey]);
+          let swapKey = null, swapS = -Infinity;
+          for (const k of Object.keys(scoredMap)) {
+            if (tmpOwnd.has(k)||tmpSold.has(k)||consumed.has(k)) continue;
+            if (isSubsumed(k, tmpOwnd)) continue;
+            if ((bpItemMap[k]?.upgrades_from||[]).some(c => !tmpOwnd.has(c) && tmpSold.has(c))) continue;
+            const cost = chainCost(k, tmpOwnd);
+            if (cost <= 0 || cost > remaining + refund) continue;
+            const s = egScore(k, scoredMap[k], invContrib, soulScale);
+            if (s > swapS) { swapS = s; swapKey = k; }
+          }
+          if (swapKey && swapS > worstS * 4.0) {
+            owned.delete(worstKey); sold.add(worstKey); remaining += refund;
+            changes[phaseName].push({ action:'sell', key:worstKey, refund });
+            remaining -= beamEmit(swapKey, owned, consumed, changes[phaseName]);
+          }
+        }
+      }
+    }
+    const fullBPBlacklist = new Set();
+    PHASE_NAMES.forEach(p => { changes[p].forEach(ch => { fullBPBlacklist.add(ch.key); (ch.components||[]).forEach(c => fullBPBlacklist.add(c)); }); });
+    const globalAssistUsed3 = new Set(), globalCounterUsed3 = new Set();
+    return PHASE_NAMES.map(phaseName => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed3,  phaseName, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed3, phaseName, 'enemy');
+      return { phase:phaseName, changes:changes[phaseName], assistChanges, counterChanges };
+    });
+  }
+
+  function runHybridRotation(variant = 'adaptive') {
+    // ─── Guide vector ───────────────────────────────────────────────────────
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myAllies  = onAlly ? MATCH.allies.filter(n => n !== heroName) : MATCH.enemies.filter(n => n !== heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+
+    const assistImp  = Math.max(0, rv.self_weight?.assist_importance  || 0);
+    const counterImp = Math.max(0, rv.self_weight?.counter_importance || 0);
+
+    const ROT_CAP    = variant === 'adaptive' ? 0.6 : 0.5;
+    const assistPct  = Math.min(ROT_CAP, Math.max(0, (assistImp  + 2) / 4));
+    const counterPct = Math.min(ROT_CAP, Math.max(0, (counterImp + 2) / 4));
+
+    // Build normalised self-weight (non-negative, skip special tags)
+    const selfRaw = {};
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    const buildNorm = vecNormalizeBP(selfRaw, tagKeys);
+
+    // Consensus-pruned rotation target for a hero group.
+    // Only keeps tags where >= 50% of heroes have |value| >= threshold; then top topN
+    // by average magnitude. This prevents a single hero's outlier tags from
+    // pulling the guide off course for the whole team.
+    // negate=true flips the sign (used for enemy_weight, where negative = weak to it).
+    const CONSENSUS_THRESHOLD = 0.1;
+    const CONSENSUS_MIN_FRAC  = 0.5;
+    function buildRotationTarget(heroNames, weightKey, topN, negate) {
+      const N = heroNames.length;
+      if (!N) return {};
+      const vectors = heroNames.map(n => {
+        const hero = MATCH.heroData[n];
+        if (!hero) return null;
+        const idx   = MATCH.selectedBuilds[n] ?? 0;
+        const build = hero.builds[idx] || hero.builds[0];
+        return build ? (_rsvCache[n]?.[build.name]?.[weightKey] || null) : null;
+      }).filter(Boolean);
+      if (!vectors.length) return {};
+
+      const avg = {}, sigCount = {};
+      tagKeys.forEach(t => { avg[t] = 0; sigCount[t] = 0; });
+      vectors.forEach(v => {
+        tagKeys.forEach(t => {
+          const val = v[t] || 0;
+          avg[t] += val;
+          if (Math.abs(val) >= CONSENSUS_THRESHOLD) sigCount[t]++;
+        });
+      });
+      tagKeys.forEach(t => { avg[t] /= vectors.length; });
+
+      // Apply consensus filter and direction (negate = counter, non-negate = synergy)
+      const consensus = {};
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t)) return;
+        if (sigCount[t] / N < CONSENSUS_MIN_FRAC) return;
+        const val = negate ? Math.max(0, -(avg[t])) : Math.max(0, avg[t]);
+        if (val > 0) consensus[t] = val;
+      });
+
+      // Keep top N by magnitude, then normalise to unit vector
+      const pruned = {};
+      Object.entries(consensus)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .forEach(([t, v]) => { pruned[t] = v; });
+      return vecNormalizeBP(pruned, tagKeys);
+    }
+
+    const allyNorm  = buildRotationTarget(myAllies,  'ally_weight',  6, false);
+    const enemyNorm = buildRotationTarget(myEnemies, 'enemy_weight', 6, true);
+
+    // Single combined rotation: buildNorm anchors at weight 1.0, ally and enemy
+    // contribute additively at their respective percentages. No compounding.
+    // guide = normalize(buildNorm + assistPct × allyNorm + counterPct × enemyNorm)
+    const combined = {};
+    tagKeys.forEach(t => {
+      combined[t] = (buildNorm[t] || 0)
+        + assistPct  * (allyNorm[t]  || 0)
+        + counterPct * (enemyNorm[t] || 0);
+    });
+    const finalGuide = vecNormalizeBP(combined, tagKeys);
+
+    if (_bpDbg) {
+      _bpDbg.guide      = finalGuide;
+      _bpDbg.selfWeight = rv.self_weight || {};
+      _bpDbg.allyAvg    = allyNorm;   // pruned consensus ally vector
+      _bpDbg.enemyAvg   = enemyNorm;  // pruned negated enemy counter vector
+      _bpDbg.guideMeta  = { assistImp, counterImp, assistPct, counterPct, myAllies, myEnemies };
+    }
+
+    // ─── Budget / slot schedule ─────────────────────────────────────────────
+    // Late ends at 3500; Extra Late continues at +100/tick increments, all 12 slots
+    const TICK_INCOME    = [800,800,800,900,900,1100,1200,1200,1200,1300,1400,1400,1400,1500,1500,1600,1700,1800,1800,1900,2000,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000,4100,4200,4300];
+    const TICK_MAX_SLOTS = [1,2,3,4,5,6,8,9,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12];
+    const TICK_PHASE     = ['Lane','Lane','Lane','Lane','Lane','Lane','Early','Early','Early','Early','Early','Early','Mid','Mid','Mid','Mid','Mid','Mid','Late','Late','Late','Late','Late','Late','Late','Late','Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late'];
+    const NUM_TICKS      = TICK_INCOME.length;
+    const PHASE_NAMES    = ['Lane','Early','Mid','Late','Extra Late'];
+
+    // ─── Scoring helpers ────────────────────────────────────────────────────
+    const HR_TIER = { 800: 1.0, 1600: 1.8, 3200: 2.5, 6400: 3.5, 9999: 5.0 };
+    function hrTierMult(k) { return HR_TIER[bpItemMap[k]?.tier || 800] || 1.0; }
+
+    // Cyclic Focus schedule: teamWeight = how much ally/enemy rotation applies this tick.
+    // Lane 50/50 → Early selfish first half → Early 50/50 second half →
+    // Mid full-team first third → Mid selfish middle → Mid 50/50 last third →
+    // Late 50/50 → Extra Late 75% team.
+    function cyclicTeamWeight(tick) {
+      if (tick <  6) return 0.50;  // Lane: 50/50
+      if (tick <  9) return 0.00;  // Early first half: selfish
+      if (tick < 12) return 0.50;  // Early second half: 50/50
+      if (tick < 14) return 1.00;  // Mid first third: full team
+      if (tick < 16) return 0.00;  // Mid middle: selfish
+      if (tick < 18) return 0.50;  // Mid last third: 50/50
+      if (tick < 27) return 0.50;  // Late: 50/50
+      return 0.75;                  // Extra Late: mostly team
+    }
+
+    // Guide at tick T: finalGuide scaled to magnitude (T + 1).
+    // Fusion: sqrt-ramp from self → team. Cyclic: phase-schedule teamWeight blend.
+    function guideAt(tick) {
+      if (variant === 'fusion') {
+        const pf = tick / (NUM_TICKS - 1);
+        const pa = assistPct  * Math.sqrt(pf);
+        const pc = counterPct * Math.sqrt(pf);
+        const c = {};
+        tagKeys.forEach(t => {
+          c[t] = (buildNorm[t] || 0) + pa * (allyNorm[t] || 0) + pc * (enemyNorm[t] || 0);
+        });
+        const dir = vecNormalizeBP(c, tagKeys);
+        const g = {};
+        tagKeys.forEach(t => { g[t] = (dir[t] || 0) * (tick + 1); });
+        return g;
+      }
+      if (variant === 'cyclic') {
+        const tw = cyclicTeamWeight(tick);
+        const c = {};
+        tagKeys.forEach(t => {
+          c[t] = (buildNorm[t] || 0) + tw * (assistPct * (allyNorm[t] || 0) + counterPct * (enemyNorm[t] || 0));
+        });
+        const dir = vecNormalizeBP(c, tagKeys);
+        const g = {};
+        tagKeys.forEach(t => { g[t] = (dir[t] || 0) * (tick + 1); });
+        return g;
+      }
+      const s = tick + 1, g = {};
+      tagKeys.forEach(t => { g[t] = (finalGuide[t] || 0) * s; });
+      return g;
+    }
+
+    // Raw power score — no coverage cap, over-coverage is rewarded
+    function hrScore(k, it, g) {
+      let s = 0;
+      tagKeys.forEach(t => {
+        if (SKIP_TAGS.has(t)) return;
+        s += (it.values?.[t] || 0) * (g[t] || 0);
+      });
+      return Math.max(0, s * hrTierMult(k));
+    }
+
+    // Marginal score for upgrades: net gain above the component being replaced
+    function hrMarginal(k, it, g, owned) {
+      const base = hrScore(k, it, g);
+      const compSum = (bpItemMap[k]?.upgrades_from || [])
+        .filter(c => owned.has(c) && scoredMap[c])
+        .reduce((acc, c) => acc + hrScore(c, scoredMap[c], g), 0);
+      return Math.max(0, base - compSum);
+    }
+
+    // Ticks until item k is affordable from current budget
+    function hrTicksAway(k, owned, remaining, fromTick) {
+      const cost = chainCost(k, owned);
+      if (cost <= remaining) return 0;
+      let deficit = cost - remaining;
+      for (let t = fromTick + 1; t < NUM_TICKS; t++) {
+        deficit -= TICK_INCOME[t];
+        if (deficit <= 0) return t - fromTick;
+      }
+      return NUM_TICKS;
+    }
+
+    // Holistic score: sum of hrScore across all owned items (beam pruning)
+    function hrHolistic(owned, tick) {
+      const g = guideAt(tick);
+      let s = 0;
+      owned.forEach(k => { const it = scoredMap[k]; if (it) s += hrScore(k, it, g); });
+      return s;
+    }
+
+    // ─── Rollout helpers (Oracle / Rollout Greedy) ───────────────────────────
+    // Simulates remaining ticks greedily from startBm; returns end-state holistic score.
+    function greedyRollout(startBm, fromTick, maxTick = NUM_TICKS) {
+      const rb = cloneBeam(startBm);
+      const endTick = Math.min(maxTick, NUM_TICKS);
+      for (let t = fromTick; t < endTick; t++) {
+        rb.remaining += TICK_INCOME[t];
+        const maxS = TICK_MAX_SLOTS[t];
+        const g = guideAt(t);
+        let bestKey = null, bestScore = -Infinity;
+        for (const k of Object.keys(scoredMap)) {
+          if (rb.owned.has(k) || rb.sold.has(k) || rb.consumed.has(k)) continue;
+          if (isSubsumed(k, rb.owned)) continue;
+          if ((bpItemMap[k]?.upgrades_from || []).some(c => !rb.owned.has(c) && rb.sold.has(c))) continue;
+          const cost = chainCost(k, rb.owned);
+          if (cost <= 0 || cost > rb.remaining) continue;
+          const hasComp = (bpItemMap[k]?.upgrades_from || []).some(c => rb.owned.has(c));
+          if (!hasComp && rb.owned.size >= maxS) continue;
+          const it = scoredMap[k];
+          const s = hasComp ? hrMarginal(k, it, g, rb.owned) : hrScore(k, it, g);
+          if (s > bestScore) { bestScore = s; bestKey = k; }
+        }
+        if (bestKey) rb.remaining -= beamEmit(bestKey, rb.owned, rb.consumed, []);
+      }
+      return hrHolistic(rb.owned, Math.max(0, endTick - 1));
+    }
+
+    // Scoring function used to prune/select candidates each tick.
+    // Oracle: holistic + 5-tick greedy rollout for lookahead. Default: immediate holistic.
+    function candidateScore(bm, tick) {
+      if (variant === 'oracle') return hrHolistic(bm.owned, tick) + 0.4 * greedyRollout(bm, tick + 1, tick + 6);
+      return hrHolistic(bm.owned, tick);
+    }
+
+    // ─── Beam search tick simulation ────────────────────────────────────────
+    const BEAM_K         = variant === 'oracle' ? 6 : variant === 'fusion' ? 4 : 3;
+    const SELL_THRESHOLD = variant === 'fusion' ? 6.0 : 5.0;
+    const EXPAND_K       = BEAM_K;
+
+    function makeBeam() {
+      return { owned: new Set(), sold: new Set(), consumed: new Set(), remaining: 0, changes: { Lane: [], Early: [], Mid: [], Late: [], 'Extra Late': [] } };
+    }
+    function cloneBeam(bm) {
+      const changes = {};
+      PHASE_NAMES.forEach(p => { changes[p] = [...bm.changes[p]]; });
+      return { owned: new Set(bm.owned), sold: new Set(bm.sold), consumed: new Set(bm.consumed), remaining: bm.remaining, changes };
+    }
+
+    let beams = Array.from({ length: BEAM_K }, makeBeam);
+
+    for (let tick = 0; tick < NUM_TICKS; tick++) {
+      const income    = TICK_INCOME[tick];
+      const maxSlots  = TICK_MAX_SLOTS[Math.min(tick, TICK_MAX_SLOTS.length - 1)];
+      const phaseName = TICK_PHASE[tick];
+      const g         = guideAt(tick);
+
+      beams.forEach(bm => { bm.remaining += income; });
+
+      const candidates = [];
+
+      for (const bm of beams) {
+        // Option: hold (no purchase this tick)
+        candidates.push({ bm, _h: candidateScore(bm, tick) });
+
+        // Score all items (affordable = raw score; unaffordable = score / ticksAway)
+        const ranked = [];
+        for (const k of Object.keys(scoredMap)) {
+          if (bm.owned.has(k) || bm.sold.has(k) || bm.consumed.has(k)) continue;
+          if (isSubsumed(k, bm.owned)) continue;
+          // Never buy an item whose unowned component was previously sold
+          if ((bpItemMap[k]?.upgrades_from || []).some(c => !bm.owned.has(c) && bm.sold.has(c))) continue;
+          const cost = chainCost(k, bm.owned);
+          if (cost <= 0) continue;
+          const it = scoredMap[k];
+          const hasComp = (bpItemMap[k]?.upgrades_from || []).some(c => bm.owned.has(c));
+          const base = hasComp ? hrMarginal(k, it, g, bm.owned) : hrScore(k, it, g);
+          if (base <= 0) continue;
+          const tAway = hrTicksAway(k, bm.owned, bm.remaining, tick);
+          ranked.push({ k, adj: tAway > 0 ? base / tAway : base, tAway });
+        }
+        ranked.sort((a, b) => b.adj - a.adj);
+
+        // Expand top BEAM_K affordable buys.
+        // Upgrades that consume an owned component don't add a slot, so allow them
+        // even at the cap. A straight buy requires a free slot.
+        let expanded = 0;
+        for (const { k, tAway } of ranked) {
+          if (tAway > 0) continue;
+          const hasOwnedComp = (bpItemMap[k]?.upgrades_from || []).some(c => bm.owned.has(c));
+          if (!hasOwnedComp && bm.owned.size >= maxSlots) continue;
+          const nb = cloneBeam(bm);
+          nb.remaining -= beamEmit(k, nb.owned, nb.consumed, nb.changes[phaseName]);
+          candidates.push({ bm: nb, _h: candidateScore(nb, tick) });
+          if (++expanded >= EXPAND_K) break;
+        }
+
+        // Sell-swap: only at slot cap; new item must score ≥ 1.8× sold item
+        if (bm.owned.size >= maxSlots) {
+          let worstKey = null, worstS = Infinity;
+          bm.owned.forEach(k => {
+            if (!scoredMap[k]) return;
+            const s = hrScore(k, scoredMap[k], g);
+            if (s < worstS) { worstS = s; worstKey = k; }
+          });
+          if (worstKey) {
+            const refund = Math.floor((bpItemMap[worstKey]?.tier ?? 0) / 2);
+            const nb = cloneBeam(bm);
+            nb.owned.delete(worstKey); nb.sold.add(worstKey);
+            nb.remaining += refund;
+            nb.changes[phaseName].push({ action: 'sell', key: worstKey, refund });
+            let swapKey = null, swapS = -Infinity;
+            for (const k of Object.keys(scoredMap)) {
+              if (nb.owned.has(k) || nb.sold.has(k) || nb.consumed.has(k)) continue;
+              if (isSubsumed(k, nb.owned)) continue;
+              if ((bpItemMap[k]?.upgrades_from || []).some(c => !nb.owned.has(c) && nb.sold.has(c))) continue;
+              const cost = chainCost(k, nb.owned);
+              if (cost <= 0 || cost > nb.remaining) continue;
+              const s = hrScore(k, scoredMap[k], g);
+              if (s > swapS) { swapS = s; swapKey = k; }
+            }
+            if (swapKey && swapS > worstS * SELL_THRESHOLD) {
+              nb.remaining -= beamEmit(swapKey, nb.owned, nb.consumed, nb.changes[phaseName]);
+              candidates.push({ bm: nb, _h: candidateScore(nb, tick) });
+            }
+          }
+        }
+      }
+
+      // Prune to BEAM_K unique beams by holistic score
+      candidates.sort((a, b) => b._h - a._h);
+      const seen = new Set();
+      beams = [];
+      for (const c of candidates) {
+        const fp = [...c.bm.owned].sort().join(',');
+        if (!seen.has(fp)) { seen.add(fp); beams.push(c.bm); }
+        if (beams.length >= BEAM_K) break;
+      }
+      while (beams.length < BEAM_K) beams.push(cloneBeam(beams[0]));
+    }
+
+    const best = beams[0];
+
+    // ─── Assist / counter side lanes ────────────────────────────────────────
+    const fullBPBlacklist = new Set();
+    PHASE_NAMES.forEach(p => {
+      best.changes[p].forEach(ch => {
+        fullBPBlacklist.add(ch.key);
+        (ch.components || []).forEach(c => fullBPBlacklist.add(c));
+      });
+    });
+    const globalAssistUsed  = new Set();
+    const globalCounterUsed = new Set();
+    return PHASE_NAMES.map(phaseName => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  phaseName, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, phaseName, 'enemy');
+      return { phase: phaseName, changes: best.changes[phaseName], assistChanges, counterChanges };
+    });
+  }
+
+  // ── Phase loop ─────────────────────────────────────────────────────────────
+  if (algo === 'expert')    return runExpertGreedy();
+  if (algo === 'strengths') return runPlayToStrengths();
+  if (algo === 'assassin')  return runTargetAssassin();
+  if (algo === 'adaptive') return runHybridRotation('adaptive');
+  if (algo === 'fusion')   return runHybridRotation('fusion');
+  if (algo === 'oracle')   return runHybridRotation('oracle');
+  if (algo === 'cyclic')   return runHybridRotation('cyclic');
+  if (algo === 'beam')     return runBeamSearch();
+
+  const useCosine = algo === 'cosine' || algo === 'cosine-match';
 
   // Pass 1: run all main-path phases to get the complete purchase list.
   let owned = new Set();
@@ -3308,6 +4502,27 @@ function buildPathPanelContents(pathData, b) {
   const itemNameMap = {};
   b.items.forEach(it => { itemNameMap[it.key] = it; });
 
+  // Staple: top 4 self-score per tier, in final inventory, never sold
+  const soldEver = new Set();
+  pathData.forEach(({ changes }) => {
+    changes.forEach(c => { if (c.action === 'sell') soldEver.add(c.key); });
+  });
+  const tierGroups = {};
+  b.items.forEach(it => {
+    if (it.self > 0) {
+      const t = it.tier || 0;
+      if (!tierGroups[t]) tierGroups[t] = [];
+      tierGroups[t].push(it);
+    }
+  });
+  const topSelfKeys = new Set();
+  Object.values(tierGroups).forEach(group => {
+    group.sort((a, bc) => bc.self - a.self).slice(0, 4).forEach(it => topSelfKeys.add(it.key));
+  });
+  const stapleKeys = new Set([...summaryOwned].filter(k =>
+    topSelfKeys.has(k) && !soldEver.has(k)
+  ));
+
   // Title bar with toggle + debug
   let detailOpen = false;
   const titleBar = document.createElement('div');
@@ -3352,8 +4567,8 @@ function buildPathPanelContents(pathData, b) {
       const it  = itemNameMap[k];
       const img = srcUrl(it?.imagePath || '');
       const chip = document.createElement('span');
-      chip.className = 'bp-summary-chip';
-      chip.title = it?.name || k;
+      chip.className = 'bp-summary-chip' + (stapleKeys.has(k) ? ' bp-staple' : '');
+      chip.title = (stapleKeys.has(k) ? '★ Staple — ' : '') + (it?.name || k);
       chip.innerHTML = img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`;
       const nameLbl = document.createElement('span');
       nameLbl.className = 'bp-summary-name';
@@ -3369,7 +4584,7 @@ function buildPathPanelContents(pathData, b) {
   // Detail view (hidden by default)
   const detailEl = document.createElement('div');
   detailEl.className = 'bp-detail hidden';
-  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap));
+  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, stapleKeys));
   wrap.appendChild(detailEl);
 
   titleBar.querySelector('.bp-detail-toggle').addEventListener('click', () => {
@@ -3382,10 +4597,13 @@ function buildPathPanelContents(pathData, b) {
   return wrap;
 }
 
-function renderBuildPath(pathData, b, itemNameMap) {
+function renderBuildPath(pathData, b, itemNameMap, stapleKeys = new Set()) {
   if (!itemNameMap) { itemNameMap = {}; b.items.forEach(it => { itemNameMap[it.key] = it; }); }
   const container = document.createElement('div');
   container.className = 'bp-container';
+
+  // Items bought so far in build order — runner-up hides only if already bought before this decision
+  const buyHistory = new Set();
 
   let hasAny = false;
   pathData.forEach(({ phase, changes, assistChanges, counterChanges }) => {
@@ -3411,8 +4629,14 @@ function renderBuildPath(pathData, b, itemNameMap) {
       changes.forEach(c => {
         const scored  = itemNameMap[c.key] || { name: c.key, imagePath: '' };
         const img     = srcUrl(scored.imagePath || '');
+        // Runner-up: hide only if it was already bought before this decision
+        const altKey  = c.runnerUp && !buyHistory.has(c.runnerUp) ? c.runnerUp : null;
+        const altItem = altKey ? (itemNameMap[altKey] || { name: altKey, imagePath: '' }) : null;
+        const hasAlt  = c.action !== 'sell' && !!altItem;
         const row     = document.createElement('div');
-        row.className = `bp-change bp-${c.action}`;
+        row.className = `bp-change bp-${c.action}` +
+          (stapleKeys.has(c.key) && c.action !== 'sell' ? ' bp-staple' : '') +
+          (hasAlt ? ' bp-has-alt' : '');
         const badge   = c.action === 'sell' ? '−' : c.action === 'upgrade' ? '↑' : '+';
         const costTxt = c.action === 'sell' ? `+${c.refund}s` : `-${c.cost}s`;
         row.innerHTML = `
@@ -3420,7 +4644,17 @@ function renderBuildPath(pathData, b, itemNameMap) {
           ${img ? `<img class="bp-item-img" src="${img}" alt="">` : ''}
           <span class="bp-item-name">${scored.name}</span>
           <span class="bp-cost">${costTxt}</span>`;
+        if (hasAlt) {
+          const altImg = srcUrl(altItem.imagePath || '');
+          const panel = document.createElement('div');
+          panel.className = 'bp-alt-panel';
+          panel.innerHTML = `<span class="bp-alt-lbl">Close alt:</span>
+            ${altImg ? `<img class="bp-item-img" src="${altImg}" alt="">` : ''}
+            <span class="bp-alt-name">${altItem.name}</span>`;
+          row.appendChild(panel);
+        }
         mainCol.appendChild(row);
+        if (c.action === 'buy' || c.action === 'upgrade') buyHistory.add(c.key);
         if (c.action === 'upgrade' && c.components?.length) {
           const compNames = c.components.map(k => itemNameMap[k]?.name || k).join(', ');
           const hint = document.createElement('div');
@@ -3554,5 +4788,40 @@ document.getElementById('back-to-hero').addEventListener('click', () => openCalc
 document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; });
 document.getElementById('score-formula-sel').addEventListener('change', e => {
   MATCH.scoreFormula = e.target.value;
-  document.getElementById('v2-mult-group').style.display = MATCH.scoreFormula === 'v2' ? '' : 'none';
+  document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
 });
+
+// ── Reverse Engineer listeners ─────────────────────────────────────────────
+document.getElementById('btn-reverse-engineer').addEventListener('click', openReverseEngineer);
+document.getElementById('back-re').addEventListener('click', () => showPage('hero-edit'));
+document.getElementById('btn-re-submit').addEventListener('click', submitReverseEngineer);
+
+document.getElementById('re-item-search').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  const dd = document.getElementById('re-item-dropdown');
+  if (q.length < 2 || !RE._itemData) { dd.classList.add('hidden'); return; }
+  const matches = RE._itemData.filter(it => it.tier !== 9999 && it.name.toLowerCase().includes(q)).slice(0, 12);
+  if (!matches.length) { dd.classList.add('hidden'); return; }
+  dd.innerHTML = '';
+  matches.forEach(it => {
+    const opt = document.createElement('div');
+    opt.className = 're-item-opt';
+    const img = srcUrl(it.image_path);
+    opt.innerHTML = `${img ? `<img class="re-item-opt-img" src="${img}" alt="">` : ''}
+      <span class="re-item-opt-name">${it.name}</span>
+      <span class="re-item-opt-tier">${it.tier}★</span>`;
+    opt.addEventListener('mousedown', e => {
+      e.preventDefault();
+      RE.items.push({ key: it.normalized_name, name: it.name, tier: it.tier, imagePath: it.image_path, selfScore: it.values?.self_score || {} });
+      this.value = ''; dd.classList.add('hidden');
+      renderReChips();
+    });
+    dd.appendChild(opt);
+  });
+  dd.classList.remove('hidden');
+});
+document.getElementById('re-item-search').addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('re-item-dropdown').classList.add('hidden'), 150);
+});
+document.getElementById('re-enemy-search').addEventListener('input', () => renderReHeroPicker('enemy'));
+document.getElementById('re-ally-search').addEventListener('input', () => renderReHeroPicker('ally'));
