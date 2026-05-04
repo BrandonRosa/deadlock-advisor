@@ -47,6 +47,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     else if (page === 'items') loadItems();
     else if (page === 'tags') loadTags();
     else if (page === 'calc') loadCalc();
+    else if (page === 'qa') loadQA();
     showPage(page);
   });
 });
@@ -2861,6 +2862,7 @@ const COSINE_ENEMY_MULT  = 0.75;  // used by cosine-match (linear)
 const COSINE_ENEMY_K    = 1.37;   // power-func scale: matches 0.75× linear at |signal|=0.30
 const COSINE_ENEMY_POW  = 1.5;    // super-linear: amplifies strong enemy signals, spares weak ones
 const COSINE_SW_DAMP    = 4;      // dampens enemy correction when hero already has self_weight for that tag
+const COSINE_CTR_BOOST  = 2.0;    // boost multiplier for counter-direction (negative enemy signal)
 
 function vecMagBP(v, keys) {
   return Math.sqrt(keys.reduce((s, t) => s + (v[t] || 0) ** 2, 0));
@@ -3052,21 +3054,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           + enemyCorr
         );
       });
-      // Normalize to self_weight's magnitude so the guide only rotates toward
-      // enemy-countering tags — the total "energy" stays constant, preventing
-      // any newly-amplified tag from making a single T4 item dominate mid-phase.
-      const selfMag    = vecMagBP(rv.self_weight || {}, tagKeys);
-      const blendedMag = vecMagBP(blended, tagKeys);
-      const normFactor = blendedMag > 0 ? selfMag / blendedMag : 1;
-      const guide = {};
-      tagKeys.forEach(t => { guide[t] = blended[t] * normFactor; });
-      _cosineGuide = guide;
+      _cosineGuide = blended;
       if (_bpDbg) {
-        _bpDbg.guide      = guide;
+        _bpDbg.guide      = blended;
         _bpDbg.selfWeight = rv.self_weight || {};
         _bpDbg.allyAvg    = allyAvg;
         _bpDbg.enemyFactor = enemyFactor;
-        _bpDbg.guideMeta  = { selfMag, blendedMag, normFactor, myAllies, myEnemies };
+        _bpDbg.guideMeta  = { myAllies, myEnemies };
       }
     } else {
       const enemyAvg = bpAvgRsvVec(myEnemies, 'enemy_weight');
@@ -3074,10 +3068,11 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const allyAvg  = bpAvgRsvVec(myAllies,  'ally_weight');
         const guide = {};
         tagKeys.forEach(t => {
+          const ea = enemyAvg[t] || 0;
           guide[t] = Math.max(0,
             (rv.self_weight?.[t] || 0)
-            + COSINE_MATCH_MULT  * (allyAvg[t]  || 0)
-            - COSINE_ENEMY_MULT  * (enemyAvg[t] || 0)
+            + COSINE_MATCH_MULT * (allyAvg[t] || 0)
+            + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_ENEMY_MULT)
           );
         });
         _cosineGuide = guide;
@@ -3091,9 +3086,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       } else {
         const guide = {};
         tagKeys.forEach(t => {
+          const ea = enemyAvg[t] || 0;
           guide[t] = Math.max(0,
             (rv.self_weight?.[t] || 0)
-            - COSINE_MATCH_MULT * (enemyAvg[t] || 0)
+            + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_MATCH_MULT)
           );
         });
         _cosineGuide = guide;
@@ -3378,7 +3374,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         if (simOwned.has(ck) || isSubsumed(ck, simOwned) || simConsumed.has(ck)) continue;
         const cc = chainCost(ck, simOwned);
         if (cc <= 0 || cc > simBudget) continue;
-        const ps = bpScore(scoredMap[ck], phaseName);
+        // Lightweight guide-dot scorer — O(tags), not O(owned×tags) like cosineScoreFn.
+        // Holistic evaluation at the end uses getCosineGuide(), so counter-awareness is preserved.
+        const sit = scoredMap[ck];
+        const sg  = getCosineGuide();
+        let ps = 0;
+        tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) ps += (sit.values?.[t] || 0) * (sg[t] || 0); });
+        ps *= getPhaseTierMult(phaseName, bpItemMap[ck]?.tier ?? 800);
         if (ps > bv) { bv = ps; bk = ck; }
       }
       if (!bk) break;
@@ -3550,9 +3552,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     }
     const ctrNorm = vecNormalizeBP(ctrRaw, tagKeys);
 
-    // Static guide: self + 20% enemy counter
+    // Static guide: self + equal-weight enemy counter
     const guideRaw = {};
-    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 0.20 * (ctrNorm[t]||0); });
+    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 1.00 * (ctrNorm[t]||0); });
     const guide = vecNormalizeBP(guideRaw, tagKeys);
 
     if (_bpDbg) {
@@ -3758,7 +3760,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const { ctrNorm, targets } = findTargetCounter(selfNorm, myEnemies, 2, 8);
 
     const guideRaw = {};
-    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 0.35 * (ctrNorm[t]||0); });
+    tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 1.00 * (ctrNorm[t]||0); });
     const guide = vecNormalizeBP(guideRaw, tagKeys);
 
     if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.self_weight||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
@@ -3797,6 +3799,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       owned.forEach(k => { const it = scoredMap[k]; if (it) tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) invContrib[t] += (it.values?.[t]||0) * (guide[t]||0); }); });
 
       let bestKey = null, bestScore = -Infinity;
+      const psAltCands = [];
       for (const k of Object.keys(scoredMap)) {
         if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
         if (isSubsumed(k, owned)) continue;
@@ -3985,8 +3988,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const counterImp = Math.max(0, rv.self_weight?.counter_importance || 0);
 
     const ROT_CAP    = variant === 'adaptive' ? 0.6 : 0.5;
+    const HR_CTR_MIN = 1.0;
+    const HR_CTR_CAP = 1.5;
     const assistPct  = Math.min(ROT_CAP, Math.max(0, (assistImp  + 2) / 4));
-    const counterPct = Math.min(ROT_CAP, Math.max(0, (counterImp + 2) / 4));
+    const counterPct = Math.min(HR_CTR_CAP, Math.max(HR_CTR_MIN, (counterImp + 2) / 4));
 
     // Build normalised self-weight (non-negative, skip special tags)
     const selfRaw = {};
@@ -4825,3 +4830,617 @@ document.getElementById('re-item-search').addEventListener('blur', () => {
 });
 document.getElementById('re-enemy-search').addEventListener('input', () => renderReHeroPicker('enemy'));
 document.getElementById('re-ally-search').addEventListener('input', () => renderReHeroPicker('ally'));
+
+// ══════════════════════════════════════════════════════════════════════════════
+// QA TAB
+// ══════════════════════════════════════════════════════════════════════════════
+
+const BP_ALGO_OPTIONS = [
+  { value: 'greedy-phase', label: 'Greedy (Phase)' },
+  { value: 'marginal',     label: 'Marginal Value' },
+  { value: 'cosine',       label: 'Cosine Deficit' },
+  { value: 'cosine-match', label: 'Cosine Match' },
+  { value: 'beam',         label: 'Beam Search' },
+  { value: 'lookahead',    label: '1-Step Lookahead' },
+  { value: 'expert',       label: 'Expert Greedy' },
+  { value: 'strengths',    label: 'Play to Strengths' },
+  { value: 'assassin',     label: 'Target Assassin' },
+  { value: 'adaptive',     label: 'Hybrid Rotation' },
+  { value: 'fusion',       label: 'Fusion (Best of All)' },
+  { value: 'oracle',       label: 'Oracle (Deep/Slow)' },
+  { value: 'cyclic',       label: 'Cyclic Focus' },
+];
+
+const QA = {
+  scenarios:      [],
+  reports:        [],
+  editId:         null,
+  editAllies:     [],
+  editEnemies:    [],
+  editAddSide:    'ally',
+  editHeroSearch: '',
+  editHeroNotes:  {},
+  runScenarioId:  null,
+  runResults:     {},
+  runAlgo:        null,
+  runNotes:       {},
+};
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Load & Render List ────────────────────────────────────────────────────────
+
+async function loadQA() {
+  if (!S.heroList.length) S.heroList = await api.get('/api/heroes');
+  const [scenarios, reports] = await Promise.all([
+    api.get('/api/qa/scenarios'),
+    api.get('/api/qa/reports'),
+  ]);
+  QA.scenarios = scenarios;
+  QA.reports   = reports;
+  renderQAScenarioList();
+  renderQAReportsList(reports);
+}
+
+function renderQAScenarioList() {
+  const el = document.getElementById('qa-scenario-list');
+  if (!QA.scenarios.length) {
+    el.innerHTML = '<p class="qa-empty">No scenarios yet — create one to get started.</p>';
+    return;
+  }
+  el.innerHTML = '';
+  QA.scenarios.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'qa-scenario-card';
+    div.innerHTML = `
+      <div class="qa-sc-info">
+        <div class="qa-sc-name">${escHtml(s.name)}</div>
+        <div class="qa-sc-meta">${s.algos.length} algo${s.algos.length !== 1 ? 's' : ''} · ${s.allies.length} allies · ${s.enemies.length} enemies · ${escHtml(s.scoreFormula || 'v2')}</div>
+      </div>
+      <div class="qa-sc-actions">
+        <button class="btn-ghost btn-sm">Edit</button>
+        <button class="btn-primary btn-sm">&#9654; Run</button>
+        <button class="btn-danger btn-sm">Delete</button>
+      </div>`;
+    div.querySelector('.btn-ghost').addEventListener('click', () => editQAScenario(s.id));
+    div.querySelector('.btn-primary').addEventListener('click', () => runQAScenario(s.id));
+    div.querySelector('.btn-danger').addEventListener('click', () => deleteQAScenario(s.id));
+    el.appendChild(div);
+  });
+}
+
+function renderQAReportsList(reports) {
+  const el = document.getElementById('qa-reports-list');
+  if (!reports.length) {
+    el.innerHTML = '<p class="qa-empty">No saved reports.</p>';
+    return;
+  }
+  el.innerHTML = '';
+  reports.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'qa-report-card';
+    div.innerHTML = `
+      <div class="qa-sc-info">
+        <div class="qa-sc-name">${escHtml(r.scenario_name)}</div>
+        <div class="qa-sc-meta">${escHtml(r.run_at ? new Date(r.run_at).toLocaleString() : '')}</div>
+      </div>
+      <div class="qa-sc-actions">
+        <button class="btn-ghost btn-sm">View</button>
+        <button class="btn-danger btn-sm">Delete</button>
+      </div>`;
+    div.querySelector('.btn-ghost').addEventListener('click', () => viewQAReport(r.id));
+    div.querySelector('.btn-danger').addEventListener('click', () => deleteQAReport(r.id));
+    el.appendChild(div);
+  });
+}
+
+// ── Scenario Edit ─────────────────────────────────────────────────────────────
+
+function newQAScenario() { renderQAEditPage(null); }
+
+function editQAScenario(id) {
+  const s = QA.scenarios.find(x => x.id === id);
+  if (s) renderQAEditPage(s);
+}
+
+function renderQAEditPage(s) {
+  QA.editId         = s ? s.id : null;
+  QA.editAllies     = s ? [...s.allies]  : [];
+  QA.editEnemies    = s ? [...s.enemies] : [];
+  QA.editAddSide    = 'ally';
+  QA.editHeroSearch = '';
+  QA.editHeroNotes  = s ? { ...(s.heroNotes || {}) } : {};
+
+  document.getElementById('qa-edit-title').textContent      = s ? `Edit: ${s.name}` : 'New Scenario';
+  document.getElementById('qe-name').value                  = s ? s.name : '';
+  document.getElementById('qe-score-formula').value         = s ? (s.scoreFormula || 'v2') : 'v2';
+
+  const algosSelected = s ? new Set(s.algos) : new Set(['cosine']);
+  const container = document.getElementById('qe-algo-checkboxes');
+  container.innerHTML = BP_ALGO_OPTIONS.map(opt => `
+    <label class="qa-algo-check">
+      <input type="checkbox" value="${opt.value}"${algosSelected.has(opt.value) ? ' checked' : ''}>
+      ${escHtml(opt.label)}
+    </label>`).join('');
+  document.getElementById('qe-algo-all').checked = BP_ALGO_OPTIONS.every(o => algosSelected.has(o.value));
+
+  document.querySelectorAll('.qa-side-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.side === 'ally');
+  });
+
+  renderQETeams();
+  renderQEHeroNotes(QA.editHeroNotes);
+  renderQEHeroGrid();
+  showPage('qa-edit');
+}
+
+async function saveQAScenario() {
+  const name = document.getElementById('qe-name').value.trim();
+  if (!name) { toast('Scenario name is required', 'error'); return; }
+
+  const algos = Array.from(document.querySelectorAll('#qe-algo-checkboxes input:checked')).map(cb => cb.value);
+  if (!algos.length) { toast('Select at least one algorithm', 'error'); return; }
+
+  const payload = {
+    name,
+    scoreFormula: document.getElementById('qe-score-formula').value,
+    algos,
+    allies:    QA.editAllies,
+    enemies:   QA.editEnemies,
+    heroNotes: getQEHeroNotes(),
+  };
+
+  const res = QA.editId
+    ? await api.put(`/api/qa/scenarios/${QA.editId}`, payload)
+    : await api.post('/api/qa/scenarios', payload);
+
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast('Scenario saved');
+  await loadQA();
+  showPage('qa');
+}
+
+async function deleteQAScenario(id) {
+  if (!confirm('Delete this scenario?')) return;
+  const res = await api.del(`/api/qa/scenarios/${id}`);
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast('Scenario deleted');
+  await loadQA();
+}
+
+// ── QA Edit: Roster & Hero Picker ─────────────────────────────────────────────
+
+function qeSetAddSide(side) {
+  QA.editAddSide = side;
+  document.querySelectorAll('.qa-side-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.side === side);
+  });
+}
+
+function qeSelectHero(name) {
+  if (QA.editAllies.includes(name) || QA.editEnemies.includes(name)) return;
+  const arr   = QA.editAddSide === 'ally' ? QA.editAllies : QA.editEnemies;
+  const label = QA.editAddSide === 'ally' ? 'allies' : 'enemies';
+  if (arr.length >= 6) { toast(`Max 6 ${label}`, 'error'); return; }
+  arr.push(name);
+  renderQETeams();
+  renderQEHeroNotes(QA.editHeroNotes);
+  renderQEHeroGrid();
+}
+
+function qeRemoveHero(side, name) {
+  const arr = side === 'ally' ? QA.editAllies : QA.editEnemies;
+  const idx = arr.indexOf(name);
+  if (idx >= 0) arr.splice(idx, 1);
+  delete QA.editHeroNotes[name];
+  renderQETeams();
+  renderQEHeroNotes(QA.editHeroNotes);
+  renderQEHeroGrid();
+}
+
+function renderQETeams() {
+  document.getElementById('qe-ally-count').textContent  = `${QA.editAllies.length}/6`;
+  document.getElementById('qe-enemy-count').textContent = `${QA.editEnemies.length}/6`;
+
+  const mkChips = (list, containerId, side) => {
+    const cont = document.getElementById(containerId);
+    cont.innerHTML = '';
+    list.forEach(name => {
+      const h    = S.heroList.find(x => x.normalized_name === name);
+      const chip = document.createElement('div');
+      chip.className = 'team-chip';
+      chip.innerHTML = `<span>${escHtml(h?.eng_name || name)}</span><button class="chip-x" title="Remove">×</button>`;
+      chip.querySelector('.chip-x').addEventListener('click', () => qeRemoveHero(side, name));
+      cont.appendChild(chip);
+    });
+  };
+  mkChips(QA.editAllies,  'qe-ally-chips',  'ally');
+  mkChips(QA.editEnemies, 'qe-enemy-chips', 'enemy');
+}
+
+function renderQEHeroGrid() {
+  const q    = QA.editHeroSearch.toLowerCase();
+  const list = q
+    ? S.heroList.filter(h => h.normalized_name.includes(q) || (h.eng_name || '').toLowerCase().includes(q))
+    : S.heroList;
+
+  const cont = document.getElementById('qe-hero-grid');
+  cont.innerHTML = '';
+  list.forEach(h => {
+    const inAlly  = QA.editAllies.includes(h.normalized_name);
+    const inEnemy = QA.editEnemies.includes(h.normalized_name);
+    const taken   = inAlly || inEnemy;
+    const imgSrc  = h.image_path ? srcUrl(h.image_path) : '';
+
+    const card = document.createElement('div');
+    card.className = `qa-pick-card${taken ? ' taken' : ''}`;
+    card.innerHTML = `
+      ${imgSrc
+        ? `<img src="${imgSrc}" class="qa-pick-img" alt="">`
+        : '<div class="qa-pick-img qa-pick-placeholder">🦸</div>'}
+      <div class="qa-pick-name">${escHtml(h.eng_name || h.normalized_name)}</div>
+      ${inAlly  ? '<div class="qa-pick-badge ally-badge">Ally</div>'   : ''}
+      ${inEnemy ? '<div class="qa-pick-badge enemy-badge">Enemy</div>' : ''}`;
+    if (!taken) card.addEventListener('click', () => qeSelectHero(h.normalized_name));
+    cont.appendChild(card);
+  });
+}
+
+function renderQEHeroNotes(existing = {}) {
+  QA.editHeroNotes = existing;
+  const all  = [...QA.editAllies, ...QA.editEnemies];
+  const cont = document.getElementById('qe-hero-notes');
+  if (!all.length) {
+    cont.innerHTML = '<p style="color:var(--muted);font-size:12px">Add heroes to roster first.</p>';
+    return;
+  }
+  cont.innerHTML = all.map(name => {
+    const display = S.heroList.find(h => h.normalized_name === name)?.eng_name || name;
+    return `
+      <div class="qa-note-row">
+        <label class="qa-note-lbl">${escHtml(display)}</label>
+        <input type="text" class="qa-note-input" data-hero="${escHtml(name)}"
+               placeholder="Note (optional)" value="${escHtml(existing[name] || '')}">
+      </div>`;
+  }).join('');
+}
+
+function getQEHeroNotes() {
+  const notes = {};
+  document.querySelectorAll('#qe-hero-notes .qa-note-input').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) notes[inp.dataset.hero] = v;
+  });
+  return notes;
+}
+
+function toggleQEAlgos(show) {
+  document.querySelectorAll('#qe-algo-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = show; });
+}
+
+// ── Run Scenario ──────────────────────────────────────────────────────────────
+
+async function runQAScenario(id) {
+  const scenario = QA.scenarios.find(x => x.id === id);
+  if (!scenario) { toast('Scenario not found', 'error'); return; }
+  if (!scenario.allies.length && !scenario.enemies.length) {
+    toast('Add heroes to the scenario first', 'error'); return;
+  }
+
+  toast('Loading data…');
+
+  if (!S.tags.length)     S.tags     = await api.get('/api/tags');
+  if (!S.heroList.length) S.heroList = await api.get('/api/heroes');
+
+  const allNames = [...new Set([...scenario.allies, ...scenario.enemies])];
+  for (const name of allNames) {
+    MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
+    cacheHeroBuilds(name);
+  }
+  if (!MATCH.itemData.length) MATCH.itemData = await api.get('/api/items/all');
+
+  const savedAllies  = MATCH.allies;
+  const savedEnemies = MATCH.enemies;
+  const savedFormula = MATCH.scoreFormula;
+  const savedAlgo    = MATCH.bpAlgo;
+
+  MATCH.allies       = scenario.allies;
+  MATCH.enemies      = scenario.enemies;
+  MATCH.scoreFormula = scenario.scoreFormula;
+
+  QA.runScenarioId = id;
+  QA.runResults    = {};
+  QA.runNotes      = {};
+
+  const total = scenario.algos.length;
+  for (let i = 0; i < total; i++) {
+    const algo = scenario.algos[i];
+    toast(`Running ${i + 1}/${total}: ${BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo}…`);
+    await new Promise(r => setTimeout(r, 0)); // yield to browser between algos
+    MATCH.bpAlgo = algo;
+    const results = computeResults();
+    QA.runResults[algo] = results.map(r => ({
+      name:      r.name,
+      engName:   r.engName,
+      imagePath: r.imagePath,
+      isEnemy:   r.isEnemy,
+      builds:    r.builds.map(b => ({ ...b, buildPath: computeBuildPath(b, algo) })),
+    }));
+  }
+
+  MATCH.allies       = savedAllies;
+  MATCH.enemies      = savedEnemies;
+  MATCH.scoreFormula = savedFormula;
+  MATCH.bpAlgo       = savedAlgo;
+
+  QA.runAlgo = scenario.algos[0];
+  renderQARunPage(scenario);
+  showPage('qa-run');
+  toast('Done');
+}
+
+function renderQARunPage(scenario) {
+  document.getElementById('qa-run-title').textContent = scenario.name;
+
+  const tabs = document.getElementById('qa-run-algo-tabs');
+  tabs.innerHTML = '';
+  scenario.algos.forEach(algo => {
+    const label = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
+    const btn   = document.createElement('button');
+    btn.className   = `qa-algo-tab${algo === QA.runAlgo ? ' active' : ''}`;
+    btn.textContent = label;
+    btn.addEventListener('click', () => selectQARunAlgo(algo));
+    tabs.appendChild(btn);
+  });
+
+  renderQARunResults();
+}
+
+function selectQARunAlgo(algo) {
+  QA.runAlgo = algo;
+  const label = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
+  document.querySelectorAll('.qa-algo-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === label);
+  });
+  renderQARunResults();
+}
+
+function renderQARunResults() {
+  const results   = QA.runResults[QA.runAlgo] || [];
+  const container = document.getElementById('qa-run-results');
+  container.innerHTML = '';
+
+  if (!results.length) {
+    container.innerHTML = '<p style="color:var(--muted)">No results.</p>';
+    return;
+  }
+
+  results.forEach(r => { container.innerHTML += renderQABuildRow(r); });
+
+  container.querySelectorAll('.qa-note-input[data-key]').forEach(inp => {
+    inp.addEventListener('input', () => { QA.runNotes[inp.dataset.key] = inp.value; });
+  });
+}
+
+function renderQABuildRow(heroResult) {
+  const isAlly    = !heroResult.isEnemy;
+  const sideClass = isAlly ? 'ally-hdr' : 'enemy-hdr';
+  const sideLabel = isAlly ? 'Ally' : 'Enemy';
+  const img = heroResult.imagePath
+    ? `<img src="${srcUrl(heroResult.imagePath)}" class="qa-hero-thumb" alt="">`
+    : '';
+
+  const buildsHtml = heroResult.builds.map(b => {
+    const noteKey = `${QA.runAlgo}::${heroResult.name}::${b.name}`;
+    const noteVal = escHtml(QA.runNotes[noteKey] || '');
+    return `
+      <div class="qa-build-entry">
+        <div class="qa-build-name">${escHtml(b.name)} <span class="qa-build-score">${b.total.toFixed(2)}</span></div>
+        <div class="qa-build-path-wrap">${renderQABuildPath(b.buildPath, b)}</div>
+        <div class="qa-note-row">
+          <label class="qa-note-lbl">Note</label>
+          <input type="text" class="qa-note-input" data-key="${escHtml(noteKey)}" placeholder="Optional note" value="${noteVal}">
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="qa-hero-block">
+      <div class="qa-hero-hdr ${sideClass}">
+        ${img}
+        <span class="qa-hero-name">${escHtml(heroResult.engName)}</span>
+        <span class="qa-hero-side-badge">${sideLabel}</span>
+      </div>
+      <div class="qa-hero-builds">${buildsHtml}</div>
+    </div>`;
+}
+
+function renderQABuildPath(bp, b) {
+  if (!bp || !bp.length) return '<span style="color:var(--muted);font-size:12px">No path computed</span>';
+  const itemNameMap = {};
+  (b?.items || []).forEach(it => { itemNameMap[it.key] = it; });
+
+  const phaseHtml = bp.map(({ phase, changes }) => {
+    if (!changes || !changes.length) return '';
+    const rows = changes.map(ch => {
+      const it  = itemNameMap[ch.key];
+      const img = it?.imagePath ? `<img src="${srcUrl(it.imagePath)}" class="qa-bp-img" alt="">` : '';
+      const lbl = escHtml(it?.name || ch.key);
+      const badge = ch.action === 'sell' ? '−' : ch.action === 'upgrade' ? '↑' : '+';
+      const badgeClass = `qa-bp-badge qa-bp-badge-${ch.action}`;
+      return `<div class="qa-bp-row"><span class="${badgeClass}">${badge}</span>${img}<span class="qa-bp-name">${lbl}</span></div>`;
+    }).join('');
+    return `<div class="qa-bp-phase"><div class="qa-bp-phase-hdr">${escHtml(phase)}</div>${rows}</div>`;
+  }).join('');
+
+  return phaseHtml || '<span style="color:var(--muted);font-size:12px">No items in path</span>';
+}
+
+// ── Save / View Reports ───────────────────────────────────────────────────────
+
+async function saveQAReport() {
+  const scenario = QA.scenarios.find(x => x.id === QA.runScenarioId);
+  if (!scenario) { toast('Scenario not found', 'error'); return; }
+
+  document.querySelectorAll('#qa-run-results .qa-note-input[data-key]').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) QA.runNotes[inp.dataset.key] = v;
+  });
+
+  const algoResults = {};
+  for (const [algo, results] of Object.entries(QA.runResults)) {
+    algoResults[algo] = results.map(r => ({
+      name:      r.name,
+      engName:   r.engName,
+      imagePath: r.imagePath,
+      isEnemy:   r.isEnemy,
+      builds:    r.builds.map(b => ({
+        name:      b.name,
+        total:     b.total,
+        buildPath: (b.buildPath || []).flatMap(phase => (phase.changes || []).map(ch => ch.key)),
+        note:      QA.runNotes[`${algo}::${r.name}::${b.name}`] || '',
+      })),
+    }));
+  }
+
+  const res = await api.post('/api/qa/reports', {
+    scenario_id:   scenario.id,
+    scenario_name: scenario.name,
+    allies:        scenario.allies,
+    enemies:       scenario.enemies,
+    algos:         scenario.algos,
+    scoreFormula:  scenario.scoreFormula,
+    heroNotes:     scenario.heroNotes || {},
+    algoResults,
+    buildNotes:    QA.runNotes,
+  });
+
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast('Report saved');
+  QA.reports = await api.get('/api/qa/reports');
+  renderQAReportsList(QA.reports);
+}
+
+async function viewQAReport(id) {
+  const report = await api.get(`/api/qa/reports/${id}`);
+  if (report.error) { toast(report.error, 'error'); return; }
+  document.getElementById('qa-report-title').textContent   = `Report: ${report.scenario_name}`;
+  document.getElementById('btn-delete-qa-report').dataset.rid = id;
+  renderQAReportContent(report);
+  showPage('qa-report');
+}
+
+function renderQAReportContent(report) {
+  const container = document.getElementById('qa-report-content');
+
+  const allies  = (report.allies  || []).map(n => `<div class="team-chip">${escHtml(n)}</div>`).join('');
+  const enemies = (report.enemies || []).map(n => `<div class="team-chip">${escHtml(n)}</div>`).join('');
+
+  const heroNotesHtml = Object.keys(report.heroNotes || {}).length
+    ? `<div class="qa-report-section">
+        <div class="qa-section-hdr">Hero Notes</div>
+        ${Object.entries(report.heroNotes).map(([hero, note]) =>
+          `<div class="qa-note-row">
+            <span class="qa-note-lbl">${escHtml(hero)}</span>
+            <span>${escHtml(note)}</span>
+          </div>`).join('')}
+      </div>`
+    : '';
+
+  const algosHtml = (report.algos || []).map(algo => {
+    const label       = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
+    const heroResults = (report.algoResults || {})[algo] || [];
+    const heroHtml    = heroResults.map(r => {
+      const buildsHtml = (r.builds || []).map(b => `
+        <div class="qa-build-entry">
+          <div class="qa-build-name">${escHtml(b.name)} <span class="qa-build-score">${typeof b.total === 'number' ? b.total.toFixed(2) : b.total}</span></div>
+          <div class="qa-bp-list">${(b.buildPath || []).map((k, i) => `<span class="qa-bp-pill">${i + 1}. ${escHtml(k)}</span>`).join('')}</div>
+          ${b.note ? `<div class="qa-build-note">${escHtml(b.note)}</div>` : ''}
+        </div>`).join('');
+      return `
+        <div class="qa-hero-block">
+          <div class="qa-hero-hdr ${r.isEnemy ? 'enemy-hdr' : 'ally-hdr'}">
+            <span class="qa-hero-name">${escHtml(r.engName)}</span>
+          </div>
+          <div class="qa-hero-builds">${buildsHtml}</div>
+        </div>`;
+    }).join('');
+    return `<div class="qa-report-algo">
+      <div class="qa-report-algo-name">${escHtml(label)}</div>
+      ${heroHtml}
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="qa-report-meta">
+      <span>Scenario: <strong>${escHtml(report.scenario_name)}</strong></span>
+      <span>Formula: <strong>${escHtml(report.scoreFormula || 'v2')}</strong></span>
+      <span>Saved: <strong>${escHtml(report.timestamp || '')}</strong></span>
+    </div>
+    <div class="qa-report-section">
+      <div class="qa-section-hdr">Roster</div>
+      <div class="calc-teams-bar">
+        <div class="calc-team">
+          <div class="calc-team-hdr ally-hdr">Allies</div>
+          <div class="team-chips">${allies}</div>
+        </div>
+        <div class="calc-team">
+          <div class="calc-team-hdr enemy-hdr">Enemies</div>
+          <div class="team-chips">${enemies}</div>
+        </div>
+      </div>
+    </div>
+    ${heroNotesHtml}
+    <div class="qa-report-section">
+      <div class="qa-section-hdr">Algorithm Results</div>
+      ${algosHtml}
+    </div>`;
+}
+
+async function deleteQAReport(id) {
+  if (!confirm('Delete this report?')) return;
+  const res = await api.del(`/api/qa/reports/${id}`);
+  if (res.error) { toast(res.error, 'error'); return; }
+  toast('Report deleted');
+  await loadQA();
+  showPage('qa');
+}
+
+// ── QA Event Listeners ────────────────────────────────────────────────────────
+
+document.getElementById('btn-new-qa-scenario').addEventListener('click', newQAScenario);
+
+document.getElementById('back-qa-edit').addEventListener('click', async () => {
+  await loadQA(); showPage('qa');
+});
+
+document.getElementById('btn-save-qa-scenario').addEventListener('click', saveQAScenario);
+
+document.getElementById('qe-algo-all').addEventListener('change', function () {
+  toggleQEAlgos(this.checked);
+});
+
+document.getElementById('qe-hero-search').addEventListener('input', function () {
+  QA.editHeroSearch = this.value;
+  renderQEHeroGrid();
+});
+
+document.querySelectorAll('.qa-side-btn').forEach(btn => {
+  btn.addEventListener('click', () => qeSetAddSide(btn.dataset.side));
+});
+
+document.getElementById('back-qa-run').addEventListener('click', async () => {
+  await loadQA(); showPage('qa');
+});
+
+document.getElementById('btn-save-qa-report').addEventListener('click', saveQAReport);
+
+document.getElementById('back-qa-report').addEventListener('click', async () => {
+  await loadQA(); showPage('qa');
+});
+
+document.getElementById('btn-delete-qa-report').addEventListener('click', function () {
+  deleteQAReport(this.dataset.rid);
+});

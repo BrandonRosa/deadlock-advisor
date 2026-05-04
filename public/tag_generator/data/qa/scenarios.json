@@ -1,0 +1,180 @@
+[
+  {
+    "id": "beb19fd5-12b7-45dd-8776-78b0170cc53e",
+    "name": "Spirit Vs Bullet Teams",
+    "created_at": "2026-05-04T14:46:15.725513",
+    "allies": [
+      "apollo",
+      "bebop",
+      "calico",
+      "celeste",
+      "lash",
+      "seven"
+    ],
+    "enemies": [
+      "drifter",
+      "ivy",
+      "silver",
+      "haze"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
+  },
+  {
+    "id": "8129d345-f3f4-4671-8270-50cdaafbae9c",
+    "name": "50/50 Spirit and Gun",
+    "created_at": "2026-05-04T16:17:38.079166",
+    "allies": [
+      "apollo",
+      "celeste",
+      "drifter",
+      "haze"
+    ],
+    "enemies": [
+      "bebop",
+      "pocket",
+      "silver",
+      "vindicta"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
+  },
+  {
+    "id": "fd6d2d08-0f17-4bcd-a1d5-384e381000bb",
+    "name": "Burst Vs Sustain",
+    "created_at": "2026-05-04T16:18:52.975608",
+    "allies": [
+      "apollo",
+      "bebop",
+      "lash",
+      "holliday"
+    ],
+    "enemies": [
+      "drifter",
+      "infernus",
+      "kelvin",
+      "seven"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
+  },
+  {
+    "id": "012e4868-6323-4877-8086-9c470b777a03",
+    "name": "Tank vs Squishy",
+    "created_at": "2026-05-04T16:28:45.858490",
+    "allies": [
+      "abrams",
+      "billy",
+      "dynamo",
+      "kelvin",
+      "mo_&_krill"
+    ],
+    "enemies": [
+      "celeste",
+      "grey_talon",
+      "mina",
+      "paradox",
+      "pocket"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
+  },
+  {
+    "id": "d31835c3-da5c-48ae-86b3-37c97739b196",
+    "name": "Even",
+    "created_at": "2026-05-04T16:30:33.042400",
+    "allies": [
+      "abrams",
+      "calico",
+      "haze",
+      "grey_talon",
+      "rem",
+      "ivy"
+    ],
+    "enemies": [
+      "billy",
+      "shiv",
+      "silver",
+      "vindicta",
+      "paige",
+      "drifter"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
+  }
+]

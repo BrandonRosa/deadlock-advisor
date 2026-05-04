@@ -14,6 +14,7 @@
     <button class="nav-btn" data-page="items">⚔️ Items</button>
     <button class="nav-btn" data-page="tags">🏷️ Tags</button>
     <button class="nav-btn" data-page="calc">🎯 Calculator</button>
+    <button class="nav-btn" data-page="qa">🧪 QA</button>
   </nav>
 
   <!-- ── Main ───────────────────────────────────────────────── -->
@@ -406,6 +407,97 @@
         </div>
       </div>
       <div id="calc-build-detail"></div>
+    </section>
+
+    <!-- QA: SCENARIO LIST -->
+    <section id="page-qa" class="page">
+      <div class="page-header">
+        <h1>QA Scenarios</h1>
+        <button class="btn-primary" id="btn-new-qa-scenario">+ New Scenario</button>
+      </div>
+      <div id="qa-scenario-list"></div>
+      <div class="qa-reports-hdr">
+        <h2>Saved Reports</h2>
+      </div>
+      <div id="qa-reports-list"></div>
+    </section>
+
+    <!-- QA: SCENARIO EDITOR -->
+    <section id="page-qa-edit" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-qa-edit">← QA</button>
+        <h1 id="qa-edit-title">New Scenario</h1>
+        <button class="btn-primary" id="btn-save-qa-scenario">Save</button>
+      </div>
+      <div class="qa-edit-layout">
+        <div class="qa-edit-left">
+          <div class="field-row">
+            <label>Scenario Name</label>
+            <input id="qe-name" type="text" placeholder="e.g. Anti-carry test" />
+          </div>
+          <div class="field-row">
+            <label>Score Formula</label>
+            <select id="qe-score-formula">
+              <option value="v1">V1 – Classic</option>
+              <option value="v2">V2 – Symmetric</option>
+              <option value="v3">V3 – Target Focus</option>
+            </select>
+          </div>
+          <div class="qa-section-hdr">
+            Algorithms
+            <label class="toggle-label" style="margin-left:auto">
+              <input type="checkbox" id="qe-algo-all"> All
+            </label>
+          </div>
+          <div id="qe-algo-checkboxes" class="qa-algo-grid"></div>
+          <div class="qa-section-hdr">Roster</div>
+          <div class="calc-teams-bar">
+            <div class="calc-team">
+              <div class="calc-team-hdr ally-hdr">Allies <span id="qe-ally-count" class="count-badge">0/6</span></div>
+              <div class="team-chips" id="qe-ally-chips"></div>
+            </div>
+            <div class="calc-team">
+              <div class="calc-team-hdr enemy-hdr">Enemies <span id="qe-enemy-count" class="count-badge">0/6</span></div>
+              <div class="team-chips" id="qe-enemy-chips"></div>
+            </div>
+          </div>
+          <div class="qa-section-hdr">Hero Notes <span class="muted-label">(optional)</span></div>
+          <div id="qe-hero-notes"></div>
+        </div>
+        <div class="qa-edit-right">
+          <div class="qa-side-toggle">
+            <button class="btn-ghost btn-sm qa-side-btn active" data-side="ally">Add as Ally</button>
+            <button class="btn-ghost btn-sm qa-side-btn" data-side="enemy">Add as Enemy</button>
+          </div>
+          <input type="text" id="qe-hero-search" placeholder="Filter heroes…" class="search-input" />
+          <div id="qe-hero-grid" class="qa-hero-pick-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QA: RUN RESULTS -->
+    <section id="page-qa-run" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-qa-run">← QA</button>
+        <h1 id="qa-run-title">Running…</h1>
+        <div class="header-actions">
+          <button class="btn-primary" id="btn-save-qa-report">Save Report</button>
+        </div>
+      </div>
+      <div id="qa-run-algo-tabs" class="qa-algo-tabs"></div>
+      <div id="qa-run-results"></div>
+    </section>
+
+    <!-- QA: REPORT VIEWER -->
+    <section id="page-qa-report" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-qa-report">← QA</button>
+        <h1 id="qa-report-title">Report</h1>
+        <div class="header-actions">
+          <button class="btn-danger btn-sm" id="btn-delete-qa-report">Delete</button>
+        </div>
+      </div>
+      <div id="qa-report-content"></div>
     </section>
 
   </main>
