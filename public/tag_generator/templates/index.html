@@ -35,6 +35,7 @@
         <h1 id="hero-edit-title">Hero</h1>
         <div class="header-actions">
           <span id="dirty-badge" class="dirty-badge hidden">Unsaved</span>
+          <button class="btn-secondary btn-sm" id="btn-reverse-engineer" title="Reverse engineer a build from observed items and matchup data">⟲ Reverse Engineer</button>
           <button class="btn-primary" id="btn-save-hero">Save</button>
         </div>
       </div>
@@ -116,6 +117,71 @@
             <tbody id="hero-tag-body"></tbody>
           </table>
         </div>
+      </div>
+    </section>
+
+    <!-- REVERSE ENGINEER BUILD -->
+    <section id="page-reverse-engineer" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-re">← Back to Editor</button>
+        <h1>Reverse Engineer Build</h1>
+        <span id="re-hero-label" class="re-hero-label-badge"></span>
+      </div>
+
+      <div class="re-body">
+        <!-- LEFT: items -->
+        <div class="re-col">
+          <div class="re-section">
+            <div class="re-section-title">Build Order</div>
+            <div class="re-section-hint">Add items in purchase order. Earlier buys carry a small weight bonus; higher-tier items count more.</div>
+            <div class="re-item-search-wrap">
+              <input id="re-item-search" type="text" placeholder="Search items to add…" class="re-search-input" autocomplete="off">
+              <div id="re-item-dropdown" class="re-dropdown hidden"></div>
+            </div>
+            <div id="re-item-chips" class="re-chips-list"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: context + settings -->
+        <div class="re-col">
+          <div class="re-section">
+            <div class="re-section-title">Enemies Killed Most <span class="re-opt-badge">up to 3 — first selected = dominant (strongest weight)</span></div>
+            <input id="re-enemy-search" type="text" placeholder="Filter heroes…" class="re-search-input re-hero-filter">
+            <div id="re-enemy-grid" class="re-hero-grid"></div>
+            <div id="re-enemy-chips" class="re-chips-list"></div>
+          </div>
+
+          <div class="re-section">
+            <div class="re-section-title">Allies They Played With <span class="re-opt-badge">optional, up to 3 — first selected = primary synergy</span></div>
+            <input id="re-ally-search" type="text" placeholder="Filter heroes…" class="re-search-input re-hero-filter">
+            <div id="re-ally-grid" class="re-hero-grid"></div>
+            <div id="re-ally-chips" class="re-chips-list"></div>
+          </div>
+
+          <div class="re-section re-settings-section">
+            <div class="re-settings-row">
+              <div class="re-field">
+                <label class="re-field-lbl">Build Name</label>
+                <input id="re-build-name" type="text" placeholder="e.g. Enemy Meta" class="re-text-input">
+              </div>
+              <div class="re-field">
+                <label class="re-field-lbl">Algorithm</label>
+                <select id="re-algo" class="re-text-input">
+                  <option value="items+context">Full Context — items + enemies + allies</option>
+                  <option value="items-only">Items Only — ignore matchup context</option>
+                </select>
+              </div>
+            </div>
+            <button id="btn-re-submit" class="btn-primary re-submit-btn">Reverse Engineer Build →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weight preview (shown after submit) -->
+      <div id="re-preview" class="re-preview hidden">
+        <div class="re-prev-title">Inferred Weights Preview</div>
+        <div id="re-preview-body" class="re-prev-body"></div>
+        <div class="re-prev-hint">Opening build editor…</div>
       </div>
     </section>
 
@@ -253,7 +319,13 @@
                   <option value="cosine-match">Cosine Match</option>
                   <option value="beam">Beam Search</option>
                   <option value="lookahead">1-Step Lookahead</option>
-                  <option value="adaptive">Adaptive</option>
+                  <option value="expert">Expert Greedy</option>
+                  <option value="strengths">Play to Strengths</option>
+                  <option value="assassin">Target Assassin</option>
+                  <option value="adaptive">Hybrid Rotation</option>
+                  <option value="fusion">Fusion (Best of All)</option>
+                  <option value="oracle">Oracle (Deep/Slow)</option>
+                  <option value="cyclic">Cyclic Focus</option>
                 </select>
               </label>
             </div>
@@ -263,6 +335,7 @@
                 <select id="score-formula-sel" class="mult-input">
                   <option value="v1">V1 – Classic</option>
                   <option value="v2">V2 – Symmetric</option>
+                  <option value="v3">V3 – Target Focus</option>
                 </select>
               </label>
             </div>

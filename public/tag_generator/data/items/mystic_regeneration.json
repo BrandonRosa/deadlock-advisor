@@ -1,5 +1,6 @@
 {
   "category": "Spirit",
+  "compare_to": [],
   "image_path": "/resources/items/mystic_regeneration/mystic_regeneration.png",
   "name": "Mystic Regeneration",
   "normalized_name": "mystic_regeneration",
@@ -29,7 +30,7 @@
       "close_range": null,
       "close_to_team": null,
       "continous_heal": 0.5,
-      "continuous_damage": 0.15,
+      "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": 0.05,
       "counter_importance": null,
@@ -84,11 +85,11 @@
       "spirit_burst_proc": 0.2,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.2,
-      "spirit_continuous_proc": 1,
+      "spirit_continuous_proc": 0.8,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 0.25,
+      "spirit_damage": 0.2,
       "spirit_lifesteal": 0.33,
-      "spirit_proc": 0.75,
+      "spirit_proc": 0.5,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
       "stun": null,
@@ -98,6 +99,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Mystic_Regeneration",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Mystic_Regeneration"
 }
