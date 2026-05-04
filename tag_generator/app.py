@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, render_template, send_from_directory
-import json
+import json, uuid
+from datetime import datetime
 from pathlib import Path
 
 app = Flask(__name__)
@@ -9,6 +10,8 @@ DATA        = BASE / "data"
 HEROES_DIR  = DATA / "heroes"
 ITEMS_DIR   = DATA / "items"
 TAGS_F      = DATA / "tags.json"
+QA_DIR      = DATA / "qa"
+REPORTS_DIR = QA_DIR / "reports"
 
 SOURCE_ROOT = Path(__file__).parent.parent
 SOURCE_HEROES     = SOURCE_ROOT / "resources" / "heroes"
@@ -116,6 +119,8 @@ def init_item(manifest, nname, tags):
 def bootstrap():
     HEROES_DIR.mkdir(parents=True, exist_ok=True)
     ITEMS_DIR.mkdir(parents=True, exist_ok=True)
+    QA_DIR.mkdir(parents=True, exist_ok=True)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
     if not TAGS_F.exists():
         TAGS_F.write_text(json.dumps(DEFAULT_TAGS, indent=2, ensure_ascii=False))
@@ -351,6 +356,97 @@ def get_all_items():
         except Exception:
             pass
     return jsonify(out)
+
+
+# ── QA ───────────────────────────────────────────────────────────────────────
+def load_scenarios():
+    f = QA_DIR / "scenarios.json"
+    return json.loads(f.read_text()) if f.exists() else []
+
+def save_scenarios(scenarios):
+    (QA_DIR / "scenarios.json").write_text(json.dumps(scenarios, indent=2, ensure_ascii=False))
+
+@app.route("/api/qa/scenarios", methods=["GET"])
+def get_qa_scenarios():
+    return jsonify(load_scenarios())
+
+@app.route("/api/qa/scenarios", methods=["POST"])
+def create_qa_scenario():
+    d = request.json
+    scenarios = load_scenarios()
+    scenario = {
+        "id":           str(uuid.uuid4()),
+        "name":         d.get("name", "Unnamed"),
+        "created_at":   datetime.utcnow().isoformat(),
+        "allies":       d.get("allies", []),
+        "enemies":      d.get("enemies", []),
+        "scoreFormula": d.get("scoreFormula", "v2"),
+        "algos":        d.get("algos", ["cosine"]),
+        "heroNotes":    d.get("heroNotes", {}),
+    }
+    scenarios.append(scenario)
+    save_scenarios(scenarios)
+    return jsonify(scenario), 201
+
+@app.route("/api/qa/scenarios/<sid>", methods=["PUT"])
+def update_qa_scenario(sid):
+    scenarios = load_scenarios()
+    d = request.json
+    for s in scenarios:
+        if s["id"] == sid:
+            s["name"]         = d.get("name", s["name"])
+            s["allies"]       = d.get("allies", s["allies"])
+            s["enemies"]      = d.get("enemies", s["enemies"])
+            s["scoreFormula"] = d.get("scoreFormula", s.get("scoreFormula", "v2"))
+            s["algos"]        = d.get("algos", s.get("algos", []))
+            s["heroNotes"]    = d.get("heroNotes", s.get("heroNotes", {}))
+            save_scenarios(scenarios)
+            return jsonify(s)
+    return jsonify({"error": "Not found"}), 404
+
+@app.route("/api/qa/scenarios/<sid>", methods=["DELETE"])
+def delete_qa_scenario(sid):
+    save_scenarios([s for s in load_scenarios() if s["id"] != sid])
+    return jsonify({"ok": True})
+
+@app.route("/api/qa/reports", methods=["GET"])
+def get_qa_reports():
+    reports = []
+    for f in sorted(REPORTS_DIR.glob("*.json"), reverse=True):
+        try:
+            d = json.loads(f.read_text())
+            reports.append({
+                "id":            d["id"],
+                "scenario_name": d.get("scenario_name", ""),
+                "run_at":        d.get("run_at", ""),
+                "allies":        d.get("allies", []),
+                "enemies":       d.get("enemies", []),
+            })
+        except Exception:
+            pass
+    return jsonify(reports)
+
+@app.route("/api/qa/reports", methods=["POST"])
+def save_qa_report():
+    d = request.json
+    rid = str(uuid.uuid4())
+    report = {"id": rid, "run_at": datetime.utcnow().isoformat(), **d}
+    (REPORTS_DIR / f"{rid}.json").write_text(json.dumps(report, indent=2, ensure_ascii=False))
+    return jsonify({"id": rid}), 201
+
+@app.route("/api/qa/reports/<rid>", methods=["GET"])
+def get_qa_report(rid):
+    f = REPORTS_DIR / f"{rid}.json"
+    if not f.exists():
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(json.loads(f.read_text()))
+
+@app.route("/api/qa/reports/<rid>", methods=["DELETE"])
+def delete_qa_report(rid):
+    f = REPORTS_DIR / f"{rid}.json"
+    if f.exists():
+        f.unlink()
+    return jsonify({"ok": True})
 
 
 # ── App ───────────────────────────────────────────────────────────────────────

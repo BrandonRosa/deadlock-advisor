@@ -1260,3 +1260,195 @@ html, body { height: 100%; font-family: 'Segoe UI', system-ui, sans-serif; backg
 .re-prev-tag { color: var(--muted); }
 .re-prev-val { font-weight: 600; }
 .re-prev-hint { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; font-style: italic; }
+
+/* ── QA Tab ──────────────────────────────────────────────────── */
+.qa-empty { color: var(--muted); padding: 16px 0; font-size: 13px; }
+
+.qa-reports-hdr {
+  margin-top: 32px; margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.qa-reports-hdr h2 { font-size: 18px; font-weight: 700; }
+
+.qa-scenario-card, .qa-report-card {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 8px;
+}
+.qa-sc-info { flex: 1; min-width: 0; }
+.qa-sc-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+.qa-sc-meta { font-size: 12px; color: var(--muted); }
+.qa-sc-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* ── QA Edit Layout ──────────────────────────────────────────── */
+.qa-edit-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.qa-edit-left  { display: flex; flex-direction: column; gap: 14px; }
+.qa-edit-right { display: flex; flex-direction: column; gap: 8px; }
+
+.qa-section-hdr {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 12px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.muted-label { color: var(--muted); font-size: 11px; font-weight: 400; }
+
+.qa-algo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
+}
+.qa-algo-check {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; cursor: pointer; color: var(--text);
+  padding: 4px 6px; border-radius: 4px; transition: background .1s;
+}
+.qa-algo-check:hover { background: var(--card); }
+.qa-algo-check input { cursor: pointer; accent-color: var(--accent); }
+
+.qa-side-toggle { display: flex; gap: 8px; }
+.qa-side-btn.active {
+  background: var(--card); color: var(--text); border-color: var(--accent);
+}
+
+.search-input {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 12px; border-radius: 6px;
+  font-size: 13px; width: 100%;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── QA Hero Pick Grid ───────────────────────────────────────── */
+.qa-hero-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 6px;
+}
+.qa-pick-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden; cursor: pointer;
+  transition: border-color .15s;
+  display: flex; flex-direction: column; align-items: center;
+  padding-bottom: 4px;
+}
+.qa-pick-card:not(.taken):hover { border-color: var(--accent); }
+.qa-pick-card.taken { opacity: 0.45; cursor: default; }
+.qa-pick-img {
+  width: 100%; aspect-ratio: 1; object-fit: cover;
+}
+.qa-pick-placeholder {
+  width: 100%; aspect-ratio: 1;
+  background: var(--panel); display: flex;
+  align-items: center; justify-content: center; font-size: 20px;
+}
+.qa-pick-name {
+  font-size: 10px; font-weight: 600; text-align: center;
+  padding: 2px 4px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+}
+.qa-pick-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 10px; margin-bottom: 2px;
+}
+.ally-badge  { background: rgba(46,204,113,.2); color: var(--success); }
+.enemy-badge { background: rgba(231,76,60,.2);  color: var(--danger);  }
+
+/* ── QA Note Inputs ──────────────────────────────────────────── */
+.qa-note-row {
+  display: flex; align-items: center; gap: 10px; margin-top: 4px;
+}
+.qa-note-lbl {
+  font-size: 12px; color: var(--muted);
+  min-width: 80px; font-weight: 600; flex-shrink: 0;
+}
+.qa-note-input {
+  flex: 1; background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 12px;
+}
+.qa-note-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── QA Algo Tabs ────────────────────────────────────────────── */
+.qa-algo-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 12px 0; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.qa-algo-tab {
+  background: var(--card); color: var(--muted);
+  border: 1px solid var(--border); padding: 6px 14px;
+  border-radius: 20px; cursor: pointer; font-size: 12px;
+  transition: all .15s;
+}
+.qa-algo-tab:hover { color: var(--text); }
+.qa-algo-tab.active {
+  background: var(--accent); color: #fff;
+  border-color: var(--accent); font-weight: 600;
+}
+
+/* ── QA Hero/Build Blocks ────────────────────────────────────── */
+.qa-hero-block {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+}
+.qa-hero-hdr {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; font-weight: 600;
+}
+.qa-hero-hdr.ally-hdr  { border-left: 3px solid var(--success); }
+.qa-hero-hdr.enemy-hdr { border-left: 3px solid var(--danger);  }
+.qa-hero-thumb { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; }
+.qa-hero-name  { font-size: 15px; flex: 1; }
+.qa-hero-side-badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+}
+.ally-hdr  .qa-hero-side-badge { background: rgba(46,204,113,.15); color: var(--success); }
+.enemy-hdr .qa-hero-side-badge { background: rgba(231,76,60,.15);  color: var(--danger); }
+
+.qa-hero-builds { padding: 12px 14px; display: flex; flex-direction: column; gap: 12px; }
+.qa-build-entry { border-top: 1px solid var(--border); padding-top: 10px; }
+.qa-build-entry:first-child { border-top: none; padding-top: 0; }
+.qa-build-name  { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.qa-build-score { color: var(--accent); font-weight: 700; margin-left: 8px; }
+.qa-build-path-wrap { overflow-x: auto; margin-bottom: 6px; }
+
+.qa-bp-phase     { margin-bottom: 8px; }
+.qa-bp-phase-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase;
+                   letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.qa-bp-row       { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0; }
+.qa-bp-badge     { display: inline-flex; align-items: center; justify-content: center;
+                   width: 16px; height: 16px; border-radius: 3px;
+                   font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.qa-bp-badge-buy     { background: rgba(46,204,113,.2); color: var(--success); }
+.qa-bp-badge-upgrade { background: rgba(52,152,219,.2); color: #3498db; }
+.qa-bp-badge-sell    { background: rgba(231,76,60,.15);  color: var(--danger); }
+.qa-bp-img  { width: 20px; height: 20px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+.qa-bp-name { font-size: 12px; }
+
+/* ── QA Report View ──────────────────────────────────────────── */
+.qa-report-meta {
+  display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  padding: 12px 0; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted); font-size: 13px;
+}
+.qa-report-section { margin-bottom: 24px; }
+.qa-report-algo    { margin-top: 14px; }
+.qa-report-algo-name {
+  font-weight: 700; font-size: 14px; color: var(--accent); margin-bottom: 8px;
+}
+.qa-bp-list { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.qa-bp-pill {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 6px; font-size: 11px;
+}
+.qa-build-note {
+  font-size: 12px; color: var(--muted); font-style: italic;
+  background: var(--panel); border-left: 3px solid var(--accent);
+  padding: 4px 8px; border-radius: 0 4px 4px 0; margin-top: 6px;
+}
