@@ -1,10 +1,10 @@
 {
   "category": "Vitality",
-  "image_path": "/resources/items/trophy_collector/trophy_collector.png",
+  "image_path": "/resources/items/trophy_collector/trophy_collector_2.png",
   "name": "Trophy Collector",
   "normalized_name": "trophy_collector",
   "remarks": "Only get if you had a good early/mid game!",
-  "tier": 3200,
+  "tier": 1600,
   "upgrades_from": [
     "sprint_boots"
   ],
@@ -28,7 +28,7 @@
       "cc_resist": null,
       "charge_dependant": null,
       "close_range": null,
-      "close_to_team": null,
+      "close_to_team": 0.1,
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": null,
@@ -40,7 +40,7 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "farmer": 0.1,
+      "farmer": -0.2,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -54,7 +54,7 @@
       "high_assist_count": 1.5,
       "high_kill_count": 1,
       "high_max_hp": 0.66,
-      "horizontal_mobility": 0.8,
+      "horizontal_mobility": 0.85,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
@@ -67,7 +67,7 @@
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
-      "range_extender_dependant": 0.66,
+      "range_extender_dependant": 0.9,
       "scaling_early": 0.66,
       "scaling_late": null,
       "self_buff": 0.15,
@@ -92,8 +92,18 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "engage": null,
+      "escape": null,
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Trophy_Collector"
+  "wiki_url": "https://deadlock.wiki/Trophy_Collector",
+  "compare_to": [
+    "enduring_speed",
+    "arcane_surge"
+  ]
 }
