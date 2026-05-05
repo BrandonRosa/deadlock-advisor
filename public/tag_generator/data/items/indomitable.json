@@ -100,7 +100,7 @@
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.25,
+      "ult_focused": 0.2,
       "vertical_mobility": null
     }
   },
