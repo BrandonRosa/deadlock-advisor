@@ -77,29 +77,28 @@
       "apollo",
       "bebop",
       "lash",
-      "holliday"
+      "holliday",
+      "grey_talon"
     ],
     "enemies": [
       "drifter",
       "infernus",
       "kelvin",
-      "seven"
+      "seven",
+      "mcginnis"
     ],
     "scoreFormula": "v3",
     "algos": [
       "greedy-phase",
       "marginal",
       "cosine",
-      "cosine-match",
       "beam",
       "lookahead",
       "expert",
-      "strengths",
       "assassin",
       "adaptive",
       "fusion",
-      "oracle",
-      "cyclic"
+      "oracle"
     ],
     "heroNotes": {}
   },
@@ -178,22 +177,18 @@
     "heroNotes": {}
   },
   {
-    "id": "2a184335-fe8c-427a-ba3e-15c8733f0eaa",
-    "name": "Gun Talon Win",
-    "created_at": "2026-05-06T06:18:37.271308",
+    "id": "66ba23a3-980b-4662-95d2-b05c291ec14c",
+    "name": "Even V2",
+    "created_at": "2026-05-06T13:43:57.101718",
     "allies": [
+      "graves",
       "paige",
-      "shiv",
-      "grey_talon",
-      "seven",
-      "dynamo"
+      "holliday"
     ],
     "enemies": [
-      "lash",
-      "vindicta",
-      "rem",
-      "celeste",
-      "pocket"
+      "abrams",
+      "kelvin",
+      "paradox"
     ],
     "scoreFormula": "v3",
     "algos": [
@@ -211,8 +206,70 @@
       "oracle",
       "cyclic"
     ],
-    "heroNotes": {
-      "grey_talon": "Check Gun Carry Talon.."
-    }
+    "heroNotes": {}
+  },
+  {
+    "id": "66ba23a3-980b-4662-95d2-b05c291ec14c",
+    "name": "Even V2",
+    "created_at": "2026-05-06T13:43:57.101718",
+    "allies": [
+      "graves",
+      "paige",
+      "holliday"
+    ],
+    "enemies": [
+      "abrams",
+      "kelvin",
+      "paradox"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "beam",
+      "lookahead",
+      "expert",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle"
+    ],
+    "heroNotes": {}
+  },
+  {
+    "id": "dca95138-a155-4f19-90f2-5508ad32ba68",
+    "name": "Spirit vs Even",
+    "created_at": "2026-05-06T17:04:24.180833",
+    "allies": [
+      "apollo",
+      "bebop",
+      "celeste",
+      "calico",
+      "seven",
+      "lash"
+    ],
+    "enemies": [
+      "holliday",
+      "graves",
+      "paradox"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {}
   }
 ]

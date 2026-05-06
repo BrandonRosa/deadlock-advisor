@@ -373,9 +373,41 @@
     },
     {
       "build_description_eng": "Focuses on Charged Shot and trying to deal as much spirit damage as possible. Great against low HP enemies with low spirit resist. Bad against Tanks and close range enemies.",
+      "counter_phase_slots": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          5
+        ]
+      ],
       "followed_build": "General",
       "name": "Charged Shot",
       "normalized_build_name": "grey_talon_charged_shot",
+      "required_items": [
+        "boundless_spirit",
+        "spirit_burn",
+        "mystic_reverb",
+        "extra_charge"
+      ],
+      "signature_items": [
+        "rapid_recharge",
+        "enchanters_emblem"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -748,6 +780,12 @@
       "followed_build": "General",
       "name": "Gun",
       "normalized_build_name": "grey_talon_gun",
+      "required_items": [
+        "glass_cannon"
+      ],
+      "signature_items": [
+        "indomitable"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1485,13 +1523,20 @@
           "ult_focused": -0.1,
           "vertical_mobility": 0.1
         }
-      }
+      },
+      "signature_items": [
+        "opening_rounds",
+        "recharging_rush"
+      ]
     },
     {
       "build_description_eng": "VERY off meta build. Focuses on talon's snare. Goal is to more of a supportive character for teamfights where you can continuously silence enemies. Good vs Mid range cluster focused enemies. Awful against aerial/long range characters.",
       "followed_build": "Gun",
       "name": "Snare",
       "normalized_build_name": "grey_talon_snare",
+      "required_items": [
+        "mystic_expansion"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
