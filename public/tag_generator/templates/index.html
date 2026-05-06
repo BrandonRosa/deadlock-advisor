@@ -97,6 +97,41 @@
           </div>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
+        <!-- Build constraints (advanced): signature/required/blacklist items + counter slots -->
+        <details class="build-constraints" id="bc-section">
+          <summary>Build Constraints</summary>
+          <div class="bc-grid">
+            <div class="bc-section">
+              <label class="bc-lbl">Signature Items <span class="bc-hint">(×1.5 score boost)</span></label>
+              <div class="bc-search-wrap">
+                <input id="bc-sig-search" class="bc-search" type="text" placeholder="Search items…" autocomplete="off">
+                <div id="bc-sig-dropdown" class="bc-dropdown hidden"></div>
+              </div>
+              <div id="bc-sig-chips" class="bc-chips"></div>
+            </div>
+            <div class="bc-section">
+              <label class="bc-lbl">Required Items <span class="bc-hint">(×1.5 boost + force-buy + sticky)</span></label>
+              <div class="bc-search-wrap">
+                <input id="bc-req-search" class="bc-search" type="text" placeholder="Search items…" autocomplete="off">
+                <div id="bc-req-dropdown" class="bc-dropdown hidden"></div>
+              </div>
+              <div id="bc-req-chips" class="bc-chips"></div>
+            </div>
+            <div class="bc-section">
+              <label class="bc-lbl">Blacklist Items <span class="bc-hint">(never bought; chain components still allowed)</span></label>
+              <div class="bc-search-wrap">
+                <input id="bc-bl-search" class="bc-search" type="text" placeholder="Search items…" autocomplete="off">
+                <div id="bc-bl-dropdown" class="bc-dropdown hidden"></div>
+              </div>
+              <div id="bc-bl-chips" class="bc-chips"></div>
+            </div>
+            <div class="bc-section">
+              <label class="bc-lbl">Counter Items per Phase <span class="bc-hint">(min, max — blank = default)</span></label>
+              <div id="bc-counter-slots" class="bc-cs-grid"></div>
+            </div>
+          </div>
+        </details>
+
         <!-- Shown only when General build is empty -->
         <div id="preset-banner" class="preset-banner hidden">
           <span class="preset-banner-label">General build is empty —</span>
@@ -146,14 +181,14 @@
         <!-- RIGHT: context + settings -->
         <div class="re-col">
           <div class="re-section">
-            <div class="re-section-title">Enemies Killed Most <span class="re-opt-badge">up to 3 — first selected = dominant (strongest weight)</span></div>
+            <div class="re-section-title">Enemies Killed Most <span class="re-opt-badge">click to select — click again to mark impactful (★)</span></div>
             <input id="re-enemy-search" type="text" placeholder="Filter heroes…" class="re-search-input re-hero-filter">
             <div id="re-enemy-grid" class="re-hero-grid"></div>
             <div id="re-enemy-chips" class="re-chips-list"></div>
           </div>
 
           <div class="re-section">
-            <div class="re-section-title">Allies They Played With <span class="re-opt-badge">optional, up to 3 — first selected = primary synergy</span></div>
+            <div class="re-section-title">Allies They Played With <span class="re-opt-badge">optional — click to select, click again to mark impactful (★)</span></div>
             <input id="re-ally-search" type="text" placeholder="Filter heroes…" class="re-search-input re-hero-filter">
             <div id="re-ally-grid" class="re-hero-grid"></div>
             <div id="re-ally-chips" class="re-chips-list"></div>

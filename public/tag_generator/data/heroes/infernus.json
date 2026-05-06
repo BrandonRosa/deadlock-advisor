@@ -372,10 +372,45 @@
       }
     },
     {
+      "blacklist_items": [
+        "arcane_surge",
+        "golden_goose_egg"
+      ],
       "build_description_eng": "Focuses on Infernus's Afterburn. Great on low max HP enemies. Horrible against tankier enemies.",
+      "counter_phase_slots": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ],
       "followed_build": "General",
       "name": "DoT",
       "normalized_build_name": "infernus_dot",
+      "required_items": [
+        "duration_extender",
+        "quicksilver_reload",
+        "toxic_bullets"
+      ],
+      "signature_items": [
+        "mercurial_magnum",
+        "superior_duration"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -744,10 +779,19 @@
       }
     },
     {
+      "blacklist_items_excluded": [
+        "arcane_surge",
+        "golden_goose_egg"
+      ],
       "build_description_eng": "Focuses on denying healing and resistance from the enemy team. Weak to burst damage or long range comps.",
       "followed_build": "DoT",
       "name": "Anti-Tank",
       "normalized_build_name": "infernus_antitank",
+      "signature_items": [
+        "crippling_headshot",
+        "spirit_rend",
+        "golden_goose_egg"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1120,6 +1164,14 @@
       "followed_build": "General",
       "name": "Flame Dash",
       "normalized_build_name": "infernus_flame_dash",
+      "required_items": [
+        "extra_charge",
+        "indomitable"
+      ],
+      "signature_items": [
+        "arcane_surge",
+        "rapid_recharge"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1857,7 +1909,11 @@
           "ult_focused": null,
           "vertical_mobility": "+-0.1"
         }
-      }
+      },
+      "signature_items": [
+        "colossus",
+        "leech"
+      ]
     },
     {
       "build_description_eng": "",
