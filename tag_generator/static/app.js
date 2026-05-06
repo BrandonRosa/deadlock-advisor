@@ -149,6 +149,65 @@ function resolveBuildValues(build, heroBuilds, visited) {
   return r;
 }
 
+// ── Resolve build constraints through the follow chain ─────────────────────
+// Returns the effective constraints for `build`, merging in everything inherited
+// from the chain it follows. Inherited item lists are augmented by own additions
+// and reduced by own *_excluded entries. Counter slots fall through cell-by-cell.
+const _BC_DEFAULT_SLOTS_RESOLVE = [[0,1],[0,2],[1,2],[2,3],[2,4]];
+function resolveBuildConstraints(build, heroBuilds, visited) {
+  visited = visited || new Set();
+  let parent = null;
+  if (build.followed_build && !visited.has(build.name)) {
+    const pb = heroBuilds.find(b => b.name === build.followed_build);
+    if (pb) {
+      const next = new Set(visited); next.add(build.name);
+      parent = resolveBuildConstraints(pb, heroBuilds, next);
+    }
+  }
+  const ownSig = new Set(build.signature_items || []);
+  const ownReq = new Set(build.required_items  || []);
+  const ownBl  = new Set(build.blacklist_items || []);
+  const exSig  = new Set(build.signature_items_excluded || []);
+  const exReq  = new Set(build.required_items_excluded  || []);
+  const exBl   = new Set(build.blacklist_items_excluded || []);
+
+  function merge(parentSet, own, excluded) {
+    const out = new Set(parentSet || []);
+    excluded.forEach(k => { if (!own.has(k)) out.delete(k); });
+    own.forEach(k => out.add(k));
+    return out;
+  }
+  const sig = merge(parent?.signature_items, ownSig, exSig);
+  const req = merge(parent?.required_items,  ownReq, exReq);
+  const bl  = merge(parent?.blacklist_items, ownBl,  exBl);
+
+  const ownSlots = Array.isArray(build.counter_phase_slots) ? build.counter_phase_slots : [];
+  const slots = _BC_DEFAULT_SLOTS_RESOLVE.map((def, i) => {
+    const parentCell = parent?.counter_phase_slots?.[i] || def;
+    const oc = ownSlots[i];
+    if (!Array.isArray(oc)) return parentCell;
+    const blank = v => v === null || v === undefined || v === '';
+    const lo = blank(oc[0]) ? parentCell[0] : Number(oc[0]);
+    const hi = blank(oc[1]) ? parentCell[1] : Number(oc[1]);
+    return [Number.isFinite(lo) ? lo : parentCell[0], Number.isFinite(hi) ? hi : parentCell[1]];
+  });
+
+  return {
+    signature_items: sig,
+    required_items:  req,
+    blacklist_items: bl,
+    counter_phase_slots: slots,
+    // For UI: which items came from parent chain, and which the user has excluded
+    _parent: {
+      signature_items: parent?.signature_items || new Set(),
+      required_items:  parent?.required_items  || new Set(),
+      blacklist_items: parent?.blacklist_items || new Set(),
+      counter_phase_slots: parent?.counter_phase_slots || _BC_DEFAULT_SLOTS_RESOLVE,
+    },
+    _excluded: { signature_items: exSig, required_items: exReq, blacklist_items: exBl },
+  };
+}
+
 function wouldCreateCycleJS(builds, buildIdx, targetName) {
   const selfName = builds[buildIdx].name;
   let cur = builds.find(b => b.name === targetName);
@@ -456,6 +515,7 @@ function renderBuildContent() {
   if (showBanner) populatePresetBannerHeroes();
 
   renderHeroTagTable(build);
+  renderBuildConstraints();
 }
 
 function populatePresetBannerHeroes() {
@@ -548,6 +608,7 @@ document.getElementById('bf-follow').addEventListener('change', () => {
   b.followed_build = val || undefined;
   setHeroDirty(true);
   renderHeroTagTable(b);
+  renderBuildConstraints();
 });
 
 // ── Delete build ──────────────────────────────────────────────────────────────
@@ -562,6 +623,193 @@ function deleteBuild(idx) {
   setHeroDirty(true);
   renderBuildTabs();
   renderBuildContent();
+}
+
+// ─── Build Constraints UI (signature/required/blacklist/counter slots) ────────
+let _bcItemData = null;   // cached item list for dropdowns
+const BC_PHASE_NAMES   = ['Lane','Early','Mid','Late','Extra Late'];
+const BC_DEFAULT_SLOTS = [[0,1],[0,2],[1,2],[2,3],[2,4]];
+
+const BC_PICKERS = [
+  { field: 'signature_items', exField: 'signature_items_excluded', search: 'bc-sig-search', dropdown: 'bc-sig-dropdown', chips: 'bc-sig-chips' },
+  { field: 'required_items',  exField: 'required_items_excluded',  search: 'bc-req-search', dropdown: 'bc-req-dropdown', chips: 'bc-req-chips'  },
+  { field: 'blacklist_items', exField: 'blacklist_items_excluded', search: 'bc-bl-search',  dropdown: 'bc-bl-dropdown',  chips: 'bc-bl-chips'   },
+];
+
+async function ensureBCItems() {
+  if (!_bcItemData) _bcItemData = await api.get('/api/items/all');
+  return _bcItemData;
+}
+
+function _bcResolvedForCurrentBuild() {
+  const builds = S.currentHero?.builds || [];
+  const b = builds[S.currentBuildIdx];
+  if (!b) return null;
+  return resolveBuildConstraints(b, builds);
+}
+
+function bcRenderChips(b, cfg) {
+  const cont = document.getElementById(cfg.chips);
+  if (!cont) return;
+  const own = new Set(b[cfg.field] || []);
+  const excluded = new Set(b[cfg.exField] || []);
+  const resolved = _bcResolvedForCurrentBuild();
+  const inherited = resolved?._parent[cfg.field] || new Set();
+  // Display order: inherited (excluded last), then own additions not in inherited.
+  const ordered = [];
+  [...inherited].forEach(k => { if (!own.has(k)) ordered.push({ key: k, kind: excluded.has(k) ? 'excluded' : 'inherited' }); });
+  [...own].forEach(k => ordered.push({ key: k, kind: inherited.has(k) ? 'inherited-own' : 'own' }));
+
+  cont.innerHTML = '';
+  ordered.forEach(({ key, kind }) => {
+    const it = (_bcItemData || []).find(x => x.normalized_name === key);
+    const chip = document.createElement('div');
+    chip.className = 'bc-chip ' + (
+      kind === 'excluded' ? 'bc-chip-excluded' :
+      kind === 'inherited' ? 'bc-chip-inherited' :
+      kind === 'inherited-own' ? 'bc-chip-inherited-own' : ''
+    );
+    const img = it ? srcUrl(it.image_path) : '';
+    const badge = (kind === 'inherited' || kind === 'excluded' || kind === 'inherited-own')
+      ? '<span class="bc-chip-follow" title="Inherited from followed build">↳</span>' : '';
+    const xTitle = kind === 'excluded' ? 'Restore (un-exclude)' : (kind === 'inherited' ? 'Exclude (strike out)' : 'Remove');
+    chip.innerHTML = `
+      ${badge}
+      ${img ? `<img class="bc-chip-img" src="${img}" alt="">` : ''}
+      <span class="bc-chip-name">${it ? it.name : key}</span>
+      <button class="bc-chip-x" title="${xTitle}">×</button>`;
+    chip.querySelector('.bc-chip-x').addEventListener('click', () => {
+      if (kind === 'inherited') {
+        // Add to excluded
+        const ex = b[cfg.exField] || [];
+        ex.push(key); b[cfg.exField] = ex;
+      } else if (kind === 'excluded') {
+        // Restore: remove from excluded
+        const ex = (b[cfg.exField] || []).filter(x => x !== key);
+        if (ex.length) b[cfg.exField] = ex; else delete b[cfg.exField];
+      } else {
+        // Own — remove from own list
+        const cur = (b[cfg.field] || []).filter(x => x !== key);
+        if (cur.length) b[cfg.field] = cur; else delete b[cfg.field];
+      }
+      setHeroDirty(true);
+      bcRenderChips(b, cfg);
+    });
+    cont.appendChild(chip);
+  });
+}
+
+function bcWireSearch(b, cfg) {
+  const input = document.getElementById(cfg.search);
+  const dd    = document.getElementById(cfg.dropdown);
+  if (!input || !dd) return;
+  // Replace the input to drop any prior listeners (renderBuildContent re-runs on tab switch)
+  const fresh = input.cloneNode(true);
+  input.parentNode.replaceChild(fresh, input);
+  fresh.addEventListener('input', () => {
+    const q = fresh.value.trim().toLowerCase();
+    if (!q) { dd.classList.add('hidden'); dd.innerHTML = ''; return; }
+    const own = new Set(b[cfg.field] || []);
+    const resolved = _bcResolvedForCurrentBuild();
+    const inherited = resolved?._parent[cfg.field] || new Set();
+    const excluded = new Set(b[cfg.exField] || []);
+    // Hide items already shown (own, inherited-not-excluded). Excluded items can be re-added by clicking the chip.
+    const visible = new Set([...own, ...[...inherited].filter(k => !excluded.has(k))]);
+    const matches = (_bcItemData || [])
+      .filter(it => !visible.has(it.normalized_name) && it.name.toLowerCase().includes(q))
+      .slice(0, 25);
+    dd.innerHTML = '';
+    if (!matches.length) { dd.classList.add('hidden'); return; }
+    matches.forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'bc-dd-item';
+      const img = srcUrl(it.image_path);
+      row.innerHTML = `
+        ${img ? `<img class="bc-dd-img" src="${img}" alt="">` : ''}
+        <span>${it.name}</span>
+        <span class="bc-dd-tier">${it.tier ? it.tier : ''}</span>`;
+      row.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const cur = b[cfg.field] || [];
+        cur.push(it.normalized_name);
+        b[cfg.field] = cur;
+        // If the item was previously excluded, drop the exclusion (own takes priority anyway)
+        if (excluded.has(it.normalized_name)) {
+          const ex = (b[cfg.exField] || []).filter(x => x !== it.normalized_name);
+          if (ex.length) b[cfg.exField] = ex; else delete b[cfg.exField];
+        }
+        setHeroDirty(true);
+        bcRenderChips(b, cfg);
+        fresh.value = '';
+        dd.classList.add('hidden'); dd.innerHTML = '';
+      });
+      dd.appendChild(row);
+    });
+    dd.classList.remove('hidden');
+  });
+  fresh.addEventListener('blur', () => setTimeout(() => dd.classList.add('hidden'), 120));
+  fresh.addEventListener('focus', () => { if (dd.innerHTML) dd.classList.remove('hidden'); });
+}
+
+function bcRenderCounterSlots(b) {
+  const cont = document.getElementById('bc-counter-slots');
+  if (!cont) return;
+  const slots = Array.isArray(b.counter_phase_slots) ? b.counter_phase_slots : [];
+  // Parent's resolved counter slots — used as inheritance placeholders when the child leaves
+  // a cell blank. Falls back to global defaults when no follow chain exists.
+  const builds = S.currentHero?.builds || [];
+  let parentSlots = BC_DEFAULT_SLOTS;
+  if (b.followed_build) {
+    const pb = builds.find(x => x.name === b.followed_build);
+    if (pb) {
+      const pr = resolveBuildConstraints(pb, builds);
+      parentSlots = pr.counter_phase_slots;
+    }
+  }
+  cont.innerHTML = '';
+  const h1 = document.createElement('div'); h1.className = 'bc-cs-head'; h1.textContent = 'Phase';
+  const h2 = document.createElement('div'); h2.className = 'bc-cs-head'; h2.textContent = 'Min';
+  const h3 = document.createElement('div'); h3.className = 'bc-cs-head'; h3.textContent = 'Max';
+  cont.append(h1, h2, h3);
+
+  BC_PHASE_NAMES.forEach((pn, i) => {
+    const inh = parentSlots[i] || BC_DEFAULT_SLOTS[i];
+    const cur = Array.isArray(slots[i]) ? slots[i] : [];
+    const lbl = document.createElement('div'); lbl.className = 'bc-cs-name'; lbl.textContent = pn;
+    const minIn = document.createElement('input');
+    minIn.className = 'bc-cs-input'; minIn.type = 'number'; minIn.min = '0';
+    minIn.placeholder = String(inh[0]);
+    if (cur[0] !== null && cur[0] !== undefined && cur[0] !== '') minIn.value = String(cur[0]);
+    const maxIn = document.createElement('input');
+    maxIn.className = 'bc-cs-input'; maxIn.type = 'number'; maxIn.min = '0';
+    maxIn.placeholder = String(inh[1]);
+    if (cur[1] !== null && cur[1] !== undefined && cur[1] !== '') maxIn.value = String(cur[1]);
+
+    function commit() {
+      if (!Array.isArray(b.counter_phase_slots)) b.counter_phase_slots = [];
+      while (b.counter_phase_slots.length < BC_PHASE_NAMES.length) b.counter_phase_slots.push(null);
+      const lo = minIn.value === '' ? null : Number(minIn.value);
+      const hi = maxIn.value === '' ? null : Number(maxIn.value);
+      if (lo === null && hi === null) b.counter_phase_slots[i] = null;
+      else b.counter_phase_slots[i] = [lo, hi];
+      while (b.counter_phase_slots.length && b.counter_phase_slots[b.counter_phase_slots.length - 1] === null) {
+        b.counter_phase_slots.pop();
+      }
+      if (!b.counter_phase_slots.length) delete b.counter_phase_slots;
+      setHeroDirty(true);
+    }
+    minIn.addEventListener('change', commit);
+    maxIn.addEventListener('change', commit);
+    cont.append(lbl, minIn, maxIn);
+  });
+}
+
+async function renderBuildConstraints() {
+  const b = S.currentHero?.builds[S.currentBuildIdx];
+  if (!b) return;
+  await ensureBCItems();
+  BC_PICKERS.forEach(cfg => { bcRenderChips(b, cfg); bcWireSearch(b, cfg); });
+  bcRenderCounterSlots(b);
 }
 
 // ── Hero Tag Table ────────────────────────────────────────────────────────────
@@ -870,15 +1118,18 @@ document.getElementById('mb-confirm').addEventListener('click', async () => {
 // ════════════════════════════════════════════════════════════════════════════
 
 const RE = {
-  items: [],    // { key, name, tier, imagePath, selfScore }
-  enemies: [],  // normalized_names (up to 3)
-  allies: [],   // normalized_names (up to 3)
+  items: [],              // { key, name, tier, imagePath, selfScore }
+  enemies: [],            // normalized_names (selected)
+  allies: [],             // normalized_names (selected)
+  impactfulEnemies: new Set(),
+  impactfulAllies:  new Set(),
   _itemData: null,
 };
 
 async function openReverseEngineer() {
   if (!S.currentHero) return;
   RE.items = []; RE.enemies = []; RE.allies = [];
+  RE.impactfulEnemies = new Set(); RE.impactfulAllies = new Set();
   document.getElementById('re-hero-label').textContent = S.currentHero.eng_name || S.currentHero.normalized_name;
   document.getElementById('re-build-name').value = '';
   document.getElementById('re-algo').value = 'items+context';
@@ -898,17 +1149,31 @@ function renderReHeroPicker(type) {
   const filterEl = document.getElementById(`re-${type}-search`);
   const q = (filterEl?.value || '').trim().toLowerCase();
   const sel = type === 'enemy' ? RE.enemies : RE.allies;
+  const imp = type === 'enemy' ? RE.impactfulEnemies : RE.impactfulAllies;
   grid.innerHTML = '';
   S.heroList.filter(h => !h.is_preset && (!q || h.eng_name.toLowerCase().includes(q))).forEach(h => {
+    const name   = h.normalized_name;
+    const isImp  = imp.has(name);
+    const isOn   = sel.includes(name);
+    let cls = 're-hero-btn';
+    if (isImp) cls += ' impactful';
+    else if (isOn) cls += ' on';
     const btn = document.createElement('button');
-    btn.className = 're-hero-btn' + (sel.includes(h.normalized_name) ? ' on' : '');
+    btn.className = cls;
     const img = srcUrl(h.image_path);
-    btn.innerHTML = `${img ? `<img class="re-hero-btn-img" src="${img}" alt="">` : ''}<span>${h.eng_name || h.normalized_name}</span>`;
+    btn.innerHTML = `${img ? `<img class="re-hero-btn-img" src="${img}" alt="">` : ''}<span>${h.eng_name || name}</span>`;
     btn.addEventListener('click', () => {
-      const arr = type === 'enemy' ? RE.enemies : RE.allies;
-      const idx = arr.indexOf(h.normalized_name);
-      if (idx >= 0) arr.splice(idx, 1);
-      else if (arr.length < 3) arr.push(h.normalized_name);
+      const arr    = type === 'enemy' ? RE.enemies : RE.allies;
+      const impSet = type === 'enemy' ? RE.impactfulEnemies : RE.impactfulAllies;
+      const idx    = arr.indexOf(name);
+      if (idx < 0) {
+        arr.push(name);           // off → normal
+      } else if (!impSet.has(name)) {
+        impSet.add(name);         // normal → impactful
+      } else {
+        arr.splice(idx, 1);       // impactful → off
+        impSet.delete(name);
+      }
       renderReHeroPicker(type);
       renderReChips();
     });
@@ -937,22 +1202,27 @@ function renderReChips() {
   // Enemy / ally chips
   ['enemy', 'ally'].forEach(type => {
     const arr = type === 'enemy' ? RE.enemies : RE.allies;
+    const imp = type === 'enemy' ? RE.impactfulEnemies : RE.impactfulAllies;
     const cont = document.getElementById(`re-${type}-chips`);
     if (!cont) return;
     cont.innerHTML = '';
     arr.forEach(name => {
       const hd = S.heroList.find(h => h.normalized_name === name);
       if (!hd) return;
+      const isImp = imp.has(name);
       const chip = document.createElement('div');
-      chip.className = 're-chip';
+      chip.className = 're-chip' + (isImp ? ' re-chip-impactful' : '');
       const img = srcUrl(hd.image_path);
       chip.innerHTML = `
         ${img ? `<img class="re-chip-img" src="${img}" alt="">` : ''}
         <span class="re-chip-name">${hd.eng_name || name}</span>
+        ${isImp ? '<span class="re-chip-impact-badge">★</span>' : ''}
         <button class="re-chip-x" title="Remove">×</button>`;
       chip.querySelector('.re-chip-x').addEventListener('click', () => {
-        const a = type === 'enemy' ? RE.enemies : RE.allies;
+        const a  = type === 'enemy' ? RE.enemies : RE.allies;
+        const is = type === 'enemy' ? RE.impactfulEnemies : RE.impactfulAllies;
         a.splice(a.indexOf(name), 1);
+        is.delete(name);
         renderReHeroPicker(type);
         renderReChips();
       });
@@ -1013,34 +1283,37 @@ async function submitReverseEngineer() {
     });
     if (totalW > 0) tagCodes.forEach(t => { swRaw[t] /= totalW; });
 
-    // ── Enemy weight: top weaknesses of killed enemies, selection order = priority
-    // First selected enemy treated as "dominant" (2.5×), second 1.5×, third 1.0×.
-    // Pruned to top 4 tags so output is sparse: 1 strong value (~1.0) + 2-3 minor ones.
-    const ENEMY_PRI = [2.5, 1.5, 1.0];
+    // ── Enemy / ally influence on self_weight ───────────────────────────
+    // Normal hero: tiny baseline influence (player was in the matchup but hero wasn't the focus).
+    // Impactful hero: aggressively subtracts their counter/synergy signal so items bought
+    // specifically to answer that hero don't inflate the hero's personal self_weight.
+    const NORMAL_INF = 0.05;
+    const IMPACT_INF = 0.8;
+
     const ewRaw = {}; tagCodes.forEach(t => ewRaw[t] = 0);
     if (algo !== 'items-only' && RE.enemies.length) {
-      RE.enemies.forEach((en, i) => {
-        const ew = resolvedSrcBuildVals(en)?.enemy_weight || {};
-        const pw = ENEMY_PRI[i] ?? 1.0;
-        tagCodes.forEach(t => { ewRaw[t] += pw * Math.max(0, -(ew[t] || 0)); });
+      RE.enemies.forEach(en => {
+        const ew  = resolvedSrcBuildVals(en)?.enemy_weight || {};
+        const inf = RE.impactfulEnemies.has(en) ? IMPACT_INF : NORMAL_INF;
+        tagCodes.forEach(t => {
+          const counter = Math.max(0, -(ew[t] || 0));
+          ewRaw[t]    += inf * counter;
+          swRaw[t]    -= inf * counter;
+        });
       });
-      // subtract from self_weight — enemies countering a tag means player may have avoided it
-      const ePriSum = ENEMY_PRI.slice(0, RE.enemies.length).reduce((a, b) => a + b, 0);
-      tagCodes.forEach(t => { swRaw[t] -= Math.min(0.1, 0.04 * (ewRaw[t] / ePriSum)); });
     }
 
-    // ── Ally weight: what allies need from teammates, selection order = priority
-    const ALLY_PRI = [2.0, 1.5, 1.0];
     const awRaw = {}; tagCodes.forEach(t => awRaw[t] = 0);
     if (algo !== 'items-only' && RE.allies.length) {
-      RE.allies.forEach((al, i) => {
-        const aw = resolvedSrcBuildVals(al)?.ally_weight || {};
-        const pw = ALLY_PRI[i] ?? 1.0;
-        tagCodes.forEach(t => { awRaw[t] += pw * Math.max(0, aw[t] || 0); });
+      RE.allies.forEach(al => {
+        const aw  = resolvedSrcBuildVals(al)?.ally_weight || {};
+        const inf = RE.impactfulAllies.has(al) ? IMPACT_INF : NORMAL_INF;
+        tagCodes.forEach(t => {
+          const synergy = Math.max(0, aw[t] || 0);
+          awRaw[t]    += inf * synergy;
+          swRaw[t]    -= inf * synergy;
+        });
       });
-      // subtract from self_weight — ally covering a tag means player needed it less
-      const aPriSum = ALLY_PRI.slice(0, RE.allies.length).reduce((a, b) => a + b, 0);
-      tagCodes.forEach(t => { swRaw[t] -= Math.min(0.1, 0.03 * (awRaw[t] / aPriSum)); });
     }
 
     // ── Normalize + prune: keep top N tags, scale so peak ≈ maxCap ───────
@@ -1424,7 +1697,7 @@ const MATCH = {
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
-  bpAlgo: 'cosine',
+  bpAlgo: 'lookahead',
   scoreFormula: 'v2',
 };
 
@@ -2973,6 +3246,59 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     return (upgradesTo[k] || []).some(u => owned.has(u));
   }
 
+  // ── Build-level constraints (signature / required / blacklist / counter slots) ──
+  const SIG_MULT             = 1.5;   // sig/required boost for greedyMain (greedy/marginal/cosine/lookahead)
+  const SIG_MULT_STRONG      = 2.0;   // stronger boost for non-greedy algos (beam/expert/assassin/hybrid)
+                                      // — needed because their cosine-style scoring dampens overlapping tags.
+  const REQ_STICKY_MULT      = 1.5;   // sell-swap stickiness for required items
+  const COUNTER_TAG_THRESH   = 0.3;   // item.values.counter_importance > X → counter item
+  const COUNTER_FORCE_FRAC   = 0.5;   // soft-min: force counter buy only if its score ≥ X × best non-counter
+  const COUNTER_BOOST_LOW    = 1.8;   // in-loop multiplier for counter items when below this phase's min
+  const DEFAULT_COUNTER_SLOTS = [[0,1],[0,2],[1,2],[2,3],[2,4]];  // Lane, Early, Mid, Late, Extra Late
+
+  // Resolve constraints through the follow chain (inherited items + own additions − exclusions).
+  // Falls back to the raw build object's own fields when hero data isn't loaded.
+  const _hbList = MATCH.heroData[b.heroName]?.builds || null;
+  const _ownBuild = _hbList ? (_hbList[b.buildIdx] || _hbList.find(hb => hb.name === b.name)) : null;
+  const _bcResolved = (_hbList && _ownBuild)
+    ? resolveBuildConstraints(_ownBuild, _hbList)
+    : {
+        signature_items: new Set(b.signature_items || []),
+        required_items:  new Set(b.required_items  || []),
+        blacklist_items: new Set(b.blacklist_items || []),
+        counter_phase_slots: DEFAULT_COUNTER_SLOTS.map((d, i) => {
+          const u = (b.counter_phase_slots || [])[i];
+          if (!Array.isArray(u)) return d;
+          const lo = (u[0] === null || u[0] === undefined || u[0] === '') ? d[0] : Number(u[0]);
+          const hi = (u[1] === null || u[1] === undefined || u[1] === '') ? d[1] : Number(u[1]);
+          return [Number.isFinite(lo) ? lo : d[0], Number.isFinite(hi) ? hi : d[1]];
+        }),
+      };
+  const signatureSet = _bcResolved.signature_items;
+  const requiredSet  = _bcResolved.required_items;
+  const blacklistSet = _bcResolved.blacklist_items;
+  const counterSlots = _bcResolved.counter_phase_slots;
+
+  function isCounterItem(it) {
+    return (it?.values?.counter_importance || 0) > COUNTER_TAG_THRESH;
+  }
+  function itemBoostMult(k) {
+    return (signatureSet.has(k) || requiredSet.has(k)) ? SIG_MULT : 1.0;
+  }
+  // Stronger boost for non-greedy algorithms whose cosine-style scoring otherwise
+  // dampens signature/required items via tag-coverage saturation.
+  function itemBoostMultStrong(k) {
+    return (signatureSet.has(k) || requiredSet.has(k)) ? SIG_MULT_STRONG : 1.0;
+  }
+  function isFlaggedItem(k) {
+    return signatureSet.has(k) || requiredSet.has(k);
+  }
+  function countCounterItems(ownedSet) {
+    let n = 0;
+    ownedSet.forEach(k => { if (isCounterItem(scoredMap[k])) n++; });
+    return n;
+  }
+
   // Budget to acquire k from current state.
   // When no prereqs are owned: = item.tier (prereq cost + upgrade cost nets to item.tier).
   // When some prereqs are owned: = item.tier − (sum of owned prereq tiers).
@@ -3064,41 +3390,20 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
     } else {
       const enemyAvg = bpAvgRsvVec(myEnemies, 'enemy_weight');
-      if (algo === 'cosine-match') {
-        const allyAvg  = bpAvgRsvVec(myAllies,  'ally_weight');
-        const guide = {};
-        tagKeys.forEach(t => {
-          const ea = enemyAvg[t] || 0;
-          guide[t] = Math.max(0,
-            (rv.self_weight?.[t] || 0)
-            + COSINE_MATCH_MULT * (allyAvg[t] || 0)
-            + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_ENEMY_MULT)
-          );
-        });
-        _cosineGuide = guide;
-        if (_bpDbg) {
-          _bpDbg.guide      = guide;
-          _bpDbg.selfWeight = rv.self_weight || {};
-          _bpDbg.allyAvg    = allyAvg;
-          _bpDbg.enemyAvg   = enemyAvg;
-          _bpDbg.guideMeta  = { myAllies, myEnemies };
-        }
-      } else {
-        const guide = {};
-        tagKeys.forEach(t => {
-          const ea = enemyAvg[t] || 0;
-          guide[t] = Math.max(0,
-            (rv.self_weight?.[t] || 0)
-            + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_MATCH_MULT)
-          );
-        });
-        _cosineGuide = guide;
-        if (_bpDbg) {
-          _bpDbg.guide      = guide;
-          _bpDbg.selfWeight = rv.self_weight || {};
-          _bpDbg.enemyAvg   = enemyAvg;
-          _bpDbg.guideMeta  = { myAllies, myEnemies };
-        }
+      const guide = {};
+      tagKeys.forEach(t => {
+        const ea = enemyAvg[t] || 0;
+        guide[t] = Math.max(0,
+          (rv.self_weight?.[t] || 0)
+          + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_MATCH_MULT)
+        );
+      });
+      _cosineGuide = guide;
+      if (_bpDbg) {
+        _bpDbg.guide      = guide;
+        _bpDbg.selfWeight = rv.self_weight || {};
+        _bpDbg.enemyAvg   = enemyAvg;
+        _bpDbg.guideMeta  = { myAllies, myEnemies };
       }
     }
     return _cosineGuide;
@@ -3132,8 +3437,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       itemContrib[t] = (it.values?.[t] || 0) * (guide[t] || 0);
     });
 
-    // cosine-match + adaptive: scale item vector by assist/counter importance tags.
-    if (algo === 'cosine-match' || algo === 'adaptive') {
+    // adaptive: scale item vector by assist/counter importance tags.
+    if (algo === 'adaptive') {
       const assistImp  = Math.max(0, it.values?.assist_importance  || 0);
       const counterImp = Math.max(0, it.values?.counter_importance || 0);
       if (assistImp > 0 || counterImp > 0) {
@@ -3150,12 +3455,19 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // deficitMult[t] = 1 / (1 + coverage) → 1.0 when empty, never reaches 0.
     // Items that fill undercovered tags score higher; but high-contrib items in
     // well-covered tags still score well because itemContrib[t] is large.
+    // Signature/required items bypass deficit dampening — they're part of the
+    // build identity and shouldn't be penalised for tag-overlap with other picks.
+    const flaggedItem = isFlaggedItem(k);
     let baseScore = 0;
     tagKeys.forEach(t => {
       if (SKIP_TAGS.has(t) || (guide[t] || 0) <= 0) return;
-      const coverage    = invContrib[t] / (guide[t] * soulScale);
-      const deficitMult = 1 / (1 + coverage);
-      baseScore += (itemContrib[t] || 0) * deficitMult;
+      if (flaggedItem) {
+        baseScore += (itemContrib[t] || 0);
+      } else {
+        const coverage    = invContrib[t] / (guide[t] * soulScale);
+        const deficitMult = 1 / (1 + coverage);
+        baseScore += (itemContrib[t] || 0) * deficitMult;
+      }
     });
 
     // Phase-aware tier preference (same table as greedy).
@@ -3172,12 +3484,17 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     (upgradesTo[k] || []).forEach(uk => {
       const upgrade = scoredMap[uk];
       if (!upgrade) return;
+      const flaggedUpg = isFlaggedItem(uk);
       let upgradeScore = 0;
       tagKeys.forEach(t => {
         if (SKIP_TAGS.has(t) || (guide[t] || 0) <= 0) return;
-        const coverage    = invContrib[t] / (guide[t] * soulScale);
-        const deficitMult = 1 / (1 + coverage);
-        upgradeScore += (upgrade.values?.[t] || 0) * (guide[t] || 0) * deficitMult;
+        if (flaggedUpg) {
+          upgradeScore += (upgrade.values?.[t] || 0) * (guide[t] || 0);
+        } else {
+          const coverage    = invContrib[t] / (guide[t] * soulScale);
+          const deficitMult = 1 / (1 + coverage);
+          upgradeScore += (upgrade.values?.[t] || 0) * (guide[t] || 0) * deficitMult;
+        }
       });
       const testOwned = new Set([...owned, k]);
       const upgCost   = Math.max(0, chainCost(uk, testOwned));
@@ -3189,12 +3506,15 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Main greedy for one phase ─────────────────────────────────────────────
-  function greedyMain(ownedIn, budget, maxSlots, minSlots, phaseName, maxSells, scoreFn, sellThreshold = 2.0) {
+  // phaseIdx: index into counterSlots (0=Lane … 4=Extra Late). Used for counter min/max.
+  function greedyMain(ownedIn, budget, maxSlots, minSlots, phaseName, maxSells, scoreFn, sellThreshold = 2.0, phaseIdx = 0) {
     const owned       = new Set(ownedIn);
     let   remaining   = budget;
     const changes     = [];
     const soldInPhase = new Set();   // items sold this phase — never re-buy
     let   sellCount   = 0;
+
+    const [counterMin, counterMax] = counterSlots[phaseIdx] || [0, 99];
 
     const _dbgPhase = _bpDbg ? { phaseName, steps: [], swaps: [] } : null;
     if (_bpDbg) _bpDbg.phases.push(_dbgPhase);
@@ -3202,23 +3522,64 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     for (let iter = 0; iter < 100; iter++) {
       const slots   = owned.size;
       const filling = slots < minSlots;
+      const counterCount = countCounterItems(owned);
+      const belowMin     = counterCount < counterMin;
+      const atMax        = counterCount >= counterMax;
+
+      // Required items: force-buy as soon as affordable. Required items HAVE to make
+      // it in (or be consumed as a component). Cheapest unsatisfied first so the
+      // constraint locks early; OK if an upgrade later consumes the component.
+      const unsatReq = [...requiredSet]
+        .filter(k => !owned.has(k) && !consumedComponents.has(k) && !blacklistSet.has(k) && !soldInPhase.has(k) && !isSubsumed(k, owned))
+        .map(k => ({ k, cost: chainCost(k, owned) }))
+        .filter(({ cost }) => cost > 0 && cost <= remaining && slots + 1 <= maxSlots)
+        .sort((a, b) => a.cost - b.cost);
+      if (unsatReq.length) {
+        const forcedKey = unsatReq[0].k;
+        const beforeLen = changes.length;
+        remaining -= emitChain(forcedKey, owned, changes);
+        if (changes.length > beforeLen) changes[changes.length - 1].forcedRequired = true;
+        continue;
+      }
+
       let bestKey = null, bestVal = -Infinity;
+      let bestNonCounterKey = null, bestNonCounterVal = -Infinity;  // for soft-min force decision
+      let bestCounterKey = null, bestCounterVal = -Infinity;
       const altCands = []; // top runners-up sorted by val
       const _dbgCands = _dbgPhase ? [] : null;
 
       for (const k of Object.keys(scoredMap)) {
         const it = scoredMap[k];
+        if (blacklistSet.has(k)) continue;
         if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumedComponents.has(k)) continue;
         const cost = chainCost(k, owned);
         if (cost <= 0 || cost > remaining || slots + 1 > maxSlots) continue;
-        const ps = scoreFn(k, it, phaseName, owned);
+        const isCtr = isCounterItem(it);
+        if (atMax && isCtr) continue;   // hard cap on counters this phase
+        let ps = scoreFn(k, it, phaseName, owned) * itemBoostMult(k);
         if (ps <= 0) continue;
+        if (belowMin && isCtr) ps *= COUNTER_BOOST_LOW;  // in-loop counter push when below min
         // Fill mode: phase-score per soul spent (prefers cheap, phase-appropriate items)
         // Quality mode: absolute phase-score
         const val = filling ? (ps / cost) : ps;
         if (val > bestVal) { bestVal = val; bestKey = k; }
+        if (isCtr) {
+          if (val > bestCounterVal) { bestCounterVal = val; bestCounterKey = k; }
+        } else if (val > bestNonCounterVal) {
+          bestNonCounterVal = val; bestNonCounterKey = k;
+        }
         altCands.push({ k, val });
         if (_dbgCands) _dbgCands.push({ key: k, ps, cost, val });
+      }
+
+      // Soft-min force: if below counter min and best pick is non-counter, prefer the best
+      // counter only when its score is at least COUNTER_FORCE_FRAC × the non-counter alternative.
+      if (belowMin && bestCounterKey && bestKey !== bestCounterKey) {
+        const ref = bestNonCounterVal > 0 ? bestNonCounterVal : bestVal;
+        if (bestCounterVal >= ref * COUNTER_FORCE_FRAC) {
+          bestKey = bestCounterKey;
+          bestVal = bestCounterVal;
+        }
       }
 
       if (bestKey) {
@@ -3244,7 +3605,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         let worstKey = null, worstPS = Infinity;
         owned.forEach(k => {
           if (soldInPhase.has(k)) return;
-          const ps = scoredMap[k] ? scoreFn(k, scoredMap[k], phaseName, owned) : 0;
+          let ps = scoredMap[k] ? scoreFn(k, scoredMap[k], phaseName, owned) * itemBoostMult(k) : 0;
+          // Required items get a stickiness multiplier — harder to displace.
+          if (requiredSet.has(k)) ps *= REQ_STICKY_MULT;
           if (ps < worstPS) { worstPS = ps; worstKey = k; }
         });
         if (!worstKey) break;
@@ -3252,14 +3615,21 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const refund     = Math.floor((bpItemMap[worstKey]?.tier ?? 0) / 2);
         const testOwned  = new Set(owned); testOwned.delete(worstKey);
         const testBudget = remaining + refund;
+        const wouldDropCounter = isCounterItem(scoredMap[worstKey]);
 
         let swapKey = null, swapPS = -Infinity;
         for (const k of Object.keys(scoredMap)) {
           const it = scoredMap[k];
+          if (blacklistSet.has(k)) continue;
           if (testOwned.has(k) || isSubsumed(k, testOwned) || soldInPhase.has(k)) continue;
           const cost = chainCost(k, testOwned);
           if (cost <= 0 || cost > testBudget || testOwned.size + 1 > maxSlots) continue;
-          const ps = scoreFn(k, it, phaseName, testOwned);
+          // Don't swap into a counter if we're already at max (counting after the prospective sell)
+          const projectedCounters = countCounterItems(testOwned) + (isCounterItem(it) ? 1 : 0);
+          if (projectedCounters > counterMax) continue;
+          // Don't sell the only counter when below min unless replacing with another counter
+          if (wouldDropCounter && !isCounterItem(it) && (counterCount - 1) < counterMin) continue;
+          const ps = scoreFn(k, it, phaseName, testOwned) * itemBoostMult(k);
           if (ps > swapPS) { swapPS = ps; swapKey = k; }
         }
 
@@ -3410,15 +3780,21 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       let remaining = budget;
       const changes = [], soldInPhase = new Set();
       let sellCount = 0;
+      const bsPhaseIdx = BUILD_PHASES.indexOf(phase);
+      const [, bsCounterMax] = counterSlots[bsPhaseIdx] || [0, 99];
       for (let iter = 0; iter < 100; iter++) {
         const slots = owned.size, filling = slots < phase.minSlots;
+        const bsCtrCount = countCounterItems(owned);
+        const bsAtMax    = bsCtrCount >= bsCounterMax;
         let bestKey = null, bestVal = -Infinity;
         const bsAltCands = [];
         for (const k of Object.keys(scoredMap)) {
+          if (blacklistSet.has(k)) continue;
           if (owned.has(k) || isSubsumed(k, owned) || soldInPhase.has(k) || consumed.has(k)) continue;
           const cost = chainCost(k, owned);
           if (cost <= 0 || cost > remaining || slots + 1 > phase.totalSlots) continue;
-          const ps = scorerFn(k, scoredMap[k], phase.name);
+          if (bsAtMax && isCounterItem(scoredMap[k])) continue;
+          const ps = scorerFn(k, scoredMap[k], phase.name) * itemBoostMultStrong(k);
           if (ps <= 0) continue;
           const val = filling ? (ps / cost) : ps;
           if (val > bestVal) { bestVal = val; bestKey = k; }
@@ -3435,7 +3811,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           let worstKey = null, worstPS = Infinity;
           owned.forEach(k => {
             if (soldInPhase.has(k)) return;
-            const ps = scoredMap[k] ? scorerFn(k, scoredMap[k], phase.name) : 0;
+            let ps = scoredMap[k] ? scorerFn(k, scoredMap[k], phase.name) * itemBoostMultStrong(k) : 0;
+            if (requiredSet.has(k)) ps *= REQ_STICKY_MULT;
             if (ps < worstPS) { worstPS = ps; worstKey = k; }
           });
           if (!worstKey) break;
@@ -3443,10 +3820,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const testOwned = new Set(owned); testOwned.delete(worstKey);
           let swapKey = null, swapPS = -Infinity;
           for (const k of Object.keys(scoredMap)) {
+            if (blacklistSet.has(k)) continue;
             if (testOwned.has(k) || isSubsumed(k, testOwned) || soldInPhase.has(k)) continue;
             const cost = chainCost(k, testOwned);
             if (cost <= 0 || cost > remaining + refund || testOwned.size + 1 > phase.totalSlots) continue;
-            const ps = scorerFn(k, scoredMap[k], phase.name);
+            if (isCounterItem(scoredMap[k]) && (countCounterItems(testOwned) + 1 > bsCounterMax)) continue;
+            const ps = scorerFn(k, scoredMap[k], phase.name) * itemBoostMultStrong(k);
             if (ps > swapPS) { swapPS = ps; swapKey = k; }
           }
           if (swapKey && swapPS > worstPS * 2.5) {
@@ -3584,17 +3963,24 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // deficitMult[t] = 1/(1 + invContrib[t]/(guide[t]*soulScale))
     // Items that fill undercovered tags score higher; coverage grows with soulScale
     // so the guide's "appetite" expands with income, preventing premature saturation.
-    function egDeficit(it, invContrib, soulScale) {
+    // When `k` is signature/required the deficit term is bypassed — flagged items
+    // get full credit even when their tags overlap existing inventory.
+    function egDeficit(k, it, invContrib, soulScale) {
+      const flagged = isFlaggedItem(k);
       let s = 0;
       tagKeys.forEach(t => {
         if (SKIP_TAGS.has(t) || !(guide[t] > 0)) return;
-        const cov = (invContrib[t]||0) / (guide[t] * soulScale);
-        s += (it.values?.[t]||0) * guide[t] * (1 / (1 + cov));
+        if (flagged) {
+          s += (it.values?.[t]||0) * guide[t];
+        } else {
+          const cov = (invContrib[t]||0) / (guide[t] * soulScale);
+          s += (it.values?.[t]||0) * guide[t] * (1 / (1 + cov));
+        }
       });
       return Math.max(0, s);
     }
     function egScore(k, it, invContrib, soulScale) {
-      return egDeficit(it, invContrib, soulScale) * egTierMult(k);
+      return egDeficit(k, it, invContrib, soulScale) * egTierMult(k);
     }
     // Marginal for upgrades: net gain above the consumed component
     function egMarginal(k, it, invContrib, soulScale) {
@@ -3626,9 +4012,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       });
 
       // Find best affordable item
+      const egPhaseIdx     = PHASE_NAMES.indexOf(phaseName);
+      const [, egCounterMax] = counterSlots[egPhaseIdx] || [0, 99];
+      const egCtrCount     = countCounterItems(owned);
+      const egAtMax        = egCtrCount >= egCounterMax;
       let bestKey = null, bestScore = -Infinity;
       const egAltCands = [];
       for (const k of Object.keys(scoredMap)) {
+        if (blacklistSet.has(k)) continue;
         if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
         if (isSubsumed(k, owned)) continue;
         if ((bpItemMap[k]?.upgrades_from||[]).some(c => !owned.has(c) && sold.has(c))) continue;
@@ -3637,12 +4028,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const hasComp = (bpItemMap[k]?.upgrades_from||[]).some(c => owned.has(c));
         if (!hasComp && owned.size >= maxSlots) continue;
         const it = scoredMap[k];
-        let s = hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale);
+        if (egAtMax && isCounterItem(it)) continue;
+        let s = (hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale)) * itemBoostMultStrong(k);
         // Path value: bonus for components that unlock a strong next-tier upgrade
         if (futureW > 0.01) {
           (upgradesTo[k]||[]).forEach(uk => {
             const upgIt = scoredMap[uk]; if (!upgIt) return;
-            const upgS    = egDeficit(upgIt, invContrib, soulScale) * egTierMult(uk);
+            const upgS    = egDeficit(uk, upgIt, invContrib, soulScale) * egTierMult(uk);
             const upgCost = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0));
             const ticksAway = upgCost > 0 ? upgCost / 1500 : 0;
             s += futureW * upgS * Math.exp(-0.12 * ticksAway);
@@ -3665,7 +4057,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         let worstKey = null, worstS = Infinity;
         owned.forEach(k => {
           if (!scoredMap[k]) return;
-          const s = egScore(k, scoredMap[k], invContrib, soulScale);
+          let s = egScore(k, scoredMap[k], invContrib, soulScale) * itemBoostMultStrong(k);
+          if (requiredSet.has(k)) s *= REQ_STICKY_MULT;
           if (s < worstS) { worstS = s; worstKey = k; }
         });
         if (worstKey) {
@@ -3674,12 +4067,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const tmpSold = new Set([...sold, worstKey]);
           let swapKey = null, swapS = -Infinity;
           for (const k of Object.keys(scoredMap)) {
+            if (blacklistSet.has(k)) continue;
             if (tmpOwnd.has(k)||tmpSold.has(k)||consumed.has(k)) continue;
             if (isSubsumed(k, tmpOwnd)) continue;
             if ((bpItemMap[k]?.upgrades_from||[]).some(c => !tmpOwnd.has(c) && tmpSold.has(c))) continue;
             const cost = chainCost(k, tmpOwnd);
             if (cost <= 0 || cost > remaining + refund) continue;
-            const s = egScore(k, scoredMap[k], invContrib, soulScale);
+            if (isCounterItem(scoredMap[k]) && (countCounterItems(tmpOwnd) + 1 > egCounterMax)) continue;
+            const s = egScore(k, scoredMap[k], invContrib, soulScale) * itemBoostMultStrong(k);
             if (s > swapS) { swapS = s; swapKey = k; }
           }
           if (swapKey && swapS > worstS * 4.5) {
@@ -3898,15 +4293,20 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     let remaining = 0, totalEarned = 0;
     const changes = { Lane:[], Early:[], Mid:[], Late:[], 'Extra Late':[] };
 
-    function egDeficit(it, invContrib, soulScale) {
+    function egDeficit(k, it, invContrib, soulScale) {
+      const flagged = isFlaggedItem(k);
       let s = 0;
       tagKeys.forEach(t => {
         if (SKIP_TAGS.has(t) || !(guide[t] > 0)) return;
-        s += (it.values?.[t]||0) * guide[t] * (1 / (1 + (invContrib[t]||0) / (guide[t] * soulScale)));
+        if (flagged) {
+          s += (it.values?.[t]||0) * guide[t];
+        } else {
+          s += (it.values?.[t]||0) * guide[t] * (1 / (1 + (invContrib[t]||0) / (guide[t] * soulScale)));
+        }
       });
       return Math.max(0, s);
     }
-    function egScore(k, it, ic, ss) { return egDeficit(it, ic, ss) * egTierMult(k); }
+    function egScore(k, it, ic, ss) { return egDeficit(k, it, ic, ss) * egTierMult(k); }
     function egMarginal(k, it, ic, ss) {
       return Math.max(0, egScore(k, it, ic, ss) - (bpItemMap[k]?.upgrades_from||[]).filter(c => owned.has(c) && scoredMap[c]).reduce((s, c) => s + egScore(c, scoredMap[c], ic, ss), 0));
     }
@@ -3920,8 +4320,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       tagKeys.forEach(t => { invContrib[t] = 0; });
       owned.forEach(k => { const it = scoredMap[k]; if (it) tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) invContrib[t] += (it.values?.[t]||0) * (guide[t]||0); }); });
 
+      const taPhaseIdx = PHASE_NAMES.indexOf(phaseName);
+      const [, taCounterMax] = counterSlots[taPhaseIdx] || [0, 99];
+      const taAtMax = countCounterItems(owned) >= taCounterMax;
       let bestKey = null, bestScore = -Infinity;
       for (const k of Object.keys(scoredMap)) {
+        if (blacklistSet.has(k)) continue;
         if (owned.has(k)||sold.has(k)||consumed.has(k)) continue;
         if (isSubsumed(k, owned)) continue;
         if ((bpItemMap[k]?.upgrades_from||[]).some(c => !owned.has(c) && sold.has(c))) continue;
@@ -3930,10 +4334,11 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const hasComp = (bpItemMap[k]?.upgrades_from||[]).some(c => owned.has(c));
         if (!hasComp && owned.size >= maxSlots) continue;
         const it = scoredMap[k];
-        let s = hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale);
+        if (taAtMax && isCounterItem(it)) continue;
+        let s = (hasComp ? egMarginal(k, it, invContrib, soulScale) : egScore(k, it, invContrib, soulScale)) * itemBoostMultStrong(k);
         if (futureW > 0.01) (upgradesTo[k]||[]).forEach(uk => {
           const upgIt = scoredMap[uk]; if (!upgIt) return;
-          const upgS = egDeficit(upgIt, invContrib, soulScale) * egTierMult(uk);
+          const upgS = egDeficit(uk, upgIt, invContrib, soulScale) * egTierMult(uk);
           const ticksAway = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0)) / 1500;
           s += futureW * upgS * Math.exp(-0.12 * ticksAway);
         });
@@ -3944,19 +4349,26 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       // Sell threshold 4.0× — more willing to swap for a better kill item
       if (owned.size >= maxSlots) {
         let worstKey = null, worstS = Infinity;
-        owned.forEach(k => { if (!scoredMap[k]) return; const s = egScore(k, scoredMap[k], invContrib, soulScale); if (s < worstS) { worstS = s; worstKey = k; } });
+        owned.forEach(k => {
+          if (!scoredMap[k]) return;
+          let s = egScore(k, scoredMap[k], invContrib, soulScale) * itemBoostMultStrong(k);
+          if (requiredSet.has(k)) s *= REQ_STICKY_MULT;
+          if (s < worstS) { worstS = s; worstKey = k; }
+        });
         if (worstKey) {
           const refund = Math.floor((bpItemMap[worstKey]?.tier??0) / 2);
           const tmpOwnd = new Set(owned); tmpOwnd.delete(worstKey);
           const tmpSold = new Set([...sold, worstKey]);
           let swapKey = null, swapS = -Infinity;
           for (const k of Object.keys(scoredMap)) {
+            if (blacklistSet.has(k)) continue;
             if (tmpOwnd.has(k)||tmpSold.has(k)||consumed.has(k)) continue;
             if (isSubsumed(k, tmpOwnd)) continue;
             if ((bpItemMap[k]?.upgrades_from||[]).some(c => !tmpOwnd.has(c) && tmpSold.has(c))) continue;
             const cost = chainCost(k, tmpOwnd);
             if (cost <= 0 || cost > remaining + refund) continue;
-            const s = egScore(k, scoredMap[k], invContrib, soulScale);
+            if (isCounterItem(scoredMap[k]) && (countCounterItems(tmpOwnd) + 1 > taCounterMax)) continue;
+            const s = egScore(k, scoredMap[k], invContrib, soulScale) * itemBoostMultStrong(k);
             if (s > swapS) { swapS = s; swapKey = k; }
           }
           if (swapKey && swapS > worstS * 4.0) {
@@ -4221,6 +4633,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       const maxSlots  = TICK_MAX_SLOTS[Math.min(tick, TICK_MAX_SLOTS.length - 1)];
       const phaseName = TICK_PHASE[tick];
       const g         = guideAt(tick);
+      const hrPhaseIdx = PHASE_NAMES.indexOf(phaseName);
+      const [, hrCounterMax] = counterSlots[hrPhaseIdx] || [0, 99];
 
       beams.forEach(bm => { bm.remaining += income; });
 
@@ -4230,9 +4644,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         // Option: hold (no purchase this tick)
         candidates.push({ bm, _h: candidateScore(bm, tick) });
 
+        const bmAtCtrMax = countCounterItems(bm.owned) >= hrCounterMax;
+
         // Score all items (affordable = raw score; unaffordable = score / ticksAway)
         const ranked = [];
         for (const k of Object.keys(scoredMap)) {
+          if (blacklistSet.has(k)) continue;
           if (bm.owned.has(k) || bm.sold.has(k) || bm.consumed.has(k)) continue;
           if (isSubsumed(k, bm.owned)) continue;
           // Never buy an item whose unowned component was previously sold
@@ -4240,8 +4657,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const cost = chainCost(k, bm.owned);
           if (cost <= 0) continue;
           const it = scoredMap[k];
+          if (bmAtCtrMax && isCounterItem(it)) continue;
           const hasComp = (bpItemMap[k]?.upgrades_from || []).some(c => bm.owned.has(c));
-          const base = hasComp ? hrMarginal(k, it, g, bm.owned) : hrScore(k, it, g);
+          const base = (hasComp ? hrMarginal(k, it, g, bm.owned) : hrScore(k, it, g)) * itemBoostMultStrong(k);
           if (base <= 0) continue;
           const tAway = hrTicksAway(k, bm.owned, bm.remaining, tick);
           ranked.push({ k, adj: tAway > 0 ? base / tAway : base, tAway });
@@ -4267,7 +4685,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           let worstKey = null, worstS = Infinity;
           bm.owned.forEach(k => {
             if (!scoredMap[k]) return;
-            const s = hrScore(k, scoredMap[k], g);
+            let s = hrScore(k, scoredMap[k], g) * itemBoostMultStrong(k);
+            if (requiredSet.has(k)) s *= REQ_STICKY_MULT;
             if (s < worstS) { worstS = s; worstKey = k; }
           });
           if (worstKey) {
@@ -4278,12 +4697,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
             nb.changes[phaseName].push({ action: 'sell', key: worstKey, refund });
             let swapKey = null, swapS = -Infinity;
             for (const k of Object.keys(scoredMap)) {
+              if (blacklistSet.has(k)) continue;
               if (nb.owned.has(k) || nb.sold.has(k) || nb.consumed.has(k)) continue;
               if (isSubsumed(k, nb.owned)) continue;
               if ((bpItemMap[k]?.upgrades_from || []).some(c => !nb.owned.has(c) && nb.sold.has(c))) continue;
               const cost = chainCost(k, nb.owned);
               if (cost <= 0 || cost > nb.remaining) continue;
-              const s = hrScore(k, scoredMap[k], g);
+              if (isCounterItem(scoredMap[k]) && (countCounterItems(nb.owned) + 1 > hrCounterMax)) continue;
+              const s = hrScore(k, scoredMap[k], g) * itemBoostMultStrong(k);
               if (s > swapS) { swapS = s; swapKey = k; }
             }
             if (swapKey && swapS > worstS * SELL_THRESHOLD) {
@@ -4327,15 +4748,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
   // ── Phase loop ─────────────────────────────────────────────────────────────
   if (algo === 'expert')    return runExpertGreedy();
-  if (algo === 'strengths') return runPlayToStrengths();
   if (algo === 'assassin')  return runTargetAssassin();
   if (algo === 'adaptive') return runHybridRotation('adaptive');
   if (algo === 'fusion')   return runHybridRotation('fusion');
   if (algo === 'oracle')   return runHybridRotation('oracle');
-  if (algo === 'cyclic')   return runHybridRotation('cyclic');
   if (algo === 'beam')     return runBeamSearch();
 
-  const useCosine = algo === 'cosine' || algo === 'cosine-match';
+  const useCosine = algo === 'cosine';
 
   // Pass 1: run all main-path phases to get the complete purchase list.
   let owned = new Set();
@@ -4343,7 +4762,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   let totalEarned     = 0;
   const mainPhaseData = [];
 
-  for (const phase of BUILD_PHASES) {
+  for (let phaseIdx = 0; phaseIdx < BUILD_PHASES.length; phaseIdx++) {
+    const phase = BUILD_PHASES[phaseIdx];
     remainingBudget += phase.addBudget;
     totalEarned     += phase.addBudget;
     const te = totalEarned;
@@ -4355,7 +4775,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
                             (_k, it, pn)    => bpScore(it, pn);
 
     const { changes, owned: newOwned, remaining: newBudget } =
-      greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells, phaseScorerFn, useCosine ? 3.5 : 2.0);
+      greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells, phaseScorerFn, useCosine ? 3.5 : 2.0, phaseIdx);
     owned           = newOwned;
     remainingBudget = newBudget;
     mainPhaseData.push({ phase, changes });
@@ -4839,16 +5259,13 @@ const BP_ALGO_OPTIONS = [
   { value: 'greedy-phase', label: 'Greedy (Phase)' },
   { value: 'marginal',     label: 'Marginal Value' },
   { value: 'cosine',       label: 'Cosine Deficit' },
-  { value: 'cosine-match', label: 'Cosine Match' },
   { value: 'beam',         label: 'Beam Search' },
   { value: 'lookahead',    label: '1-Step Lookahead' },
   { value: 'expert',       label: 'Expert Greedy' },
-  { value: 'strengths',    label: 'Play to Strengths' },
   { value: 'assassin',     label: 'Target Assassin' },
   { value: 'adaptive',     label: 'Hybrid Rotation' },
   { value: 'fusion',       label: 'Fusion (Best of All)' },
   { value: 'oracle',       label: 'Oracle (Deep/Slow)' },
-  { value: 'cyclic',       label: 'Cyclic Focus' },
 ];
 
 const QA = {

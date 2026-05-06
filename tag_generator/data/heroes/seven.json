@@ -376,6 +376,13 @@
       "followed_build": "General",
       "name": "Ball",
       "normalized_build_name": "seven_ball",
+      "required_items": [
+        "rapid_recharge",
+        "extra_charge"
+      ],
+      "signature_items": [
+        "trophy_collector"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1120,6 +1127,13 @@
       "followed_build": "General",
       "name": "Power Surge",
       "normalized_build_name": "seven_power_surge",
+      "required_items": [
+        "duration_extender"
+      ],
+      "signature_items": [
+        "ballistic_enchantment",
+        "escalating_exposure"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1403,7 +1417,7 @@
           "aoe_cluster": 0,
           "assist_importance": -0.15,
           "away_from_team": 0.1,
-          "bullet_damage": 0.55,
+          "bullet_damage": 0.66,
           "bullet_evasion": 0.1,
           "bullet_lifesteal": 0.25,
           "bullet_proc": 0.45,
@@ -1489,9 +1503,34 @@
     },
     {
       "build_description_eng": "",
+      "counter_phase_slots": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          5
+        ]
+      ],
       "followed_build": "Farmer",
       "name": "Ult",
       "normalized_build_name": "seven_ult",
+      "signature_items_excluded": [
+        "ballistic_enchantment"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1857,13 +1896,22 @@
           "ult_focused": 2,
           "vertical_mobility": 0.3
         }
-      }
+      },
+      "required_items": [
+        "unstoppable"
+      ],
+      "signature_items": [
+        "mystic_expansion"
+      ]
     },
     {
       "build_description_eng": "",
       "followed_build": "Power Surge",
       "name": "Farmer",
       "normalized_build_name": "seven_farmer",
+      "required_items": [
+        "superior_cooldown"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
