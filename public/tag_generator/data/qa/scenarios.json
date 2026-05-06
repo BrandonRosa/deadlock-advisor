@@ -176,5 +176,43 @@
       "cyclic"
     ],
     "heroNotes": {}
+  },
+  {
+    "id": "2a184335-fe8c-427a-ba3e-15c8733f0eaa",
+    "name": "Gun Talon Win",
+    "created_at": "2026-05-06T06:18:37.271308",
+    "allies": [
+      "paige",
+      "shiv",
+      "grey_talon",
+      "seven",
+      "dynamo"
+    ],
+    "enemies": [
+      "lash",
+      "vindicta",
+      "rem",
+      "celeste",
+      "pocket"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "cosine-match",
+      "beam",
+      "lookahead",
+      "expert",
+      "strengths",
+      "assassin",
+      "adaptive",
+      "fusion",
+      "oracle",
+      "cyclic"
+    ],
+    "heroNotes": {
+      "grey_talon": "Check Gun Carry Talon.."
+    }
   }
 ]
