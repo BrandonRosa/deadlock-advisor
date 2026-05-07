@@ -377,5 +377,11 @@
   "image_path": "/resources/heroes/silver/portrait_silver.png",
   "mini_image_path": "/resources/heroes/silver/mini_icon_silver.png",
   "normalized_name": "silver",
-  "wiki_url": "https://deadlock.wiki/Silver"
+  "wiki_url": "https://deadlock.wiki/Silver",
+  "colors": [
+    "tan",
+    "orange",
+    "black"
+  ],
+  "search_terms": []
 }

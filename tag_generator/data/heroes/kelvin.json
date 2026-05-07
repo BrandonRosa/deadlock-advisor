@@ -377,5 +377,10 @@
   "image_path": "/resources/heroes/kelvin/portrait_kelvin.png",
   "mini_image_path": "/resources/heroes/kelvin/mini_icon_kelvin.png",
   "normalized_name": "kelvin",
-  "wiki_url": "https://deadlock.wiki/Kelvin"
+  "wiki_url": "https://deadlock.wiki/Kelvin",
+  "colors": [
+    "orange",
+    "white"
+  ],
+  "search_terms": []
 }

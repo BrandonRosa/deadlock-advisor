@@ -4,17 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deadlock Tag Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <!-- ── Sidebar ─────────────────────────────────────────────── -->
   <nav id="sidebar">
-    <div class="sidebar-logo">⚡ TAG GEN</div>
-    <button class="nav-btn active" data-page="heroes">🦸 Heroes</button>
-    <button class="nav-btn" data-page="items">⚔️ Items</button>
-    <button class="nav-btn" data-page="tags">🏷️ Tags</button>
-    <button class="nav-btn" data-page="calc">🎯 Calculator</button>
-    <button class="nav-btn" data-page="qa">🧪 QA</button>
+    <div class="sidebar-logo"><span class="sidebar-mark">❋</span><span class="sidebar-title">DEADLOCK</span><span class="sidebar-sub">ADVISOR</span></div>
+    <button class="nav-btn active" data-page="heroes"><span class="nav-ico">✦</span>Heroes</button>
+    <button class="nav-btn" data-page="items"><span class="nav-ico">◈</span>Items</button>
+    <button class="nav-btn" data-page="tags"><span class="nav-ico">❋</span>Tags</button>
+    <button class="nav-btn" data-page="calc"><span class="nav-ico">⊞</span>Calculator</button>
+    <button class="nav-btn" data-page="qa"><span class="nav-ico">⌬</span>QA</button>
   </nav>
 
   <!-- ── Main ───────────────────────────────────────────────── -->
@@ -69,6 +72,19 @@
           <div class="field-row">
             <label>Wiki URL</label>
             <input id="hf-wiki" type="text" />
+          </div>
+          <div class="field-row">
+            <label>Filter Colors</label>
+            <div id="hf-colors" class="hf-colors-row"></div>
+          </div>
+          <div class="field-row">
+            <label>Search Terms</label>
+            <div class="hf-terms-wrap">
+              <div id="hf-terms-chips" class="hf-terms-chips"></div>
+              <input id="hf-terms-input" type="text"
+                     placeholder="Type a term and press Enter (e.g. tank, healer, alt-name)"
+                     autocomplete="off">
+            </div>
           </div>
         </div>
       </div>
@@ -333,6 +349,7 @@
             <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
             <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
             <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include 9999 items</label>
+            <label class="toggle-label" title="Show 'Simulate this build' button on each build's detail page"><input type="checkbox" id="calc-enable-sim" checked> Simulator</label>
             <div class="mult-group">
               <span class="mult-lbl">Build:</span>
               <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
@@ -385,15 +402,28 @@
         </div>
       </div>
       <div class="calc-teams-bar">
-        <div class="calc-team">
+        <div class="calc-team" id="ally-drop">
           <div class="calc-team-hdr ally-hdr">Allies <span id="ally-count" class="count-badge">0/6</span></div>
           <div class="team-chips" id="ally-chips"></div>
         </div>
-        <div class="calc-team">
+        <div class="calc-team" id="enemy-drop">
           <div class="calc-team-hdr enemy-hdr">Enemies <span id="enemy-count" class="count-badge">0/6</span></div>
           <div class="team-chips" id="enemy-chips"></div>
         </div>
       </div>
+      <!-- Filter bar: text + color chips + clear filter + clear team. Single
+           horizontal row, intentionally tight so it doesn't crowd the roster.
+           When any filter is active, a mini-icon tray appears just below for
+           drag-and-drop into the team chip lists. -->
+      <div class="calc-filter-bar">
+        <input id="calc-text-filter" class="calc-text-filter" type="text"
+               placeholder="Filter heroes by name or term…" autocomplete="off">
+        <div id="calc-color-filter" class="calc-color-filter"></div>
+        <button id="calc-clear-filter" class="btn-ghost btn-sm" type="button">Clear filter</button>
+        <button id="calc-clear-teams"  class="btn-ghost btn-sm" type="button">Clear all</button>
+        <span id="calc-filter-hint" class="calc-filter-hint"></span>
+      </div>
+      <div id="calc-filter-tray" class="calc-filter-tray hidden"></div>
       <div class="card-grid" id="calc-roster"></div>
     </section>
 
@@ -442,6 +472,64 @@
         </div>
       </div>
       <div id="calc-build-detail"></div>
+    </section>
+
+    <!-- INTERACTIVE PHASE SIMULATION -->
+    <section id="page-sim" class="page">
+      <div class="page-header sticky-header sim-header-bar">
+        <button class="btn-back" id="back-from-sim">← Build</button>
+        <div class="sim-title-block">
+          <h1 id="sim-title">Simulate</h1>
+          <div id="sim-subtitle" class="calc-build-desc"></div>
+        </div>
+        <div class="sim-header-actions">
+          <button class="btn-ghost btn-sm" id="sim-focus-btn" title="Mark allies/enemies to focus on — focused chars weight more in scoring">Focus…</button>
+          <button class="btn-ghost btn-sm" id="sim-fullscreen-btn" title="Toggle fullscreen">⛶ Fullscreen</button>
+          <button class="btn-ghost btn-sm" id="sim-blocked-btn" title="Manage blocked items">Blocked</button>
+          <button class="btn-ghost btn-sm" id="sim-save-btn">Save Log</button>
+          <button class="btn-ghost btn-sm" id="sim-reset-btn">Reset</button>
+        </div>
+      </div>
+      <div class="sim-stats">
+        <div class="sim-stat"><span class="sim-stat-lbl">Souls</span><span id="sim-souls" class="sim-stat-val">0</span></div>
+        <div class="sim-stat"><span class="sim-stat-lbl">Earned</span><span id="sim-earned" class="sim-stat-val">0</span></div>
+        <div class="sim-stat"><span class="sim-stat-lbl">Tick</span><span id="sim-tick" class="sim-stat-val">0/35</span></div>
+        <div class="sim-stat"><span class="sim-stat-lbl">Phase</span><span id="sim-phase" class="sim-stat-val">Lane</span></div>
+        <div class="sim-stat"><span class="sim-stat-lbl">Slots</span><span id="sim-slots" class="sim-stat-val">0/9</span></div>
+        <button class="btn-warm btn-sm" id="sim-slot-unlock" title="Spend a slot unlocker">+ Slot Unlocked!</button>
+        <div class="sim-controls">
+          <button class="btn-ghost btn-sm" id="sim-back">◀ Back</button>
+          <button class="btn-ghost btn-sm" id="sim-skip">Skip</button>
+          <button class="btn-primary btn-sm" id="sim-forward">Confirm ▶</button>
+          <button class="btn-ghost btn-sm" id="sim-override">Override…</button>
+          <button class="btn-warm btn-sm" id="sim-sell" style="display:none">Sell Item…</button>
+        </div>
+      </div>
+      <div class="sim-body">
+        <aside class="sim-history-pane">
+          <div class="sim-pane-title">Lobby</div>
+          <div id="sim-team-comp" class="sim-team-comp"></div>
+          <div class="sim-pane-title sim-inv-title">Inventory</div>
+          <div id="sim-inventory" class="sim-inventory"></div>
+          <div class="sim-pane-title sim-inv-title">Timeline</div>
+          <div id="sim-history" class="sim-history"></div>
+        </aside>
+        <div class="sim-columns">
+          <div class="sim-col sim-col-balance" data-col="balance">
+            <div class="sim-col-hdr">Balance <span class="sim-col-sub">fill the build's shape</span></div>
+            <div class="sim-col-body" id="sim-col-balance"></div>
+          </div>
+          <div class="sim-col sim-col-strength" data-col="strength">
+            <div class="sim-col-hdr">Strength <span class="sim-col-sub">push raw score</span></div>
+            <div class="sim-col-body" id="sim-col-strength"></div>
+          </div>
+          <div class="sim-col sim-col-counter" data-col="counter">
+            <div class="sim-col-hdr">Counter / Survive / Assist <span class="sim-col-sub">react to the lobby</span></div>
+            <div class="sim-col-body" id="sim-col-counter"></div>
+          </div>
+        </div>
+      </div>
+      <div id="sim-modal-host"></div>
     </section>
 
     <!-- QA: SCENARIO LIST -->

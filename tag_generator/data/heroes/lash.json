@@ -372,10 +372,18 @@
       }
     }
   ],
+  "colors": [
+    "blue",
+    "tan",
+    "black"
+  ],
   "desc_eng": "",
   "eng_name": "Lash",
   "image_path": "/resources/heroes/lash/portrait_lash.png",
   "mini_image_path": "/resources/heroes/lash/mini_icon_lash.png",
   "normalized_name": "lash",
+  "search_terms": [
+    "asshole"
+  ],
   "wiki_url": "https://deadlock.wiki/Lash"
 }

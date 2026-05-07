@@ -372,10 +372,16 @@
       }
     }
   ],
+  "colors": [
+    "red",
+    "white",
+    "grey"
+  ],
   "desc_eng": "",
   "eng_name": "Apollo",
   "image_path": "/resources/heroes/apollo/portrait_apollo.png",
   "mini_image_path": "/resources/heroes/apollo/mini_icon_apollo.png",
   "normalized_name": "apollo",
+  "search_terms": [],
   "wiki_url": "https://deadlock.wiki/Apollo"
 }

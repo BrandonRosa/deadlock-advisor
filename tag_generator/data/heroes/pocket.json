@@ -372,7 +372,7 @@
       }
     },
     {
-      "build_description_eng": "RE from: Monster Rounds, Sprint Boots, Trophy Collector, Mystic Burst, Mystic Expansion… | Enemies: Abrams, Seven",
+      "build_description_eng": "RE from: Monster Rounds, Sprint Boots, Trophy Collector, Mystic Burst, Mystic Expansionâ€¦ | Enemies: Abrams, Seven",
       "followed_build": "General",
       "name": "Damage Carry",
       "normalized_build_name": "pocket_damage_carry",
@@ -1133,10 +1133,20 @@
       }
     }
   ],
+  "colors": [
+    "black",
+    "tan",
+    "red",
+    "green",
+    "grey"
+  ],
   "desc_eng": "",
   "eng_name": "Pocket",
   "image_path": "/resources/heroes/pocket/portrait_pocket.png",
   "mini_image_path": "/resources/heroes/pocket/mini_icon_pocket.png",
   "normalized_name": "pocket",
+  "search_terms": [
+    "frog"
+  ],
   "wiki_url": "https://deadlock.wiki/Pocket"
 }

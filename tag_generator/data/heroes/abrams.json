@@ -1121,5 +1121,10 @@
   "image_path": "/resources/heroes/abrams/portrait_abrams.png",
   "mini_image_path": "/resources/heroes/abrams/mini_icon_abrams.png",
   "normalized_name": "abrams",
-  "wiki_url": "https://deadlock.wiki/Abrams"
+  "wiki_url": "https://deadlock.wiki/Abrams",
+  "colors": [
+    "blue",
+    "grey"
+  ],
+  "search_terms": []
 }

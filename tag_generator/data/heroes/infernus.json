@@ -1544,6 +1544,10 @@
       "followed_build": "Anti-Tank",
       "name": "Tank",
       "normalized_build_name": "infernus_tank",
+      "signature_items": [
+        "colossus",
+        "leech"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1909,11 +1913,7 @@
           "ult_focused": null,
           "vertical_mobility": "+-0.1"
         }
-      },
-      "signature_items": [
-        "colossus",
-        "leech"
-      ]
+      }
     },
     {
       "build_description_eng": "",
@@ -2288,10 +2288,19 @@
       }
     }
   ],
+  "colors": [
+    "red",
+    "orange",
+    "black",
+    "yellow"
+  ],
   "desc_eng": "",
   "eng_name": "Infernus",
   "image_path": "/resources/heroes/infernus/portrait_infernus.png",
   "mini_image_path": "/resources/heroes/infernus/mini_icon_infernus.png",
   "normalized_name": "infernus",
+  "search_terms": [
+    "infurnus"
+  ],
   "wiki_url": "https://deadlock.wiki/Infernus"
 }
