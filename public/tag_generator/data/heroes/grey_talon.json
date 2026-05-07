@@ -1158,6 +1158,10 @@
       "followed_build": "Gun",
       "name": "Hybrid",
       "normalized_build_name": "grey_talon_hybrid",
+      "signature_items": [
+        "opening_rounds",
+        "recharging_rush"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,
@@ -1523,11 +1527,7 @@
           "ult_focused": -0.1,
           "vertical_mobility": 0.1
         }
-      },
-      "signature_items": [
-        "opening_rounds",
-        "recharging_rush"
-      ]
+      }
     },
     {
       "build_description_eng": "VERY off meta build. Focuses on talon's snare. Goal is to more of a supportive character for teamfights where you can continuously silence enemies. Good vs Mid range cluster focused enemies. Awful against aerial/long range characters.",
@@ -1820,7 +1820,7 @@
           "aoe_cluster": 0.33,
           "assist_importance": 0.1,
           "away_from_team": -0.15,
-          "bullet_damage": "+-0.33",
+          "bullet_damage": "+-0.25",
           "bullet_evasion": null,
           "bullet_lifesteal": null,
           "bullet_proc": 0.15,
@@ -1848,7 +1848,7 @@
           "engage": -0.15,
           "escape": 0.15,
           "farmer": 0.25,
-          "fire_rate": "+-0.2",
+          "fire_rate": "+-0.1",
           "fire_rate_slow": null,
           "grounded": 0.15,
           "gun_burst_damage": 0.05,
@@ -1891,7 +1891,7 @@
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
-          "spirit_damage": "+0.1",
+          "spirit_damage": "+-0.15",
           "spirit_lifesteal": null,
           "spirit_proc": null,
           "spirit_resist_shred": 0.1,
