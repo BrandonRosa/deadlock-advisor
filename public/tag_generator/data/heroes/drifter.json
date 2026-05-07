@@ -361,5 +361,10 @@
   "image_path": "/resources/heroes/drifter/portrait_drifter.png",
   "mini_image_path": "/resources/heroes/drifter/mini_icon_drifter.png",
   "normalized_name": "drifter",
-  "wiki_url": "https://deadlock.wiki/Drifter"
+  "wiki_url": "https://deadlock.wiki/Drifter",
+  "colors": [
+    "red",
+    "black"
+  ],
+  "search_terms": []
 }

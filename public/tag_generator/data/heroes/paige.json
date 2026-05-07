@@ -90,7 +90,11 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -177,7 +181,11 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_score": {
           "ability_spam": 0.1,
@@ -264,7 +272,11 @@
           "team_heal": 1,
           "trap_block_obstruct": 0.25,
           "ult_focused": 0.25,
-          "vertical_mobility": 0.33
+          "vertical_mobility": 0.33,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_weight": {
           "ability_spam": 0.1,
@@ -351,15 +363,28 @@
           "team_heal": 1,
           "trap_block_obstruct": 0.15,
           "ult_focused": 0.25,
-          "vertical_mobility": 0.33
+          "vertical_mobility": 0.33,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         }
       }
     }
+  ],
+  "colors": [
+    "orange",
+    "green"
   ],
   "desc_eng": "",
   "eng_name": "Paige",
   "image_path": "/resources/heroes/paige/portrait_paige.png",
   "mini_image_path": "/resources/heroes/paige/mini_icon_paige.png",
   "normalized_name": "paige",
+  "search_terms": [
+    "book",
+    "page",
+    "librarian"
+  ],
   "wiki_url": "https://deadlock.wiki/Paige"
 }

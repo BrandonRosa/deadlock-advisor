@@ -372,10 +372,18 @@
       }
     }
   ],
+  "colors": [
+    "black",
+    "pink",
+    "blue",
+    "red",
+    "brown"
+  ],
   "desc_eng": "",
   "eng_name": "Paradox",
   "image_path": "/resources/heroes/paradox/portrait_paradox.png",
   "mini_image_path": "/resources/heroes/paradox/mini_icon_paradox.png",
   "normalized_name": "paradox",
+  "search_terms": [],
   "wiki_url": "https://deadlock.wiki/Paradox"
 }

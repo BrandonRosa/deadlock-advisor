@@ -372,10 +372,16 @@
       }
     }
   ],
+  "colors": [
+    "black",
+    "yellow",
+    "orange"
+  ],
   "desc_eng": "",
   "eng_name": "Haze",
   "image_path": "/resources/heroes/haze/portrait_haze.png",
   "mini_image_path": "/resources/heroes/haze/mini_icon_haze.png",
   "normalized_name": "haze",
+  "search_terms": [],
   "wiki_url": "https://deadlock.wiki/Haze"
 }

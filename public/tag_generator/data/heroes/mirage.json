@@ -345,5 +345,10 @@
   "image_path": "/resources/heroes/mirage/portrait_mirage.png",
   "mini_image_path": "/resources/heroes/mirage/mini_icon_mirage.png",
   "normalized_name": "mirage",
-  "wiki_url": "https://deadlock.wiki/Mirage"
+  "wiki_url": "https://deadlock.wiki/Mirage",
+  "colors": [
+    "purple",
+    "brown"
+  ],
+  "search_terms": []
 }

@@ -372,7 +372,7 @@
       }
     },
     {
-      "build_description_eng": "RE from: Opening Rounds, Improved Spirit, Extra Charge, Rapid Recharge, Swift Striker… | Enemies: Mo & Krill, Silver, Seven | Allies: Bebop",
+      "build_description_eng": "RE from: Opening Rounds, Improved Spirit, Extra Charge, Rapid Recharge, Swift Strikerâ€¦ | Enemies: Mo & Krill, Silver, Seven | Allies: Bebop",
       "followed_build": "General",
       "name": "Sniper",
       "normalized_build_name": "vindicta_sniper",
@@ -744,10 +744,17 @@
       }
     }
   ],
+  "colors": [
+    "blue",
+    "purple"
+  ],
   "desc_eng": "",
   "eng_name": "Vindicta",
   "image_path": "/resources/heroes/vindicta/portrait_vindicta.png",
   "mini_image_path": "/resources/heroes/vindicta/mini_icon_vindicta.png",
   "normalized_name": "vindicta",
+  "search_terms": [
+    "vendicta"
+  ],
   "wiki_url": "https://deadlock.wiki/Vindicta"
 }

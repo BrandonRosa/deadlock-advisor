@@ -12,6 +12,7 @@ ITEMS_DIR   = DATA / "items"
 TAGS_F      = DATA / "tags.json"
 QA_DIR      = DATA / "qa"
 REPORTS_DIR = QA_DIR / "reports"
+SIM_LOGS    = DATA / "sim_logs"
 
 SOURCE_ROOT = Path(__file__).parent.parent
 SOURCE_HEROES     = SOURCE_ROOT / "resources" / "heroes"
@@ -216,6 +217,8 @@ def get_heroes():
                 "image_path":      d.get("image_path", ""),
                 "build_count":     len(d.get("builds", [])),
                 "is_preset":       d.get("is_preset", False),
+                "colors":          d.get("colors", []),
+                "search_terms":    d.get("search_terms", []),
             }
         except Exception:
             return None
@@ -447,6 +450,41 @@ def delete_qa_report(rid):
     if f.exists():
         f.unlink()
     return jsonify({"ok": True})
+
+
+# ── Simulation Logs ─────────────────────────────────────────────────────────
+# Each saved sim run gets its own JSON file under data/sim_logs. Filename is
+# `<ts>_<hero>.json` so they sort chronologically. Used as training data for
+# learning user override patterns vs. algorithm recommendations.
+@app.route("/api/sim-logs", methods=["POST"])
+def save_sim_log():
+    SIM_LOGS.mkdir(parents=True, exist_ok=True)
+    payload = request.json or {}
+    ts   = (payload.get("ts") or datetime.utcnow().isoformat()).replace(":", "-")
+    hero = payload.get("hero", "unknown")
+    f = SIM_LOGS / f"{ts}_{hero}.json"
+    f.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    return jsonify({"ok": True, "id": f.stem})
+
+
+@app.route("/api/sim-logs", methods=["GET"])
+def list_sim_logs():
+    SIM_LOGS.mkdir(parents=True, exist_ok=True)
+    items = []
+    for f in sorted(SIM_LOGS.glob("*.json")):
+        try:
+            d = json.loads(f.read_text())
+            items.append({
+                "id":      f.stem,
+                "hero":    d.get("hero"),
+                "build":   d.get("build_name"),
+                "outcome": d.get("outcome"),
+                "feel":    d.get("feel"),
+                "ts":      d.get("ts"),
+            })
+        except Exception:
+            continue
+    return jsonify(items)
 
 
 # ── App ───────────────────────────────────────────────────────────────────────

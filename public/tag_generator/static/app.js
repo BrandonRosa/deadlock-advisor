@@ -430,9 +430,84 @@ function renderHeroEditPage() {
 
   setImg('hero-portrait-img', h.image_path);
   setImg('hero-mini-img', h.mini_image_path);
+  if (!Array.isArray(h.colors))       h.colors = [];
+  if (!Array.isArray(h.search_terms)) h.search_terms = [];
+  renderHeroColorEditor();
+  renderHeroTermsEditor();
   setHeroDirty(false);
   renderBuildTabs();
   renderBuildContent();
+}
+
+function renderHeroColorEditor() {
+  const row = document.getElementById('hf-colors');
+  if (!row) return;
+  if (!row.dataset.built) {
+    COLOR_PALETTE.forEach(c => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'color-chip';
+      chip.dataset.color = c;
+      chip.title = c;
+      chip.addEventListener('click', () => {
+        const h = S.currentHero;
+        if (!h) return;
+        if (!Array.isArray(h.colors)) h.colors = [];
+        const i = h.colors.indexOf(c);
+        if (i >= 0) h.colors.splice(i, 1); else h.colors.push(c);
+        renderHeroColorEditor();
+        setHeroDirty(true);
+      });
+      row.appendChild(chip);
+    });
+    row.dataset.built = '1';
+  }
+  const cur = (S.currentHero && S.currentHero.colors) || [];
+  row.querySelectorAll('.color-chip').forEach(el => {
+    el.classList.toggle('on', cur.includes(el.dataset.color));
+  });
+}
+
+function renderHeroTermsEditor() {
+  const chips = document.getElementById('hf-terms-chips');
+  const input = document.getElementById('hf-terms-input');
+  if (!chips || !input) return;
+  if (!input.dataset.bound) {
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const v = input.value.trim().replace(/,$/, '').trim();
+        if (!v) return;
+        const h = S.currentHero;
+        if (!h) return;
+        if (!Array.isArray(h.search_terms)) h.search_terms = [];
+        if (!h.search_terms.includes(v)) {
+          h.search_terms.push(v);
+          renderHeroTermsEditor();
+          setHeroDirty(true);
+        }
+        input.value = '';
+      } else if (e.key === 'Backspace' && !input.value && S.currentHero?.search_terms?.length) {
+        S.currentHero.search_terms.pop();
+        renderHeroTermsEditor();
+        setHeroDirty(true);
+      }
+    });
+    input.dataset.bound = '1';
+  }
+  chips.innerHTML = '';
+  const terms = (S.currentHero && S.currentHero.search_terms) || [];
+  terms.forEach((t, idx) => {
+    const chip = document.createElement('span');
+    chip.className = 'hf-term-chip';
+    chip.innerHTML = `${t}<button class="hf-term-chip-x" type="button" title="Remove">×</button>`;
+    chip.querySelector('.hf-term-chip-x').addEventListener('click', () => {
+      S.currentHero.search_terms.splice(idx, 1);
+      renderHeroTermsEditor();
+      setHeroDirty(true);
+    });
+    chips.appendChild(chip);
+  });
 }
 
 // ── Hero field changes ────────────────────────────────────────────────────────
@@ -1430,7 +1505,7 @@ function renderItemGrid() {
   });
   filtered.forEach(it => {
     const card = document.createElement('div');
-    card.className = 'item-card';
+    card.className = `item-card cat-${it.category}`;
     const imgSrc = srcUrl(it.image_path);
     card.innerHTML = `
       ${imgSrc
@@ -1661,6 +1736,7 @@ document.getElementById('back-items').addEventListener('click', async () => {
 // INIT
 // ════════════════════════════════════════════════════════════════════════════
 (async () => {
+  restoreMatchState();
   S.tags     = await api.get('/api/tags');
   S.heroList = await api.get('/api/heroes');
   renderHeroGrid();
@@ -1699,7 +1775,50 @@ const MATCH = {
   lazyBuildPaths: false,
   bpAlgo: 'lookahead',
   scoreFormula: 'v2',
+  filter: { text: '', colors: [] },
+  primedHero: null,  // when exactly 1 filtered result + Enter pressed → primed for 1/2/3 assignment
+  simEnabled: true,
+  simStates:  {},  // keyed by `${heroName}::${buildIdx}` — see SIM helpers below
 };
+
+// ── MATCH persistence (localStorage) ──────────────────────────────────────
+// We persist enough state to resurrect the calculator + active simulators on
+// reload, but skip large fetched objects (heroData, itemData, results) since
+// those are recomputed on demand.
+const MATCH_LS_KEY = 'dl-match-state-v2';
+const MATCH_PERSIST_KEYS = [
+  'multiMode','uncapped','include9999','self','allies','enemies',
+  'mult','bpAlgo','scoreFormula','filter','simEnabled','simStates',
+  'selectedBuilds','viewHeroName','viewBuildIdx',
+];
+let _matchSaveTimer = null;
+function saveMatchState() {
+  clearTimeout(_matchSaveTimer);
+  _matchSaveTimer = setTimeout(() => {
+    try {
+      const snap = {};
+      MATCH_PERSIST_KEYS.forEach(k => { snap[k] = MATCH[k]; });
+      localStorage.setItem(MATCH_LS_KEY, JSON.stringify(snap));
+    } catch { /* quota / private mode — silently ignore */ }
+  }, 150);
+}
+function restoreMatchState() {
+  try {
+    const raw = localStorage.getItem(MATCH_LS_KEY);
+    if (!raw) return;
+    const snap = JSON.parse(raw);
+    MATCH_PERSIST_KEYS.forEach(k => {
+      if (snap[k] !== undefined) MATCH[k] = snap[k];
+    });
+  } catch { /* malformed — ignore */ }
+}
+function clearMatchState() {
+  try { localStorage.removeItem(MATCH_LS_KEY); } catch {}
+}
+
+// Canonical filter palette (kept in sync with _apply_colors.py PALETTE)
+const COLOR_PALETTE = ['red','orange','yellow','green','blue','purple',
+                       'pink','brown','tan','white','black','grey'];
 
 // ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
 // ally:  Σ(item.self_score × ally.ally_weight).          > norm = synergizes, > super = VERY
@@ -1730,6 +1849,7 @@ function renderCalcSetup() {
   document.getElementById('calc-multi-mode').checked    = MATCH.multiMode;
   document.getElementById('calc-uncap').checked         = MATCH.uncapped;
   document.getElementById('calc-include9999').checked   = MATCH.include9999;
+  document.getElementById('calc-enable-sim').checked    = MATCH.simEnabled !== false;
   document.getElementById('mult-build-ally').value      = MATCH.mult.buildAlly;
   document.getElementById('mult-build-enemy').value     = MATCH.mult.buildEnemy;
   document.getElementById('mult-item-ally').value       = MATCH.mult.itemAlly;
@@ -1739,8 +1859,165 @@ function renderCalcSetup() {
   document.getElementById('bp-algo-sel').value          = MATCH.bpAlgo;
   document.getElementById('score-formula-sel').value    = MATCH.scoreFormula;
   document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
+  renderCalcFilter();
   renderTeamBars();
   renderCalcRoster();
+}
+
+// ── Filter: text + color chips, live ──────────────────────────────────────
+function calcFilterIsActive() {
+  return !!MATCH.filter.text || MATCH.filter.colors.length > 0;
+}
+function calcFilteredHeroes() {
+  const q = MATCH.filter.text.trim().toLowerCase();
+  const cols = MATCH.filter.colors;
+  return S.heroList.filter(h => {
+    if (h.is_preset) return false;
+    if (q) {
+      const hay = [h.eng_name, h.normalized_name, ...(h.search_terms || [])]
+        .filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (cols.length) {
+      const hc = h.colors || [];
+      if (!cols.every(c => hc.includes(c))) return false;
+    }
+    return true;
+  });
+}
+function renderCalcFilter() {
+  const colorBar = document.getElementById('calc-color-filter');
+  if (!colorBar) return;
+  // Build color chips once; subsequent calls just re-sync the .on state.
+  if (!colorBar.dataset.built) {
+    COLOR_PALETTE.forEach(c => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'color-chip';
+      chip.dataset.color = c;
+      chip.title = c;
+      chip.addEventListener('click', () => {
+        const i = MATCH.filter.colors.indexOf(c);
+        if (i >= 0) MATCH.filter.colors.splice(i, 1);
+        else MATCH.filter.colors.push(c);
+        renderCalcFilter();
+        renderCalcRoster();
+        saveMatchState();
+      });
+      colorBar.appendChild(chip);
+    });
+    colorBar.dataset.built = '1';
+
+    const txt = document.getElementById('calc-text-filter');
+    txt.value = MATCH.filter.text;
+    txt.addEventListener('input', () => {
+      MATCH.filter.text = txt.value;
+      MATCH.primedHero = null;
+      renderCalcRoster();
+      saveMatchState();
+    });
+    txt.addEventListener('keydown', e => onCalcFilterKey(e));
+
+    document.getElementById('calc-clear-filter').addEventListener('click', () => {
+      MATCH.filter.text = '';
+      MATCH.filter.colors = [];
+      MATCH.primedHero = null;
+      txt.value = '';
+      renderCalcFilter();
+      renderCalcRoster();
+    });
+    document.getElementById('calc-clear-teams').addEventListener('click', () => {
+      MATCH.allies  = [];
+      MATCH.enemies = [];
+      MATCH.self    = null;
+      renderTeamBars();
+      renderCalcRoster();
+    });
+
+    // Drop zones for tray drag-and-drop
+    ['ally-drop','enemy-drop'].forEach(id => {
+      const z = document.getElementById(id);
+      const role = id === 'ally-drop' ? 'ally' : 'enemy';
+      z.addEventListener('dragover', e => {
+        if (e.dataTransfer.types.includes('application/x-dl-hero')) {
+          e.preventDefault();
+          z.classList.add('drag-target');
+        }
+      });
+      z.addEventListener('dragleave', () => z.classList.remove('drag-target'));
+      z.addEventListener('drop', e => {
+        e.preventDefault();
+        z.classList.remove('drag-target');
+        const name = e.dataTransfer.getData('application/x-dl-hero');
+        if (name) assignHero(name, role);
+      });
+    });
+  }
+  // Sync chip on-state
+  colorBar.querySelectorAll('.color-chip').forEach(el => {
+    el.classList.toggle('on', MATCH.filter.colors.includes(el.dataset.color));
+  });
+}
+
+function onCalcFilterKey(e) {
+  // Keyboard shortcut: with exactly one filtered result, Enter primes the
+  // hero, then 1=ally / 2=self / 3=enemy assigns. Esc unprimes.
+  const matches = calcFilteredHeroes();
+  if (e.key === 'Escape') {
+    MATCH.primedHero = null;
+    renderFilterTray(matches);
+    return;
+  }
+  if (e.key === 'Enter') {
+    if (matches.length === 1) {
+      MATCH.primedHero = matches[0].normalized_name;
+      renderFilterTray(matches);
+    }
+    e.preventDefault();
+    return;
+  }
+  if (MATCH.primedHero && /^[123]$/.test(e.key)) {
+    const role = e.key === '1' ? 'ally' : e.key === '2' ? 'self' : 'enemy';
+    const name = MATCH.primedHero;
+    MATCH.primedHero = null;
+    assignHero(name, role);
+    e.preventDefault();
+  }
+}
+
+function renderFilterTray(filtered) {
+  const tray = document.getElementById('calc-filter-tray');
+  const hint = document.getElementById('calc-filter-hint');
+  const active = calcFilterIsActive();
+  tray.classList.toggle('hidden', !active);
+  tray.innerHTML = '';
+  if (!active) { hint.textContent = ''; return; }
+
+  filtered.forEach(h => {
+    const btn = document.createElement('div');
+    btn.className = 'tray-mini' + (MATCH.primedHero === h.normalized_name ? ' focused' : '');
+    btn.draggable = true;
+    btn.title = `${h.eng_name} — drag to a team, or click to add as ally`;
+    const mini = h.mini_image_path ? srcUrl(h.mini_image_path) : srcUrl(h.image_path);
+    btn.innerHTML = `
+      ${mini ? `<img src="${mini}" alt="">` : ''}
+      <div class="tray-mini-name">${h.eng_name || h.normalized_name}</div>`;
+    btn.addEventListener('dragstart', e => {
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('application/x-dl-hero', h.normalized_name);
+      e.dataTransfer.setData('text/plain', h.eng_name || h.normalized_name);
+    });
+    btn.addEventListener('click', () => assignHero(h.normalized_name, 'ally'));
+    tray.appendChild(btn);
+  });
+
+  if (filtered.length === 1) {
+    hint.textContent = MATCH.primedHero
+      ? `${filtered[0].eng_name} primed — press 1=ally, 2=self, 3=enemy`
+      : `Press Enter to prime ${filtered[0].eng_name}, then 1/2/3`;
+  } else {
+    hint.textContent = `${filtered.length} match${filtered.length === 1 ? '' : 'es'}`;
+  }
 }
 
 function renderTeamBars() {
@@ -1770,12 +2047,15 @@ function renderTeamBars() {
 
   renderChips(MATCH.allies,  'ally-chips');
   renderChips(MATCH.enemies, 'enemy-chips');
+  saveMatchState();
 }
 
 function renderCalcRoster() {
   const grid = document.getElementById('calc-roster');
   grid.innerHTML = '';
-  S.heroList.filter(h => !h.is_preset).forEach(h => grid.appendChild(makeCalcCard(h)));
+  const filtered = calcFilteredHeroes();
+  filtered.forEach(h => grid.appendChild(makeCalcCard(h)));
+  renderFilterTray(filtered);
 }
 
 function makeCalcCard(h) {
@@ -1846,8 +2126,17 @@ function removeFromTeam(name) {
   renderCalcRoster();
 }
 
-document.getElementById('calc-multi-mode').addEventListener('change', e => { MATCH.multiMode = e.target.checked; });
-document.getElementById('calc-include9999').addEventListener('change', e => { MATCH.include9999 = e.target.checked; });
+document.getElementById('calc-multi-mode').addEventListener('change', e => { MATCH.multiMode = e.target.checked; saveMatchState(); });
+document.getElementById('calc-include9999').addEventListener('change', e => { MATCH.include9999 = e.target.checked; saveMatchState(); });
+document.getElementById('calc-enable-sim').addEventListener('change', e => {
+  MATCH.simEnabled = e.target.checked;
+  saveMatchState();
+  // Refresh open build-detail page so the Simulate button appears/disappears
+  if (document.getElementById('page-calc-build').classList.contains('active')) {
+    const heroName = MATCH.viewHeroName, idx = MATCH.viewBuildIdx;
+    if (heroName != null && idx != null) openCalcBuild(heroName, idx);
+  }
+});
 document.getElementById('calc-uncap').addEventListener('change', e => {
   MATCH.uncapped = e.target.checked;
   renderTeamBars();
@@ -3299,6 +3588,102 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     return n;
   }
 
+  // ── Post-process fixup: force-acquire missing required items ────────────
+  // Replays the algorithm's phase output to derive final ownership, then for any
+  // required items still missing tries (a) direct buy if budget+slot available,
+  // else (b) a sell-swap of the lowest-bpScore non-required, non-signature owned
+  // item. Inserted into the latest phase. No-op for greedyMain-based algos which
+  // already force-buy required items in-loop.
+  function applyConstraintsFixup(phaseDataList) {
+    if (!requiredSet.size || !phaseDataList || !phaseDataList.length) return phaseDataList;
+
+    const owned = new Set();
+    const consumed = new Set();
+    let totalBudget = 0;
+    BUILD_PHASES.forEach(p => { totalBudget += p.addBudget; });
+    let spent = 0;
+
+    phaseDataList.forEach(ph => {
+      (ph.changes || []).forEach(ch => {
+        if (ch.action === 'buy' || ch.action === 'upgrade') {
+          (ch.components || []).forEach(c => { owned.delete(c); consumed.add(c); });
+          owned.add(ch.key);
+          spent += ch.cost || 0;
+        } else if (ch.action === 'sell') {
+          owned.delete(ch.key);
+          spent -= ch.refund || 0;
+        }
+      });
+    });
+    let remaining = totalBudget - spent;
+
+    const missing = [...requiredSet].filter(k =>
+      !owned.has(k) && !consumed.has(k) && !blacklistSet.has(k) && bpItemMap[k]
+    );
+    if (!missing.length) return phaseDataList;
+
+    const lastPhase = phaseDataList[phaseDataList.length - 1];
+    const HARD_SLOT_CAP = 12;
+
+    function fixupEmit(reqK) {
+      const item = bpItemMap[reqK];
+      const out = [];
+      let cost = 0;
+      (item.upgrades_from || []).forEach(c => {
+        if (!owned.has(c) && !consumed.has(c) && bpItemMap[c]) {
+          owned.add(c);
+          const cCost = bpItemMap[c].tier;
+          cost += cCost;
+          out.push({ action: 'buy', key: c, components: [], cost: cCost, fixupRequired: true });
+        }
+      });
+      const comps = (item.upgrades_from || []).filter(c => owned.has(c));
+      const mainCost = item.tier - comps.reduce((s, c) => s + (bpItemMap[c]?.tier ?? 0), 0);
+      comps.forEach(c => { owned.delete(c); consumed.add(c); });
+      owned.add(reqK);
+      cost += mainCost;
+      out.push({ action: comps.length ? 'upgrade' : 'buy', key: reqK, components: comps, cost: mainCost, fixupRequired: true });
+      return { changes: out, cost };
+    }
+
+    for (const reqK of missing) {
+      const cost = chainCost(reqK, owned);
+      if (cost <= 0) continue;
+
+      // Direct buy if free slot + budget
+      if (owned.size < HARD_SLOT_CAP && cost <= remaining) {
+        const { changes: emitted, cost: spentNow } = fixupEmit(reqK);
+        lastPhase.changes.push(...emitted);
+        remaining -= spentNow;
+        continue;
+      }
+
+      // Sell-swap: pick lowest-bpScore owned item that isn't required, signature, or
+      // a component already powering an owned upgrade chain.
+      const sellPool = [...owned].filter(k =>
+        !requiredSet.has(k) && !signatureSet.has(k) && scoredMap[k] &&
+        !(upgradesTo[k] || []).some(uk => owned.has(uk))
+      );
+      if (!sellPool.length) continue;
+      sellPool.sort((a, b) => bpScore(scoredMap[a], 'Extra Late') - bpScore(scoredMap[b], 'Extra Late'));
+      const sellKey = sellPool[0];
+      const refund = Math.floor((bpItemMap[sellKey]?.tier || 0) / 2);
+
+      const newCost = chainCost(reqK, owned);
+      if (newCost > remaining + refund) continue;  // still unaffordable
+
+      lastPhase.changes.push({ action: 'sell', key: sellKey, refund, fixupRequired: true });
+      owned.delete(sellKey);
+      remaining += refund;
+
+      const { changes: emitted, cost: spentNow } = fixupEmit(reqK);
+      lastPhase.changes.push(...emitted);
+      remaining -= spentNow;
+    }
+
+    return phaseDataList;
+  }
+
   // Budget to acquire k from current state.
   // When no prereqs are owned: = item.tier (prereq cost + upgrade cost nets to item.tier).
   // When some prereqs are owned: = item.tier − (sum of owned prereq tiers).
@@ -4747,12 +5132,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Phase loop ─────────────────────────────────────────────────────────────
-  if (algo === 'expert')    return runExpertGreedy();
-  if (algo === 'assassin')  return runTargetAssassin();
-  if (algo === 'adaptive') return runHybridRotation('adaptive');
-  if (algo === 'fusion')   return runHybridRotation('fusion');
-  if (algo === 'oracle')   return runHybridRotation('oracle');
-  if (algo === 'beam')     return runBeamSearch();
+  if (algo === 'expert')    return applyConstraintsFixup(runExpertGreedy());
+  if (algo === 'assassin')  return applyConstraintsFixup(runTargetAssassin());
+  if (algo === 'adaptive') return applyConstraintsFixup(runHybridRotation('adaptive'));
+  if (algo === 'fusion')   return applyConstraintsFixup(runHybridRotation('fusion'));
+  if (algo === 'oracle')   return applyConstraintsFixup(runHybridRotation('oracle'));
+  if (algo === 'beam')     return applyConstraintsFixup(runBeamSearch());
 
   const useCosine = algo === 'cosine';
 
@@ -4794,7 +5179,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   // Pass 2: compute assist/counter per phase using the full blacklist.
   const globalAssistUsed  = new Set();
   const globalCounterUsed = new Set();
-  return mainPhaseData.map(({ phase, changes }) => {
+  const result = mainPhaseData.map(({ phase, changes }) => {
     const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  phase.name, 'ally');
     const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, phase.name, 'enemy');
     if (_bpDbg) {
@@ -4806,6 +5191,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     }
     return { phase: phase.name, changes, assistChanges, counterChanges };
   });
+  return applyConstraintsFixup(result);
 }
 
 function formatBpDebug(allHeroDbgList) {
@@ -5019,6 +5405,23 @@ function buildPathPanelContents(pathData, b) {
       detailOpen ? 'Hide Step-by-Step ▴' : 'Show Step-by-Step ▾';
   });
 
+  // ── Simulate button (gated by the Simulator checkbox in calc setup) ──
+  if (MATCH.simEnabled !== false) {
+    const simRow = document.createElement('div');
+    simRow.className = 'bp-sim-row';
+    const sst = SIM.states[`${b.heroName}::${b.buildIdx ?? 0}`];
+    const resumeable = !!sst && (sst.tick > 0 || (sst.history && sst.history.length));
+    simRow.innerHTML = `
+      <button class="btn-primary btn-sm sim-start-btn">
+        ${resumeable ? '▶ Resume Simulation' : '▶ Simulate this build'}
+      </button>
+      ${resumeable ? `<span class="bp-sim-resume-hint">tick ${sst.tick + 1} / ${SIM_NUM_TICKS}</span>` : ''}`;
+    simRow.querySelector('.sim-start-btn').addEventListener('click', () => {
+      openSimulation(b.heroName, b.buildIdx ?? 0, b);
+    });
+    wrap.appendChild(simRow);
+  }
+
   return wrap;
 }
 
@@ -5210,10 +5613,11 @@ document.getElementById('btn-regen-run').addEventListener('click', () => {
 });
 document.getElementById('back-to-summary').addEventListener('click', () => showPage('calc-summary'));
 document.getElementById('back-to-hero').addEventListener('click', () => openCalcHero(MATCH.viewHeroName));
-document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; });
+document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; saveMatchState(); });
 document.getElementById('score-formula-sel').addEventListener('change', e => {
   MATCH.scoreFormula = e.target.value;
   document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
+  saveMatchState();
 });
 
 // ── Reverse Engineer listeners ─────────────────────────────────────────────
@@ -5860,4 +6264,1036 @@ document.getElementById('back-qa-report').addEventListener('click', async () => 
 
 document.getElementById('btn-delete-qa-report').addEventListener('click', function () {
   deleteQAReport(this.dataset.rid);
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// INTERACTIVE PHASE SIMULATION
+// ════════════════════════════════════════════════════════════════════════════
+// A turn-based take on the build-path algorithms. Each tick the player chooses
+// from three columns of recommendations (Balance / Strength / Counter) — or
+// skips, overrides, or sells. Reuses MATCH.itemData/heroData and bpItemMap.
+// State lives on MATCH.simStates (persisted via saveMatchState).
+
+// Schedule mirrors the tick-based algos in app.js (expert/strengths/etc.)
+const SIM_TICK_INCOME = [800,800,800,900,900,1100,1200,1200,1200,1300,1400,1400,1400,1500,1500,1600,1700,1800,1800,1900,2000,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000,4100,4200,4300];
+const SIM_TICK_PHASE  = ['Lane','Lane','Lane','Lane','Lane','Lane','Early','Early','Early','Early','Early','Early','Mid','Mid','Mid','Mid','Mid','Mid','Late','Late','Late','Late','Late','Late','Late','Late','Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late','Extra Late'];
+const SIM_NUM_TICKS   = SIM_TICK_INCOME.length;
+const SIM_BASE_SLOT_CAP = 9;        // user can't fill past 9 until they "Slot Unlocked!"
+const SIM_MAX_SLOT_CAP  = 12;
+const SIM_SELL_REFUND   = 0.5;      // matches Deadlock's 50% sell refund
+
+// Counter-tag amplification set for the third column.
+const SIM_COUNTER_TAGS = new Set([
+  'bullet_resistance','spirit_resistance','max_hp','horizontal_mobility',
+  'cc_resist','assist_importance','anti_heal','spirit_resist_shred','bullet_resist_shred',
+]);
+
+const SIM = {
+  states:    MATCH.simStates,   // alias — single source of truth
+  current:   null,              // active sim state being viewed
+  fullscreen: false,
+};
+
+function simKey(heroName, buildIdx) { return `${heroName}::${buildIdx}`; }
+
+function simNewState() {
+  return {
+    tick: 0,
+    totalEarned: 0,
+    remaining: 0,
+    owned: [],            // array of item keys (preserves order)
+    consumed: [],         // component keys consumed by upgrades
+    sold: [],             // sold-this-run keys (for log)
+    blocked: [],          // user-blocked keys (won't recommend)
+    slotsUnlocked: 0,     // extra slots unlocked beyond SIM_BASE_SLOT_CAP
+    history: [],          // [{ tick, action: 'buy'|'skip'|'sell'|'unlock', key?, col?, override?, recommended?, phase, soulsBefore, costEffective? }]
+    pendingChoice: null,  // { col, key, override } selected this tick but not yet confirmed
+    focused: { allies: [], enemies: [] },  // chars the player has marked "focus" — weighted higher
+    outcome: null,        // 'win'|'loss'|'unfinished'
+    feel:    null,        // 'good'|'bad'|'neutral'
+  };
+}
+
+// Weighted-average build vector (matches bpAvgRsvVec) with focused heroes
+// counted at FOCUS_WEIGHT× and unfocused at 1×. When no one is focused this
+// degrades to a plain average — same as bpAvgRsvVec.
+const SIM_FOCUS_WEIGHT = 2.0;
+function simFocusedAvg(heroes, weightKey, focusedSet) {
+  let totalW = 0;
+  const sum = {};
+  heroes.forEach(n => {
+    const hero = MATCH.heroData[n]; if (!hero) return;
+    const idx  = MATCH.selectedBuilds[n] ?? 0;
+    const build = hero.builds[idx] || hero.builds[0];
+    const v = build ? (_rsvCache[n]?.[build.name]?.[weightKey] || null) : null;
+    if (!v) return;
+    const w = focusedSet.has(n) ? SIM_FOCUS_WEIGHT : 1;
+    Object.keys(v).forEach(t => { sum[t] = (sum[t] || 0) + (v[t] || 0) * w; });
+    totalW += w;
+  });
+  if (!totalW) return {};
+  Object.keys(sum).forEach(t => { sum[t] /= totalW; });
+  return sum;
+}
+
+// Walks upgrades_from transitively and returns every owned item along the
+// chain. Lets a T3 buy correctly consume a T1 the player owns even if it
+// doesn't appear in the T3's direct upgrades_from list (it's the T2's
+// component). Both the cost discount and the buy/slot logic use this.
+function simOwnedAncestorComponents(itemKey, ownedSet) {
+  const result = [];
+  const seen = new Set();
+  const stack = [...((bpItemMap[itemKey]?.upgrades_from) || [])];
+  while (stack.length) {
+    const c = stack.pop();
+    if (seen.has(c)) continue;
+    seen.add(c);
+    if (ownedSet.has(c)) result.push(c);
+    (bpItemMap[c]?.upgrades_from || []).forEach(s => { if (!seen.has(s)) stack.push(s); });
+  }
+  return result;
+}
+
+function simEffectiveCost(itemKey, ownedSet) {
+  const it = bpItemMap[itemKey];
+  if (!it) return 999999;
+  let cost = it.tier || 0;
+  simOwnedAncestorComponents(itemKey, ownedSet).forEach(c => {
+    cost -= (bpItemMap[c]?.tier || 0);
+  });
+  return Math.max(0, cost);
+}
+
+// Walk a buy "change" and update state in-place. Returns the change object
+// suitable for history (mirrors the build-path algos' change shape).
+function simApplyBuy(state, key) {
+  const it = bpItemMap[key];
+  if (!it) return null;
+  const ownedSet = new Set(state.owned);
+  // Transitive consume: a T3 buy will pull in any owned T1 / T2 along its chain.
+  const consumedComps = simOwnedAncestorComponents(key, ownedSet);
+  const cost = simEffectiveCost(key, ownedSet);
+  consumedComps.forEach(c => {
+    state.owned = state.owned.filter(k => k !== c);
+    state.consumed.push(c);
+  });
+  state.owned.push(key);
+  state.remaining -= cost;
+  return { action: consumedComps.length ? 'upgrade' : 'buy', key, components: consumedComps, cost };
+}
+
+function simApplySell(state, key) {
+  const ownedSet = new Set(state.owned);
+  if (!ownedSet.has(key)) return null;
+  const it = bpItemMap[key];
+  const refund = Math.round((it?.tier || 0) * SIM_SELL_REFUND);
+  state.owned = state.owned.filter(k => k !== key);
+  state.sold.push(key);
+  state.remaining += refund;
+  return { action: 'sell', key, refund };
+}
+
+// Roll the tick forward: append income, advance tick counter.
+function simAdvanceTick(state) {
+  state.remaining   += SIM_TICK_INCOME[state.tick] || 0;
+  state.totalEarned += SIM_TICK_INCOME[state.tick] || 0;
+  state.tick += 1;
+}
+
+// ── Scoring ─────────────────────────────────────────────────────────────
+// Three column scorers. All take (item, ctx) and return a number; higher is
+// better. The ctx is precomputed once per tick (guides + averages).
+
+function simBuildCtx(b, state) {
+  // Reuses MATCH.heroData & resolved build constraints. Unlike the regular
+  // computeBuildPath we don't run the full algo — we just need vectors.
+  const tagKeys = S.tags.map(t => t.code);
+  // Reverse map: component → list of items that upgrade from it (matches
+  // computeBuildPath's local `upgradesTo`). Used to skip subsumed items.
+  const upgradesTo = {};
+  Object.keys(bpItemMap).forEach(k => {
+    (bpItemMap[k].upgrades_from || []).forEach(comp => {
+      if (!upgradesTo[comp]) upgradesTo[comp] = [];
+      upgradesTo[comp].push(k);
+    });
+  });
+  const focusedAlliesSet  = new Set(state?.focused?.allies  || []);
+  const focusedEnemiesSet = new Set(state?.focused?.enemies || []);
+  const anyAllyFocused  = focusedAlliesSet.size  > 0;
+  const anyEnemyFocused = focusedEnemiesSet.size > 0;
+  const selfWeight  = b.values?.self_weight  || {};
+  const enemyW      = b.values?.enemy_weight || {};
+  const allyW       = b.values?.ally_weight  || {};
+  const allyHeroes  = MATCH.allies.filter(n => n !== b.heroName);
+  // Focused heroes count 2× in their team vector
+  const allySelf    = simFocusedAvg(allyHeroes,    'self_score',   focusedAlliesSet);
+  const enemyEnemy  = simFocusedAvg(MATCH.enemies, 'enemy_weight', focusedEnemiesSet);
+  const allyAssist  = simFocusedAvg(allyHeroes,    'ally_weight',  focusedAlliesSet);
+  // Multipliers — bumped a notch when *any* character on that side is focused
+  const balAllyMult   = anyAllyFocused  ? 0.65 : 0.5;
+  const balEnemyMult  = anyEnemyFocused ? 0.95 : 0.75;
+  const ctrAssistMult = anyAllyFocused  ? 0.55 : 0.4;
+  const ctrEnemyMult  = anyEnemyFocused ? 1.85 : 1.5;
+  // Strength keeps very small ally/enemy influence per spec
+  const strAllyMult   = anyAllyFocused  ? 0.20 : 0.15;
+  const strEnemyMult  = anyEnemyFocused ? 0.27 : 0.20;
+  // cosine-match guide: self + ally·M - enemy·M, clamped >= 0
+  const balanceGuide = {};
+  tagKeys.forEach(t => {
+    balanceGuide[t] = Math.max(0,
+      (selfWeight[t] || 0) + balAllyMult * (allySelf[t] || 0) - balEnemyMult * (enemyEnemy[t] || 0));
+  });
+  // counter guide: amplify enemy + counter-tag set
+  const counterGuide = {};
+  tagKeys.forEach(t => {
+    let v = (selfWeight[t] || 0)
+          + ctrAssistMult * (allyAssist[t] || 0)
+          + ctrEnemyMult  * Math.max(0, enemyEnemy[t] || 0);
+    if (SIM_COUNTER_TAGS.has(t)) v += 0.5;
+    counterGuide[t] = Math.max(0, v);
+  });
+  return {
+    tagKeys, selfWeight, enemyW, allyW, allySelf, enemyEnemy, allyAssist,
+    balanceGuide, counterGuide, upgradesTo,
+    strAllyMult, strEnemyMult,
+    focusedAlliesSet, focusedEnemiesSet,
+  };
+}
+
+function simDot(itemValues, guide, keys) {
+  let s = 0;
+  keys.forEach(t => { s += (itemValues[t] || 0) * (guide[t] || 0); });
+  return s;
+}
+
+function simScoreStrength(it, ctx, phase) {
+  // bpScore-style with reduced ally + enemy. Multipliers come from ctx so a
+  // focused ally/enemy bumps strength a notch too (per the user's spec).
+  const tier = bpItemMap[it.key]?.tier ?? 800;
+  const gm   = tierMult(tier) || 1;
+  const base = (it.ally / gm) * (ctx.strAllyMult ?? 0.15)
+             + (it.self / gm)
+             + (it.enemy / gm) * (ctx.strEnemyMult ?? 0.20);
+  return base * getPhaseTierMult(phase, tier);
+}
+
+function simScoreBalance(it, ctx, phase) {
+  const tier = bpItemMap[it.key]?.tier ?? 800;
+  const raw = simDot(it.values || {}, ctx.balanceGuide, ctx.tagKeys);
+  return raw * getPhaseTierMult(phase, tier);
+}
+
+function simScoreCounter(it, ctx, phase) {
+  const tier = bpItemMap[it.key]?.tier ?? 800;
+  const raw = simDot(it.values || {}, ctx.counterGuide, ctx.tagKeys);
+  return raw * getPhaseTierMult(phase, tier);
+}
+
+// ── Recommendation per column ───────────────────────────────────────────
+// Returns { affordable: [{key, score, eff}, ...], soon, later } — top 2
+// affordable sorted by score, plus a "soon" preview (≤ 1.5× current souls)
+// and a "later/important" preview (high score regardless of affordability).
+function simRecommendCol(state, b, ctx, scorer, constraints) {
+  const ownedSet  = new Set(state.owned);
+  const consumed  = new Set(state.consumed);
+  const blocked   = new Set(state.blocked);
+  const phase     = SIM_TICK_PHASE[state.tick] || 'Late';
+  const candidates = [];
+  b.items.forEach(it => {
+    const k = it.key;
+    if (ownedSet.has(k) || consumed.has(k)) return;
+    if (blocked.has(k)) return;
+    if (constraints.blacklist.has(k)) return;
+    // skip subsumed: if any upgrade of this item is already owned
+    const upgrades = ctx.upgradesTo[k] || [];
+    if (upgrades.some(u => ownedSet.has(u))) return;
+    const eff = simEffectiveCost(k, ownedSet);
+    let score = scorer(it, ctx, phase);
+    if (constraints.signature.has(k)) score *= 1.5;
+    if (constraints.required.has(k))  score *= 2.0;
+    candidates.push({ key: k, score, eff, item: it });
+  });
+  candidates.sort((a, b) => b.score - a.score);
+  // Top 2 affordable take the "main" slots. The "soon" and "later" slots
+  // hold the next-best and a forward-looking important pick respectively
+  // — and stay visible even when the player can already afford them
+  // (in which case the cards become selectable, not preview-only).
+  const used = new Set();
+  const affordable = [];
+  for (const c of candidates) {
+    if (affordable.length >= 2) break;
+    if (c.eff <= state.remaining) { affordable.push({ ...c, slot: 'main' }); used.add(c.key); }
+  }
+  const soonCutoff = Math.max(state.remaining * 1.5, state.remaining + 1500);
+  let soon = null;
+  for (const c of candidates) {
+    if (used.has(c.key)) continue;
+    // Prefer the highest-scoring next pick. If lots are affordable, this is
+    // simply the 3rd-best; if money is tight, it's the best within reach.
+    if (c.eff <= soonCutoff) { soon = { ...c, slot: 'soon' }; used.add(c.key); break; }
+  }
+  let later = null;
+  for (const c of candidates) {
+    if (used.has(c.key)) continue;
+    const tier = bpItemMap[c.key]?.tier || 0;
+    const important = constraints.required.has(c.key)
+                   || constraints.signature.has(c.key)
+                   || tier >= 6400;
+    if (important) { later = { ...c, slot: 'later' }; used.add(c.key); break; }
+  }
+  return { affordable, soon, later };
+}
+
+// Resolve constraints (signature/required/blacklist) for a build.
+function simResolveConstraints(b) {
+  const empty = { signature: new Set(), required: new Set(), blacklist: new Set() };
+  if (!b) return empty;
+  const heroBuilds = MATCH.heroData[b.heroName]?.builds;
+  if (heroBuilds) {
+    const own = heroBuilds[b.buildIdx] || heroBuilds.find(hb => hb.name === b.name);
+    if (own) {
+      const r = resolveBuildConstraints(own, heroBuilds);
+      return {
+        signature: r.signature_items,
+        required:  r.required_items,
+        blacklist: r.blacklist_items,
+      };
+    }
+  }
+  return {
+    signature: new Set(b.signature_items || []),
+    required:  new Set(b.required_items  || []),
+    blacklist: new Set(b.blacklist_items || []),
+  };
+}
+
+// ── Ally / enemy attribution ────────────────────────────────────────────
+function simAttributionIcons(itemKey, b, ctx) {
+  const it = b.items.find(x => x.key === itemKey);
+  const itemSelfScore = bpItemMap[itemKey]?.values?.self_score || it?.values || {};
+  const allyMatches = [];
+  const enemyMatches = [];
+  // Ally: each ally's ally_weight × this item's self_score
+  MATCH.allies.forEach(n => {
+    if (n === b.heroName) return;
+    const hero = MATCH.heroData[n]; if (!hero) return;
+    const idx  = MATCH.selectedBuilds[n] ?? 0;
+    const build = hero.builds[idx] || hero.builds[0];
+    const aw = (build && _rsvCache[n]?.[build.name]?.ally_weight) || {};
+    let s = 0;
+    Object.keys(aw).forEach(t => { s += (itemSelfScore[t] || 0) * (aw[t] || 0); });
+    if (s >= EFFECT_THRESH.ally.norm) allyMatches.push({ name: n, score: s, mini: hero.mini_image_path });
+  });
+  // Enemy: -Σ(item.self_score × enemy.enemy_weight) — positive when item counters them
+  MATCH.enemies.forEach(n => {
+    const hero = MATCH.heroData[n]; if (!hero) return;
+    const idx  = MATCH.selectedBuilds[n] ?? 0;
+    const build = hero.builds[idx] || hero.builds[0];
+    const ew = (build && _rsvCache[n]?.[build.name]?.enemy_weight) || {};
+    let s = 0;
+    Object.keys(ew).forEach(t => { s += (itemSelfScore[t] || 0) * (ew[t] || 0); });
+    s = -s;
+    if (s >= EFFECT_THRESH.enemy.norm) enemyMatches.push({ name: n, score: s, mini: hero.mini_image_path });
+  });
+  return { allies: allyMatches.sort((a,b)=>b.score-a.score).slice(0,3),
+           enemies: enemyMatches.sort((a,b)=>b.score-a.score).slice(0,3),
+           allyExtra: Math.max(0, allyMatches.length - 3),
+           enemyExtra: Math.max(0, enemyMatches.length - 3) };
+}
+
+// ── Open / resume / reset ───────────────────────────────────────────────
+async function openSimulation(heroName, buildIdx, b) {
+  // Ensure heroData/items are loaded for scoring
+  if (!MATCH.itemData.length) MATCH.itemData = await api.get('/api/items');
+  bpItemMap = {};
+  MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+  // Load allies/enemies hero data so attribution & guides work
+  const everyone = [...new Set([heroName, ...MATCH.allies, ...MATCH.enemies])];
+  for (const n of everyone) {
+    if (!MATCH.heroData[n]) MATCH.heroData[n] = await api.get(`/api/heroes/${n}`);
+  }
+  const key = simKey(heroName, buildIdx);
+  if (!MATCH.simStates[key]) MATCH.simStates[key] = simNewState();
+  // First tick income hasn't been granted yet?
+  const st = MATCH.simStates[key];
+  if (st.tick === 0 && st.totalEarned === 0 && !st.history.length) {
+    st.remaining   = SIM_TICK_INCOME[0];
+    st.totalEarned = SIM_TICK_INCOME[0];
+  }
+  SIM.current = { heroName, buildIdx, b, key };
+  document.getElementById('sim-title').textContent = `${MATCH.heroData[heroName]?.eng_name || heroName} — ${b.name}`;
+  document.getElementById('sim-subtitle').textContent =
+    `${MATCH.allies.filter(n=>n!==heroName).length} allies vs ${MATCH.enemies.length} enemies · ${MATCH.bpAlgo} · ${MATCH.scoreFormula}`;
+  showPage('sim');
+  renderSim();
+}
+
+function simStateOrFail() {
+  if (!SIM.current) return null;
+  return MATCH.simStates[SIM.current.key] || null;
+}
+
+// ── Render ──────────────────────────────────────────────────────────────
+function renderSim() {
+  const cur = SIM.current; if (!cur) return;
+  const state = simStateOrFail(); if (!state) return;
+  const b = cur.b;
+  const ctx = simBuildCtx(b, state);
+  const constraints = simResolveConstraints(b);
+  const slotCap = Math.min(SIM_BASE_SLOT_CAP + state.slotsUnlocked, SIM_MAX_SLOT_CAP);
+  const ownedCount = state.owned.length;
+  const phase = SIM_TICK_PHASE[state.tick] || 'Done';
+
+  // Stats
+  document.getElementById('sim-souls').textContent  = state.remaining.toLocaleString();
+  document.getElementById('sim-earned').textContent = state.totalEarned.toLocaleString();
+  document.getElementById('sim-tick').textContent   = `${state.tick + 1}/${SIM_NUM_TICKS}`;
+  document.getElementById('sim-phase').textContent  = phase;
+  document.getElementById('sim-slots').textContent  = `${ownedCount}/${slotCap}`;
+  document.getElementById('sim-slot-unlock').disabled = slotCap >= SIM_MAX_SLOT_CAP;
+  document.getElementById('sim-slot-unlock').style.display = slotCap >= SIM_MAX_SLOT_CAP ? 'none' : '';
+  document.getElementById('sim-back').disabled    = state.history.length === 0;
+  document.getElementById('sim-forward').disabled = !state.pendingChoice;
+  document.getElementById('sim-sell').style.display = ownedCount >= slotCap ? '' : 'none';
+
+  // Done?
+  const done = state.tick >= SIM_NUM_TICKS;
+  document.getElementById('sim-skip').disabled    = done;
+  document.getElementById('sim-override').disabled = done;
+  if (done) {
+    document.getElementById('sim-col-balance').innerHTML = '<div class="sim-empty">Match complete — save the log to keep this run.</div>';
+    document.getElementById('sim-col-strength').innerHTML = '';
+    document.getElementById('sim-col-counter').innerHTML = '';
+  } else {
+    const recBal = simRecommendCol(state, b, ctx, simScoreBalance,  constraints);
+    const recStr = simRecommendCol(state, b, ctx, simScoreStrength, constraints);
+    const recCtr = simRecommendCol(state, b, ctx, simScoreCounter,  constraints);
+
+    // Most-recommended-overall: top score across all 3 columns (with required
+    // boost). Affordable soon/later cards are eligible too — they're selectable.
+    const collectAffordable = (rec, col) => {
+      const arr = rec.affordable.map(c => ({ ...c, col }));
+      if (rec.soon  && rec.soon.eff  <= state.remaining) arr.push({ ...rec.soon,  col });
+      if (rec.later && rec.later.eff <= state.remaining) arr.push({ ...rec.later, col });
+      return arr;
+    };
+    const all = [
+      ...collectAffordable(recBal, 'balance'),
+      ...collectAffordable(recStr, 'strength'),
+      ...collectAffordable(recCtr, 'counter'),
+    ];
+    const topAffordable = all.sort((a,b) => b.score - a.score)[0];
+    const skipScoreBaseline = all.length ? (all.reduce((s,c)=>s+c.score,0) / all.length) * 0.7 : 0;
+    const shouldSkip = !topAffordable || topAffordable.score < skipScoreBaseline;
+    const topKey = topAffordable ? topAffordable.key : null;
+
+    renderSimCol('sim-col-balance',  recBal, b, ctx, constraints, state, topKey, 'balance');
+    renderSimCol('sim-col-strength', recStr, b, ctx, constraints, state, topKey, 'strength');
+    renderSimCol('sim-col-counter',  recCtr, b, ctx, constraints, state, topKey, 'counter');
+
+    // Mark skip button as the most-recommended choice if appropriate
+    document.getElementById('sim-skip').classList.toggle('is-most-rec', shouldSkip);
+  }
+
+  renderSimTeamComp(state, b);
+  renderSimInventory(state);
+  renderSimHistory(state);
+  saveMatchState();
+}
+
+function renderSimCol(elId, rec, b, ctx, constraints, state, topKey, colName) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  const make = c => makeSimCard(c, b, ctx, constraints, state, topKey, colName);
+  rec.affordable.forEach(c => el.appendChild(make(c)));
+  if (rec.soon)  el.appendChild(make(rec.soon));
+  if (rec.later) el.appendChild(make(rec.later));
+  if (!rec.affordable.length && !rec.soon && !rec.later) {
+    el.appendChild(Object.assign(document.createElement('div'),
+      { className: 'sim-empty', textContent: 'Nothing left in this column.' }));
+  }
+}
+
+function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
+  // A card is preview-only (non-interactive, dimmed) only when the player
+  // can't afford it. Affordable soon/later cards stay fully selectable.
+  const isAffordable = c.eff <= state.remaining;
+  const isPreview = !isAffordable;
+  const card = document.createElement('div');
+  card.className = 'sim-card' + (isPreview ? ' is-preview' : '');
+  if (constraints.required.has(c.key))  card.classList.add('is-required');
+  else if (constraints.signature.has(c.key)) card.classList.add('is-signature');
+  if (c.key === topKey && !isPreview)        card.classList.add('is-most-rec');
+  if (state.pendingChoice && state.pendingChoice.key === c.key && state.pendingChoice.col === colName) {
+    card.classList.add('is-selected');
+  }
+  const it = bpItemMap[c.key];
+  const img = it?.image_path ? srcUrl(it.image_path) : '';
+  const tier = it?.tier || 0;
+  const attrib = simAttributionIcons(c.key, b, ctx);
+  const allyIcons = attrib.allies.map(a =>
+    `<img class="sim-attrib-mini sim-attrib-ally" src="${srcUrl(a.mini)}" title="Helps ${MATCH.heroData[a.name]?.eng_name||a.name}">`
+  ).join('') + (attrib.allyExtra ? `<span class="sim-attrib-extra">+${attrib.allyExtra}</span>` : '');
+  const enemyIcons = attrib.enemies.map(e =>
+    `<img class="sim-attrib-mini sim-attrib-enemy" src="${srcUrl(e.mini)}" title="Counters ${MATCH.heroData[e.name]?.eng_name||e.name}">`
+  ).join('') + (attrib.enemyExtra ? `<span class="sim-attrib-extra">+${attrib.enemyExtra}</span>` : '');
+  card.innerHTML = `
+    ${img ? `<img class="sim-card-img" src="${img}" alt="">` : '<div class="sim-card-img sim-card-noimg"></div>'}
+    <div class="sim-card-body">
+      <div class="sim-card-name">${it?.name || c.key}</div>
+      <div class="sim-card-meta">
+        <span class="sim-card-cost">${c.eff.toLocaleString()}</span>
+        <span class="sim-card-tier">T${Math.round(tier/800)} · ${tier}</span>
+      </div>
+      <div class="sim-card-attrib">${allyIcons}${enemyIcons}</div>
+    </div>
+    ${c.slot === 'soon'  ? '<div class="sim-preview-badge">next</div>'    : ''}
+    ${c.slot === 'later' ? '<div class="sim-preview-badge">horizon</div>' : ''}
+    ${constraints.required.has(c.key)   ? '<div class="sim-flag sim-flag-req">REQ</div>' : ''}
+    ${constraints.signature.has(c.key) && !constraints.required.has(c.key) ? '<div class="sim-flag sim-flag-sig">★</div>' : ''}
+    <button class="sim-block-btn" title="Don't recommend again">⊘</button>`;
+  card.addEventListener('click', e => {
+    if (e.target.closest('.sim-block-btn')) return;
+    if (isPreview) return;
+    state.pendingChoice = { col: colName, key: c.key, override: false };
+    renderSim();
+  });
+  card.querySelector('.sim-block-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    if (!state.blocked.includes(c.key)) state.blocked.push(c.key);
+    if (state.pendingChoice && state.pendingChoice.key === c.key) state.pendingChoice = null;
+    renderSim();
+  });
+  return card;
+}
+
+function renderSimHistory(state) {
+  const host = document.getElementById('sim-history');
+  host.innerHTML = '';
+  // Most recent on top
+  [...state.history].reverse().forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'sim-history-row sim-h-' + h.action + (h.override ? ' is-override' : '');
+    if (h.action === 'skip') {
+      row.innerHTML = `<span class="sim-h-tick">${h.tick + 1}</span>
+        <span class="sim-h-phase">${h.phase}</span>
+        <span class="sim-h-text">— skipped —</span>`;
+    } else if (h.action === 'unlock') {
+      row.innerHTML = `<span class="sim-h-tick">${h.tick + 1}</span>
+        <span class="sim-h-phase">${h.phase}</span>
+        <span class="sim-h-text">+ slot unlocked</span>`;
+    } else {
+      const it = bpItemMap[h.key];
+      const img = it?.image_path ? `<img class="sim-h-img" src="${srcUrl(it.image_path)}">` : '';
+      const verb = h.action === 'sell' ? 'sold' : (h.action === 'upgrade' ? 'upgraded' : 'bought');
+      row.innerHTML = `<span class="sim-h-tick">${h.tick + 1}</span>
+        <span class="sim-h-phase">${h.phase}</span>
+        ${img}
+        <span class="sim-h-text">${verb} <b>${it?.name || h.key}</b>${h.override ? ' (override)' : ''}</span>`;
+    }
+    host.appendChild(row);
+  });
+  if (!state.history.length) {
+    host.innerHTML = '<div class="sim-empty sim-empty-sm">No moves yet — pick or skip to start.</div>';
+  }
+}
+
+// ── Team comp + focus + per-hero hover preview ──────────────────────────
+function renderSimTeamComp(state, b) {
+  const host = document.getElementById('sim-team-comp');
+  if (!host) return;
+  host.innerHTML = '';
+  const allyHeroes = MATCH.allies.filter(n => n !== b.heroName);
+  const focusedAllies  = new Set(state.focused?.allies  || []);
+  const focusedEnemies = new Set(state.focused?.enemies || []);
+
+  const makeRow = (heroes, side, focusedSet) => {
+    if (!heroes.length) return null;
+    const row = document.createElement('div');
+    row.className = `sim-team-row sim-team-${side}`;
+    heroes.forEach(n => {
+      const hero = MATCH.heroData[n] || S.heroList.find(h => h.normalized_name === n);
+      const mini = hero?.mini_image_path ? srcUrl(hero.mini_image_path) : '';
+      const btn = document.createElement('div');
+      btn.className = `sim-team-mini sim-team-mini-${side}`
+        + (focusedSet.has(n) ? ' is-focused' : '');
+      btn.dataset.hero = n;
+      btn.dataset.side = side;
+      btn.title = (hero?.eng_name || n) + ' — click to ' + (focusedSet.has(n) ? 'unfocus' : 'focus');
+      btn.innerHTML = mini ? `<img src="${mini}" alt="">` : '';
+      btn.addEventListener('click', () => simToggleFocus(n, side));
+      btn.addEventListener('mouseenter', e => simShowTeamTooltip(e.currentTarget, n, side, b, state));
+      btn.addEventListener('mouseleave', simHideTeamTooltip);
+      row.appendChild(btn);
+    });
+    return row;
+  };
+  const allyRow  = makeRow(allyHeroes, 'ally', focusedAllies);
+  const enemyRow = makeRow(MATCH.enemies, 'enemy', focusedEnemies);
+  if (allyRow)  host.appendChild(allyRow);
+  if (enemyRow) host.appendChild(enemyRow);
+  if (!allyRow && !enemyRow) {
+    host.innerHTML = '<div class="sim-empty sim-empty-sm">No allies/enemies set.</div>';
+  }
+}
+
+function simToggleFocus(name, side) {
+  const state = simStateOrFail(); if (!state) return;
+  if (!state.focused) state.focused = { allies: [], enemies: [] };
+  const list = side === 'ally' ? state.focused.allies : state.focused.enemies;
+  const i = list.indexOf(name);
+  if (i >= 0) list.splice(i, 1); else list.push(name);
+  renderSim();
+}
+
+// Top assist (for ally) or top counter (for enemy) item, split into the best
+// affordable pick and the best unaffordable pick. Skips owned/consumed/blocked.
+function simHeroPickPreview(heroName, side, b, state) {
+  const ownedSet = new Set(state.owned);
+  const consumed = new Set(state.consumed);
+  const blocked  = new Set(state.blocked);
+  const hero = MATCH.heroData[heroName];
+  const idx  = MATCH.selectedBuilds[heroName] ?? 0;
+  const build = hero?.builds?.[idx] || hero?.builds?.[0];
+  // Ally: "assist" = item.self_score · ally.ally_weight (positive = helps them)
+  // Enemy: "counter" = -(item.self_score · enemy.enemy_weight) (positive = hurts them)
+  const wKey = side === 'ally' ? 'ally_weight' : 'enemy_weight';
+  const wVec = (build && _rsvCache[heroName]?.[build.name]?.[wKey]) || {};
+  const sign = side === 'ally' ? 1 : -1;
+  const candidates = [];
+  b.items.forEach(it => {
+    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return;
+    let s = 0;
+    Object.keys(wVec).forEach(t => { s += (it.values?.[t] || 0) * (wVec[t] || 0); });
+    s *= sign;
+    if (s <= 0) return;
+    candidates.push({ key: it.key, score: s, eff: simEffectiveCost(it.key, ownedSet) });
+  });
+  candidates.sort((a, b) => b.score - a.score);
+  const aff   = candidates.find(c => c.eff <= state.remaining) || null;
+  const unaff = candidates.find(c => c.eff > state.remaining)  || null;
+  return { affordable: aff, unaffordable: unaff };
+}
+
+let _simTooltipEl = null;
+function simShowTeamTooltip(anchor, heroName, side, b, state) {
+  simHideTeamTooltip();
+  const hero = MATCH.heroData[heroName];
+  const preview = simHeroPickPreview(heroName, side, b, state);
+  const tip = document.createElement('div');
+  tip.className = `sim-tooltip sim-tooltip-${side}`;
+  const label = side === 'ally' ? 'Top assist for' : 'Top counter for';
+  const renderRow = (c, sub) => {
+    if (!c) return `<div class="sim-tip-row sim-tip-empty"><span>${sub}</span><span class="sim-tip-none">—</span></div>`;
+    const it = bpItemMap[c.key];
+    const img = it?.image_path ? `<img src="${srcUrl(it.image_path)}">` : '';
+    return `<div class="sim-tip-row">
+      ${img}
+      <div class="sim-tip-name">${it?.name || c.key}</div>
+      <div class="sim-tip-meta">
+        <span class="sim-tip-cost">${c.eff.toLocaleString()}</span>
+        <span class="sim-tip-sub">${sub}</span>
+      </div>
+    </div>`;
+  };
+  tip.innerHTML = `
+    <div class="sim-tip-hdr">${label} <b>${hero?.eng_name || heroName}</b></div>
+    ${renderRow(preview.affordable,   'affordable')}
+    ${renderRow(preview.unaffordable, 'unaffordable')}`;
+  document.body.appendChild(tip);
+  const r = anchor.getBoundingClientRect();
+  // Position to the right of the icon by default, wrapping if it'd overflow.
+  let left = r.right + 8;
+  let top  = r.top;
+  const tw = tip.offsetWidth;
+  const th = tip.offsetHeight;
+  if (left + tw > window.innerWidth - 8)  left = Math.max(8, r.left - tw - 8);
+  if (top  + th > window.innerHeight - 8) top  = Math.max(8, window.innerHeight - th - 8);
+  tip.style.left = `${left}px`;
+  tip.style.top  = `${top}px`;
+  _simTooltipEl = tip;
+}
+function simHideTeamTooltip() {
+  if (_simTooltipEl) { _simTooltipEl.remove(); _simTooltipEl = null; }
+}
+
+// ── Focus modal ──────────────────────────────────────────────────────────
+function simOpenFocus() {
+  const state = simStateOrFail(); if (!state) return;
+  const cur = SIM.current; if (!cur) return;
+  if (!state.focused) state.focused = { allies: [], enemies: [] };
+  simShowModal('Focus on…', host => {
+    const wrap = document.createElement('div');
+    wrap.className = 'sim-focus-form';
+    const allyHeroes = MATCH.allies.filter(n => n !== cur.heroName);
+    const make = (heroes, side) => {
+      const focusedSet = new Set(state.focused[side === 'ally' ? 'allies' : 'enemies']);
+      const sec = document.createElement('div');
+      sec.className = `sim-focus-section sim-focus-${side}`;
+      sec.innerHTML = `<div class="sim-focus-title">${side === 'ally' ? 'Allies' : 'Enemies'}</div>`;
+      const list = document.createElement('div');
+      list.className = 'sim-focus-list';
+      heroes.forEach(n => {
+        const hero = MATCH.heroData[n] || S.heroList.find(h => h.normalized_name === n);
+        const mini = hero?.mini_image_path ? srcUrl(hero.mini_image_path) : '';
+        const lbl = document.createElement('label');
+        lbl.className = 'sim-focus-pick';
+        lbl.innerHTML = `
+          <input type="checkbox" ${focusedSet.has(n) ? 'checked' : ''}>
+          ${mini ? `<img src="${mini}">` : ''}
+          <span>${hero?.eng_name || n}</span>`;
+        lbl.querySelector('input').addEventListener('change', e => {
+          const arr = state.focused[side === 'ally' ? 'allies' : 'enemies'];
+          const i = arr.indexOf(n);
+          if (e.target.checked && i < 0) arr.push(n);
+          else if (!e.target.checked && i >= 0) arr.splice(i, 1);
+        });
+        list.appendChild(lbl);
+      });
+      if (!heroes.length) list.innerHTML = '<div class="sim-empty">none</div>';
+      sec.appendChild(list);
+      return sec;
+    };
+    wrap.appendChild(make(allyHeroes, 'ally'));
+    wrap.appendChild(make(MATCH.enemies, 'enemy'));
+    const actions = document.createElement('div');
+    actions.className = 'sim-save-actions';
+    actions.innerHTML = `
+      <button class="btn-ghost btn-sm" id="sim-focus-clear">Clear all</button>
+      <button class="btn-primary btn-sm" id="sim-focus-done">Done</button>`;
+    wrap.appendChild(actions);
+    host.appendChild(wrap);
+    actions.querySelector('#sim-focus-clear').addEventListener('click', () => {
+      state.focused = { allies: [], enemies: [] };
+      simCloseModal(); renderSim();
+    });
+    actions.querySelector('#sim-focus-done').addEventListener('click', () => {
+      simCloseModal(); renderSim();
+    });
+  });
+}
+
+function renderSimInventory(state) {
+  const host = document.getElementById('sim-inventory');
+  host.innerHTML = '';
+  state.owned.forEach(k => {
+    const it = bpItemMap[k];
+    const img = it?.image_path ? srcUrl(it.image_path) : '';
+    const chip = document.createElement('div');
+    chip.className = 'sim-inv-chip';
+    chip.title = it?.name || k;
+    chip.innerHTML = img ? `<img src="${img}">` : '<div class="sim-card-noimg sim-inv-chip-noimg"></div>';
+    host.appendChild(chip);
+  });
+  if (!state.owned.length) {
+    host.innerHTML = '<div class="sim-empty sim-empty-sm">Empty</div>';
+  }
+}
+
+// ── Controls ────────────────────────────────────────────────────────────
+function simConfirmForward() {
+  const state = simStateOrFail(); if (!state) return;
+  const cur = SIM.current; if (!cur) return;
+  const phase = SIM_TICK_PHASE[state.tick] || 'Late';
+  const soulsBefore = state.remaining;
+
+  if (state.pendingChoice) {
+    // Slot guard — a pure buy adds 1 slot, but an upgrade that consumes any
+    // owned transitive component nets ≤ 0 slots and is always permitted, even
+    // at cap. Uses the same transitive walk as simApplyBuy so a T3 buy that
+    // would consume a T1 (via the T2 chain) still counts as an upgrade.
+    const k = state.pendingChoice.key;
+    const ownedSet = new Set(state.owned);
+    const willConsume = simOwnedAncestorComponents(k, ownedSet).length > 0;
+    const slotCap = Math.min(SIM_BASE_SLOT_CAP + state.slotsUnlocked, SIM_MAX_SLOT_CAP);
+    if (!willConsume && state.owned.length >= slotCap) {
+      toast(`Inventory full (${slotCap}/${slotCap}) — upgrade something or sell first.`, 'error');
+      return;
+    }
+    const ch = simApplyBuy(state, k);
+    if (ch) {
+      state.history.push({
+        tick: state.tick, action: ch.action, key: ch.key,
+        col: state.pendingChoice.col, override: !!state.pendingChoice.override,
+        phase, soulsBefore, costEffective: ch.cost, components: ch.components,
+      });
+    }
+    state.pendingChoice = null;
+  } else {
+    state.history.push({ tick: state.tick, action: 'skip', phase, soulsBefore });
+  }
+  simAdvanceTick(state);
+  renderSim();
+}
+
+function simSkip() {
+  const state = simStateOrFail(); if (!state) return;
+  if (state.tick >= SIM_NUM_TICKS) return;
+  state.pendingChoice = null;
+  simConfirmForward();
+}
+
+function simBack() {
+  const state = simStateOrFail(); if (!state) return;
+  const last = state.history.pop();
+  if (!last) return;
+  // Roll the tick back: subtract last income gain and undo the action
+  state.tick = Math.max(0, state.tick - 1);
+  state.totalEarned -= SIM_TICK_INCOME[state.tick] || 0;
+  state.remaining   -= SIM_TICK_INCOME[state.tick] || 0;
+  if (last.action === 'buy' || last.action === 'upgrade') {
+    state.owned = state.owned.filter(k => k !== last.key);
+    // Restore consumed components (best-effort: we don't track per-buy what was consumed,
+    // but the change record on history captured them via `components`)
+    if (last.components) {
+      last.components.forEach(c => {
+        const i = state.consumed.lastIndexOf(c);
+        if (i >= 0) { state.consumed.splice(i, 1); state.owned.push(c); }
+      });
+    }
+    state.remaining += last.costEffective || 0;
+  } else if (last.action === 'sell') {
+    state.owned.push(last.key);
+    state.sold = state.sold.filter(k => k !== last.key);
+    state.remaining -= last.refund || 0;
+  } else if (last.action === 'unlock') {
+    state.slotsUnlocked = Math.max(0, state.slotsUnlocked - 1);
+  }
+  state.pendingChoice = null;
+  renderSim();
+}
+
+function simSlotUnlock() {
+  const state = simStateOrFail(); if (!state) return;
+  const cap = Math.min(SIM_BASE_SLOT_CAP + state.slotsUnlocked, SIM_MAX_SLOT_CAP);
+  if (cap >= SIM_MAX_SLOT_CAP) return;
+  state.slotsUnlocked += 1;
+  state.history.push({
+    tick: state.tick, action: 'unlock',
+    phase: SIM_TICK_PHASE[state.tick] || 'Done', soulsBefore: state.remaining,
+  });
+  renderSim();
+}
+
+function simReset() {
+  const cur = SIM.current; if (!cur) return;
+  if (!confirm('Reset this simulation? This deletes all your tick history.')) return;
+  MATCH.simStates[cur.key] = simNewState();
+  const st = MATCH.simStates[cur.key];
+  st.remaining   = SIM_TICK_INCOME[0];
+  st.totalEarned = SIM_TICK_INCOME[0];
+  renderSim();
+}
+
+// ── Override picker (modal) ─────────────────────────────────────────────
+function simOpenOverride() {
+  const state = simStateOrFail(); if (!state) return;
+  const cur = SIM.current; if (!cur) return;
+  const ownedSet = new Set(state.owned);
+  const consumed = new Set(state.consumed);
+  const blocked  = new Set(state.blocked);
+  const items = cur.b.items.filter(it => {
+    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return false;
+    return simEffectiveCost(it.key, ownedSet) <= state.remaining;
+  }).sort((a,b) => (bpItemMap[a.key]?.tier||0) - (bpItemMap[b.key]?.tier||0)
+                || (a.key < b.key ? -1 : 1));
+  simShowModal('Override — pick any affordable item', host => {
+    const list = document.createElement('div'); list.className = 'sim-override-list';
+    items.forEach(it => {
+      const row = document.createElement('div'); row.className = 'sim-override-row';
+      const obj = bpItemMap[it.key];
+      const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
+      row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||it.key}</span>
+        <span class="sim-or-cost">${simEffectiveCost(it.key, ownedSet).toLocaleString()}</span>
+        <span class="sim-or-tier">T${Math.round((obj?.tier||0)/800)}</span>`;
+      row.addEventListener('click', e => {
+        e.stopPropagation();
+        state.pendingChoice = { col: 'override', key: it.key, override: true };
+        simCloseModal();
+        renderSim();
+      });
+      list.appendChild(row);
+    });
+    if (!items.length) list.innerHTML = '<div class="sim-empty">Nothing affordable to override with.</div>';
+    host.appendChild(list);
+  });
+}
+
+// ── Sell modal ──────────────────────────────────────────────────────────
+function simOpenSell() {
+  const state = simStateOrFail(); if (!state) return;
+  const cur = SIM.current; if (!cur) return;
+  const phase = SIM_TICK_PHASE[state.tick] || 'Late';
+  const ranked = state.owned.map(k => {
+    const it = cur.b.items.find(x => x.key === k);
+    if (!it) return { key: k, score: 0 };
+    return { key: k, score: bpScore(it, phase) };
+  }).sort((a, b) => a.score - b.score);
+  simShowModal('Sell which item?', host => {
+    const list = document.createElement('div'); list.className = 'sim-sell-list';
+    ranked.forEach((r, i) => {
+      const row = document.createElement('div'); row.className = 'sim-sell-row';
+      if (i === 0) row.classList.add('is-most-rec');
+      const obj = bpItemMap[r.key];
+      const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
+      const refund = Math.round((obj?.tier||0) * SIM_SELL_REFUND);
+      row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||r.key}</span>
+        <span class="sim-or-tier">score ${r.score.toFixed(2)}</span>
+        <span class="sim-or-cost">+${refund.toLocaleString()}</span>
+        ${i === 0 ? '<span class="sim-or-badge">recommended</span>' : ''}`;
+      row.addEventListener('click', e => {
+        e.stopPropagation();
+        const soulsBefore = state.remaining;
+        const ch = simApplySell(state, r.key);
+        if (ch) {
+          state.history.push({
+            tick: state.tick, action: 'sell', key: r.key,
+            phase, soulsBefore, refund: ch.refund,
+          });
+        }
+        simCloseModal();
+        renderSim();
+      });
+      list.appendChild(row);
+    });
+    host.appendChild(list);
+  });
+}
+
+// ── Blocked-list modal ──────────────────────────────────────────────────
+function simOpenBlocked() {
+  const state = simStateOrFail(); if (!state) return;
+  simShowModal('Blocked items', host => {
+    if (!state.blocked.length) {
+      host.innerHTML = '<div class="sim-empty">No items blocked.</div>'; return;
+    }
+    const list = document.createElement('div'); list.className = 'sim-override-list';
+    state.blocked.slice().forEach(k => {
+      const obj = bpItemMap[k];
+      const row = document.createElement('div'); row.className = 'sim-override-row';
+      const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
+      row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||k}</span>
+        <button class="btn-ghost btn-sm sim-or-unblock">Unblock</button>`;
+      row.querySelector('.sim-or-unblock').addEventListener('click', () => {
+        state.blocked = state.blocked.filter(x => x !== k);
+        simOpenBlocked();   // re-render
+        renderSim();
+      });
+      list.appendChild(row);
+    });
+    host.appendChild(list);
+  });
+}
+
+// ── Save log modal ──────────────────────────────────────────────────────
+function simOpenSaveLog() {
+  const state = simStateOrFail(); if (!state) return;
+  const cur = SIM.current; if (!cur) return;
+  simShowModal('Save simulation as training log', host => {
+    const wrap = document.createElement('div'); wrap.className = 'sim-save-form';
+    wrap.innerHTML = `
+      <div class="sim-save-row">
+        <label>Outcome</label>
+        <div class="sim-radio-group" id="sim-save-outcome">
+          <label><input type="radio" name="o" value="win"> Won</label>
+          <label><input type="radio" name="o" value="loss"> Loss</label>
+          <label><input type="radio" name="o" value="unfinished" checked> Unfinished</label>
+        </div>
+      </div>
+      <div class="sim-save-row">
+        <label>Felt</label>
+        <div class="sim-radio-group" id="sim-save-feel">
+          <label><input type="radio" name="f" value="good"> Good</label>
+          <label><input type="radio" name="f" value="neutral" checked> Neutral</label>
+          <label><input type="radio" name="f" value="bad"> Bad</label>
+        </div>
+      </div>
+      <div class="sim-save-row">
+        <label>Notes</label>
+        <textarea id="sim-save-notes" rows="3" placeholder="Optional context for the log entry…"></textarea>
+      </div>
+      <div class="sim-save-actions">
+        <button class="btn-ghost btn-sm" id="sim-save-cancel">Cancel</button>
+        <button class="btn-primary btn-sm" id="sim-save-confirm">Save</button>
+      </div>`;
+    host.appendChild(wrap);
+    wrap.querySelector('#sim-save-cancel').addEventListener('click', simCloseModal);
+    wrap.querySelector('#sim-save-confirm').addEventListener('click', async () => {
+      const outcome = wrap.querySelector('input[name="o"]:checked')?.value || 'unfinished';
+      const feel    = wrap.querySelector('input[name="f"]:checked')?.value || 'neutral';
+      const notes   = wrap.querySelector('#sim-save-notes').value.trim();
+      const payload = {
+        hero: cur.heroName,
+        build_idx: cur.buildIdx,
+        build_name: cur.b.name,
+        formula:    MATCH.scoreFormula,
+        algo:       MATCH.bpAlgo,
+        allies:  MATCH.allies,
+        enemies: MATCH.enemies,
+        self:    MATCH.self,
+        outcome, feel, notes,
+        history: state.history,
+        owned:   state.owned,
+        sold:    state.sold,
+        blocked: state.blocked,
+        total_earned: state.totalEarned,
+        slots_unlocked: state.slotsUnlocked,
+        ts: new Date().toISOString(),
+      };
+      try {
+        await api.post('/api/sim-logs', payload);
+        toast('Sim log saved', 'success');
+        simCloseModal();
+      } catch (err) {
+        toast('Save failed: ' + err, 'error');
+      }
+    });
+  });
+}
+
+// ── Tiny modal host ─────────────────────────────────────────────────────
+function simShowModal(title, builder) {
+  const host = document.getElementById('sim-modal-host');
+  host.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal sim-modal">
+        <div class="sim-modal-hdr">
+          <h2>${title}</h2>
+          <button class="btn-ghost btn-sm sim-modal-close">×</button>
+        </div>
+        <div class="sim-modal-body"></div>
+      </div>
+    </div>`;
+  host.querySelector('.sim-modal-close').addEventListener('click', simCloseModal);
+  host.querySelector('.modal-overlay').addEventListener('click', e => {
+    if (e.target.classList.contains('modal-overlay')) simCloseModal();
+  });
+  builder(host.querySelector('.sim-modal-body'));
+}
+function simCloseModal() {
+  document.getElementById('sim-modal-host').innerHTML = '';
+  simHideTeamTooltip();
+}
+
+// ── Wire ────────────────────────────────────────────────────────────────
+document.getElementById('sim-forward').addEventListener('click', simConfirmForward);
+document.getElementById('sim-skip').addEventListener('click',    simSkip);
+document.getElementById('sim-back').addEventListener('click',    simBack);
+document.getElementById('sim-slot-unlock').addEventListener('click', simSlotUnlock);
+document.getElementById('sim-reset-btn').addEventListener('click', simReset);
+document.getElementById('sim-override').addEventListener('click', simOpenOverride);
+document.getElementById('sim-sell').addEventListener('click',     simOpenSell);
+document.getElementById('sim-blocked-btn').addEventListener('click', simOpenBlocked);
+document.getElementById('sim-focus-btn').addEventListener('click',   simOpenFocus);
+document.getElementById('sim-save-btn').addEventListener('click',    simOpenSaveLog);
+document.getElementById('sim-fullscreen-btn').addEventListener('click', () => {
+  SIM.fullscreen = !SIM.fullscreen;
+  document.body.classList.toggle('sim-fullscreen', SIM.fullscreen);
+});
+document.getElementById('back-from-sim').addEventListener('click', () => {
+  if (MATCH.viewHeroName != null && MATCH.viewBuildIdx != null) {
+    showPage('calc-build');
+  } else {
+    showPage('calc-summary');
+  }
 });

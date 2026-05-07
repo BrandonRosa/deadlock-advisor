@@ -47,6 +47,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
@@ -87,8 +89,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": null,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -132,6 +138,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": -0.25,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "hybrid_damage_usage": null,
@@ -172,8 +180,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": -0.5,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_score": {
           "ability_spam": null,
@@ -217,6 +229,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "hybrid_damage_usage": null,
@@ -257,8 +271,12 @@
           "trap_block_obstruct": null,
           "ult_focused": 0.15,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -302,6 +320,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.5,
           "hybrid_damage_usage": null,
@@ -342,8 +362,12 @@
           "trap_block_obstruct": null,
           "ult_focused": 0.15,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         }
       }
     },
@@ -394,6 +418,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
@@ -434,8 +460,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": null,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -479,6 +509,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": -0.25,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "hybrid_damage_usage": null,
@@ -519,8 +551,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": -0.5,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_score": {
           "ability_spam": null,
@@ -564,6 +600,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "hybrid_damage_usage": null,
@@ -604,8 +642,12 @@
           "trap_block_obstruct": null,
           "ult_focused": 0.05,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -649,6 +691,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.75,
           "hybrid_damage_usage": null,
@@ -689,8 +733,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         }
       }
     },
@@ -741,6 +789,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": null,
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
@@ -781,8 +831,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": null,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -826,6 +880,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": -0.5,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.05,
           "horizontal_mobility": -0.5,
           "hybrid_damage_usage": null,
@@ -866,8 +922,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": -0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_score": {
           "ability_spam": null,
@@ -911,6 +971,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.25,
           "hybrid_damage_usage": null,
@@ -951,8 +1013,12 @@
           "trap_block_obstruct": null,
           "ult_focused": 1.25,
           "vertical_mobility": 0.5,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -996,6 +1062,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.25,
           "hybrid_damage_usage": null,
@@ -1036,8 +1104,12 @@
           "trap_block_obstruct": null,
           "ult_focused": 1,
           "vertical_mobility": 0.5,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         }
       }
     },
@@ -1088,6 +1160,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": null,
           "horizontal_mobility": 0.25,
           "hybrid_damage_usage": null,
@@ -1128,8 +1202,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": null,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -1173,6 +1251,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": -0.15,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": -0.25,
           "horizontal_mobility": -0.5,
           "hybrid_damage_usage": null,
@@ -1213,8 +1293,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": 0.5,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_score": {
           "ability_spam": null,
@@ -1258,6 +1342,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.25,
           "horizontal_mobility": 0.5,
           "hybrid_damage_usage": null,
@@ -1298,8 +1384,12 @@
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -1343,6 +1433,8 @@
           "gun_continuous_proc": null,
           "gun_continuous_resistance": null,
           "headshot_damage": null,
+          "high_assist_count": null,
+          "high_kill_count": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.25,
           "hybrid_damage_usage": null,
@@ -1383,16 +1475,26 @@
           "trap_block_obstruct": null,
           "ult_focused": -0.33,
           "vertical_mobility": 0.25,
-          "high_assist_count": null,
-          "high_kill_count": null
+          "engage": null,
+          "escape": null,
+          "burst_heal": null,
+          "continous_heal": null,
+          "spirit_lifesteal": null,
+          "bullet_lifesteal": null
         }
       }
     }
+  ],
+  "colors": [
+    "orange",
+    "red",
+    "grey"
   ],
   "desc_eng": "",
   "eng_name": "Bebop",
   "image_path": "/resources/heroes/bebop/portrait_bebop.png",
   "mini_image_path": "/resources/heroes/bebop/mini_icon_bebop.png",
   "normalized_name": "bebop",
+  "search_terms": [],
   "wiki_url": "https://deadlock.wiki/Bebop"
 }

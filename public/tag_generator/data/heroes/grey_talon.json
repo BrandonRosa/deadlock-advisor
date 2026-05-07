@@ -2277,7 +2277,7 @@
       }
     },
     {
-      "build_description_eng": "RE from: Rapid Rounds, High-Velocity Rounds, Opening Rounds, Extended Magazine, Headshot Booster… | Enemies: Abrams, Vindicta",
+      "build_description_eng": "RE from: Rapid Rounds, High-Velocity Rounds, Opening Rounds, Extended Magazine, Headshot Boosterâ€¦ | Enemies: Abrams, Vindicta",
       "followed_build": "General",
       "name": "Damage Heavy Gun",
       "normalized_build_name": "grey_talon_damage_heavy_gun",
@@ -2649,10 +2649,18 @@
       }
     }
   ],
+  "colors": [
+    "white",
+    "orange",
+    "yellow"
+  ],
   "desc_eng": "",
   "eng_name": "Grey Talon",
   "image_path": "/resources/heroes/grey_talon/portrait_grey_talon.png",
   "mini_image_path": "/resources/heroes/grey_talon/mini_icon_grey_talon.png",
   "normalized_name": "grey_talon",
+  "search_terms": [
+    "Talon"
+  ],
   "wiki_url": "https://deadlock.wiki/Grey_Talon"
 }
