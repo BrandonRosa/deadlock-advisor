@@ -114,6 +114,44 @@ function applyRelation(parent, child, rel) {
   return child; // '='
 }
 
+// ── Confidence (Option H: sign + scale aware) ─────────────────────────
+// `confidence` is a manual recommendation knob, default 0.
+//   adjustedScore = score + confidence × max(|score|) across the candidate set
+// Items store a single number; builds store the same shape as a tag value
+// (null / number / "+0.x" / "x1.x") so they support the =, +, x follow chain.
+function resolveBuildConfidence(build, heroBuilds, visited) {
+  visited = visited || new Set();
+  if (visited.has(build.name)) return 0;
+  visited.add(build.name);
+  let parent = 0;
+  if (build.followed_build) {
+    const pb = (heroBuilds || []).find(b => b.name === build.followed_build);
+    if (pb) {
+      const next = new Set(visited);
+      parent = resolveBuildConfidence(pb, heroBuilds, next);
+    }
+  }
+  const { value, rel } = parseWeightEntry(build.confidence);
+  if (value === null || value === undefined) return parent;
+  return applyRelation(parent, value, rel);
+}
+function itemConfidence(itemKey) {
+  const v = bpItemMap?.[itemKey]?.confidence;
+  return typeof v === 'number' ? v : 0;
+}
+// Mutates `scored` in place: each entry's `score` becomes `score + ref × confidence`,
+// where `ref = max |score|` and `confidence = lookup(entry.key)`.
+function applyConfidenceH(scored, lookupFn) {
+  if (!scored || !scored.length) return;
+  let ref = 0;
+  for (const c of scored) { const a = Math.abs(c.score); if (a > ref) ref = a; }
+  if (ref < 0.001) return;
+  scored.forEach(c => {
+    const conf = lookupFn(c) || 0;
+    if (conf) c.score += ref * conf;
+  });
+}
+
 function resolveBuildValues(build, heroBuilds, visited) {
   visited = visited || new Set();
   const COLS = ['ally_weight','self_weight','enemy_weight','self_score'];
@@ -584,6 +622,15 @@ function renderBuildContent() {
     followSel.value = build.followed_build || '';
   }
 
+  // Confidence — populate from `build.confidence` (null | number | "+x" | "x1.x")
+  const confRel = document.getElementById('bf-confidence-rel');
+  const confVal = document.getElementById('bf-confidence-val');
+  if (confRel && confVal) {
+    const { value, rel } = parseWeightEntry(build.confidence ?? null);
+    confRel.value = rel || '=';
+    confVal.value = (value === null || value === undefined) ? '' : value;
+  }
+
   const showBanner = S.currentBuildIdx === 0 && !S.currentHero.is_preset && isBuildEmpty(build);
   const banner = document.getElementById('preset-banner');
   banner.classList.toggle('hidden', !showBanner);
@@ -685,6 +732,23 @@ document.getElementById('bf-follow').addEventListener('change', () => {
   renderHeroTagTable(b);
   renderBuildConstraints();
 });
+
+// Build Confidence — operator + value combine into a single field
+// (null | number | "+0.x" | "x1.x") on the build, mirroring tag entries.
+function _bfConfidenceCommit() {
+  const b = S.currentHero?.builds?.[S.currentBuildIdx];
+  if (!b) return;
+  const rel = document.getElementById('bf-confidence-rel').value || '=';
+  const raw = document.getElementById('bf-confidence-val').value.trim();
+  if (raw === '') { b.confidence = null; }
+  else {
+    const v = Math.max(-0.5, Math.min(0.5, parseFloat(raw) || 0));
+    b.confidence = formatWeightEntry(v, rel);
+  }
+  setHeroDirty(true);
+}
+document.getElementById('bf-confidence-rel').addEventListener('change', _bfConfidenceCommit);
+document.getElementById('bf-confidence-val').addEventListener('input',  _bfConfidenceCommit);
 
 // ── Delete build ──────────────────────────────────────────────────────────────
 document.getElementById('btn-delete-build').addEventListener('click', () => {
@@ -1262,15 +1326,30 @@ function renderReChips() {
   itemCont.innerHTML = '';
   RE.items.forEach((it, i) => {
     const chip = document.createElement('div');
-    chip.className = 're-chip re-item-chip';
+    const mark = it.mark || null;       // null | 'sig' | 'req'
+    chip.className = 're-chip re-item-chip'
+      + (mark === 'sig' ? ' is-sig' : '')
+      + (mark === 'req' ? ' is-req' : '');
     const img = srcUrl(it.imagePath);
+    const markLabel = mark === 'req' ? 'REQ' : mark === 'sig' ? '★' : '○';
+    const markTitle = mark === 'req'
+      ? 'Required — click to clear (cycle: none → ★ Sig → REQ → none)'
+      : mark === 'sig'
+      ? 'Signature — click to mark Required'
+      : 'Not flagged — click to mark Signature';
     chip.innerHTML = `
       ${img ? `<img class="re-chip-img" src="${img}" alt="">` : ''}
       <span class="re-chip-pos">${i + 1}</span>
       <span class="re-chip-name">${it.name}</span>
       <span class="re-chip-tier re-tier-${it.tier}">${it.tier}★</span>
+      <button class="re-mark-btn" title="${markTitle}">${markLabel}</button>
       <button class="re-chip-x" title="Remove">×</button>`;
     chip.querySelector('.re-chip-x').addEventListener('click', () => { RE.items.splice(i, 1); renderReChips(); });
+    chip.querySelector('.re-mark-btn').addEventListener('click', () => {
+      // Cycle: none → sig → req → none
+      RE.items[i].mark = mark === null ? 'sig' : mark === 'sig' ? 'req' : null;
+      renderReChips();
+    });
     itemCont.appendChild(chip);
   });
 
@@ -1343,12 +1422,18 @@ async function submitReverseEngineer() {
       tierAvg[tier] = avg;
     });
 
+    // Mark multiplier — items the user flagged as Signature/Required carry
+    // disproportionate weight, since they're the *defining* picks of the
+    // build. This makes Required items dominate the inferred self_weight,
+    // matching how the build will actually score those items at run-time.
+    const MARK_MULT = { sig: 1.6, req: 2.5 };
     const swRaw = {}; tagCodes.forEach(t => swRaw[t] = 0);
     let totalW = 0;
     RE.items.forEach((it, i) => {
       const posW  = 1 / (1 + i * 0.12);   // earlier = more weight; decay ~50% by item 6
       const tierW = TIER_W[it.tier] || 1.0;
-      const w     = posW * tierW;
+      const markW = MARK_MULT[it.mark] || 1.0;
+      const w     = posW * tierW * markW;
       totalW += w;
       const avg = tierAvg[it.tier] || {};
       tagCodes.forEach(t => {
@@ -1438,7 +1523,11 @@ async function submitReverseEngineer() {
     const itemList   = RE.items.slice(0, 5).map(it => it.name).join(', ') + (RE.items.length > 5 ? '…' : '');
     const enemyList  = RE.enemies.map(n => S.heroList.find(h => h.normalized_name === n)?.eng_name || n).join(', ');
     const allyList   = RE.allies.map(n => S.heroList.find(h => h.normalized_name === n)?.eng_name || n).join(', ');
+    const sigKeys = RE.items.filter(it => it.mark === 'sig').map(it => it.key);
+    const reqKeys = RE.items.filter(it => it.mark === 'req').map(it => it.key);
     let desc = `RE from: ${itemList}`;
+    if (sigKeys.length) desc += ` | Sig: ${RE.items.filter(it => it.mark === 'sig').map(it => it.name).join(', ')}`;
+    if (reqKeys.length) desc += ` | Req: ${RE.items.filter(it => it.mark === 'req').map(it => it.name).join(', ')}`;
     if (enemyList) desc += ` | Enemies: ${enemyList}`;
     if (allyList)  desc += ` | Allies: ${allyList}`;
 
@@ -1446,6 +1535,9 @@ async function submitReverseEngineer() {
       name: buildName, normalized_build_name: code,
       build_description_eng: desc,
       followed_build: 'General',
+      signature_items: sigKeys,
+      required_items:  reqKeys,
+      blacklist_items: [],
       values: buildValues,
     });
     S.currentBuildIdx = S.currentHero.builds.length - 1;
@@ -1577,6 +1669,7 @@ function renderItemEditPage() {
   document.getElementById('if-image').value   = it.image_path        || '';
   document.getElementById('if-remarks').value       = it.remarks           || '';
   document.getElementById('if-upgrades-from').value = (it.upgrades_from || []).join(', ');
+  document.getElementById('if-confidence').value    = it.confidence ?? '';
 
   const catBadge = document.getElementById('item-cat-badge');
   catBadge.textContent = it.category;
@@ -1627,7 +1720,7 @@ async function removeCompareTo(key) {
 }
 
 // Item field changes
-['if-name','if-cat','if-tier','if-wiki','if-image','if-remarks','if-upgrades-from'].forEach(id => {
+['if-name','if-cat','if-tier','if-wiki','if-image','if-remarks','if-upgrades-from','if-confidence'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const it = S.currentItem;
     if (!it) return;
@@ -1639,6 +1732,8 @@ async function removeCompareTo(key) {
     it.remarks       = document.getElementById('if-remarks').value;
     it.upgrades_from = document.getElementById('if-upgrades-from').value
       .split(',').map(s => s.trim()).filter(Boolean);
+    const confRaw = document.getElementById('if-confidence').value.trim();
+    it.confidence = confRaw === '' ? null : Math.max(-0.5, Math.min(0.5, parseFloat(confRaw) || 0));
     setImg('item-icon-img', it.image_path);
     document.getElementById('item-cat-badge').textContent = it.category;
     document.getElementById('item-cat-badge').className   = `cat-badge ${it.category}`;
@@ -2389,6 +2484,17 @@ function computeResults() {
       buildResult.buildPath = computeBuildPath(buildResult, MATCH.bpAlgo);
       return buildResult;
     });
+
+    // Apply per-build Confidence (Option H) to the totals — `ref` is the
+    // max absolute total across this hero's non-General builds, then each
+    // build's resolved confidence shifts its total by `ref × confidence`.
+    const heroBuilds = heroData.builds || [];
+    const confScored = buildResults.map(br => ({
+      br, score: br.total,
+      conf: resolveBuildConfidence(heroBuilds[br.buildIdx] || {}, heroBuilds),
+    }));
+    applyConfidenceH(confScored, c => c.conf);
+    confScored.forEach(c => { c.br.total = c.score; c.br.confidence = c.conf; });
 
     const nonGen    = buildResults.filter(b => !b.isGeneral);
     const ranked    = nonGen.length ? [...nonGen].sort((a, b) => b.total - a.total) : [buildResults[0]];
@@ -3415,7 +3521,20 @@ function bpScore(it, phaseName) {
   const tier    = bpItemMap[it.key]?.tier ?? 800;
   const gm      = tierMult(tier) || 1;
   const base    = (it.ally / gm) * 0.75 + (it.self / gm) + (it.enemy / gm);
-  return base * getPhaseTierMult(phaseName, tier);
+  return base * getPhaseTierMult(phaseName, tier) + confShift(it.key, phaseName);
+}
+
+// Per-item Confidence shift used by every leaf scorer in computeBuildPath
+// (bpScore, cosineScoreFn, the egScore variants, lookahead's inner pick).
+// Uses getPhaseTierMult as a stable per-phase per-tier reference so the bump
+// stays sign-correct and scale-aware even when the underlying score is small
+// or negative — matching Option H behavior without needing the candidate set.
+function confShift(itemKey, phaseName) {
+  const conf = itemConfidence(itemKey);
+  if (!conf) return 0;
+  const tier = bpItemMap[itemKey]?.tier ?? 800;
+  const mult = getPhaseTierMult(phaseName || 'Mid', tier) || 1;
+  return conf * Math.abs(mult) * 2;   // ×2 ≈ avg pool-max, matches Option H magnitude
 }
 
 // ── Build-path algorithm utilities ────────────────────────────────────────
@@ -3887,7 +4006,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       pathValue = Math.max(pathValue, upgradeScore * Math.exp(-0.1 * minutes));
     });
     const futureWeight = 1.0 - gamePhase * 0.6;
-    return blended + pathValue * futureWeight;
+    return blended + pathValue * futureWeight + confShift(k, phaseName);
   }
 
   // ── Main greedy for one phase ─────────────────────────────────────────────
@@ -4136,6 +4255,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         let ps = 0;
         tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) ps += (sit.values?.[t] || 0) * (sg[t] || 0); });
         ps *= getPhaseTierMult(phaseName, bpItemMap[ck]?.tier ?? 800);
+        ps += confShift(ck, phaseName);
         if (ps > bv) { bv = ps; bk = ck; }
       }
       if (!bk) break;
@@ -4365,7 +4485,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return Math.max(0, s);
     }
     function egScore(k, it, invContrib, soulScale) {
-      return egDeficit(k, it, invContrib, soulScale) * egTierMult(k);
+      return egDeficit(k, it, invContrib, soulScale) * egTierMult(k) + confShift(k);
     }
     // Marginal for upgrades: net gain above the consumed component
     function egMarginal(k, it, invContrib, soulScale) {
@@ -4565,7 +4685,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       });
       return Math.max(0, s);
     }
-    function egScore(k, it, ic, ss) { return egDeficit(it, ic, ss) * egTierMult(k); }
+    function egScore(k, it, ic, ss) { return egDeficit(it, ic, ss) * egTierMult(k) + confShift(k); }
     function egMarginal(k, it, ic, ss) {
       return Math.max(0, egScore(k, it, ic, ss) - (bpItemMap[k]?.upgrades_from||[]).filter(c => owned.has(c) && scoredMap[c]).reduce((s, c) => s + egScore(c, scoredMap[c], ic, ss), 0));
     }
@@ -4691,7 +4811,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       });
       return Math.max(0, s);
     }
-    function egScore(k, it, ic, ss) { return egDeficit(k, it, ic, ss) * egTierMult(k); }
+    function egScore(k, it, ic, ss) { return egDeficit(k, it, ic, ss) * egTierMult(k) + confShift(k); }
     function egMarginal(k, it, ic, ss) {
       return Math.max(0, egScore(k, it, ic, ss) - (bpItemMap[k]?.upgrades_from||[]).filter(c => owned.has(c) && scoredMap[c]).reduce((s, c) => s + egScore(c, scoredMap[c], ic, ss), 0));
     }
@@ -6513,6 +6633,9 @@ function simRecommendCol(state, b, ctx, scorer, constraints) {
     if (constraints.required.has(k))  score *= 2.0;
     candidates.push({ key: k, score, eff, item: it });
   });
+  // Confidence (Option H) — bias each candidate by its item-level knob,
+  // scaled to this column's score range. ref is computed inside the helper.
+  applyConfidenceH(candidates, c => itemConfidence(c.key));
   candidates.sort((a, b) => b.score - a.score);
   // Top 2 affordable take the "main" slots. The "soon" and "later" slots
   // hold the next-best and a forward-looking important pick respectively
@@ -6869,6 +6992,7 @@ function simHeroPickPreview(heroName, side, b, state) {
     if (s <= 0) return;
     candidates.push({ key: it.key, score: s, eff: simEffectiveCost(it.key, ownedSet) });
   });
+  applyConfidenceH(candidates, c => itemConfidence(c.key));
   candidates.sort((a, b) => b.score - a.score);
   const aff   = candidates.find(c => c.eff <= state.remaining) || null;
   const unaff = candidates.find(c => c.eff > state.remaining)  || null;
@@ -7095,8 +7219,10 @@ function simOpenOverride() {
   const items = cur.b.items.filter(it => {
     if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return false;
     return simEffectiveCost(it.key, ownedSet) <= state.remaining;
-  }).sort((a,b) => (bpItemMap[a.key]?.tier||0) - (bpItemMap[b.key]?.tier||0)
-                || (a.key < b.key ? -1 : 1));
+  }).sort((a,b) =>
+       (bpItemMap[a.key]?.tier||0) - (bpItemMap[b.key]?.tier||0)
+    || itemConfidence(b.key)        - itemConfidence(a.key)   // higher Confidence first within tier
+    || (a.key < b.key ? -1 : 1));
   simShowModal('Override — pick any affordable item', host => {
     const list = document.createElement('div'); list.className = 'sim-override-list';
     items.forEach(it => {
@@ -7128,7 +7254,11 @@ function simOpenSell() {
     const it = cur.b.items.find(x => x.key === k);
     if (!it) return { key: k, score: 0 };
     return { key: k, score: bpScore(it, phase) };
-  }).sort((a, b) => a.score - b.score);
+  });
+  // Confidence on sell ranking — high-confidence items resist being sold
+  // (positive conf raises their score). Sort ascending: lowest = sell pick.
+  applyConfidenceH(ranked, c => itemConfidence(c.key));
+  ranked.sort((a, b) => a.score - b.score);
   simShowModal('Sell which item?', host => {
     const list = document.createElement('div'); list.className = 'sim-sell-list';
     ranked.forEach((r, i) => {
