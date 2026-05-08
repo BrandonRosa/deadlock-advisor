@@ -1,0 +1,212 @@
+{
+  "hero": "grey_talon",
+  "build_idx": 1,
+  "build_name": "Charged Shot",
+  "formula": "v2",
+  "algo": "expert",
+  "allies": [
+    "grey_talon",
+    "dynamo",
+    "seven",
+    "lady_geist",
+    "abrams",
+    "graves"
+  ],
+  "enemies": [
+    "celeste",
+    "haze",
+    "billy",
+    "paige",
+    "infernus"
+  ],
+  "self": "grey_talon",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Was greedy and it payed off very well. MID:80981866",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "mystic_burst",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "rusted_barrel",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 900,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2100
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3300,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2100
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3300
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 6000
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "mystic_reverb",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2400
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5400
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 7000
+    },
+    {
+      "tick": 17,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 8700,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4100
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5900,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    }
+  ],
+  "owned": [
+    "mystic_burst",
+    "rusted_barrel",
+    "rapid_recharge",
+    "mystic_reverb",
+    "spirit_burn",
+    "boundless_spirit"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 27000,
+  "slots_unlocked": 0,
+  "ts": "2026-05-08T03:40:13.882Z"
+}
