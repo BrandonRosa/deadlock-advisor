@@ -111,6 +111,15 @@
             <label>Follows Build</label>
             <select id="bf-follow"><option value="">— none —</option></select>
           </div>
+          <div class="field-row bf-confidence-row" title="Manual recommendation knob for the whole build. Positive nudges this build up vs. siblings; negative nudges it down. Range ±0.5. Use the operator (=, +, x) to inherit from the followed build.">
+            <label>Confidence</label>
+            <select id="bf-confidence-rel" class="bf-conf-rel">
+              <option value="=">=</option>
+              <option value="+">+</option>
+              <option value="x">x</option>
+            </select>
+            <input id="bf-confidence-val" type="number" step="0.05" min="-0.5" max="0.5" placeholder="0" class="bf-conf-val">
+          </div>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
         <!-- Build constraints (advanced): signature/required/blacklist items + counter slots -->
@@ -185,7 +194,7 @@
         <div class="re-col">
           <div class="re-section">
             <div class="re-section-title">Build Order</div>
-            <div class="re-section-hint">Add items in purchase order. Earlier buys carry a small weight bonus; higher-tier items count more.</div>
+            <div class="re-section-hint">Add items in purchase order. Earlier buys carry a small weight bonus; higher-tier items count more. Click the <b>○</b> toggle on a chip to mark it as <b>★ Signature</b> (1.6× weight + prefilled into the build) or <b>REQ Required</b> (2.5× weight + force-bought + sticky).</div>
             <div class="re-item-search-wrap">
               <input id="re-item-search" type="text" placeholder="Search items to add…" class="re-search-input" autocomplete="off">
               <div id="re-item-dropdown" class="re-dropdown hidden"></div>
@@ -298,6 +307,10 @@
           <div class="field-row">
             <label>Remarks</label>
             <input id="if-remarks" type="text" placeholder="e.g. Only buy if enemy melees a lot" />
+          </div>
+          <div class="field-row">
+            <label title="Manual recommendation knob. Positive = recommend more, negative = recommend less. Range ±0.5. Adjusts ranking only — doesn't change tag values.">Confidence</label>
+            <input id="if-confidence" type="number" step="0.05" min="-0.5" max="0.5" placeholder="0" />
           </div>
           <div class="field-row">
             <label>Upgrades From</label>

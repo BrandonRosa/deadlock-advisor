@@ -1438,6 +1438,34 @@ h1, h2, .page-header h1, .display-font {
 }
 .re-chip-img { width: 18px; height: 18px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
 .re-chip-pos { font-size: 10px; color: var(--muted); min-width: 13px; text-align: right; }
+/* Sig / Req mark cycle on item chips. Click the ○ button to cycle
+   none → ★ Signature → REQ Required → none. The chip's own border
+   color updates to match so the build-defining picks read at a glance. */
+.re-mark-btn {
+  background: transparent; border: 1px solid var(--border-soft);
+  color: var(--muted); font-size: 11px; font-weight: 700;
+  width: 30px; height: 20px; line-height: 1;
+  border-radius: 3px; cursor: pointer;
+  letter-spacing: .04em;
+  transition: color .12s, border-color .12s, background .12s;
+}
+.re-mark-btn:hover { color: var(--text); border-color: var(--border); }
+.re-item-chip.is-sig {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(245, 200, 74, .35);
+}
+.re-item-chip.is-sig .re-mark-btn {
+  color: var(--gold); border-color: var(--gold);
+  background: rgba(245, 200, 74, .12);
+}
+.re-item-chip.is-req {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px rgba(185, 70, 62, .45);
+}
+.re-item-chip.is-req .re-mark-btn {
+  color: #fff; border-color: var(--danger);
+  background: var(--danger);
+}
 .re-chip-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .re-chip-tier { font-size: 10px; }
 .re-tier-800  { color: var(--muted); }
@@ -2061,6 +2089,15 @@ body.sim-fullscreen #page-sim.active {
   overflow: auto;
 }
 
+
+/* Build Confidence — operator selector + value sit on one line */
+.bf-confidence-row { gap: 4px; }
+.bf-conf-rel {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 6px; border-radius: 3px;
+  font-family: monospace; font-size: 13px; width: 36px;
+}
+.bf-conf-val { width: 80px !important; }
 
 /* ── Hero Config: color + search-term editors ─────────────────
    The color chips reuse .color-chip from the calc filter bar so a
