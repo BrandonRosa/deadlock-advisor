@@ -373,6 +373,7 @@
     },
     {
       "build_description_eng": "Focuses on Charged Shot and trying to deal as much spirit damage as possible. Great against low HP enemies with low spirit resist. Bad against Tanks and close range enemies.",
+      "confidence": -0.05,
       "counter_phase_slots": [
         [
           0,
@@ -777,14 +778,21 @@
     },
     {
       "build_description_eng": "Focuses on talon's Bow. Good in team fights where they arent focused on. Bad against CC.",
+      "confidence": 0.15,
       "followed_build": "General",
       "name": "Gun",
       "normalized_build_name": "grey_talon_gun",
       "required_items": [
-        "glass_cannon"
+        "glass_cannon",
+        "long_range",
+        "sharpshooter",
+        "intensifying_magazine",
+        "rapid_rounds"
       ],
       "signature_items": [
-        "indomitable"
+        "indomitable",
+        "slowing_bullets",
+        "vampiric_burst"
       ],
       "values": {
         "ally_weight": {
@@ -1160,7 +1168,8 @@
       "normalized_build_name": "grey_talon_hybrid",
       "signature_items": [
         "opening_rounds",
-        "recharging_rush"
+        "recharging_rush",
+        "quicksilver_reload"
       ],
       "values": {
         "ally_weight": {
@@ -1531,6 +1540,7 @@
     },
     {
       "build_description_eng": "VERY off meta build. Focuses on talon's snare. Goal is to more of a supportive character for teamfights where you can continuously silence enemies. Good vs Mid range cluster focused enemies. Awful against aerial/long range characters.",
+      "confidence": -0.15,
       "followed_build": "Gun",
       "name": "Snare",
       "normalized_build_name": "grey_talon_snare",
@@ -1906,6 +1916,7 @@
     },
     {
       "build_description_eng": "Nieche Build. Focuses on talon's ult, getting as many bird stacks . Weak against high spirit damage resist and evasive/fast enemies.",
+      "confidence": "+-0.05",
       "followed_build": "Charged Shot",
       "name": "Bird",
       "normalized_build_name": "grey_talon_bird",
