@@ -1,0 +1,344 @@
+{
+  "hero": "seven",
+  "build_idx": 1,
+  "build_name": "Ball",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "seven",
+    "drifter",
+    "paige",
+    "lady_geist",
+    "abrams",
+    "calico"
+  ],
+  "enemies": [
+    "shiv",
+    "haze",
+    "venator",
+    "holliday",
+    "graves"
+  ],
+  "self": "seven",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Felt good, really popped off near the end, was apart of every team fight, always in the back lol",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "trophy_collector",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2500,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "mystic_regeneration",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1300,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "mystic_slow",
+      "col": "override",
+      "override": true,
+      "phase": "Early",
+      "soulsBefore": 3000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2800
+    },
+    {
+      "tick": 12,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 13,
+      "action": "upgrade",
+      "key": "radiant_regeneration",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5600,
+      "costEffective": 2400,
+      "components": [
+        "mystic_regeneration"
+      ]
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 15,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6200,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "slowing_hex",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 3000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 3100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3300
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "superior_cooldown",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 5100,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3800
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5800
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8800
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8800
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8800
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8800,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5500
+    },
+    {
+      "tick": 24,
+      "action": "upgrade",
+      "key": "vortex_web",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 8700,
+      "costEffective": 4800,
+      "components": [
+        "slowing_hex"
+      ]
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "scourge",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 27,
+      "action": "buy",
+      "key": "superior_duration",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 7700,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 28,
+      "action": "upgrade",
+      "key": "transcendent_cooldown",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 8100,
+      "costEffective": 3200,
+      "components": [
+        "superior_cooldown"
+      ]
+    }
+  ],
+  "owned": [
+    "mystic_expansion",
+    "trophy_collector",
+    "rapid_recharge",
+    "mystic_slow",
+    "radiant_regeneration",
+    "boundless_spirit",
+    "healbane",
+    "escalating_exposure",
+    "vortex_web",
+    "scourge",
+    "superior_duration",
+    "transcendent_cooldown"
+  ],
+  "sold": [],
+  "blocked": [
+    "suppressor",
+    "bullet_resist_shredder"
+  ],
+  "total_earned": 55800,
+  "slots_unlocked": 3,
+  "ts": "2026-05-10T01:10:15.328Z"
+}
