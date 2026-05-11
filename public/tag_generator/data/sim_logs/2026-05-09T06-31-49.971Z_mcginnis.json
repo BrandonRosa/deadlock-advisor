@@ -1,0 +1,368 @@
+{
+  "hero": "mcginnis",
+  "build_idx": 1,
+  "build_name": "Rosalia",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "mcginnis",
+    "infernus",
+    "holliday",
+    "grey_talon"
+  ],
+  "enemies": [
+    "shiv",
+    "haze",
+    "drifter",
+    "the_doorman",
+    "seven",
+    "mo_&_krill"
+  ],
+  "self": "mcginnis",
+  "outcome": "loss",
+  "feel": "good",
+  "notes": "",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "intensifying_magazine",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "suppressor",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2900
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "mystic_slow",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 4100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3600
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "toxic_bullets",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5000,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 6200
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "witchmail",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 7800,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "unlock",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4900
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "inhibitor",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6700,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 20,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 21,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2600,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 22,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 6300
+    },
+    {
+      "tick": 24,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 9500,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "plated_armor",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5000
+    },
+    {
+      "tick": 27,
+      "action": "buy",
+      "key": "crippling_headshot",
+      "col": "counter",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 8500,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 28,
+      "action": "skip",
+      "phase": "Extra Late",
+      "soulsBefore": 5700
+    },
+    {
+      "tick": 29,
+      "action": "sell",
+      "key": "toxic_bullets",
+      "phase": "Extra Late",
+      "soulsBefore": 9400,
+      "refund": 1600
+    },
+    {
+      "tick": 29,
+      "action": "upgrade",
+      "key": "lightning_scroll",
+      "col": "strength",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 11000,
+      "costEffective": 4800,
+      "components": [
+        "mystic_slow"
+      ]
+    },
+    {
+      "tick": 30,
+      "action": "buy",
+      "key": "silencer",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 10000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 31,
+      "action": "sell",
+      "key": "healbane",
+      "phase": "Extra Late",
+      "soulsBefore": 7500,
+      "refund": 800
+    },
+    {
+      "tick": 31,
+      "action": "buy",
+      "key": "boundless_spirit",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 8300,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "intensifying_magazine",
+    "suppressor",
+    "arcane_surge",
+    "witchmail",
+    "inhibitor",
+    "rapid_recharge",
+    "escalating_exposure",
+    "plated_armor",
+    "crippling_headshot",
+    "lightning_scroll",
+    "silencer",
+    "boundless_spirit"
+  ],
+  "sold": [
+    "toxic_bullets",
+    "healbane"
+  ],
+  "blocked": [
+    "enduring_speed"
+  ],
+  "total_earned": 67500,
+  "slots_unlocked": 3,
+  "ts": "2026-05-09T06:31:49.971Z"
+}

@@ -1,0 +1,394 @@
+{
+  "hero": "mcginnis",
+  "build_idx": 2,
+  "build_name": "Ult - Rushin Russian",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "mcginnis",
+    "abrams",
+    "paige",
+    "mina"
+  ],
+  "enemies": [
+    "silver",
+    "rem",
+    "haze",
+    "celeste",
+    "billy",
+    "dynamo"
+  ],
+  "self": "mcginnis",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Turret spam late game saved it. Ult Mid game was great",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "rusted_barrel",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2900
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "mystic_slow",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 4100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3600,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "decay",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4200,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2400
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5400
+    },
+    {
+      "tick": 16,
+      "action": "unlock",
+      "phase": "Mid",
+      "soulsBefore": 7000
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2300
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4100
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5900,
+      "costEffective": 5600,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 20,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 20,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 20,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2200,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2600,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 22,
+      "action": "upgrade",
+      "key": "greater_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3200,
+      "costEffective": 2400,
+      "components": [
+        "mystic_expansion"
+      ]
+    },
+    {
+      "tick": 23,
+      "action": "buy",
+      "key": "superior_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3900,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 24,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 27,
+      "action": "upgrade",
+      "key": "lightning_scroll",
+      "col": "strength",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 7700,
+      "costEffective": 4800,
+      "components": [
+        "mystic_slow"
+      ]
+    },
+    {
+      "tick": 28,
+      "action": "sell",
+      "key": "rusted_barrel",
+      "phase": "Extra Late",
+      "soulsBefore": 6500,
+      "refund": 400
+    },
+    {
+      "tick": 28,
+      "action": "buy",
+      "key": "scourge",
+      "col": "balance",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 6900,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 29,
+      "action": "sell",
+      "key": "arcane_surge",
+      "phase": "Extra Late",
+      "soulsBefore": 4200,
+      "refund": 800
+    },
+    {
+      "tick": 29,
+      "action": "buy",
+      "key": "heroic_aura",
+      "col": "counter",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 5000,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 30,
+      "action": "skip",
+      "phase": "Extra Late",
+      "soulsBefore": 5600
+    },
+    {
+      "tick": 31,
+      "action": "sell",
+      "key": "healbane",
+      "phase": "Extra Late",
+      "soulsBefore": 9500,
+      "refund": 800
+    },
+    {
+      "tick": 31,
+      "action": "buy",
+      "key": "healing_tempo",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 10300,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "decay",
+    "spirit_burn",
+    "boundless_spirit",
+    "superior_duration",
+    "rapid_recharge",
+    "greater_expansion",
+    "superior_cooldown",
+    "escalating_exposure",
+    "lightning_scroll",
+    "scourge",
+    "heroic_aura",
+    "healing_tempo"
+  ],
+  "sold": [
+    "rusted_barrel",
+    "arcane_surge",
+    "healbane"
+  ],
+  "blocked": [],
+  "total_earned": 67500,
+  "slots_unlocked": 3,
+  "ts": "2026-05-10T22:31:38.976Z"
+}

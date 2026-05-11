@@ -1,0 +1,273 @@
+{
+  "hero": "seven",
+  "build_idx": 3,
+  "build_name": "Power Surge",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "seven",
+    "billy",
+    "grey_talon",
+    "shiv",
+    "paige"
+  ],
+  "enemies": [
+    "drifter",
+    "silver",
+    "the_doorman",
+    "bebop",
+    "mina"
+  ],
+  "self": null,
+  "outcome": "loss",
+  "feel": "bad",
+  "notes": "Too reactive and ate shit for it",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "rusted_barrel",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1600
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "bullet_resist_shredder",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2100
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3300
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "suppressor",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 4500,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "ballistic_enchantment",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 4100,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3600
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "toxic_bullets",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5000,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "escalating_resilience",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 6200,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "disarming_hex",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4600,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4900
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "inhibitor",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6700,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 20,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2200,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 2600
+    },
+    {
+      "tick": 21,
+      "action": "buy",
+      "key": "bullet_lifesteal",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 2600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 22,
+      "action": "sell",
+      "key": "rusted_barrel",
+      "phase": "Late",
+      "soulsBefore": 4000,
+      "refund": 400
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "spirit_lifesteal",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 4400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "upgrade",
+      "key": "leech",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5900,
+      "costEffective": 3200,
+      "components": [
+        "bullet_lifesteal",
+        "spirit_lifesteal"
+      ]
+    }
+  ],
+  "owned": [
+    "bullet_resist_shredder",
+    "suppressor",
+    "ballistic_enchantment",
+    "toxic_bullets",
+    "escalating_resilience",
+    "disarming_hex",
+    "inhibitor",
+    "superior_duration",
+    "leech"
+  ],
+  "sold": [
+    "rusted_barrel"
+  ],
+  "blocked": [],
+  "total_earned": 38300,
+  "slots_unlocked": 1,
+  "ts": "2026-05-09T23:42:36.697Z"
+}

@@ -1,0 +1,287 @@
+{
+  "hero": "mcginnis",
+  "build_idx": 2,
+  "build_name": "Ult - Rushin Russian",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "mcginnis",
+    "bebop",
+    "graves",
+    "seven",
+    "infernus",
+    "drifter"
+  ],
+  "enemies": [
+    "paige",
+    "celeste",
+    "apollo",
+    "haze",
+    "abrams"
+  ],
+  "self": "mcginnis",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Not the best, but def felt good.",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1300,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "buy",
+      "key": "compress_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "mystic_slow",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2500,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2200,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 11,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 1800
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 6200
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7800,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 18,
+      "action": "upgrade",
+      "key": "lightning_scroll",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4900,
+      "costEffective": 4800,
+      "components": [
+        "mystic_slow"
+      ]
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 1900,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3000
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5000
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 24,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7900,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    }
+  ],
+  "owned": [
+    "extra_charge",
+    "arcane_surge",
+    "mystic_expansion",
+    "compress_cooldown",
+    "superior_duration",
+    "healbane",
+    "spirit_burn",
+    "lightning_scroll",
+    "escalating_exposure",
+    "boundless_spirit"
+  ],
+  "sold": [],
+  "blocked": [
+    "enchanters_emblem"
+  ],
+  "total_earned": 41600,
+  "slots_unlocked": 2,
+  "ts": "2026-05-10T07:52:46.659Z"
+}

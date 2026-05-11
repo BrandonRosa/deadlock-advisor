@@ -6613,7 +6613,7 @@ function simScoreCounter(it, ctx, phase) {
 // Returns { affordable: [{key, score, eff}, ...], soon, later } — top 2
 // affordable sorted by score, plus a "soon" preview (≤ 1.5× current souls)
 // and a "later/important" preview (high score regardless of affordability).
-function simRecommendCol(state, b, ctx, scorer, constraints) {
+function simRecommendCol(state, b, ctx, scorer, constraints, forceRequired = false) {
   const ownedSet  = new Set(state.owned);
   const consumed  = new Set(state.consumed);
   const blocked   = new Set(state.blocked);
@@ -6630,13 +6630,22 @@ function simRecommendCol(state, b, ctx, scorer, constraints) {
     const eff = simEffectiveCost(k, ownedSet);
     let score = scorer(it, ctx, phase);
     if (constraints.signature.has(k)) score *= 1.5;
-    if (constraints.required.has(k))  score *= 2.0;
+    if (constraints.required.has(k))  score *= 3.0;
     candidates.push({ key: k, score, eff, item: it });
   });
   // Confidence (Option H) — bias each candidate by its item-level knob,
   // scaled to this column's score range. ref is computed inside the helper.
   applyConfidenceH(candidates, c => itemConfidence(c.key));
   candidates.sort((a, b) => b.score - a.score);
+  // Balance: required items that are affordable always surface first
+  if (forceRequired) {
+    candidates.sort((a, b) => {
+      const aR = constraints.required.has(a.key) && a.eff <= state.remaining ? 1 : 0;
+      const bR = constraints.required.has(b.key) && b.eff <= state.remaining ? 1 : 0;
+      if (aR !== bR) return bR - aR;
+      return b.score - a.score;
+    });
+  }
   // Top 2 affordable take the "main" slots. The "soon" and "later" slots
   // hold the next-best and a forward-looking important pick respectively
   // — and stay visible even when the player can already afford them
@@ -6788,7 +6797,7 @@ function renderSim() {
     document.getElementById('sim-col-strength').innerHTML = '';
     document.getElementById('sim-col-counter').innerHTML = '';
   } else {
-    const recBal = simRecommendCol(state, b, ctx, simScoreBalance,  constraints);
+    const recBal = simRecommendCol(state, b, ctx, simScoreBalance,  constraints, true);
     const recStr = simRecommendCol(state, b, ctx, simScoreStrength, constraints);
     const recCtr = simRecommendCol(state, b, ctx, simScoreCounter,  constraints);
 
@@ -7213,34 +7222,63 @@ function simReset() {
 function simOpenOverride() {
   const state = simStateOrFail(); if (!state) return;
   const cur = SIM.current; if (!cur) return;
-  const ownedSet = new Set(state.owned);
-  const consumed = new Set(state.consumed);
-  const blocked  = new Set(state.blocked);
+  const ownedSet   = new Set(state.owned);
+  const consumed   = new Set(state.consumed);
+  const blocked    = new Set(state.blocked);
+  const constraints = simResolveConstraints(cur.b);
+  const phase      = SIM_TICK_PHASE[state.tick] || 'Late';
+
   const items = cur.b.items.filter(it => {
     if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return false;
     return simEffectiveCost(it.key, ownedSet) <= state.remaining;
-  }).sort((a,b) =>
-       (bpItemMap[a.key]?.tier||0) - (bpItemMap[b.key]?.tier||0)
-    || itemConfidence(b.key)        - itemConfidence(a.key)   // higher Confidence first within tier
-    || (a.key < b.key ? -1 : 1));
+  });
+
+  // Tag each item with its priority flags
+  const ALLY_THRESH  = EFFECT_THRESH.ally.norm;
+  const ENEMY_THRESH = EFFECT_THRESH.enemy.norm;
+  const tagged = items.map(it => {
+    const isReq = constraints.required.has(it.key);
+    const isSig = constraints.signature.has(it.key);
+    const isAlly = it.ally >= ALLY_THRESH;
+    const isCtr  = it.enemy >= ENEMY_THRESH;
+    const priority = isReq ? 0 : isSig ? 1 : (isAlly || isCtr) ? 2 : 3;
+    return { it, isReq, isSig, isAlly, isCtr, priority };
+  }).sort((a, b) =>
+    a.priority - b.priority
+    || (bpItemMap[a.it.key]?.tier||0) - (bpItemMap[b.it.key]?.tier||0)
+    || itemConfidence(b.it.key) - itemConfidence(a.it.key)
+  );
+
+  const makeRow = ({ it, isReq, isSig, isAlly, isCtr }) => {
+    const row = document.createElement('div'); row.className = 'sim-override-row';
+    if (isReq) row.classList.add('is-required');
+    else if (isSig) row.classList.add('is-signature');
+    const obj = bpItemMap[it.key];
+    const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
+    const reqBadge  = isReq  ? `<span class="sim-or-badge is-req-badge">REQ</span>` : '';
+    const sigBadge  = isSig  ? `<span class="sim-or-badge is-sig-badge">★</span>` : '';
+    const allyBadge = isAlly ? `<span class="sim-or-badge is-ally-badge">A</span>` : '';
+    const ctrBadge  = isCtr  ? `<span class="sim-or-badge is-ctr-badge">C</span>` : '';
+    row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||it.key}</span>
+      ${reqBadge}${sigBadge}${allyBadge}${ctrBadge}
+      <span class="sim-or-cost">${simEffectiveCost(it.key, ownedSet).toLocaleString()}</span>
+      <span class="sim-or-tier">T${Math.round((obj?.tier||0)/800)}</span>`;
+    row.addEventListener('click', e => {
+      e.stopPropagation();
+      state.pendingChoice = { col: 'override', key: it.key, override: true };
+      simCloseModal();
+      renderSim();
+    });
+    return row;
+  };
+
   simShowModal('Override — pick any affordable item', host => {
     const list = document.createElement('div'); list.className = 'sim-override-list';
-    items.forEach(it => {
-      const row = document.createElement('div'); row.className = 'sim-override-row';
-      const obj = bpItemMap[it.key];
-      const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
-      row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||it.key}</span>
-        <span class="sim-or-cost">${simEffectiveCost(it.key, ownedSet).toLocaleString()}</span>
-        <span class="sim-or-tier">T${Math.round((obj?.tier||0)/800)}</span>`;
-      row.addEventListener('click', e => {
-        e.stopPropagation();
-        state.pendingChoice = { col: 'override', key: it.key, override: true };
-        simCloseModal();
-        renderSim();
-      });
-      list.appendChild(row);
-    });
-    if (!items.length) list.innerHTML = '<div class="sim-empty">Nothing affordable to override with.</div>';
+    if (!tagged.length) {
+      list.innerHTML = '<div class="sim-empty">Nothing affordable to override with.</div>';
+    } else {
+      tagged.forEach(t => list.appendChild(makeRow(t)));
+    }
     host.appendChild(list);
   });
 }

@@ -1,0 +1,317 @@
+{
+  "hero": "seven",
+  "build_idx": 6,
+  "build_name": "GVS - Power Surge",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "seven",
+    "celeste",
+    "abrams",
+    "drifter",
+    "bebop"
+  ],
+  "enemies": [
+    "graves",
+    "apollo",
+    "mirage",
+    "paradox",
+    "mcginnis"
+  ],
+  "self": "seven",
+  "outcome": "loss",
+  "feel": "good",
+  "notes": "Needed more healing. Current algorithm didnt reccomend any type, weird how balance didnt try to suggest anything..",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "monster_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "sprint_boots",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 900,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2100
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "cultist_sacrifice",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3300,
+      "costEffective": 2400,
+      "components": [
+        "monster_rounds"
+      ]
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "suppressor",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "upgrade",
+      "key": "enduring_speed",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1700,
+      "costEffective": 800,
+      "components": [
+        "sprint_boots"
+      ]
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3600
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "toxic_bullets",
+      "col": "counter",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5000,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6200,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4900
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "reactive_barrier",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 6700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 20,
+      "action": "upgrade",
+      "key": "indomitable",
+      "col": "counter",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7000,
+      "costEffective": 4800,
+      "components": [
+        "reactive_barrier"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4200,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 22,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5600,
+      "costEffective": 5600,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 23,
+      "action": "buy",
+      "key": "opening_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 24,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "colossus",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "upgrade",
+      "key": "juggernaut",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5000,
+      "costEffective": 4800,
+      "components": [
+        "enduring_speed"
+      ]
+    }
+  ],
+  "owned": [
+    "cultist_sacrifice",
+    "suppressor",
+    "toxic_bullets",
+    "escalating_exposure",
+    "indomitable",
+    "superior_duration",
+    "boundless_spirit",
+    "opening_rounds",
+    "colossus",
+    "juggernaut"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 48500,
+  "slots_unlocked": 2,
+  "ts": "2026-05-08T20:05:29.639Z"
+}

@@ -2060,9 +2060,15 @@ h1, h2, .page-header h1, .display-font {
 .sim-or-cost  { color: var(--gold); font-weight: 700; font-size: 12px; }
 .sim-or-tier  { font-size: 11px; color: var(--muted); }
 .sim-or-badge {
-  font-size: 9px; text-transform: uppercase; letter-spacing: .1em;
-  color: var(--accent); font-weight: 700;
+  font-size: 9px; text-transform: uppercase; letter-spacing: .05em;
+  font-weight: 800; padding: 1px 4px; border-radius: 3px; flex-shrink: 0;
 }
+.is-req-badge  { background: rgba(231,76,60,.2);  color: #e74c3c; border: 1px solid rgba(231,76,60,.5); }
+.is-sig-badge  { background: rgba(240,192,64,.2); color: #f0c040; border: 1px solid rgba(240,192,64,.5); }
+.is-ally-badge { background: rgba(46,204,113,.2); color: #2ecc71; border: 1px solid rgba(46,204,113,.4); }
+.is-ctr-badge  { background: rgba(52,152,219,.2); color: #3498db; border: 1px solid rgba(52,152,219,.4); }
+.sim-override-row.is-required  { border-color: rgba(231,76,60,.4); background: rgba(231,76,60,.04); }
+.sim-override-row.is-signature { border-color: rgba(240,192,64,.35); background: rgba(240,192,64,.04); }
 .sim-sell-row.is-most-rec { border-color: var(--accent); }
 
 .sim-save-form { display: flex; flex-direction: column; gap: 12px; }

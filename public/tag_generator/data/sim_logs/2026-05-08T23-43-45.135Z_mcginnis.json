@@ -1,0 +1,321 @@
+{
+  "hero": "mcginnis",
+  "build_idx": 1,
+  "build_name": "Rosalia",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "mcginnis",
+    "silver",
+    "infernus",
+    "seven",
+    "paradox"
+  ],
+  "enemies": [
+    "dynamo",
+    "celeste",
+    "mina",
+    "ivy",
+    "lash",
+    "shiv"
+  ],
+  "self": "mcginnis",
+  "outcome": "win",
+  "feel": "neutral",
+  "notes": "Survived ALLOT was super annoying to enemy team. Kept walker up almost entire game. But felt like i did zero damage.",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "intensifying_magazine",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 7,
+      "action": "buy",
+      "key": "mystic_slow",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2500,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "suppressor",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1400
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2800
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "enduring_speed",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 13,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4000,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 14,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 3100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3000
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 17,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6300,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3300
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "lightning_scroll",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5100,
+      "costEffective": 4800,
+      "components": [
+        "mystic_slow"
+      ]
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 22,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 7200
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "spellbreaker",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "upgrade",
+      "key": "greater_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3900,
+      "costEffective": 2400,
+      "components": [
+        "mystic_expansion"
+      ]
+    },
+    {
+      "tick": 24,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 5000
+    },
+    {
+      "tick": 26,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5000
+    },
+    {
+      "tick": 27,
+      "action": "buy",
+      "key": "crippling_headshot",
+      "col": "counter",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 8500,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "healbane",
+    "intensifying_magazine",
+    "suppressor",
+    "arcane_surge",
+    "enduring_speed",
+    "rapid_recharge",
+    "escalating_exposure",
+    "lightning_scroll",
+    "spellbreaker",
+    "greater_expansion",
+    "spirit_burn",
+    "crippling_headshot"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 52100,
+  "slots_unlocked": 3,
+  "ts": "2026-05-08T23:43:45.135Z"
+}
