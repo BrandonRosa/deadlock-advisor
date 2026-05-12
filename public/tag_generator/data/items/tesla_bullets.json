@@ -95,8 +95,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": 0.75
     }
   },
-  "wiki_url": "https://deadlock.wiki/Tesla_Bullets"
+  "wiki_url": "https://deadlock.wiki/Tesla_Bullets",
+  "compare_to": []
 }

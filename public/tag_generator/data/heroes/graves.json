@@ -94,7 +94,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -185,7 +186,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": -0.75
+          "vertical_mobility": -0.75,
+          "lane_pusher": null
         },
         "self_score": {
           "ability_spam": null,
@@ -276,7 +278,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "lane_pusher": 1
         },
         "self_weight": {
           "ability_spam": null,
@@ -367,7 +370,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "lane_pusher": null
         }
       }
     },
@@ -466,7 +470,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -557,7 +562,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "self_score": {
           "ability_spam": null,
@@ -648,7 +654,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "self_weight": {
           "ability_spam": -0.175,
@@ -739,7 +746,8 @@
           "team_heal": -0.17,
           "trap_block_obstruct": 0,
           "ult_focused": -0.109,
-          "vertical_mobility": 0.141
+          "vertical_mobility": 0.141,
+          "lane_pusher": null
         }
       }
     }

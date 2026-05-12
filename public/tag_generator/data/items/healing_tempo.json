@@ -1,8 +1,10 @@
 {
   "category": "Vitality",
+  "compare_to": [],
   "image_path": "/resources/items/healing_tempo/healing_tempo.png",
   "name": "Healing Tempo",
   "normalized_name": "healing_tempo",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "healing_booster"
@@ -97,10 +99,9 @@
       "team_heal": 1,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.1
+      "vertical_mobility": 0.1,
+      "lane_pusher": 0.75
     }
   },
-  "wiki_url": "https://deadlock.wiki/Healing_Tempo",
-  "compare_to": [],
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Healing_Tempo"
 }

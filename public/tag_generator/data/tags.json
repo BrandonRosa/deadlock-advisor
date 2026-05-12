@@ -443,5 +443,10 @@
     "code": "bullet_lifesteal",
     "name": "Bullet Lifesteal",
     "description": ""
+  },
+  {
+    "code": "lane_pusher",
+    "name": "Lane Pusher",
+    "description": ""
   }
 ]
