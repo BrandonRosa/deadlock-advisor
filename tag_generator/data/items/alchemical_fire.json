@@ -95,8 +95,10 @@
       "team_heal": null,
       "trap_block_obstruct": 0.15,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": 0.75
     }
   },
-  "wiki_url": "https://deadlock.wiki/Alchemical_Fire"
+  "wiki_url": "https://deadlock.wiki/Alchemical_Fire",
+  "compare_to": []
 }

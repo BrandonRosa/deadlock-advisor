@@ -94,7 +94,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -185,7 +186,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "self_score": {
           "ability_spam": null,
@@ -276,7 +278,8 @@
           "team_heal": 0.75,
           "trap_block_obstruct": null,
           "ult_focused": 0.1,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "lane_pusher": 1
         },
         "self_weight": {
           "ability_spam": null,
@@ -367,7 +370,8 @@
           "team_heal": 0.66,
           "trap_block_obstruct": null,
           "ult_focused": 0.1,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "lane_pusher": null
         }
       }
     }
