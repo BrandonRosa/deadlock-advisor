@@ -381,7 +381,7 @@
       "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Sprint Boots, Trophy Collector, Extra Charge… | Sig: Extra Stamina, Transcendent Cooldown | Req: Arcane Surge, Sprint Boots, Trophy Collector, Mystic Expansion, Mystic Vulnerability, Enchanters Emblem, Enduring Speed, Superior Cooldown, Spirit Burn, Escalating Exposure, Boundless Spirit, Superior Duration",
       "confidence": 0.1,
       "followed_build": "General",
-      "name": "Spirit Damage Kelvin (Beam>Path>Ball)",
+      "name": "Beam Damage Kelvin (Beam>Path>Ball)",
       "normalized_build_name": "kelvin_spirit_damage_kelvin_beam_path_ball",
       "required_items": [
         "arcane_surge",
@@ -499,7 +499,7 @@
         },
         "enemy_weight": {
           "ability_spam": null,
-          "aerial": null,
+          "aerial": "+0.15",
           "ally_buff": null,
           "anti_air": null,
           "anti_heal": null,
@@ -547,7 +547,7 @@
           "high_assist_count": null,
           "high_kill_count": null,
           "high_max_hp": null,
-          "horizontal_mobility": null,
+          "horizontal_mobility": "+0.1",
           "hybrid_damage_usage": null,
           "interrupt": null,
           "large_hitbox": null,
@@ -586,7 +586,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": "+0.1"
         },
         "self_score": {
           "ability_spam": null,
@@ -775,6 +775,7 @@
     {
       "blacklist_items": [],
       "build_description_eng": "RE from: High-Velocity Rounds, Opening Rounds, Extra Regen, Extra Spirit, Sprint Boots… | Sig: High-Velocity Rounds, Extra Regen, Extra Spirit, Sprint Boots, Trophy Collector, Slowing Bullets, Extra Charge, Improved Spirit, Healing Booster, Compress Cooldown, Warp Stone, Superior Cooldown, Refresher, Boundless Spirit, Diviners Kevlar | Req: Opening Rounds, Recharging Rush, Rapid Recharge, Arcane Surge",
+      "confidence": -0.1,
       "followed_build": "General",
       "name": "Snowball Support (Ball>Dome>Path)",
       "normalized_build_name": "kelvin_snowball_support_ball_dome_path",
@@ -804,14 +805,14 @@
       "values": {
         "ally_weight": {
           "ability_spam": null,
-          "aerial": null,
+          "aerial": "+-0.15",
           "ally_buff": null,
           "anti_air": null,
           "anti_heal": null,
           "aoe_cluster": null,
           "assist_importance": null,
           "away_from_team": null,
-          "bullet_damage": null,
+          "bullet_damage": "+0.05",
           "bullet_evasion": null,
           "bullet_lifesteal": null,
           "bullet_proc": null,
@@ -851,13 +852,13 @@
           "headshot_damage": null,
           "high_assist_count": null,
           "high_kill_count": null,
-          "high_max_hp": null,
+          "high_max_hp": "+0.1",
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
           "large_hitbox": null,
           "long_range": null,
-          "low_max_hp": null,
+          "low_max_hp": "+-0.1",
           "magazine_size_dependant": null,
           "melee_damage": null,
           "melee_resistance": null,
@@ -882,7 +883,7 @@
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
-          "spirit_damage": null,
+          "spirit_damage": "+0.05",
           "spirit_lifesteal": null,
           "spirit_proc": null,
           "spirit_resist_shred": null,
@@ -895,7 +896,7 @@
         },
         "enemy_weight": {
           "ability_spam": null,
-          "aerial": null,
+          "aerial": "+-0.2",
           "ally_buff": null,
           "anti_air": null,
           "anti_heal": null,
@@ -908,7 +909,7 @@
           "bullet_proc": null,
           "bullet_resist_shred": null,
           "bullet_resistance": null,
-          "burst_damage": null,
+          "burst_damage": "+-0.15",
           "burst_heal": null,
           "burst_resistance": null,
           "cc_resist": null,
@@ -982,7 +983,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": "+-0.1"
         },
         "self_score": {
           "ability_spam": null,
@@ -1070,7 +1071,7 @@
           "spirit_resist_shred": null,
           "spirit_resistance": null,
           "stun": null,
-          "team_heal": null,
+          "team_heal": "+0.25",
           "trap_block_obstruct": null,
           "ult_focused": null,
           "vertical_mobility": null
@@ -1564,7 +1565,7 @@
     {
       "blacklist_items": [],
       "build_description_eng": "RE from: Healing Rite, Extra Spirit, Improved Spirit, Sprint Boots, Trophy Collector… | Sig: Healing Rite, Extra Spirit, Sprint Boots, Healing Booster, Fleetfoot, Enduring Speed, Guardian Ward, Surge of Power, Boundless Spirit | Req: Improved Spirit, Trophy Collector, Rescue Beam, Greater Expansion, Heroic Aura, Juggernaut, Transcendent Cooldown",
-      "followed_build": "General",
+      "followed_build": "Snowball Support (Ball>Dome>Path)",
       "name": "Speedy Rescue Lane Pusher (Ball>Dome>Path)",
       "normalized_build_name": "kelvin_speedy_rescue_lane_pusher_ball_dome_path",
       "required_items": [
@@ -1690,7 +1691,7 @@
           "ally_buff": null,
           "anti_air": null,
           "anti_heal": null,
-          "aoe_cluster": null,
+          "aoe_cluster": "+-0.15",
           "assist_importance": null,
           "away_from_team": "+0.1",
           "bullet_damage": null,
@@ -1734,7 +1735,7 @@
           "high_assist_count": null,
           "high_kill_count": null,
           "high_max_hp": null,
-          "horizontal_mobility": null,
+          "horizontal_mobility": "+-0.05",
           "hybrid_damage_usage": null,
           "interrupt": null,
           "large_hitbox": null,
@@ -1755,7 +1756,7 @@
           "shield": null,
           "silence": null,
           "single_ability_focus": null,
-          "single_target": null,
+          "single_target": "+0.1",
           "small_hitbox": null,
           "spawn_minions": null,
           "spirit_burst_damage": null,
