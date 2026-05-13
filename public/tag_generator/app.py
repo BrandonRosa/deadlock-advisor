@@ -487,6 +487,16 @@ def list_sim_logs():
     return jsonify(items)
 
 
+@app.route("/api/sim-logs/<log_id>", methods=["GET"])
+def get_sim_log(log_id):
+    # Strip anything that could escape the directory.
+    safe = log_id.replace("/", "_").replace("\\", "_").replace("..", "_")
+    f = SIM_LOGS / f"{safe}.json"
+    if not f.exists():
+        return jsonify({"error": "not found"}), 404
+    return jsonify(json.loads(f.read_text()))
+
+
 # ── App ───────────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
