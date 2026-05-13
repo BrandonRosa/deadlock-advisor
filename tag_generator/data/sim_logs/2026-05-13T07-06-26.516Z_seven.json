@@ -1,0 +1,279 @@
+{
+  "hero": "seven",
+  "build_idx": 6,
+  "build_name": "GVS - Power Surge",
+  "formula": "v3",
+  "algo": "expert",
+  "allies": [
+    "seven",
+    "apollo",
+    "haze",
+    "infernus",
+    "mo_&_krill"
+  ],
+  "enemies": [
+    "silver",
+    "dynamo",
+    "victor",
+    "mina",
+    "holliday"
+  ],
+  "self": "seven",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Huge Surge Of Power Spike!",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "monster_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "suppressor",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "buy",
+      "key": "enduring_speed",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "buy",
+      "key": "spirit_lifesteal",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1300,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "opening_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "upgrade",
+      "key": "cultist_sacrifice",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2800,
+      "costEffective": 2400,
+      "components": [
+        "monster_rounds"
+      ]
+    },
+    {
+      "tick": 12,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 1800,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 1600
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 15,
+      "action": "upgrade",
+      "key": "surge_of_power",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4600,
+      "costEffective": 2400,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3800
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5500
+    },
+    {
+      "tick": 18,
+      "action": "buy",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7300,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2700
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 21,
+      "action": "buy",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6600,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 22,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3200
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 6300
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 9500
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 9500
+    },
+    {
+      "tick": 24,
+      "action": "buy",
+      "key": "indomitable",
+      "col": "counter",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 9500,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "suppressor",
+    "enduring_speed",
+    "spirit_lifesteal",
+    "opening_rounds",
+    "cultist_sacrifice",
+    "superior_duration",
+    "surge_of_power",
+    "escalating_exposure",
+    "boundless_spirit",
+    "indomitable"
+  ],
+  "sold": [],
+  "blocked": [
+    "toxic_bullets"
+  ],
+  "total_earned": 41600,
+  "slots_unlocked": 2,
+  "ts": "2026-05-13T07:06:26.516Z"
+}
