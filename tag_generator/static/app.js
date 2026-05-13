@@ -218,6 +218,10 @@ function resolveBuildConstraints(build, heroBuilds, visited) {
   const sig = merge(parent?.signature_items, ownSig, exSig);
   const req = merge(parent?.required_items,  ownReq, exReq);
   const bl  = merge(parent?.blacklist_items, ownBl,  exBl);
+  // Sig/Req mutual exclusion at resolve time — an explicit own-side req
+  // overrides an inherited sig, and vice versa. Own-side wins.
+  ownReq.forEach(k => sig.delete(k));
+  ownSig.forEach(k => req.delete(k));
 
   const ownSlots = Array.isArray(build.counter_phase_slots) ? build.counter_phase_slots : [];
   const slots = _BC_DEFAULT_SLOTS_RESOLVE.map((def, i) => {
@@ -571,11 +575,49 @@ function renderBuildTabs() {
   bar.innerHTML = '';
   S.currentHero.builds.forEach((b, i) => {
     const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (i === S.currentBuildIdx ? ' active' : '');
-    btn.innerHTML = `${b.name || `Build ${i+1}`}${i > 0 ? '<span class="tab-close" title="Delete">×</span>' : ''}`;
+    btn.className = 'tab-btn'
+      + (i === S.currentBuildIdx ? ' active' : '')
+      + (b.disabled ? ' is-disabled' : '');
+    // Drag handle for reorder; General (index 0) is fixed.
+    const drag = i === 0 ? '' : '<span class="tab-drag" title="Drag to reorder">⋮⋮</span>';
+    btn.innerHTML = `${drag}${b.name || `Build ${i+1}`}${i > 0 ? '<span class="tab-close" title="Delete">×</span>' : ''}`;
+    btn.draggable = i > 0;
+    btn.dataset.idx = String(i);
     btn.addEventListener('click', e => {
       if (e.target.classList.contains('tab-close')) { deleteBuild(i); return; }
       S.currentBuildIdx = i;
+      renderBuildTabs();
+      renderBuildContent();
+    });
+    // Drag-and-drop reorder. General (0) is the only non-draggable tab and
+    // also rejects drops, so it always stays at index 0.
+    btn.addEventListener('dragstart', e => {
+      if (i === 0) { e.preventDefault(); return; }
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(i));
+      btn.classList.add('is-dragging');
+    });
+    btn.addEventListener('dragend', () => btn.classList.remove('is-dragging'));
+    btn.addEventListener('dragover', e => {
+      if (i === 0) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      btn.classList.add('is-drop-target');
+    });
+    btn.addEventListener('dragleave', () => btn.classList.remove('is-drop-target'));
+    btn.addEventListener('drop', e => {
+      e.preventDefault();
+      btn.classList.remove('is-drop-target');
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      if (!Number.isFinite(fromIdx) || fromIdx === i || fromIdx === 0 || i === 0) return;
+      const builds = S.currentHero.builds;
+      const [moved] = builds.splice(fromIdx, 1);
+      builds.splice(i, 0, moved);
+      // Track which build is currently being viewed across the reorder.
+      if (S.currentBuildIdx === fromIdx)            S.currentBuildIdx = i;
+      else if (fromIdx < S.currentBuildIdx && i >= S.currentBuildIdx) S.currentBuildIdx--;
+      else if (fromIdx > S.currentBuildIdx && i <= S.currentBuildIdx) S.currentBuildIdx++;
+      setHeroDirty(true);
       renderBuildTabs();
       renderBuildContent();
     });
@@ -630,6 +672,8 @@ function renderBuildContent() {
     confRel.value = rel || '=';
     confVal.value = (value === null || value === undefined) ? '' : value;
   }
+  const disabledEl = document.getElementById('bf-disabled');
+  if (disabledEl) disabledEl.checked = !!build.disabled;
 
   const showBanner = S.currentBuildIdx === 0 && !S.currentHero.is_preset && isBuildEmpty(build);
   const banner = document.getElementById('preset-banner');
@@ -749,6 +793,14 @@ function _bfConfidenceCommit() {
 }
 document.getElementById('bf-confidence-rel').addEventListener('change', _bfConfidenceCommit);
 document.getElementById('bf-confidence-val').addEventListener('input',  _bfConfidenceCommit);
+
+document.getElementById('bf-disabled').addEventListener('change', e => {
+  const b = S.currentHero?.builds?.[S.currentBuildIdx];
+  if (!b) return;
+  if (e.target.checked) b.disabled = true; else delete b.disabled;
+  setHeroDirty(true);
+  renderBuildTabs();   // strike-through the tab label
+});
 
 // ── Delete build ──────────────────────────────────────────────────────────────
 document.getElementById('btn-delete-build').addEventListener('click', () => {
@@ -877,6 +929,17 @@ function bcWireSearch(b, cfg) {
           const ex = (b[cfg.exField] || []).filter(x => x !== it.normalized_name);
           if (ex.length) b[cfg.exField] = ex; else delete b[cfg.exField];
         }
+        // Sig/Req mutual exclusion — adding to sig drops req, vice versa.
+        // Also re-render the sibling chip list so the change is visible.
+        const siblingField =
+          cfg.field === 'signature_items' ? 'required_items' :
+          cfg.field === 'required_items'  ? 'signature_items' : null;
+        if (siblingField) {
+          const sib = (b[siblingField] || []).filter(x => x !== it.normalized_name);
+          if (sib.length) b[siblingField] = sib; else delete b[siblingField];
+          const sibCfg = BC_PICKERS.find(p => p.field === siblingField);
+          if (sibCfg) bcRenderChips(b, sibCfg);
+        }
         setHeroDirty(true);
         bcRenderChips(b, cfg);
         fresh.value = '';
@@ -991,6 +1054,11 @@ function renderHeroTagTable(build) {
     }
   }
 
+  // Per-column tallies for the frozen footer (avg + total + count of non-null
+  // entries). For inheriting builds we sum the resolved value (parent + own
+  // operator); for General we sum the own value as authored.
+  const colStats = HERO_COLS.map(() => ({ sum: 0, n: 0 }));
+
   S.tags.forEach(tag => {
     const tr = document.createElement('tr');
     const nameTd = document.createElement('td');
@@ -1005,6 +1073,14 @@ function renderHeroTagTable(build) {
 
       const rawVal = (build.values[col.key] || {})[tag.code];
       const { value: numVal, rel } = parseWeightEntry(rawVal !== undefined ? rawVal : null);
+
+      // Resolved value contribution to footer total
+      const parentValForStats = parentResolved ? (parentResolved[col.key][tag.code] ?? null) : null;
+      const resolved = applyRelation(parentValForStats, numVal, rel);
+      if (resolved !== null && resolved !== undefined && Number.isFinite(resolved)) {
+        colStats[ci].sum += resolved;
+        colStats[ci].n   += 1;
+      }
 
       if (isGeneral) {
         const stats = generalStats && generalStats[col.key][tag.code];
@@ -1058,6 +1134,34 @@ function renderHeroTagTable(build) {
     });
     tbody.appendChild(tr);
   });
+
+  // Frozen footer — per-column average (primary) + total (smaller). Average is
+  // what reveals "this build is a lot bigger than the others" without rewarding
+  // builds that simply have more non-null tags.
+  const tfoot = document.getElementById('hero-tag-foot');
+  if (tfoot) {
+    tfoot.innerHTML = '';
+    const ftr = document.createElement('tr');
+    ftr.className = 'hero-tag-totals';
+    const lbl = document.createElement('td');
+    lbl.className = 'col-tag totals-lbl';
+    lbl.innerHTML = '<div class="tag-name">Totals</div><div class="tag-code">avg · sum / n</div>';
+    ftr.appendChild(lbl);
+    colStats.forEach((s, ci) => {
+      const td = document.createElement('td');
+      td.className = 'totals-cell';
+      td.dataset.colIdx = String(ci + 1);
+      if (s.n === 0) {
+        td.innerHTML = '<span class="totals-empty">—</span>';
+      } else {
+        const avg = s.sum / s.n;
+        td.innerHTML = `<span class="totals-avg">${avg.toFixed(2)}</span>`
+                     + `<span class="totals-meta">Σ ${s.sum.toFixed(2)} / ${s.n}</span>`;
+      }
+      ftr.appendChild(td);
+    });
+    tfoot.appendChild(ftr);
+  }
 }
 
 function _buildSemiCell(numVal, rel, parentVal, hasParent) {
@@ -1868,8 +1972,8 @@ const MATCH = {
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
-  bpAlgo: 'lookahead',
-  scoreFormula: 'v2',
+  bpAlgo: 'architect',     // 2026-05-13: defaulted after Architect v2 beat the field on sim-log replay
+  scoreFormula: 'v3',      // 2026-05-13: v3 (Target Focus) better matches player picks per win:good logs
   filter: { text: '', colors: [] },
   primedHero: null,  // when exactly 1 filtered result + Enter pressed → primed for 1/2/3 assignment
   simEnabled: true,
@@ -1969,9 +2073,13 @@ function calcFilteredHeroes() {
   return S.heroList.filter(h => {
     if (h.is_preset) return false;
     if (q) {
+      // Word-prefix match: split each searchable field on spaces / underscores /
+      // hyphens and require at least one resulting word to start with `q`.
+      // "Iv" → matches Ivy ("ivy"), not Shiv ("shiv"). "dy" → Dynamo, not Lady Geist.
       const hay = [h.eng_name, h.normalized_name, ...(h.search_terms || [])]
         .filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(q)) return false;
+      const words = hay.split(/[\s_\-]+/).filter(Boolean);
+      if (!words.some(w => w.startsWith(q))) return false;
     }
     if (cols.length) {
       const hc = h.colors || [];
@@ -2323,7 +2431,12 @@ function computeResults() {
     const myAllies  = onAlly ? MATCH.allies.filter(n => n !== name) : MATCH.enemies.filter(n => n !== name);
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
-    const buildResults = heroData.builds.map((build, bi) => {
+    // Skip disabled builds (user-set per-build flag). Keep General even if
+    // disabled — the picker needs a fallback when every other build is off.
+    const enabledBuilds = heroData.builds
+      .map((b, bi) => ({ b, bi }))
+      .filter(({ b, bi }) => bi === 0 || !b.disabled);
+    const buildResults = enabledBuilds.map(({ b: build, bi }) => {
       // Use pre-computed cache; fall back to live resolve if cache miss.
       const rv = _rsvCache[name]?.[build.name] ?? resolveBuildValues(build, heroData.builds);
 
@@ -3479,11 +3592,13 @@ function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
 // Phase definitions — addBudget is the ADDITIONAL souls earned entering this phase.
 // maxSells: max sell operations allowed this phase (0 = no selling in Lane/Early).
 const BUILD_PHASES = [
+  // maxSells tightened per 2026-05-13 baseline: greedy-family was burning 5–6
+  // sells/match to fund a T4 slam (player baseline is 0.38). Cut to 1/2/2.
   { name: 'Lane',       addBudget: 3200,    totalSlots: 9,  minSlots: 3,  maxSells: 0 },
   { name: 'Early',      addBudget: 6400,    totalSlots: 9,  minSlots: 6,  maxSells: 0 },
-  { name: 'Mid',        addBudget: 12800,   totalSlots: 10, minSlots: 9,  maxSells: 2 },
-  { name: 'Late',       addBudget: 19800,   totalSlots: 12, minSlots: 11, maxSells: 3 },
-  { name: 'Extra Late', addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 5 },
+  { name: 'Mid',        addBudget: 12800,   totalSlots: 10, minSlots: 9,  maxSells: 1 },
+  { name: 'Late',       addBudget: 19800,   totalSlots: 12, minSlots: 11, maxSells: 2 },
+  { name: 'Extra Late', addBudget: 1000000, totalSlots: 12, minSlots: 12, maxSells: 2 },
 ];
 
 // Per-phase assist/counter tier options.
@@ -3498,13 +3613,16 @@ const ASSIST_PHASE_OPTIONS = {
 
 // Per-phase tier preference multipliers — edit to tune which item tiers are preferred per phase.
 //   index 0=T1(800), 1=T2(1600), 2=T3(3200), 3=T4(6400+)
+// Late/Extra-Late softened on 2026-05-13: T4 hill-climb (1.55 → 2.05) was
+// pushing greedy-family algos to sell-spam everything cheap to fund 8 T4s,
+// where player baseline ends with 4 T4 / 3 T3 / 2.8 T2 / 0.7 T1.
 const PHASE_TIER_MULTS = {
   //              T1(800)  T2(1600)  T3(3200)  T4(6400+)
   'Lane':       [ 1.3,     0.95,      0.15,     0.0  ],
   'Early':      [ 0.8,    0.95,      0.55,      0.05 ],
   'Mid':        [ 0.45,     0.8,     1.05,      0.65  ],
-  'Late':       [ 0.0,     0.2,     1.1,      1.55  ],
-  'Extra Late': [ 0.0,     0,      0.55,      2.05  ],
+  'Late':       [ 0.1,     0.4,     1.0,       1.2  ],
+  'Extra Late': [ 0.0,     0.2,     0.8,       1.3  ],
 };
 
 function getPhaseTierMult(phaseName, tier) {
@@ -3655,11 +3773,24 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Build-level constraints (signature / required / blacklist / counter slots) ──
-  const SIG_MULT             = 1.5;   // sig/required boost for greedyMain (greedy/marginal/cosine/lookahead)
-  const SIG_MULT_STRONG      = 2.0;   // stronger boost for non-greedy algos (beam/expert/assassin/hybrid)
+  // Priority order, highest to lowest: required → req-component → signature
+  //                                  → sig-component → standard.
+  // Boost multipliers are scaled accordingly so the simulator + every algorithm
+  // surface req-components above sig items, and sig-components above standard.
+  const REQ_MULT             = 2.0;   // required item boost
+  const REQ_COMP_MULT        = 1.6;   // transitive component of a required item
+  const SIG_MULT             = 1.4;   // signature item boost
+  const SIG_COMP_MULT        = 1.15;  // transitive component of a signature item
+  const REQ_MULT_STRONG      = 2.6;   // stronger boost for non-greedy algos (beam/expert/etc.)
                                       // — needed because their cosine-style scoring dampens overlapping tags.
+  const REQ_COMP_MULT_STRONG = 2.1;
+  const SIG_MULT_STRONG      = 1.9;
+  const SIG_COMP_MULT_STRONG = 1.35;
   const REQ_STICKY_MULT      = 1.5;   // sell-swap stickiness for required items
-  const COUNTER_TAG_THRESH   = 0.3;   // item.values.counter_importance > X → counter item
+  const COUNTER_TAG_THRESH   = 0.2;   // item.values.counter_importance > X → counter item
+                                       // (lowered 0.3 → 0.2 on 2026-05-13: at 0.3 no item ever
+                                       //  tripped it in either player logs or any algo's output,
+                                       //  so the counter dimension was effectively dead)
   const COUNTER_FORCE_FRAC   = 0.5;   // soft-min: force counter buy only if its score ≥ X × best non-counter
   const COUNTER_BOOST_LOW    = 1.8;   // in-loop multiplier for counter items when below this phase's min
   const DEFAULT_COUNTER_SLOTS = [[0,1],[0,2],[1,2],[2,3],[2,4]];  // Lane, Early, Mid, Late, Extra Late
@@ -3687,16 +3818,44 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   const blacklistSet = _bcResolved.blacklist_items;
   const counterSlots = _bcResolved.counter_phase_slots;
 
+  // Walk upgrades_from transitively from a seed set, returning every item key
+  // along the chain (the seeds themselves are not included).
+  function expandComponents(seedSet) {
+    const out = new Set();
+    const stack = [];
+    seedSet.forEach(k => (bpItemMap[k]?.upgrades_from || []).forEach(c => stack.push(c)));
+    while (stack.length) {
+      const c = stack.pop();
+      if (out.has(c)) continue;
+      out.add(c);
+      (bpItemMap[c]?.upgrades_from || []).forEach(s => { if (!out.has(s)) stack.push(s); });
+    }
+    return out;
+  }
+  // req-components beats sig-components (req wins ties)
+  const reqComponentSet = expandComponents(requiredSet);
+  const sigComponentSet = new Set(
+    [...expandComponents(signatureSet)].filter(k => !reqComponentSet.has(k))
+  );
+
   function isCounterItem(it) {
     return (it?.values?.counter_importance || 0) > COUNTER_TAG_THRESH;
   }
   function itemBoostMult(k) {
-    return (signatureSet.has(k) || requiredSet.has(k)) ? SIG_MULT : 1.0;
+    if (requiredSet.has(k))     return REQ_MULT;
+    if (reqComponentSet.has(k)) return REQ_COMP_MULT;
+    if (signatureSet.has(k))    return SIG_MULT;
+    if (sigComponentSet.has(k)) return SIG_COMP_MULT;
+    return 1.0;
   }
   // Stronger boost for non-greedy algorithms whose cosine-style scoring otherwise
   // dampens signature/required items via tag-coverage saturation.
   function itemBoostMultStrong(k) {
-    return (signatureSet.has(k) || requiredSet.has(k)) ? SIG_MULT_STRONG : 1.0;
+    if (requiredSet.has(k))     return REQ_MULT_STRONG;
+    if (reqComponentSet.has(k)) return REQ_COMP_MULT_STRONG;
+    if (signatureSet.has(k))    return SIG_MULT_STRONG;
+    if (sigComponentSet.has(k)) return SIG_COMP_MULT_STRONG;
+    return 1.0;
   }
   function isFlaggedItem(k) {
     return signatureSet.has(k) || requiredSet.has(k);
@@ -5251,6 +5410,753 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     });
   }
 
+  // ── Architect ──────────────────────────────────────────────────────────────
+  // Two-stage path planner:
+  //   STAGE 1 (architect): build an upfront priority list and component map.
+  //   STAGE 2 (execute):   walk the sim's tick income table, deciding buy/skip
+  //                        per tick based on the current souls bracket.
+  //
+  // Calibrated from win:good logs (data/sim_log_baselines/2026-05-13_baseline.md
+  // and the souls-bucket analysis from 2026-05-13). At each souls level the
+  // player has a distinct intent:
+  //   <800        → no T1 affordable yet, skip
+  //   800–1599    → T1 shopping
+  //   1600–3199   → T2 shopping or upgrade an owned T1
+  //   3200–6399   → SAVE MODE: only buy if it's an upgrade of an owned
+  //                 component (or escape valve fires when no T4 is reachable)
+  //   6400+       → T4 shopping
+  //
+  // The escape valve in save-mode prevents the algo from infinitely sitting
+  // on souls when no T4 is reachable (e.g. build has no T4 in plan, or all T4
+  // candidates exceed even soon-reachable budget).
+  function runArchitect() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // ── STAGE 1: The architecting ─────────────────────────────────────
+    // Priority list: required → signature → everything else by .total.
+    // Uncapped — extends as far as the item pool allows so Extra Late and
+    // beyond still find things to do.
+    const requiredArr  = b.items.filter(it => requiredSet.has(it.key));
+    const sigArr       = b.items.filter(it => signatureSet.has(it.key) && !requiredSet.has(it.key));
+    const restArr      = b.items
+      .filter(it => !requiredSet.has(it.key)
+                 && !signatureSet.has(it.key)
+                 && !blacklistSet.has(it.key))
+      .sort((a, c) => (c.total || 0) - (a.total || 0));
+    const priorityList = [...requiredArr, ...sigArr, ...restArr];
+
+    // topTargets: items whose upgrade chains are worth tracing for the
+    // chain-bonus signal. Defensive: every required item is forced in.
+    const slotCap    = BUILD_PHASES[BUILD_PHASES.length - 1].totalSlots;
+    const topTargets = new Set(priorityList.slice(0, slotCap * 2).map(it => it.key));
+    requiredSet.forEach(k => topTargets.add(k));
+
+    function ancestorsOf(key) {
+      const out   = new Set();
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+
+    // For each component key, which top-target items still need it.
+    const componentOf = new Map();
+    topTargets.forEach(tk => {
+      ancestorsOf(tk).forEach(comp => {
+        if (!componentOf.has(comp)) componentOf.set(comp, new Set());
+        componentOf.get(comp).add(tk);
+      });
+    });
+
+    if (_bpDbg) {
+      _bpDbg.architectPlan = {
+        priorityHead:   priorityList.slice(0, 18).map(it => ({
+          key:   it.key,
+          total: +(it.total || 0).toFixed(3),
+          tier:  bpItemMap[it.key]?.tier,
+        })),
+        topTargetCount: topTargets.size,
+        componentCount: componentOf.size,
+      };
+    }
+
+    // ── STAGE 2: Tick-level execution ─────────────────────────────────
+    let souls = 0;
+    let owned = new Set();
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const tickDbg      = [];
+
+    function effCost(key) {
+      const tier = bpItemMap[key]?.tier || 0;
+      let cost = tier;
+      (bpItemMap[key]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+
+    // Transitive owned ancestors — a T4 buy can consume an unowned T2 chain
+    // whose T1 was bought directly (mixed-path acquisition).
+    function ownedAncestors(key) {
+      const out   = new Set();
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+
+    function hasOwnedAncestor(key) {
+      const direct = bpItemMap[key]?.upgrades_from || [];
+      for (const c of direct) if (owned.has(c)) return true;
+      // Check transitive too — slower path but rare
+      const all = ancestorsOf(key);
+      for (const c of all) if (owned.has(c)) return true;
+      return false;
+    }
+
+    // Priority score: item .total + role boost + chain bonus + owned-chain bonus.
+    function priorityScore(it) {
+      const k = it.key;
+      let s   = (it.total || 0);
+      if      (requiredSet.has(k))     s *= 3.0;
+      else if (reqComponentSet.has(k)) s *= 1.7;
+      else if (signatureSet.has(k))    s *= 1.5;
+      else if (sigComponentSet.has(k)) s *= 1.2;
+      if (componentOf.has(k)) {
+        let stillNeeded = 0;
+        componentOf.get(k).forEach(tk => { if (!owned.has(tk)) stillNeeded++; });
+        if (stillNeeded > 0) s *= 1.2;
+      }
+      if (hasOwnedAncestor(k)) s *= 1.15;   // upgrades that consume owned chain
+      return s;
+    }
+
+    // Build full affordable-candidate list for this tick.
+    function affordableCandidates() {
+      const out = [];
+      for (const it of b.items) {
+        const k = it.key;
+        if (owned.has(k)) continue;
+        if (blacklistSet.has(k)) continue;
+        const ups = upgradesTo[k] || [];
+        if (ups.some(u => owned.has(u))) continue;
+        const cost = effCost(k);
+        if (cost > souls) continue;
+        out.push({ it, key: k, cost, score: priorityScore(it), tier: bpItemMap[k]?.tier || 0 });
+      }
+      return out;
+    }
+
+    // Is a planned T4 reachable in the next `lookahead` ticks of income?
+    function planedT4ReachableSoon(tick, lookahead) {
+      let futureIncome = 0;
+      for (let i = 1; i <= lookahead; i++) futureIncome += (SIM_TICK_INCOME[tick + i] || 0);
+      const budget = souls + futureIncome;
+      for (const it of b.items) {
+        const k = it.key;
+        if (owned.has(k)) continue;
+        if (!topTargets.has(k)) continue;
+        if ((bpItemMap[k]?.tier || 0) < 6400) continue;
+        if (effCost(k) <= budget) return true;
+      }
+      return false;
+    }
+
+    // Souls brackets calibrated from the data table. T1=800, T2=1600, T3=3200, T4=6400.
+    const BR_T1_LO   =  800;
+    const BR_T2_LO   = 1600;
+    const BR_SAVE_LO = 3200;   // save mode begins
+    const BR_T4_LO   = 6400;
+    const SAVE_ESCAPE_SOULS = 5500;   // escape valve threshold inside save mode
+
+    for (let tick = 0; tick < SIM_NUM_TICKS; tick++) {
+      souls += SIM_TICK_INCOME[tick] || 0;
+      const phaseName = SIM_TICK_PHASE[tick] || 'Extra Late';
+      const phaseIdx  = BUILD_PHASES.findIndex(p => p.name === phaseName);
+      const phaseCap  = BUILD_PHASES[phaseIdx]?.totalSlots || 12;
+      let mode = '';
+      let pick = null;
+
+      if (souls < BR_T1_LO) {
+        mode = 'sub-T1';
+      } else if (owned.size >= phaseCap) {
+        // At slot cap for this phase — accumulate until cap raises.
+        mode = 'slot-cap';
+      } else {
+        let candidates = affordableCandidates();
+
+        if (souls >= BR_SAVE_LO && souls < BR_T4_LO) {
+          // Save mode: only allow upgrades (consume owned ancestor).
+          mode = 'save';
+          let upgrades = candidates.filter(c => hasOwnedAncestor(c.key));
+          if (upgrades.length) {
+            candidates = upgrades;
+          } else if (souls >= SAVE_ESCAPE_SOULS && !planedT4ReachableSoon(tick, 2)) {
+            // Escape valve: no T4 reachable — accept a T3 buy rather than
+            // sit on souls forever.
+            mode = 'save-escape';
+            // candidates already holds everything affordable
+          } else {
+            candidates = [];
+          }
+        } else if (souls >= BR_T4_LO) {
+          // T4 bracket: strongly prefer T4 picks; fall back to lower tiers
+          // only if nothing T4 is affordable.
+          mode = 'T4';
+          const t4s = candidates.filter(c => c.tier >= 6400);
+          if (t4s.length) candidates = t4s;
+          else mode = 'T4-fallback';
+        } else if (souls >= BR_T2_LO) {
+          mode = 'T2/upg';
+        } else {
+          mode = 'T1';
+        }
+
+        if (candidates.length) {
+          candidates.sort((a, c) => c.score - a.score);
+          pick = candidates[0];
+        }
+      }
+
+      if (pick) {
+        const consumedComps = [...ownedAncestors(pick.key)];
+        consumedComps.forEach(c => owned.delete(c));
+        owned.add(pick.key);
+        souls -= pick.cost;
+        phaseChanges[phaseName].push({
+          action:     consumedComps.length ? 'upgrade' : 'buy',
+          key:        pick.key,
+          components: consumedComps,
+          cost:       pick.cost,
+        });
+      }
+
+      if (_bpDbg && tickDbg.length < 40) {
+        tickDbg.push(
+          `t${String(tick).padStart(2)} ${phaseName.padEnd(11)} souls=${String(souls + (pick?.cost || 0)).padStart(5)} ` +
+          `mode=${mode.padEnd(13)} ${pick ? `BUY ${pick.key} (cost ${pick.cost})` : 'skip'}`
+        );
+      }
+    }
+
+    if (_bpDbg) _bpDbg.architectTicks = tickDbg;
+
+    return PHASE_NAMES.map(name => ({
+      phase: name, changes: phaseChanges[name], assistChanges: [], counterChanges: [],
+    }));
+  }
+
+  // ── Inverse ────────────────────────────────────────────────────────────────
+  // Backward-induction algorithm: pick the optimal endgame inventory first,
+  // resolve cheapest upgrade chains to acquire it, then schedule each buy onto
+  // the earliest sim tick where it's feasible. Lane picks are dictated by the
+  // endgame, not by local Lane-phase value — so some buys will look strange
+  // moment-to-moment but make sense in chain-completion terms.
+  //
+  // Computer-style insight (vs. every other algo): the *destination* drives
+  // the path, not the path-step value. A T1 like mystic_burst can land in
+  // Lane purely because it's a 4-hop precursor to a Late T4 anchor, while
+  // an otherwise-attractive T1 like extra_charge gets skipped because it
+  // doesn't fit any planned chain.
+  function runInverse() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+    const slotCap = BUILD_PHASES[BUILD_PHASES.length - 1].totalSlots;
+    const SYNERGY_LAMBDA = 0.3;  // weight of pair-synergy in endgame scoring
+
+    // ── Phase 1: Endgame Solver ─────────────────────────────────────────────
+    // Greedy fill of 12 slots: required first, then signature, then top score+
+    // synergy until full. Synergy = sum of tag-vector cosines with already-
+    // chosen items (rewards specialization without forcing it).
+    const candByKey = {};
+    b.items.forEach(it => { if (!blacklistSet.has(it.key)) candByKey[it.key] = it; });
+
+    function tagCosine(itA, itB) {
+      const ssA = itA.values || {};
+      const ssB = itB.values || {};
+      let dot = 0, nA = 0, nB = 0;
+      const keys = new Set([...Object.keys(ssA), ...Object.keys(ssB)]);
+      keys.forEach(t => {
+        const a = ssA[t] || 0, c = ssB[t] || 0;
+        dot += a * c; nA += a * a; nB += c * c;
+      });
+      if (!nA || !nB) return 0;
+      return dot / (Math.sqrt(nA) * Math.sqrt(nB));
+    }
+
+    function endgameScore(it, currentSet) {
+      const tier = bpItemMap[it.key]?.tier || 0;
+      const base = (it.total || 0) * getPhaseTierMult('Extra Late', tier);
+      let synergy = 0;
+      currentSet.forEach(k2 => {
+        if (k2 === it.key) return;
+        const other = candByKey[k2];
+        if (other) synergy += tagCosine(it, other);
+      });
+      return base + SYNERGY_LAMBDA * synergy;
+    }
+
+    const endgame = new Set();
+    requiredSet.forEach(k => { if (candByKey[k]) endgame.add(k); });
+    signatureSet.forEach(k => { if (candByKey[k] && endgame.size < slotCap) endgame.add(k); });
+    while (endgame.size < slotCap) {
+      let bestKey = null, bestSc = -Infinity;
+      for (const k of Object.keys(candByKey)) {
+        if (endgame.has(k)) continue;
+        const sc = endgameScore(candByKey[k], endgame);
+        if (sc > bestSc) { bestSc = sc; bestKey = k; }
+      }
+      if (bestKey === null) break;
+      endgame.add(bestKey);
+    }
+
+    // ── Phase 2: Chain Resolver ─────────────────────────────────────────────
+    // For each endgame item, walk to one ancestor (the highest-.total parent
+    // — the "feeder"). Recurse. Builds the minimum chain plan: every chain
+    // item appears at most once even if it feeds multiple endgame items
+    // (the natural discovered efficiency only a computer notices).
+    const chainPlan = [];   // ordered list of item keys to acquire
+    const planSet   = new Set();
+
+    function planFor(key, depth) {
+      if (planSet.has(key) || depth > 5) return;
+      const it = bpItemMap[key];
+      if (!it) return;
+      const parents = it.upgrades_from || [];
+      if (parents.length > 0) {
+        // Pick the highest-.total parent that exists in the candidate pool.
+        let bestFeeder = null, bestF = -Infinity;
+        parents.forEach(p => {
+          const pIt = candByKey[p];
+          if (!pIt) return;
+          if ((pIt.total || 0) > bestF) { bestF = pIt.total || 0; bestFeeder = p; }
+        });
+        if (bestFeeder) planFor(bestFeeder, depth + 1);
+      }
+      if (!planSet.has(key)) {
+        planSet.add(key);
+        chainPlan.push(key);
+      }
+    }
+
+    // Plan T1s first (sort by tier ascending) so feeders land before children.
+    const endgameSorted = [...endgame].sort((a, c) =>
+      (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0));
+    endgameSorted.forEach(k => planFor(k, 0));
+
+    if (_bpDbg) {
+      _bpDbg.inversePlan = {
+        endgame: [...endgame].map(k => ({ key: k, tier: bpItemMap[k]?.tier })),
+        chainPlan: chainPlan.map(k => ({ key: k, tier: bpItemMap[k]?.tier })),
+        endgameSize: endgame.size,
+        chainLength: chainPlan.length,
+      };
+    }
+
+    // ── Phase 3 + 4: Scheduler & Execution ──────────────────────────────────
+    let souls = 0;
+    const owned = new Set();
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const tickDbg = [];
+    let ticksSinceBuy = 0;
+
+    function effCost(key) {
+      const tier = bpItemMap[key]?.tier || 0;
+      let cost = tier;
+      (bpItemMap[key]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+    function ownedAncestors(key) {
+      const out   = new Set();
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+
+    function fire(key, phaseName) {
+      const cost = effCost(key);
+      const consumed = [...ownedAncestors(key)];
+      consumed.forEach(c => owned.delete(c));
+      owned.add(key);
+      souls -= cost;
+      phaseChanges[phaseName].push({
+        action:     consumed.length ? 'upgrade' : 'buy',
+        key, components: consumed, cost,
+      });
+    }
+
+    for (let tick = 0; tick < SIM_NUM_TICKS; tick++) {
+      souls += SIM_TICK_INCOME[tick] || 0;
+      const phaseName = SIM_TICK_PHASE[tick] || 'Extra Late';
+      const phaseIdx  = BUILD_PHASES.findIndex(p => p.name === phaseName);
+      const phaseCap  = BUILD_PHASES[phaseIdx]?.totalSlots || 12;
+
+      let didBuy = false;
+      let fireKey = null;
+
+      // Try every remaining chain item; fire any that's affordable AND not
+      // subsumed by what we already own. Loop until no more progress this tick.
+      let progress = true;
+      while (progress && owned.size < phaseCap) {
+        progress = false;
+        for (let i = 0; i < chainPlan.length; i++) {
+          const key = chainPlan[i];
+          if (owned.has(key)) continue;
+          // Subsumed: an upgrade of this item is already owned (rare here
+          // since we plan parents first, but defend anyway).
+          const ups = upgradesTo[key] || [];
+          if (ups.some(u => owned.has(u))) continue;
+          const cost = effCost(key);
+          if (cost > souls) continue;
+          fire(key, phaseName);
+          fireKey = key; didBuy = true; progress = true;
+          break;
+        }
+      }
+
+      // Escape valve: if souls have ballooned and the next chain item isn't
+      // affordable AND we've been idle 3+ ticks, allow one off-plan buy.
+      // Picks the highest-priority affordable non-plan item (counter, top
+      // target, anything in topTargets-equivalent). Prevents souls hoarding.
+      if (!didBuy) {
+        ticksSinceBuy++;
+        if (ticksSinceBuy >= 3 && owned.size < phaseCap) {
+          // Find smallest unowned chain cost; if souls > 1.5× that, we're
+          // genuinely stuck (the next item must require a parent we don't yet
+          // own, or there's nothing left to plan).
+          let minNextCost = Infinity;
+          for (const key of chainPlan) {
+            if (owned.has(key)) continue;
+            const c = effCost(key);
+            if (c < minNextCost) minNextCost = c;
+          }
+          const stuck = minNextCost === Infinity || souls > minNextCost * 1.5;
+          if (stuck) {
+            // Pick best non-chain affordable item by .total score.
+            let bestKey = null, bestSc = -Infinity;
+            for (const it of b.items) {
+              const k = it.key;
+              if (owned.has(k)) continue;
+              if (blacklistSet.has(k)) continue;
+              if (planSet.has(k)) continue;
+              const ups = upgradesTo[k] || [];
+              if (ups.some(u => owned.has(u))) continue;
+              const cost = effCost(k);
+              if (cost > souls) continue;
+              const sc = it.total || 0;
+              if (sc > bestSc) { bestSc = sc; bestKey = k; }
+            }
+            if (bestKey) {
+              fire(bestKey, phaseName);
+              fireKey = bestKey + ' (escape)';
+              didBuy = true;
+              ticksSinceBuy = 0;
+            }
+          }
+        }
+      } else {
+        ticksSinceBuy = 0;
+      }
+
+      if (_bpDbg && tickDbg.length < 40) {
+        const nextChain = chainPlan.find(k => !owned.has(k)) || '(done)';
+        tickDbg.push(
+          `t${String(tick).padStart(2)} ${phaseName.padEnd(11)} souls=${String(souls + (fireKey ? effCost(fireKey.split(' ')[0]) : 0)).padStart(5)} ` +
+          `next=${nextChain.padEnd(28)} ${didBuy ? 'BUY ' + fireKey : 'skip (' + ticksSinceBuy + ')'}`
+        );
+      }
+    }
+
+    if (_bpDbg) _bpDbg.inverseTicks = tickDbg;
+
+    return PHASE_NAMES.map(name => ({
+      phase: name, changes: phaseChanges[name], assistChanges: [], counterChanges: [],
+    }));
+  }
+
+  // ── Surge v2 ───────────────────────────────────────────────────────────────
+  // Power-spike optimizer, rebuilt 2026-05-13 after v1 was caught skipping all
+  // of Lane to bank for a T4-ASAP then flooding with counter items.
+  //
+  // v1 problems and v2 fixes:
+  //   1) Cross-tier reserve comparison made the algo always wait for higher-
+  //      tier items. → REPLACED with souls-bracket gating (Architect-style).
+  //   2) Pair-synergy + combo multiplier created a tag-cluster feedback loop
+  //      (each new counter raised the next counter's score). → REPLACED with
+  //      tag-saturation damping (diminishing returns on already-covered tags).
+  //   3) Point-in-time tick weight under-credited Lane items for their long
+  //      active life. → REPLACED with cumulative-future tick weight.
+  //
+  // Result: bracket discipline like Architect, but selection within each
+  // bracket is biased toward items that fill *uncovered* tag axes and have
+  // long remaining active life. Spike-aware without the loops.
+  function runSurge() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // ── TUNABLE KNOBS ───────────────────────────────────────────────────────
+
+    // Per-tick strategic weight. Flatter than v1 because we now integrate the
+    // *remaining* weight from purchase tick forward — Lane items get credit
+    // for being active across the whole game, Late items only across the tail.
+    // The cumulative integration handles "early items have long active life"
+    // automatically; SPIKE_WEIGHT just shapes the relative importance.
+    //
+    // COMPLAINT → ADJUSTMENT:
+    //   "Doesn't buy in Lane / waits the whole laning phase"
+    //       → already fixed by bracket gating, but if it still happens raise
+    //         Lane values (0.8 → 1.0+)
+    //   "Final builds skew T1 / never builds T4s"
+    //       → raise the Late tail (1.7 → 2.0+) OR lower the Lane head
+    //   "Always peaks at the wrong tick"
+    //       → shift the peak left/right within the vector
+    const SPIKE_WEIGHT = [
+      // Lane ticks 0-5
+      0.8, 0.8, 0.9, 0.9, 1.0, 1.0,
+      // Early ticks 6-11
+      1.0, 1.0, 1.1, 1.1, 1.2, 1.2,
+      // Mid ticks 12-17
+      1.2, 1.3, 1.3, 1.4, 1.4, 1.5,
+      // Late ticks 18-26 (peak)
+      1.5, 1.6, 1.6, 1.7, 1.7, 1.7, 1.7, 1.7, 1.7,
+      // Extra Late ticks 27-34
+      1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
+    ];
+
+    // Tag-saturation damping. For each tag the candidate provides, its value
+    // is reduced by 1 / (1 + λ_sat × coverage[tag]). Higher = diminishing
+    // returns kick in faster (more diversification). Replaces v1's pair-
+    // synergy term, which created a counter-spam feedback loop.
+    //
+    // COMPLAINT → ADJUSTMENT:
+    //   "Floods build with counter items / mono-axis specialization"
+    //       → raise (0.5 → 0.8)
+    //   "Doesn't commit to a strategy / build feels scattered"
+    //       → lower (0.5 → 0.3)
+    const SURGE_SAT_LAMBDA = 0.5;
+
+    // Role boosts (multiplicative on spike value). Required/signature items
+    // need to bypass tag saturation because their value comes from build
+    // identity, not raw tag coverage. Kept from v1.
+    const SURGE_REQ_BOOST      = 2.5;
+    const SURGE_REQ_COMP_BOOST = 1.4;
+    const SURGE_SIG_BOOST      = 1.5;
+    const SURGE_SIG_COMP_BOOST = 1.2;
+
+    // Souls brackets — same as Architect. The bracket determines which item
+    // tiers are *eligible* this tick; spike scoring picks within that pool.
+    const BR_T1_LO   =  800;
+    const BR_T2_LO   = 1600;
+    const BR_SAVE_LO = 3200;
+    const BR_T4_LO   = 6400;
+
+    // ── HELPERS ─────────────────────────────────────────────────────────────
+
+    function effCost(key, owned) {
+      const tier = bpItemMap[key]?.tier || 0;
+      let cost = tier;
+      (bpItemMap[key]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+
+    function ownedAncestors(key, owned) {
+      const out   = new Set();
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+
+    function hasOwnedAncestor(key, owned) {
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (owned.has(c)) return true;
+      }
+      const all = ownedAncestors(key, owned);
+      return all.size > 0;
+    }
+
+    function roleBoost(k) {
+      if (requiredSet.has(k))     return SURGE_REQ_BOOST;
+      if (reqComponentSet.has(k)) return SURGE_REQ_COMP_BOOST;
+      if (signatureSet.has(k))    return SURGE_SIG_BOOST;
+      if (sigComponentSet.has(k)) return SURGE_SIG_COMP_BOOST;
+      return 1.0;
+    }
+
+    // Cumulative remaining tick weight from `tick` to end of game. Pre-computed
+    // so each scoring call is O(1) instead of O(NUM_TICKS).
+    const cumulativeWeight = new Array(SIM_NUM_TICKS + 1);
+    cumulativeWeight[SIM_NUM_TICKS] = 0;
+    for (let t = SIM_NUM_TICKS - 1; t >= 0; t--) {
+      cumulativeWeight[t] = cumulativeWeight[t + 1] +
+        (SPIKE_WEIGHT[t] ?? SPIKE_WEIGHT[SPIKE_WEIGHT.length - 1]);
+    }
+
+    // Spike value: per-tag value with saturation damping, times role boost,
+    // times cumulative remaining weight from this tick forward.
+    function spikeValue(candidate, ownedItems, tick) {
+      const candVals = candidate.values || {};
+      // Build coverage map from owned items (only for tags this candidate provides)
+      let raw = 0;
+      for (const tag of Object.keys(candVals)) {
+        const v = candVals[tag] || 0;
+        if (v === 0) continue;
+        let coverage = 0;
+        for (const o of ownedItems) {
+          coverage += (o.values?.[tag] || 0);
+        }
+        // Tag-saturation damping: this tag's contribution falls as coverage rises.
+        raw += v / (1 + SURGE_SAT_LAMBDA * Math.max(0, coverage));
+      }
+      const role     = roleBoost(candidate.key);
+      const cumWeight = cumulativeWeight[tick] || 1;
+      return raw * role * cumWeight;
+    }
+
+    // ── EXECUTION ───────────────────────────────────────────────────────────
+    let souls = 0;
+    const owned      = new Set();
+    const ownedItems = [];
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const tickDbg     = [];
+    const powerCurve  = [];
+
+    function fire(candidate, phaseName) {
+      const cost = effCost(candidate.key, owned);
+      const consumed = [...ownedAncestors(candidate.key, owned)];
+      consumed.forEach(c => {
+        owned.delete(c);
+        const idx = ownedItems.findIndex(it => it.key === c);
+        if (idx >= 0) ownedItems.splice(idx, 1);
+      });
+      owned.add(candidate.key);
+      ownedItems.push(candidate);
+      souls -= cost;
+      phaseChanges[phaseName].push({
+        action:     consumed.length ? 'upgrade' : 'buy',
+        key:        candidate.key,
+        components: consumed,
+        cost,
+      });
+    }
+
+    // Build affordable-and-eligible candidate list for this tick under a tier
+    // band (loose, in absolute item-tier souls). `requireUpgrade` forces an
+    // owned-ancestor — used in the 3200-6399 save bracket.
+    function findBest(tierLo, tierHi, tick, requireUpgrade = false) {
+      let best = null, bestSc = -Infinity;
+      for (const it of b.items) {
+        const k = it.key;
+        if (owned.has(k)) continue;
+        if (blacklistSet.has(k)) continue;
+        const tier = bpItemMap[k]?.tier || 0;
+        if (tier < tierLo || tier > tierHi) continue;
+        const ups = upgradesTo[k] || [];
+        if (ups.some(u => owned.has(u))) continue;
+        const cost = effCost(k, owned);
+        if (cost > souls) continue;
+        if (requireUpgrade && !hasOwnedAncestor(k, owned)) continue;
+        const sc = spikeValue(it, ownedItems, tick);
+        if (sc > bestSc) { bestSc = sc; best = { it, sc, cost }; }
+      }
+      return best;
+    }
+
+    function currentPower() {
+      // Simple sum of tag values with saturation already accounted for
+      // implicitly by the buy sequence. Just sum item.total for the debug curve.
+      let p = 0;
+      ownedItems.forEach(it => { p += (it.total || 0); });
+      return p;
+    }
+
+    for (let tick = 0; tick < SIM_NUM_TICKS; tick++) {
+      souls += SIM_TICK_INCOME[tick] || 0;
+      const phaseName = SIM_TICK_PHASE[tick] || 'Extra Late';
+      const phaseIdx  = BUILD_PHASES.findIndex(p => p.name === phaseName);
+      const phaseCap  = BUILD_PHASES[phaseIdx]?.totalSlots || 12;
+
+      let pick = null;
+      let mode = '';
+
+      if (souls < BR_T1_LO) {
+        mode = 'sub-T1';
+      } else if (owned.size >= phaseCap) {
+        mode = 'slot-cap';
+      } else if (souls < BR_T2_LO) {
+        mode = 'T1';
+        pick = findBest(1, 800, tick);
+      } else if (souls < BR_SAVE_LO) {
+        mode = 'T2/upg';
+        // Allow T1-3200 band so upgrades from owned components fit here.
+        pick = findBest(1, 3200, tick);
+      } else if (souls < BR_T4_LO) {
+        mode = 'save';
+        // Upgrade-only: must consume an owned ancestor.
+        pick = findBest(1, 3200, tick, /* requireUpgrade */ true);
+        // Escape valve: if nothing upgrade-eligible, allow a fresh T3 buy.
+        // Prevents endless saving when no chain is set up.
+        if (!pick && souls >= 5500) {
+          pick = findBest(1601, 3200, tick);
+          if (pick) mode = 'save-escape';
+        }
+      } else {
+        mode = 'T4';
+        pick = findBest(3201, 99999, tick);
+        if (!pick) {
+          pick = findBest(1601, 3200, tick);
+          if (pick) mode = 'T4-fallback';
+        }
+      }
+
+      if (pick) fire(pick.it, phaseName);
+
+      const pwr = currentPower();
+      powerCurve.push({ tick, power: +pwr.toFixed(2), souls });
+
+      if (_bpDbg && tickDbg.length < 40) {
+        tickDbg.push(
+          `t${String(tick).padStart(2)} ${phaseName.padEnd(11)} ` +
+          `souls=${String(souls + (pick ? pick.cost : 0)).padStart(5)} ` +
+          `w_cum=${cumulativeWeight[tick].toFixed(1)} pow=${pwr.toFixed(1)} ` +
+          `mode=${mode.padEnd(13)} ${pick ? `BUY ${pick.it.key} cost=${pick.cost}` : 'skip'}`
+        );
+      }
+    }
+
+    if (_bpDbg) {
+      _bpDbg.surgeTicks  = tickDbg;
+      _bpDbg.surgePower  = powerCurve;
+      _bpDbg.surgeKnobs  = {
+        SPIKE_WEIGHT_summary: `Lane Σ=${SPIKE_WEIGHT.slice(0,6).reduce((a,b)=>a+b,0).toFixed(1)} · Early Σ=${SPIKE_WEIGHT.slice(6,12).reduce((a,b)=>a+b,0).toFixed(1)} · Mid Σ=${SPIKE_WEIGHT.slice(12,18).reduce((a,b)=>a+b,0).toFixed(1)} · Late Σ=${SPIKE_WEIGHT.slice(18,27).reduce((a,b)=>a+b,0).toFixed(1)} · ExLate Σ=${SPIKE_WEIGHT.slice(27).reduce((a,b)=>a+b,0).toFixed(1)}`,
+        SURGE_SAT_LAMBDA,
+      };
+    }
+
+    return PHASE_NAMES.map(name => ({
+      phase: name, changes: phaseChanges[name], assistChanges: [], counterChanges: [],
+    }));
+  }
+
   // ── Phase loop ─────────────────────────────────────────────────────────────
   if (algo === 'expert')    return applyConstraintsFixup(runExpertGreedy());
   if (algo === 'assassin')  return applyConstraintsFixup(runTargetAssassin());
@@ -5258,6 +6164,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   if (algo === 'fusion')   return applyConstraintsFixup(runHybridRotation('fusion'));
   if (algo === 'oracle')   return applyConstraintsFixup(runHybridRotation('oracle'));
   if (algo === 'beam')     return applyConstraintsFixup(runBeamSearch());
+  if (algo === 'architect') return runArchitect();   // strict plan → no fixup wrap
+  if (algo === 'inverse')   return runInverse();     // endgame-first backward induction
+  if (algo === 'surge')     return runSurge();       // power-spike optimizer
 
   const useCosine = algo === 'cosine';
 
@@ -5433,11 +6342,34 @@ function buildPathPanelContents(pathData, b) {
   const itemNameMap = {};
   b.items.forEach(it => { itemNameMap[it.key] = it; });
 
-  // Staple: top 4 self-score per tier, in final inventory, never sold
+  // ── Item labels for the path display ────────────────────────────────────
+  // Three exclusive labels, priority: Required > Signature > Recommended.
+  // The "Recommended" label replaces the old "staple" star — it now flags
+  // algorithm-loved items that aren't already required or signature.
   const soldEver = new Set();
   pathData.forEach(({ changes }) => {
     changes.forEach(c => { if (c.action === 'sell') soldEver.add(c.key); });
   });
+
+  // Resolve required + signature from the hero build chain (UI-only — these
+  // are the same sets computeBuildPath uses internally, just surfaced here).
+  let requiredKeys  = new Set();
+  let signatureKeys = new Set();
+  const heroBuilds = MATCH.heroData[b.heroName]?.builds;
+  if (heroBuilds) {
+    const ownBuild = heroBuilds[b.buildIdx] || heroBuilds.find(hb => hb.name === b.name);
+    if (ownBuild) {
+      try {
+        const resolved = resolveBuildConstraints(ownBuild, heroBuilds);
+        requiredKeys  = new Set(resolved.required_items);
+        signatureKeys = new Set([...resolved.signature_items].filter(k => !requiredKeys.has(k)));
+      } catch { /* fall through with empty sets */ }
+    }
+  }
+
+  // Recommended = top-4 self-score per tier that ended up in final inventory,
+  // minus anything already required/signature. This is what the algorithm
+  // "really liked" without being told to by the build constraints.
   const tierGroups = {};
   b.items.forEach(it => {
     if (it.self > 0) {
@@ -5450,9 +6382,23 @@ function buildPathPanelContents(pathData, b) {
   Object.values(tierGroups).forEach(group => {
     group.sort((a, bc) => bc.self - a.self).slice(0, 4).forEach(it => topSelfKeys.add(it.key));
   });
-  const stapleKeys = new Set([...summaryOwned].filter(k =>
+  const recommendedKeys = new Set([...summaryOwned].filter(k =>
     topSelfKeys.has(k) && !soldEver.has(k)
+       && !requiredKeys.has(k) && !signatureKeys.has(k)
   ));
+
+  // Helper: which exclusive label applies to this key (or null).
+  function labelFor(key) {
+    if (requiredKeys.has(key))    return 'required';
+    if (signatureKeys.has(key))   return 'signature';
+    if (recommendedKeys.has(key)) return 'recommended';
+    return null;
+  }
+  const LABEL_META = {
+    required:    { text: 'REQ', title: 'Required — flagged on this build' },
+    signature:   { text: 'SIG', title: 'Signature — flagged on this build' },
+    recommended: { text: 'REC', title: 'Recommended — high algo affinity' },
+  };
 
   // Title bar with toggle + debug
   let detailOpen = false;
@@ -5498,9 +6444,12 @@ function buildPathPanelContents(pathData, b) {
       const it  = itemNameMap[k];
       const img = srcUrl(it?.imagePath || '');
       const chip = document.createElement('span');
-      chip.className = 'bp-summary-chip' + (stapleKeys.has(k) ? ' bp-staple' : '');
-      chip.title = (stapleKeys.has(k) ? '★ Staple — ' : '') + (it?.name || k);
-      chip.innerHTML = img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`;
+      const label = labelFor(k);
+      chip.className = 'bp-summary-chip' + (label ? ' bp-label-' + label : '');
+      const meta = label ? LABEL_META[label] : null;
+      chip.title = (meta ? `${meta.text} — ` : '') + (it?.name || k);
+      chip.innerHTML = (img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`) +
+        (meta ? `<span class="bp-chip-badge bp-badge-${label}">${meta.text}</span>` : '');
       const nameLbl = document.createElement('span');
       nameLbl.className = 'bp-summary-name';
       nameLbl.textContent = it?.name || k;
@@ -5515,7 +6464,7 @@ function buildPathPanelContents(pathData, b) {
   // Detail view (hidden by default)
   const detailEl = document.createElement('div');
   detailEl.className = 'bp-detail hidden';
-  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, stapleKeys));
+  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, { requiredKeys, signatureKeys, recommendedKeys }));
   wrap.appendChild(detailEl);
 
   titleBar.querySelector('.bp-detail-toggle').addEventListener('click', () => {
@@ -5545,8 +6494,16 @@ function buildPathPanelContents(pathData, b) {
   return wrap;
 }
 
-function renderBuildPath(pathData, b, itemNameMap, stapleKeys = new Set()) {
+function renderBuildPath(pathData, b, itemNameMap, labels = {}) {
   if (!itemNameMap) { itemNameMap = {}; b.items.forEach(it => { itemNameMap[it.key] = it; }); }
+  const requiredKeys    = labels.requiredKeys    || new Set();
+  const signatureKeys   = labels.signatureKeys   || new Set();
+  const recommendedKeys = labels.recommendedKeys || new Set();
+  const labelFor = k => requiredKeys.has(k)    ? 'required'
+                      : signatureKeys.has(k)   ? 'signature'
+                      : recommendedKeys.has(k) ? 'recommended'
+                      : null;
+  const LABEL_TEXT = { required: 'REQ', signature: 'SIG', recommended: 'REC' };
   const container = document.createElement('div');
   container.className = 'bp-container';
 
@@ -5582,14 +6539,19 @@ function renderBuildPath(pathData, b, itemNameMap, stapleKeys = new Set()) {
         const altItem = altKey ? (itemNameMap[altKey] || { name: altKey, imagePath: '' }) : null;
         const hasAlt  = c.action !== 'sell' && !!altItem;
         const row     = document.createElement('div');
+        const rowLabel = c.action !== 'sell' ? labelFor(c.key) : null;
         row.className = `bp-change bp-${c.action}` +
-          (stapleKeys.has(c.key) && c.action !== 'sell' ? ' bp-staple' : '') +
+          (rowLabel ? ' bp-label-' + rowLabel : '') +
           (hasAlt ? ' bp-has-alt' : '');
         const badge   = c.action === 'sell' ? '−' : c.action === 'upgrade' ? '↑' : '+';
         const costTxt = c.action === 'sell' ? `+${c.refund}s` : `-${c.cost}s`;
+        const tagBadge = rowLabel
+          ? `<span class="bp-tag-badge bp-badge-${rowLabel}" title="${LABEL_TEXT[rowLabel]}">${LABEL_TEXT[rowLabel]}</span>`
+          : '';
         row.innerHTML = `
           <span class="bp-action-badge bp-${c.action}-badge">${badge}</span>
           ${img ? `<img class="bp-item-img" src="${img}" alt="">` : ''}
+          ${tagBadge}
           <span class="bp-item-name">${scored.name}</span>
           <span class="bp-cost">${costTxt}</span>`;
         if (hasAlt) {
@@ -5779,17 +6741,23 @@ document.getElementById('re-ally-search').addEventListener('input', () => render
 // QA TAB
 // ══════════════════════════════════════════════════════════════════════════════
 
+// Algorithms removed from the dropdown 2026-05-13 after sim-log comparison:
+//   - assassin  (worst affinity 23.25, over-buys + over-sells)
+//   - lookahead (ends-early bug, T4 deficit)
+//   - oracle    (mediocre across every metric, no differentiator)
+// Their runner functions remain in computeBuildPath so saved scenarios still
+// resolve, but they aren't surfaced to the user or the sim-log harness.
 const BP_ALGO_OPTIONS = [
   { value: 'greedy-phase', label: 'Greedy (Phase)' },
   { value: 'marginal',     label: 'Marginal Value' },
   { value: 'cosine',       label: 'Cosine Deficit' },
   { value: 'beam',         label: 'Beam Search' },
-  { value: 'lookahead',    label: '1-Step Lookahead' },
   { value: 'expert',       label: 'Expert Greedy' },
-  { value: 'assassin',     label: 'Target Assassin' },
   { value: 'adaptive',     label: 'Hybrid Rotation' },
   { value: 'fusion',       label: 'Fusion (Best of All)' },
-  { value: 'oracle',       label: 'Oracle (Deep/Slow)' },
+  { value: 'architect',    label: 'Architect (Path Planner)' },
+  { value: 'inverse',      label: 'Inverse (Endgame Solver)' },
+  { value: 'surge',        label: 'Surge (Power Spike)' },
 ];
 
 const QA = {
@@ -5823,6 +6791,7 @@ async function loadQA() {
   QA.reports   = reports;
   renderQAScenarioList();
   renderQAReportsList(reports);
+  loadSimLogList();
 }
 
 function renderQAScenarioList() {
@@ -6349,9 +7318,767 @@ async function deleteQAReport(id) {
   showPage('qa');
 }
 
+// ── Sim Log Comparison ─────────────────────────────────────────────────────
+// Replays every saved sim log against all build-path algorithms and reports
+// which algorithms most closely / least closely match the player's actual
+// purchases. Aggregates with bucket weights so matches in good games count
+// positively and matches in bad games count negatively.
+const SLC = { logs: [] };
+
+const SLC_BUCKET_WEIGHTS = {
+  'win:good':     5,
+  'loss:good':    4,
+  'win:neutral':  3,
+  'loss:neutral': 2,
+  'win:bad':      1,
+  'loss:bad':    -2,
+};
+const SLC_BUCKETS = ['win:good','loss:good','win:neutral','loss:neutral','win:bad','loss:bad'];
+
+async function loadSimLogList() {
+  try {
+    SLC.logs = await api.get('/api/sim-logs');
+  } catch (e) {
+    SLC.logs = [];
+  }
+  renderSimLogList();
+}
+
+function renderSimLogList() {
+  const el = document.getElementById('sim-log-list');
+  if (!el) return;
+  if (!SLC.logs.length) {
+    el.innerHTML = '<p class="qa-empty">No simulation logs saved yet.</p>';
+    return;
+  }
+  // Sort newest-first so the freshest runs sit at top.
+  const sorted = [...SLC.logs].sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+  el.innerHTML = sorted.map(l => {
+    const bucketKey = `${l.outcome}:${l.feel}`;
+    const cls = `slr-b-${l.outcome}-${l.feel}`;
+    const ts = l.ts ? new Date(l.ts).toLocaleDateString() : '';
+    return `
+      <div class="sim-log-row">
+        <div class="slr-hero">${escHtml(l.hero || '—')}</div>
+        <div class="slr-build">${escHtml(l.build || '—')}</div>
+        <div><span class="sim-log-bucket ${cls}">${escHtml(bucketKey)}</span></div>
+        <div class="muted-label">w=${SLC_BUCKET_WEIGHTS[bucketKey] ?? 0}</div>
+        <div class="muted-label">${escHtml(ts)}</div>
+      </div>`;
+  }).join('');
+}
+
+function slcJaccard(setA, setB) {
+  if (!setA.size && !setB.size) return 1;
+  let inter = 0;
+  setA.forEach(k => { if (setB.has(k)) inter++; });
+  const union = setA.size + setB.size - inter;
+  return union === 0 ? 0 : inter / union;
+}
+
+function slcCosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (const k of Object.keys(a)) {
+    const av = a[k] || 0, bv = b[k] || 0;
+    dot += av * bv; na += av*av; nb += bv*bv;
+  }
+  if (!na || !nb) return 0;
+  return dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+
+// Tag profile of an owned-item set: sum of each item's self_score per tag.
+// Items use a richer tag list than hero tags.json (extra item-only tags like
+// bullet_lifesteal, cooldown_reduction, magazine_size_dependant), so iterate
+// over whatever keys actually appear in each item's `values.self_score`.
+function slcTagProfile(itemKeySet) {
+  const profile = {};
+  itemKeySet.forEach(k => {
+    const it = bpItemMap[k]; if (!it) return;
+    const ss = it.values?.self_score || {};
+    Object.keys(ss).forEach(tag => {
+      profile[tag] = (profile[tag] || 0) + (ss[tag] || 0);
+    });
+  });
+  return profile;
+}
+
+// Rank-based column classifier. Raw simScoreBalance/Strength/Counter outputs
+// have wildly different magnitudes (balance multiplies ally×0.5, strength only
+// ×0.15) so raw comparison always returns "balance." Instead, score every
+// item in the build for each column, sort, and rank — an item belongs to the
+// column where it ranks best. Ties broken by raw score.
+function slcBuildColumnRanks(b, ctx) {
+  const rank = {};
+  const scorers = { balance: simScoreBalance, strength: simScoreStrength, counter: simScoreCounter };
+  Object.entries(scorers).forEach(([col, fn]) => {
+    const scored = b.items.map(it => ({ key: it.key, s: fn(it, ctx, 'Mid') }));
+    scored.sort((a, c) => c.s - a.s);
+    scored.forEach((x, i) => {
+      rank[x.key] ||= { score: {} };
+      rank[x.key][col]      = i;
+      rank[x.key].score[col] = x.s;
+    });
+  });
+  return rank;
+}
+
+function slcClassifyColumn(itemKey, colRank) {
+  const r = colRank[itemKey];
+  if (!r) return null;
+  const cols = ['balance', 'strength', 'counter'];
+  // Lowest rank wins (0 = best). Ties broken by raw score.
+  cols.sort((a, c) => (r[a] - r[c]) || (r.score[c] - r.score[a]));
+  return cols[0];
+}
+
+// Souls brackets calibrated from win:good log analysis (2026-05-13).
+// Player behaviour shifts distinctly at each boundary — see Architect v2
+// for the matching execution-side bracket logic.
+const SLC_BUCKETS_LIST = ['<800', '800-1599', '1600-3199', '3200-6399', '6400+'];
+function slcSoulsBucket(s) {
+  if (s < 800)  return '<800';
+  if (s < 1600) return '800-1599';
+  if (s < 3200) return '1600-3199';
+  if (s < 6400) return '3200-6399';
+  return '6400+';
+}
+
+// Replay an algo's per-phase path through the sim tick-income table to
+// recover the tick + souls level each algo buy would have happened at.
+// This is the algorithm-side counterpart to the player log's `soulsBefore`.
+// Greedy buys eagerly: at each tick, apply as many queued changes as souls
+// allow, in the order the algo emitted them.
+function slcSimulateAlgoTicks(pathData) {
+  let souls = 0;
+  const owned = new Set();
+  const queue = [];
+  pathData.forEach(ph => (ph.changes || []).forEach(c => queue.push(c)));
+  const events = [];
+  let qi = 0;
+  for (let tick = 0; tick < SIM_NUM_TICKS; tick++) {
+    souls += SIM_TICK_INCOME[tick] || 0;
+    while (qi < queue.length) {
+      const c = queue[qi];
+      const tier = bpItemMap[c.key]?.tier || 0;
+      let eff = tier;
+      (c.components || []).forEach(comp => {
+        eff -= (bpItemMap[comp]?.tier || 0);
+      });
+      eff = Math.max(0, eff);
+      if (eff > souls) break;
+      (c.components || []).forEach(comp => owned.delete(comp));
+      owned.add(c.key);
+      const soulsBefore = souls;
+      souls -= eff;
+      events.push({
+        tick, key: c.key, action: c.action,
+        soulsBefore, cost: eff,
+        bucket: slcSoulsBucket(soulsBefore),
+      });
+      qi++;
+    }
+  }
+  return events;
+}
+
+// Same shape as the algo simulator but reading directly from the log,
+// which already records soulsBefore and tick per action.
+function slcLogTickEvents(log) {
+  return (log.history || [])
+    .filter(h => h.action === 'buy' || h.action === 'upgrade')
+    .map(h => ({
+      tick: h.tick,
+      key: h.key,
+      action: h.action,
+      soulsBefore: h.soulsBefore || 0,
+      cost: h.costEffective || 0,
+      bucket: slcSoulsBucket(h.soulsBefore || 0),
+    }));
+}
+
+// Per-souls-bucket Jaccard: for each bucket, what fraction of items bought
+// in that bucket overlap between algo and player. Buckets with no events
+// from either side are skipped (no signal, would unfairly inflate). Returns
+// { sim: number, perBucket: {bucket: {pSet, aSet, jacc}} } for debug/report.
+function slcBucketSim(playerEvents, algoEvents) {
+  let total = 0, n = 0;
+  const perBucket = {};
+  SLC_BUCKETS_LIST.forEach(b => {
+    const pSet = new Set(playerEvents.filter(e => e.bucket === b).map(e => e.key));
+    const aSet = new Set(algoEvents.filter(e => e.bucket === b).map(e => e.key));
+    if (pSet.size === 0 && aSet.size === 0) {
+      perBucket[b] = { pCount: 0, aCount: 0, jacc: null };
+      return;
+    }
+    let inter = 0;
+    pSet.forEach(k => { if (aSet.has(k)) inter++; });
+    const union = pSet.size + aSet.size - inter;
+    const jacc = union === 0 ? 1 : inter / union;
+    perBucket[b] = { pCount: pSet.size, aCount: aSet.size, jacc };
+    total += jacc;
+    n++;
+  });
+  return { sim: n === 0 ? 0 : total / n, perBucket };
+}
+
+// Per-tick action agreement. At each tick, did algo and player do the same
+// kind of thing? Bucket the response so partial agreement still scores.
+//   - both bought the same key      → 1.0
+//   - both bought (different keys, same souls bucket)  → 0.6
+//   - both bought (different bucket)                   → 0.3
+//   - both skipped                                     → 0.5
+//   - one bought, one skipped                          → 0.0
+// Averaged across SIM_NUM_TICKS.
+function slcTickActionMatch(playerEvents, algoEvents) {
+  const pByTick = new Map(); playerEvents.forEach(e => pByTick.set(e.tick, e));
+  const aByTick = new Map(); algoEvents.forEach(e => aByTick.set(e.tick, e));
+  let sum = 0;
+  for (let t = 0; t < SIM_NUM_TICKS; t++) {
+    const p = pByTick.get(t);
+    const a = aByTick.get(t);
+    if (!p && !a) sum += 0.5;
+    else if (!p || !a) sum += 0.0;
+    else if (p.key === a.key) sum += 1.0;
+    else if (p.bucket === a.bucket) sum += 0.6;
+    else sum += 0.3;
+  }
+  return sum / SIM_NUM_TICKS;
+}
+
+// Walk a computeBuildPath() result to derive the final inventory after Late
+// (we ignore Extra Late so we compare against the player's typical end-state).
+// Returns a rich profile: literal sets, per-phase buy/sell tallies, tier and
+// column distributions, etc.
+function slcWalkPath(pathData, b, ctx) {
+  const final = new Set();
+  const ever  = new Set();
+  const sold  = new Set();
+  const buysByPhase    = {};    // phaseName → [{ key, eff, isUpgrade, tier }]
+  const sellsByPhase   = {};
+  for (let i = 0; i < pathData.length; i++) {
+    const phaseName = BUILD_PHASES[i].name;
+    buysByPhase[phaseName]  = [];
+    sellsByPhase[phaseName] = [];
+    (pathData[i].changes || []).forEach(c => {
+      if (c.action === 'sell') {
+        final.delete(c.key);
+        sold.add(c.key);
+        sellsByPhase[phaseName].push({ key: c.key });
+      } else if (c.action === 'buy' || c.action === 'upgrade') {
+        final.add(c.key);
+        ever.add(c.key);
+        const it = bpItemMap[c.key];
+        const tier = it?.tier || 0;
+        let eff = tier;
+        (c.components || []).forEach(comp => {
+          ever.add(comp);
+          final.delete(comp);
+          eff -= (bpItemMap[comp]?.tier || 0);
+        });
+        buysByPhase[phaseName].push({
+          key: c.key, eff: Math.max(0, eff), tier,
+          isUpgrade: (c.components || []).length > 0,
+        });
+      }
+    });
+  }
+  const _colRank = ctx ? slcBuildColumnRanks(b, ctx) : null;
+  return slcAugmentProfile({ final, ever, sold, buysByPhase, sellsByPhase, _colRank }, b, ctx);
+}
+
+// Same walk for a sim-log history[]. Note: log phase boundaries can drift
+// when a cheap T1 buy late-game forces the phase forward; we just trust the
+// recorded phase label and use lenient ±1-phase matching downstream.
+function slcWalkLog(log, b, ctx) {
+  const ever  = new Set();
+  const sold  = new Set(log.sold || []);
+  const buysByPhase  = {};
+  const sellsByPhase = {};
+  // Also track which sim-column the player chose for each buy.
+  const colCounts = { balance: 0, strength: 0, counter: 0 };
+  BUILD_PHASES.forEach(p => { buysByPhase[p.name] = []; sellsByPhase[p.name] = []; });
+  (log.history || []).forEach(h => {
+    const phase = h.phase && buysByPhase[h.phase] ? h.phase : 'Late';
+    if (h.action === 'buy' || h.action === 'upgrade') {
+      ever.add(h.key);
+      (h.components || []).forEach(c => ever.add(c));
+      const it = bpItemMap[h.key];
+      buysByPhase[phase].push({
+        key: h.key,
+        eff: h.costEffective ?? (it?.tier || 0),
+        tier: it?.tier || 0,
+        isUpgrade: h.action === 'upgrade',
+      });
+      if (h.col && colCounts[h.col] !== undefined) colCounts[h.col]++;
+    } else if (h.action === 'sell') {
+      sellsByPhase[phase].push({ key: h.key });
+    }
+  });
+  const profile = slcAugmentProfile({
+    final: new Set(log.owned || []), ever, sold, buysByPhase, sellsByPhase,
+  }, b, ctx);
+  // Override column counts with the explicit log values (more accurate than
+  // re-classifying after the fact).
+  profile.cols = colCounts;
+  return profile;
+}
+
+// Add derived metric vectors to a walk profile. The same helper is used for
+// both algo paths and player logs so the metrics are commensurable.
+function slcAugmentProfile(p, b, ctx) {
+  // Tier distribution of the final inventory (T1=500, T2=1250, T3=3000, T4=6200)
+  const tierBuckets = [0, 0, 0, 0];   // T1, T2, T3, T4
+  p.final.forEach(k => {
+    const t = bpItemMap[k]?.tier || 0;
+    if      (t <= 800)  tierBuckets[0]++;
+    else if (t <= 1600) tierBuckets[1]++;
+    else if (t <= 3200) tierBuckets[2]++;
+    else                tierBuckets[3]++;
+  });
+  // Counter-item count. counter_importance lives inside values.self_score, not
+  // at values.counter_importance — the previous reads were dead and the dimension
+  // showed 0 across the board. Threshold synced with COUNTER_TAG_THRESH in
+  // computeBuildPath (lowered to 0.2 on 2026-05-13).
+  const CTR_THRESH = 0.2;
+  const ctrImp = k => (bpItemMap[k]?.values?.self_score?.counter_importance || 0);
+  let counters = 0;
+  p.final.forEach(k => { if (ctrImp(k) > CTR_THRESH) counters++; });
+  const countersByPhase = {};
+  BUILD_PHASES.forEach(ph => {
+    countersByPhase[ph.name] = (p.buysByPhase[ph.name] || [])
+      .filter(buy => ctrImp(buy.key) > CTR_THRESH).length;
+  });
+  // Per-phase average effective cost — captures "save for big ticket"
+  const avgCostByPhase = {};
+  BUILD_PHASES.forEach(ph => {
+    const arr = p.buysByPhase[ph.name] || [];
+    avgCostByPhase[ph.name] = arr.length ? arr.reduce((s,x)=>s+x.eff,0) / arr.length : 0;
+  });
+  // Buys per phase + sells per phase counts
+  const buysCountByPhase = {};
+  const sellsCountByPhase = {};
+  BUILD_PHASES.forEach(ph => {
+    buysCountByPhase[ph.name]  = (p.buysByPhase[ph.name]  || []).length;
+    sellsCountByPhase[ph.name] = (p.sellsByPhase[ph.name] || []).length;
+  });
+  // Upgrade fraction (of all buys, how many consumed components)
+  const totalBuys = Object.values(p.buysByPhase).flat();
+  const upgradeFrac = totalBuys.length
+    ? totalBuys.filter(x => x.isUpgrade).length / totalBuys.length : 0;
+  // Column classification using rank-based assignment (built upstream).
+  let cols = null;
+  if (ctx && p._colRank) {
+    cols = { balance: 0, strength: 0, counter: 0 };
+    p.final.forEach(k => {
+      const col = slcClassifyColumn(k, p._colRank);
+      if (col) cols[col]++;
+    });
+  }
+  return { ...p, tierBuckets, counters, countersByPhase, avgCostByPhase,
+           buysCountByPhase, sellsCountByPhase, upgradeFrac, cols };
+}
+
+async function runSimLogComparison() {
+  const statusEl = document.getElementById('sim-log-compare-status');
+  const outEl    = document.getElementById('sim-log-compare-out');
+  const setStatus = msg => { if (statusEl) statusEl.textContent = msg; };
+
+  if (!SLC.logs.length) await loadSimLogList();
+  if (!SLC.logs.length) { setStatus('No sim logs to compare.'); return; }
+
+  // Ensure items + tags. Critical: use /api/items/all — the slim /api/items
+  // endpoint strips .values.self_score, which silently zeros out every tag
+  // dot product and collapses the column classifier to "balance for everything."
+  if (!S.tags.length) S.tags = await api.get('/api/tags');
+  const needRichItems = !MATCH.itemData.length
+                     || !MATCH.itemData[0]?.values?.self_score;
+  if (needRichItems) MATCH.itemData = await api.get('/api/items/all');
+  bpItemMap = {};
+  MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+
+  // Save MATCH state (deep enough for our purposes)
+  const saved = {
+    allies:         [...MATCH.allies],
+    enemies:        [...MATCH.enemies],
+    self:           MATCH.self,
+    scoreFormula:   MATCH.scoreFormula,
+    bpAlgo:         MATCH.bpAlgo,
+    selectedBuilds: { ...MATCH.selectedBuilds },
+  };
+
+  const ALGOS = BP_ALGO_OPTIONS.map(o => o.value);
+  const perAlgo = {};
+  ALGOS.forEach(a => perAlgo[a] = {
+    weighted: 0,
+    perBucket: {},
+    perLog: [],
+    errors: 0,
+  });
+
+  const skipped = [];
+  let processed = 0;
+
+  for (const sum of SLC.logs) {
+    processed++;
+    setStatus(`Replaying ${processed}/${SLC.logs.length}: ${sum.hero} — ${sum.build}…`);
+    await new Promise(r => setTimeout(r, 0));
+
+    let log;
+    try { log = await api.get(`/api/sim-logs/${sum.id}`); }
+    catch (e) { skipped.push({ id: sum.id, reason: 'fetch failed' }); continue; }
+    if (!log || !log.history) { skipped.push({ id: sum.id, reason: 'no history' }); continue; }
+
+    // Switch MATCH to the log's match-up.
+    MATCH.allies       = [...(log.allies  || [])];
+    MATCH.enemies      = [...(log.enemies || [])];
+    MATCH.self         = log.self || log.hero;
+    MATCH.scoreFormula = log.formula || 'v3';
+
+    const everyone = [...new Set([MATCH.self, ...MATCH.allies, ...MATCH.enemies])];
+    let heroLoadOk = true;
+    for (const n of everyone) {
+      if (!MATCH.heroData[n]) {
+        try { MATCH.heroData[n] = await api.get(`/api/heroes/${n}`); }
+        catch (e) { heroLoadOk = false; break; }
+      }
+      cacheHeroBuilds(n);
+    }
+    if (!heroLoadOk) { skipped.push({ id: sum.id, reason: 'hero data load failed' }); continue; }
+
+    // Each hero defaults to General; set self's selected build to the log's
+    // build so computeResults() returns the right b for it. Other heroes
+    // are left at General — same as a fresh load.
+    MATCH.selectedBuilds[MATCH.self] = log.build_idx ?? 0;
+
+    let results;
+    try { results = computeResults(); }
+    catch (e) { skipped.push({ id: sum.id, reason: 'computeResults: ' + e.message }); continue; }
+
+    const selfRes = results.find(r => r.name === MATCH.self);
+    if (!selfRes) { skipped.push({ id: sum.id, reason: 'self not in results' }); continue; }
+
+    let b = selfRes.builds.find(bx => bx.buildIdx === log.build_idx);
+    if (!b) b = selfRes.builds.find(bx => bx.name === log.build_name);
+    if (!b) { skipped.push({ id: sum.id, reason: 'build not in results' }); continue; }
+
+    // Sim context once per log — column classification only depends on team
+    // comp + self build, not on owned items, so we can reuse it across algos.
+    const simCtx = simBuildCtx(b, { tick: 12, owned: [], consumed: [], blocked: [], sold: [], focused: { allies: [], enemies: [] } });
+    const playerWalk = slcWalkLog(log, b, simCtx);
+    const playerProfile = slcTagProfile(playerWalk.final);
+    const playerTickEvents = slcLogTickEvents(log);
+    const bucket = `${log.outcome}:${log.feel}`;
+
+    // Fingerprint container: sorted-final-inventory hash per algo so we can
+    // visually verify whether two algos really produced identical paths.
+    const fingerprints = {};
+
+    for (const algo of ALGOS) {
+      let path;
+      try { path = computeBuildPath(b, algo); }
+      catch (e) { perAlgo[algo].errors++; continue; }
+      const algoWalk = slcWalkPath(path, b, simCtx);
+      const algoProfile = slcTagProfile(algoWalk.final);
+      fingerprints[algo] = [...algoWalk.final].sort().join(',');
+
+      // Replay the algo through the sim tick income table → per-tick buy
+      // events, comparable to the player's log.history events.
+      const algoTickEvents = slcSimulateAlgoTicks(path);
+      const bucketRes      = slcBucketSim(playerTickEvents, algoTickEvents);
+      const bucketSim      = bucketRes.sim;
+      const tickMatch      = slcTickActionMatch(playerTickEvents, algoTickEvents);
+
+      // Core item / tag similarity (literal + functional).
+      const jaccFinal = slcJaccard(playerWalk.final, algoWalk.final);
+      const jaccEver  = slcJaccard(playerWalk.ever,  algoWalk.ever);
+      const tcos      = slcCosine(playerProfile, algoProfile);
+
+      // "Save for big ticket": cosine of per-phase avg-effective-cost vectors.
+      const phaseAvgVecA = {}, phaseAvgVecP = {};
+      BUILD_PHASES.forEach(ph => {
+        phaseAvgVecA[ph.name] = algoWalk.avgCostByPhase[ph.name] || 0;
+        phaseAvgVecP[ph.name] = playerWalk.avgCostByPhase[ph.name] || 0;
+      });
+      const phaseCostSim = slcCosine(phaseAvgVecA, phaseAvgVecP);
+
+      // Counter-timing: per-phase counter-item counts. Drop the dimension when
+      // both sides have zero counters (no signal — was previously forced to 1
+      // which masked the algo's actual behaviour with a free 0.12 bonus).
+      const ctrA = {}, ctrP = {};
+      BUILD_PHASES.forEach(ph => {
+        ctrA[ph.name] = algoWalk.countersByPhase[ph.name] || 0;
+        ctrP[ph.name] = playerWalk.countersByPhase[ph.name] || 0;
+      });
+      const counterActive = !(algoWalk.counters === 0 && playerWalk.counters === 0);
+      const counterTimingSim = counterActive ? slcCosine(ctrA, ctrP) : null;
+
+      // Tier distribution (cosine over [T1, T2, T3, T4]).
+      const tierObjA = { 0: algoWalk.tierBuckets[0], 1: algoWalk.tierBuckets[1], 2: algoWalk.tierBuckets[2], 3: algoWalk.tierBuckets[3] };
+      const tierObjP = { 0: playerWalk.tierBuckets[0], 1: playerWalk.tierBuckets[1], 2: playerWalk.tierBuckets[2], 3: playerWalk.tierBuckets[3] };
+      const tierSim  = slcCosine(tierObjA, tierObjP);
+
+      // Column distribution — balance / strength / counter.
+      const colSim = (algoWalk.cols && playerWalk.cols)
+        ? slcCosine(algoWalk.cols, playerWalk.cols) : 0;
+
+      // Sells: Jaccard of sold-item keys + count similarity. When neither side
+      // sold anything the dimension is informationless — drop it from the blend.
+      let sellSim = null;
+      if (algoWalk.sold.size || playerWalk.sold.size) {
+        const sellJacc  = slcJaccard(algoWalk.sold, playerWalk.sold);
+        const sellCount = 1 - Math.abs(algoWalk.sold.size - playerWalk.sold.size)
+                              / Math.max(algoWalk.sold.size, playerWalk.sold.size, 1);
+        sellSim = (sellJacc + sellCount) / 2;
+      }
+
+      // Upgrade fraction match.
+      const upgSim = 1 - Math.abs(algoWalk.upgradeFrac - playerWalk.upgradeFrac);
+
+      // Dimension blend. Per-souls + per-tick step similarity now dominate
+      // because the user explicitly said "what the algo did at each soul
+      // total is even more important" than the final inventory.
+      // Dimensions returning null (no signal this log) are dropped and the
+      // remaining weights are re-normalised so sim ∈ [0, 1].
+      const itemSim = (jaccFinal + jaccEver + tcos) / 3;
+      const dimensions = [
+        { val: bucketSim,        w: 0.30 },   // NEW — per-souls-bucket Jaccard of items bought
+        { val: tickMatch,        w: 0.15 },   // NEW — per-tick action agreement
+        { val: itemSim,          w: 0.20 },   // final-inventory match (still matters)
+        { val: phaseCostSim,     w: 0.08 },
+        { val: counterTimingSim, w: 0.07 },
+        { val: tierSim,          w: 0.07 },
+        { val: colSim,           w: 0.05 },
+        { val: sellSim,          w: 0.04 },
+        { val: upgSim,           w: 0.04 },
+      ].filter(d => d.val !== null && Number.isFinite(d.val));
+      const wSum = dimensions.reduce((s, d) => s + d.w, 0) || 1;
+      const sim = dimensions.reduce((s, d) => s + d.val * d.w, 0) / wSum;
+
+      const w = SLC_BUCKET_WEIGHTS[bucket] ?? 0;
+      perAlgo[algo].weighted += sim * w;
+      const pb = perAlgo[algo].perBucket[bucket] ||= { sum: 0, n: 0 };
+      pb.sum += sim; pb.n++;
+      perAlgo[algo].perLog.push({
+        id: sum.id, hero: log.hero, build: log.build_name, bucket, sim,
+        m: { bucketSim, tickMatch, jaccFinal, jaccEver, tcos, phaseCostSim,
+             counterTimingSim, tierSim, colSim, sellSim, upgSim },
+        raw: {
+          counters: algoWalk.counters, counters_p: playerWalk.counters,
+          sells: algoWalk.sold.size,  sells_p: playerWalk.sold.size,
+          upgradeFrac: algoWalk.upgradeFrac, upgradeFrac_p: playerWalk.upgradeFrac,
+          cols: algoWalk.cols, cols_p: playerWalk.cols,
+          tiers: algoWalk.tierBuckets, tiers_p: playerWalk.tierBuckets,
+          // Bucket detail: items bought per souls bracket on both sides.
+          // Lets us see e.g. "algo over-bought T4 zone, under-bought T1 zone."
+          buckets:   bucketRes.perBucket,
+        },
+      });
+    }
+
+    // Group algos with identical final inventories so we can see the real
+    // collapse pattern (e.g. greedy = lookahead = marginal = cosine).
+    const fpGroups = {};
+    Object.entries(fingerprints).forEach(([algo, fp]) => {
+      (fpGroups[fp] ||= []).push(algo);
+    });
+    const groupSummary = Object.entries(fpGroups)
+      .map(([fp, algos]) => algos.length > 1 ? `[${algos.join(',')}] = ${fp || '<empty>'}` : null)
+      .filter(Boolean);
+    if (groupSummary.length) {
+      console.log(`[${log.hero} — ${log.build_name}] identical-path groups:`);
+      groupSummary.forEach(g => console.log('  ' + g));
+    }
+  }
+
+  // Restore MATCH state
+  MATCH.allies         = saved.allies;
+  MATCH.enemies        = saved.enemies;
+  MATCH.self           = saved.self;
+  MATCH.scoreFormula   = saved.scoreFormula;
+  MATCH.bpAlgo         = saved.bpAlgo;
+  MATCH.selectedBuilds = saved.selectedBuilds;
+
+  // Build markdown report
+  const md = slcFormatReport(perAlgo, ALGOS, processed, skipped);
+  if (outEl) {
+    outEl.style.display = 'block';
+    outEl.textContent   = md;
+  }
+  setStatus(`Done — ${processed} logs processed, ${skipped.length} skipped. Report copied to clipboard.`);
+  try { await navigator.clipboard.writeText(md); toast('Report copied to clipboard'); }
+  catch (e) { /* clipboard may be denied; report is still visible */ }
+}
+
+function slcFormatReport(perAlgo, ALGOS, nLogs, skipped) {
+  // Rank by aggregate weighted affinity
+  const ranked = ALGOS.map(a => ({ algo: a, ...perAlgo[a] }))
+    .sort((x, y) => y.weighted - x.weighted);
+
+  const lines = [];
+  lines.push(`# Sim Log ↔ Algorithm Similarity Report`);
+  lines.push('');
+  lines.push(`Logs processed: ${nLogs} · Algorithms: ${ALGOS.length} · Skipped: ${skipped.length}`);
+  lines.push('');
+  lines.push(`Bucket weights — win/good=+5, loss/good=+4, win/neutral=+3, loss/neutral=+2, win/bad=+1, loss/bad=−2`);
+  lines.push(`Phase coverage: Lane → Extra Late (all 5 phases). Similarity blends (dimensions with no signal are dropped and remaining weights re-normalised):`);
+  lines.push(`  · 0.30  bucketSim = per-souls-bracket Jaccard. Algo replayed through SIM_TICK_INCOME → each buy gets a souls level; brackets are <800 / 800-1599 / 1600-3199 / 3200-6399 / 6400+. Step-similarity headline metric.`);
+  lines.push(`  · 0.15  tickMatch = per-tick action agreement. Same-key=1.0, same-bucket=0.6, diff-bucket=0.3, both-skip=0.5, mismatch=0.0; averaged across all 35 sim ticks.`);
+  lines.push(`  · 0.20  items     = mean(Jaccard-final, Jaccard-ever, cosine-tag-profile) — final-inventory match (literal + functional).`);
+  lines.push(`  · 0.08  phaseCost = cosine of per-phase avg effective cost (save-for-big behaviour, coarser cousin of bucketSim).`);
+  lines.push(`  · 0.07  counterTiming = cosine of per-phase counter-item counts (dropped if both sides 0).`);
+  lines.push(`  · 0.07  tierDist  = cosine over [T1,T2,T3,T4] of final inventory.`);
+  lines.push(`  · 0.05  colDist   = rank-based balance/strength/counter classification, cosine.`);
+  lines.push(`  · 0.04  sells     = mean(Jaccard sold keys, |Δsell-count|) (dropped if both sides 0).`);
+  lines.push(`  · 0.04  upgradeFrac = 1 − |Δ fraction of buys that were upgrades|.`);
+  lines.push(`Affinity = Σ over logs of similarity × bucket-weight (higher = matches good games and avoids bad ones)`);
+  lines.push('');
+  lines.push(`## Affinity ranking`);
+  lines.push('');
+  lines.push(`| Rank | Algorithm | Affinity | Avg sim | Errors |`);
+  lines.push(`| --- | --- | --- | --- | --- |`);
+  ranked.forEach((r, i) => {
+    const allSims = r.perLog.map(p => p.sim);
+    const avg = allSims.length ? (allSims.reduce((s,v)=>s+v,0) / allSims.length) : 0;
+    lines.push(`| ${i+1} | ${r.algo} | ${r.weighted.toFixed(3)} | ${avg.toFixed(3)} | ${r.errors} |`);
+  });
+
+  lines.push('');
+  lines.push(`## Per-metric average (across all logs, unweighted)`);
+  lines.push('');
+  const METRIC_KEYS = ['bucketSim','tickMatch','jaccFinal','jaccEver','tcos','phaseCostSim','counterTimingSim','tierSim','colSim','sellSim','upgSim'];
+  lines.push(`| Algorithm | ${METRIC_KEYS.join(' | ')} |`);
+  lines.push(`| --- |${METRIC_KEYS.map(()=>' --- ').join('|')}|`);
+  ranked.forEach(r => {
+    const avgs = METRIC_KEYS.map(k => {
+      const vals = r.perLog.map(p => p.m?.[k]).filter(v => typeof v === 'number');
+      return vals.length ? (vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(3) : '—';
+    });
+    lines.push(`| ${r.algo} | ${avgs.join(' | ')} |`);
+  });
+
+  // Souls-bucket breakdown — average buys per bracket on both sides.
+  // This is the headline diagnostic for the bucketSim metric: where does
+  // each algorithm over-buy or under-buy relative to the player?
+  lines.push('');
+  lines.push(`## Per-souls-bucket buy counts (avg per log; "a" = algo, "p" = player)`);
+  lines.push('');
+  lines.push(`| Algorithm | <800 a/p | 800-1599 a/p | 1600-3199 a/p | 3200-6399 a/p | 6400+ a/p |`);
+  lines.push(`| --- | --- | --- | --- | --- | --- |`);
+  ranked.forEach(r => {
+    const sums = {};
+    SLC_BUCKETS_LIST.forEach(b => sums[b] = { a: 0, p: 0, n: 0 });
+    r.perLog.forEach(row => {
+      const bks = row.raw?.buckets || {};
+      SLC_BUCKETS_LIST.forEach(b => {
+        const o = bks[b]; if (!o) return;
+        sums[b].a += o.aCount || 0;
+        sums[b].p += o.pCount || 0;
+        sums[b].n += 1;
+      });
+    });
+    const cells = SLC_BUCKETS_LIST.map(b => {
+      const s = sums[b];
+      if (!s.n) return '—';
+      return `${(s.a/s.n).toFixed(1)}/${(s.p/s.n).toFixed(1)}`;
+    });
+    lines.push(`| ${r.algo} | ${cells.join(' | ')} |`);
+  });
+
+  lines.push('');
+  lines.push(`## Behavioural averages (algo vs player; "p" = player)`);
+  lines.push('');
+  lines.push(`| Algorithm | counters | counters_p | sells | sells_p | upgFrac | upgFrac_p | cols (b/s/c) | cols_p (b/s/c) | tiers (1/2/3/4) | tiers_p |`);
+  lines.push(`| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |`);
+  const mean = arr => arr.length ? arr.reduce((s,v)=>s+v,0)/arr.length : 0;
+  ranked.forEach(r => {
+    const rows = r.perLog;
+    const fmt  = v => (typeof v === 'number') ? v.toFixed(2) : '—';
+    const sumCols = key => {
+      const c = { balance: 0, strength: 0, counter: 0 };
+      rows.forEach(row => {
+        const o = row.raw?.[key]; if (!o) return;
+        c.balance += o.balance || 0;
+        c.strength += o.strength || 0;
+        c.counter  += o.counter  || 0;
+      });
+      const n = rows.length || 1;
+      return `${(c.balance/n).toFixed(1)}/${(c.strength/n).toFixed(1)}/${(c.counter/n).toFixed(1)}`;
+    };
+    const sumTiers = key => {
+      const t = [0,0,0,0];
+      rows.forEach(row => {
+        const arr = row.raw?.[key] || [0,0,0,0];
+        for (let i = 0; i < 4; i++) t[i] += arr[i] || 0;
+      });
+      const n = rows.length || 1;
+      return t.map(v => (v/n).toFixed(1)).join('/');
+    };
+    lines.push(`| ${r.algo} | ${fmt(mean(rows.map(p=>p.raw?.counters)))} | ${fmt(mean(rows.map(p=>p.raw?.counters_p)))} | ${fmt(mean(rows.map(p=>p.raw?.sells)))} | ${fmt(mean(rows.map(p=>p.raw?.sells_p)))} | ${fmt(mean(rows.map(p=>p.raw?.upgradeFrac)))} | ${fmt(mean(rows.map(p=>p.raw?.upgradeFrac_p)))} | ${sumCols('cols')} | ${sumCols('cols_p')} | ${sumTiers('tiers')} | ${sumTiers('tiers_p')} |`);
+  });
+
+  lines.push('');
+  lines.push(`## Per-bucket average similarity`);
+  lines.push('');
+  lines.push(`| Algorithm | ${SLC_BUCKETS.join(' | ')} |`);
+  lines.push(`| --- |${SLC_BUCKETS.map(()=>' --- ').join('|')}|`);
+  ranked.forEach(r => {
+    const cells = SLC_BUCKETS.map(b => {
+      const s = r.perBucket[b];
+      return s ? `${(s.sum/s.n).toFixed(3)} (n=${s.n})` : '—';
+    });
+    lines.push(`| ${r.algo} | ${cells.join(' | ')} |`);
+  });
+
+  // Per-log breakdown — useful for spotting which specific games swing each algo
+  lines.push('');
+  lines.push(`## Per-log similarity (all algos)`);
+  lines.push('');
+  // Build a wide table: rows = logs, cols = algos
+  const logIds = ranked[0]?.perLog.map(p => p.id) || [];
+  const logMeta = {};
+  ranked[0]?.perLog.forEach(p => { logMeta[p.id] = { hero: p.hero, build: p.build, bucket: p.bucket }; });
+  lines.push(`| Log | Bucket | ${ALGOS.join(' | ')} |`);
+  lines.push(`| --- | --- |${ALGOS.map(()=>' --- ').join('|')}|`);
+  logIds.forEach(id => {
+    const meta = logMeta[id] || {};
+    const label = `${meta.hero || ''} — ${meta.build || ''}`;
+    const cells = ALGOS.map(a => {
+      const row = perAlgo[a].perLog.find(p => p.id === id);
+      return row ? row.sim.toFixed(3) : '—';
+    });
+    lines.push(`| ${label} | ${meta.bucket || ''} | ${cells.join(' | ')} |`);
+  });
+
+  if (skipped.length) {
+    lines.push('');
+    lines.push(`## Skipped logs`);
+    lines.push('');
+    skipped.forEach(s => lines.push(`- ${s.id}: ${s.reason}`));
+  }
+
+  return lines.join('\n');
+}
+
+// Expose for console-driven runs as well.
+window.runSimLogComparison = runSimLogComparison;
+
 // ── QA Event Listeners ────────────────────────────────────────────────────────
 
 document.getElementById('btn-new-qa-scenario').addEventListener('click', newQAScenario);
+document.getElementById('btn-sim-log-refresh').addEventListener('click', loadSimLogList);
+document.getElementById('btn-sim-log-run').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-sim-log-run');
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = 'Running…';
+  try { await runSimLogComparison(); }
+  catch (e) {
+    document.getElementById('sim-log-compare-status').textContent = 'Error: ' + e.message;
+    console.error(e);
+  }
+  btn.textContent = orig;
+  btn.disabled = false;
+});
 
 document.getElementById('back-qa-edit').addEventListener('click', async () => {
   await loadQA(); showPage('qa');
@@ -6617,20 +8344,26 @@ function simRecommendCol(state, b, ctx, scorer, constraints, forceRequired = fal
   const ownedSet  = new Set(state.owned);
   const consumed  = new Set(state.consumed);
   const blocked   = new Set(state.blocked);
+  const soldSet   = new Set(state.sold || []);
   const phase     = SIM_TICK_PHASE[state.tick] || 'Late';
   const candidates = [];
   b.items.forEach(it => {
     const k = it.key;
     if (ownedSet.has(k) || consumed.has(k)) return;
     if (blocked.has(k)) return;
+    if (soldSet.has(k)) return;
     if (constraints.blacklist.has(k)) return;
     // skip subsumed: if any upgrade of this item is already owned
     const upgrades = ctx.upgradesTo[k] || [];
     if (upgrades.some(u => ownedSet.has(u))) return;
     const eff = simEffectiveCost(k, ownedSet);
     let score = scorer(it, ctx, phase);
-    if (constraints.signature.has(k)) score *= 1.5;
-    if (constraints.required.has(k))  score *= 3.0;
+    // Tiered boost — Req > req-component > Sig > sig-component > standard.
+    // An item flagged as BOTH Sig and Req-comp takes the higher (Req-comp).
+    if      (constraints.required.has(k))  score *= 3.0;
+    else if (constraints.reqComp.has(k))   score *= 1.7;
+    else if (constraints.signature.has(k)) score *= 1.5;
+    else if (constraints.sigComp.has(k))   score *= 1.2;
     candidates.push({ key: k, score, eff, item: it });
   });
   // Confidence (Option H) — bias each candidate by its item-level knob,
@@ -6676,27 +8409,40 @@ function simRecommendCol(state, b, ctx, scorer, constraints, forceRequired = fal
   return { affordable, soon, later };
 }
 
-// Resolve constraints (signature/required/blacklist) for a build.
+// Resolve constraints (signature/required/blacklist) for a build, including
+// the transitive component sets so we can boost req/sig components in scoring.
 function simResolveConstraints(b) {
-  const empty = { signature: new Set(), required: new Set(), blacklist: new Set() };
-  if (!b) return empty;
+  const expand = (seedSet) => {
+    const out = new Set();
+    const stack = [];
+    seedSet.forEach(k => (bpItemMap[k]?.upgrades_from || []).forEach(c => stack.push(c)));
+    while (stack.length) {
+      const c = stack.pop();
+      if (out.has(c)) continue;
+      out.add(c);
+      (bpItemMap[c]?.upgrades_from || []).forEach(s => { if (!out.has(s)) stack.push(s); });
+    }
+    return out;
+  };
+  const buildResult = (sig, req, bl) => {
+    const reqComp = expand(req);
+    const sigComp = new Set([...expand(sig)].filter(k => !reqComp.has(k)));
+    return { signature: sig, required: req, blacklist: bl, sigComp, reqComp };
+  };
+  if (!b) return buildResult(new Set(), new Set(), new Set());
   const heroBuilds = MATCH.heroData[b.heroName]?.builds;
   if (heroBuilds) {
     const own = heroBuilds[b.buildIdx] || heroBuilds.find(hb => hb.name === b.name);
     if (own) {
       const r = resolveBuildConstraints(own, heroBuilds);
-      return {
-        signature: r.signature_items,
-        required:  r.required_items,
-        blacklist: r.blacklist_items,
-      };
+      return buildResult(r.signature_items, r.required_items, r.blacklist_items);
     }
   }
-  return {
-    signature: new Set(b.signature_items || []),
-    required:  new Set(b.required_items  || []),
-    blacklist: new Set(b.blacklist_items || []),
-  };
+  return buildResult(
+    new Set(b.signature_items || []),
+    new Set(b.required_items  || []),
+    new Set(b.blacklist_items || []),
+  );
 }
 
 // ── Ally / enemy attribution ────────────────────────────────────────────
@@ -6823,8 +8569,12 @@ function renderSim() {
     renderSimCol('sim-col-strength', recStr, b, ctx, constraints, state, topKey, 'strength');
     renderSimCol('sim-col-counter',  recCtr, b, ctx, constraints, state, topKey, 'counter');
 
-    // Mark skip button as the most-recommended choice if appropriate
-    document.getElementById('sim-skip').classList.toggle('is-most-rec', shouldSkip);
+    // Mark skip as the most-recommended choice when no affordable pick beats
+    // the skip baseline — label it WAIT so the player reads it as a positive
+    // action ("save your souls") instead of an absence of recommendation.
+    const skipBtn = document.getElementById('sim-skip');
+    skipBtn.classList.toggle('is-most-rec', shouldSkip);
+    skipBtn.textContent = shouldSkip ? 'Wait ⏸' : 'Skip';
   }
 
   renderSimTeamComp(state, b);
@@ -6852,10 +8602,23 @@ function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
   const isAffordable = c.eff <= state.remaining;
   const isPreview = !isAffordable;
   const card = document.createElement('div');
+  // Class stacking — each card carries up to four identity classes that
+  // combine in the border styling. Rule of thumb: solid border + solid symbol
+  // mean the item itself is sig/req; dotted border + hollow symbol mean it's
+  // only a component of one. An item can be both at once (e.g. a Signature
+  // that's also a Req-component) — the combo border shows both colors and
+  // both symbols stack. SC (sig-component) is suppressed when the item is
+  // itself Required, because Required already implies you'll consume it.
   card.className = 'sim-card' + (isPreview ? ' is-preview' : '');
-  if (constraints.required.has(c.key))  card.classList.add('is-required');
-  else if (constraints.signature.has(c.key)) card.classList.add('is-signature');
-  if (c.key === topKey && !isPreview)        card.classList.add('is-most-rec');
+  const flagReq     = constraints.required.has(c.key);
+  const flagSig     = constraints.signature.has(c.key);  // sig/req mutually exclusive at resolve time
+  const flagReqComp = constraints.reqComp.has(c.key);
+  const flagSigComp = constraints.sigComp.has(c.key) && !flagReq;
+  if (flagReq)     card.classList.add('is-required');
+  if (flagSig)     card.classList.add('is-signature');
+  if (flagReqComp) card.classList.add('is-req-comp');
+  if (flagSigComp) card.classList.add('is-sig-comp');
+  if (c.key === topKey && !isPreview) card.classList.add('is-most-rec');
   if (state.pendingChoice && state.pendingChoice.key === c.key && state.pendingChoice.col === colName) {
     card.classList.add('is-selected');
   }
@@ -6881,9 +8644,14 @@ function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
     </div>
     ${c.slot === 'soon'  ? '<div class="sim-preview-badge">next</div>'    : ''}
     ${c.slot === 'later' ? '<div class="sim-preview-badge">horizon</div>' : ''}
-    ${constraints.required.has(c.key)   ? '<div class="sim-flag sim-flag-req">REQ</div>' : ''}
-    ${constraints.signature.has(c.key) && !constraints.required.has(c.key) ? '<div class="sim-flag sim-flag-sig">★</div>' : ''}
-    <button class="sim-block-btn" title="Don't recommend again">⊘</button>`;
+    <div class="sim-flag-stack">
+      ${flagReq     ? '<div class="sim-flag sim-flag-req"  title="Required item">REQ</div>'                            : ''}
+      ${flagReqComp ? '<div class="sim-flag sim-flag-reqc" title="Component of a required item">REQ</div>'             : ''}
+      ${flagSig     ? '<div class="sim-flag sim-flag-sig"  title="Signature item">★</div>'                             : ''}
+      ${flagSigComp ? '<div class="sim-flag sim-flag-sigc" title="Component of a signature item">☆</div>'              : ''}
+    </div>
+    ${c.key === topKey && !isPreview ? '<div class="sim-rec-badge">RECOMMENDED</div>' : ''}
+    <button class="sim-block-btn" title="Don't recommend this item again">Block</button>`;
   card.addEventListener('click', e => {
     if (e.target.closest('.sim-block-btn')) return;
     if (isPreview) return;
@@ -6984,6 +8752,7 @@ function simHeroPickPreview(heroName, side, b, state) {
   const ownedSet = new Set(state.owned);
   const consumed = new Set(state.consumed);
   const blocked  = new Set(state.blocked);
+  const sold     = new Set(state.sold || []);
   const hero = MATCH.heroData[heroName];
   const idx  = MATCH.selectedBuilds[heroName] ?? 0;
   const build = hero?.builds?.[idx] || hero?.builds?.[0];
@@ -6994,7 +8763,7 @@ function simHeroPickPreview(heroName, side, b, state) {
   const sign = side === 'ally' ? 1 : -1;
   const candidates = [];
   b.items.forEach(it => {
-    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return;
+    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key) || sold.has(it.key)) return;
     let s = 0;
     Object.keys(wVec).forEach(t => { s += (it.values?.[t] || 0) * (wVec[t] || 0); });
     s *= sign;
@@ -7225,11 +8994,12 @@ function simOpenOverride() {
   const ownedSet   = new Set(state.owned);
   const consumed   = new Set(state.consumed);
   const blocked    = new Set(state.blocked);
+  const soldSet    = new Set(state.sold || []);
   const constraints = simResolveConstraints(cur.b);
   const phase      = SIM_TICK_PHASE[state.tick] || 'Late';
 
   const items = cur.b.items.filter(it => {
-    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key)) return false;
+    if (ownedSet.has(it.key) || consumed.has(it.key) || blocked.has(it.key) || soldSet.has(it.key)) return false;
     return simEffectiveCost(it.key, ownedSet) <= state.remaining;
   });
 
@@ -7273,13 +9043,59 @@ function simOpenOverride() {
   };
 
   simShowModal('Override — pick any affordable item', host => {
+    // Filter bar: text search + category chips, both live.
+    const filterBar = document.createElement('div');
+    filterBar.className = 'sim-override-filter';
+    filterBar.innerHTML = `
+      <input type="text" class="sim-ov-search" placeholder="Search items…" autocomplete="off">
+      <div class="sim-ov-cats">
+        <button class="sim-ov-cat is-on" data-cat="">All</button>
+        <button class="sim-ov-cat" data-cat="Weapon">Weapon</button>
+        <button class="sim-ov-cat" data-cat="Vitality">Vitality</button>
+        <button class="sim-ov-cat" data-cat="Spirit">Spirit</button>
+      </div>`;
     const list = document.createElement('div'); list.className = 'sim-override-list';
+    host.appendChild(filterBar);
+    host.appendChild(list);
+
+    let filterText = '';
+    let filterCat  = '';
+    const applyFilter = () => {
+      list.innerHTML = '';
+      const q = filterText.trim().toLowerCase();
+      const filtered = tagged.filter(({ it }) => {
+        const obj = bpItemMap[it.key];
+        if (filterCat && obj?.category !== filterCat) return false;
+        if (q) {
+          // Word-prefix match across name + key
+          const hay = `${obj?.name || ''} ${it.key}`.toLowerCase();
+          const words = hay.split(/[\s_-]+/).filter(Boolean);
+          if (!words.some(w => w.startsWith(q))) return false;
+        }
+        return true;
+      });
+      if (!filtered.length) {
+        list.innerHTML = '<div class="sim-empty">No items match.</div>';
+      } else {
+        filtered.forEach(t => list.appendChild(makeRow(t)));
+      }
+    };
     if (!tagged.length) {
       list.innerHTML = '<div class="sim-empty">Nothing affordable to override with.</div>';
     } else {
-      tagged.forEach(t => list.appendChild(makeRow(t)));
+      applyFilter();
     }
-    host.appendChild(list);
+    const searchEl = filterBar.querySelector('.sim-ov-search');
+    searchEl.addEventListener('input', () => { filterText = searchEl.value; applyFilter(); });
+    setTimeout(() => searchEl.focus(), 0);
+    filterBar.querySelectorAll('.sim-ov-cat').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBar.querySelectorAll('.sim-ov-cat').forEach(b => b.classList.remove('is-on'));
+        btn.classList.add('is-on');
+        filterCat = btn.dataset.cat || '';
+        applyFilter();
+      });
+    });
   });
 }
 

@@ -1,9 +1,9 @@
 {
   "category": "Weapon",
-  "image_path": "/resources/items/shadow_weave/shadow_weave.png",
+  "image_path": "/resources/items/shadow_weave/shadow_weave_T3.png",
   "name": "Shadow Weave",
   "normalized_name": "shadow_weave",
-  "tier": 6400,
+  "tier": 3200,
   "upgrades_from": [],
   "values": {
     "self_score": {
@@ -43,10 +43,10 @@
       "engage": 1.25,
       "escape": 0.2,
       "farmer": null,
-      "fire_rate": 0.33,
+      "fire_rate": 0.66,
       "fire_rate_slow": null,
       "grounded": null,
-      "gun_burst_damage": 0.33,
+      "gun_burst_damage": 0.75,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
       "gun_continuous_damage": null,
@@ -63,7 +63,7 @@
       "long_range": null,
       "low_max_hp": null,
       "magazine_size_dependant": null,
-      "melee_damage": 0.55,
+      "melee_damage": 0.5,
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
@@ -80,7 +80,7 @@
       "single_target": 0.25,
       "small_hitbox": 0.25,
       "spawn_minions": null,
-      "spirit_burst_damage": 0.33,
+      "spirit_burst_damage": 0.75,
       "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": null,
@@ -95,8 +95,14 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Shadow_Weave"
+  "wiki_url": "https://deadlock.wiki/Shadow_Weave",
+  "compare_to": [
+    "burst_fire"
+  ],
+  "remarks": "",
+  "confidence": null
 }

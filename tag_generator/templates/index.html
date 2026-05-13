@@ -120,6 +120,10 @@
             </select>
             <input id="bf-confidence-val" type="number" step="0.05" min="-0.5" max="0.5" placeholder="0" class="bf-conf-val">
           </div>
+          <div class="field-row bf-disabled-row" title="If checked, this build is skipped by the match calculator. Use to retire or stage builds without deleting them.">
+            <label>Disabled</label>
+            <input type="checkbox" id="bf-disabled">
+          </div>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
         <!-- Build constraints (advanced): signature/required/blacklist items + counter slots -->
@@ -176,6 +180,7 @@
               </tr>
             </thead>
             <tbody id="hero-tag-body"></tbody>
+            <tfoot id="hero-tag-foot"></tfoot>
           </table>
         </div>
       </div>
@@ -384,14 +389,14 @@
                   <option value="cosine">Cosine Deficit</option>
                   <option value="cosine-match">Cosine Match</option>
                   <option value="beam">Beam Search</option>
-                  <option value="lookahead">1-Step Lookahead</option>
                   <option value="expert">Expert Greedy</option>
                   <option value="strengths">Play to Strengths</option>
-                  <option value="assassin">Target Assassin</option>
                   <option value="adaptive">Hybrid Rotation</option>
                   <option value="fusion">Fusion (Best of All)</option>
-                  <option value="oracle">Oracle (Deep/Slow)</option>
                   <option value="cyclic">Cyclic Focus</option>
+                  <option value="architect" selected>Architect (Path Planner)</option>
+                  <option value="inverse">Inverse (Endgame Solver)</option>
+                  <option value="surge">Surge (Power Spike)</option>
                 </select>
               </label>
             </div>
@@ -401,7 +406,7 @@
                 <select id="score-formula-sel" class="mult-input">
                   <option value="v1">V1 – Classic</option>
                   <option value="v2">V2 – Symmetric</option>
-                  <option value="v3">V3 – Target Focus</option>
+                  <option value="v3" selected>V3 – Target Focus</option>
                 </select>
               </label>
             </div>
@@ -556,6 +561,18 @@
         <h2>Saved Reports</h2>
       </div>
       <div id="qa-reports-list"></div>
+
+      <div class="qa-reports-hdr">
+        <h2>Sim Log Comparison</h2>
+        <div class="header-actions">
+          <button class="btn-ghost btn-sm" id="btn-sim-log-refresh">Refresh</button>
+          <button class="btn-primary btn-sm" id="btn-sim-log-run">&#9654; Run vs All Algos</button>
+        </div>
+      </div>
+      <p class="muted-label">For each saved sim run, this harness runs every build-path algorithm on the same hero / team comp / build, then scores how closely each algo's final inventory matches what you actually bought. Bucket weights: win/good=+5, loss/good=+4, win/neutral=+3, loss/neutral=+2, win/bad=+1, loss/bad=&minus;2.</p>
+      <div id="sim-log-list"></div>
+      <div id="sim-log-compare-status" class="muted-label"></div>
+      <pre id="sim-log-compare-out" class="sim-log-report" style="display:none"></pre>
     </section>
 
     <!-- QA: SCENARIO EDITOR -->
@@ -576,7 +593,7 @@
             <select id="qe-score-formula">
               <option value="v1">V1 – Classic</option>
               <option value="v2">V2 – Symmetric</option>
-              <option value="v3">V3 – Target Focus</option>
+              <option value="v3" selected>V3 – Target Focus</option>
             </select>
           </div>
           <div class="qa-section-hdr">

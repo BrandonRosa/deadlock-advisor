@@ -481,6 +481,24 @@ h1, h2, .page-header h1, .display-font {
 }
 .tab-add:hover { border-color: var(--accent); color: var(--accent); }
 
+/* Disabled builds — strike-through label in the tab bar */
+.tab-btn.is-disabled            { opacity: .55; }
+.tab-btn.is-disabled            { text-decoration: line-through; }
+.tab-btn.is-disabled.active     { opacity: .75; }
+/* Drag handle + drag-and-drop feedback for build reorder */
+.tab-drag {
+  display: inline-block; margin-right: 6px;
+  cursor: grab; color: var(--muted); font-size: 11px;
+  letter-spacing: -2px;
+}
+.tab-btn.is-dragging    { opacity: .4; }
+.tab-btn.is-drop-target { box-shadow: inset 2px 0 0 var(--accent); }
+
+/* Build Disabled checkbox row in the meta block */
+.bf-disabled-row { gap: 4px; align-items: center; }
+.bf-disabled-row label { margin-right: 4px; }
+.bf-disabled-row input[type="checkbox"] { accent-color: var(--accent); }
+
 /* ── Build Meta ────────────────────────────────────────────── */
 .build-meta-row {
   display: flex; align-items: center; gap: 12px;
@@ -510,7 +528,9 @@ h1, h2, .page-header h1, .display-font {
 .table-wrap {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100vh - 390px);
+  /* When scrolled all the way down, the sticky build tabs + page header
+     occupy ~190px at the top — the rest of the viewport is table. */
+  max-height: calc(100vh - 190px);
   min-height: 260px;
   border: 1px solid var(--border-dark); border-radius: 3px;
   background: var(--card);
@@ -537,6 +557,22 @@ h1, h2, .page-header h1, .display-font {
   border-bottom: 1px solid rgba(45, 58, 63, .5);
 }
 .tag-table tbody tr:hover td { background: rgba(117, 232, 162, .05); }
+/* Frozen footer with per-column avg + sum/n. Sticky to the bottom of the
+   scrollable table-wrap so it stays visible while scrolling the rows. */
+.tag-table tfoot tr.hero-tag-totals td {
+  position: sticky; bottom: 0; z-index: 12;
+  background: var(--panel);
+  border-top: 2px solid var(--accent-dk);
+  padding: 8px 10px;
+  text-align: center;
+}
+.tag-table tfoot tr.hero-tag-totals td.col-tag { z-index: 20; }
+.totals-lbl .tag-name { color: var(--accent); }
+.totals-lbl .tag-code { color: var(--muted); font-size: 10px; }
+.totals-cell { display: table-cell; }
+.totals-cell .totals-avg  { display: block; font-weight: 700; color: var(--text); font-size: 14px; }
+.totals-cell .totals-meta { display: block; font-size: 10px; color: var(--muted); margin-top: 1px; }
+.totals-cell .totals-empty{ color: var(--muted); opacity: .5; }
 .col-tag {
   width: 200px; min-width: 160px;
   position: sticky; left: 0; z-index: 5;
@@ -1315,34 +1351,95 @@ h1, h2, .page-header h1, .display-font {
 }
 .bp-detail { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 
-/* ── Staple item highlight ──────────────────────────────────────────────
-   Uses Soul Highlight (pale mint) — the in-game "souls" highlight color.
-   Reads as "starred / soul-touched item" without competing with the green
-   active state or the orange weapon hue. */
-@keyframes bp-staple-glow {
+/* ── Build-path item labels ──────────────────────────────────────────────
+   Three exclusive labels (priority Required > Signature > Recommended).
+   Required must read distinctly from the Sell action (both red) — Sell uses
+   a muted bordered "−" action chip, Required uses a saturated filled badge
+   with bold "REQ" text + glow halo so it can't be mistaken for sell. */
+
+/* Shared badge (summary chip corner + step-by-step row prefix) */
+.bp-chip-badge, .bp-tag-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.1;
+}
+/* Summary chip corner badge — sits over the top-right of the icon */
+.bp-summary-chip { position: relative; }
+.bp-chip-badge {
+  position: absolute; top: -3px; right: -4px;
+  z-index: 2; pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+}
+/* Step-by-step row badge — inline, after the action badge */
+.bp-tag-badge { margin: 0 2px; }
+
+/* Required (saturated red filled — different texture from sell's muted border) */
+@keyframes bp-required-pulse {
+  0%, 100% { box-shadow: 0 0 0 1.5px var(--danger), 0 0 6px 1px rgba(231, 76, 60, .35); }
+  50%      { box-shadow: 0 0 0 1.5px var(--danger), 0 0 10px 2px rgba(231, 76, 60, .55); }
+}
+.bp-summary-chip.bp-label-required img.bp-item-img {
+  animation: bp-required-pulse 2.4s ease-in-out infinite;
+  border-radius: 3px;
+}
+.bp-badge-required {
+  background: var(--danger); color: #fff;
+  text-shadow: 0 0 2px rgba(0,0,0,.5);
+}
+.bp-change.bp-label-required {
+  border-left: 3px solid var(--danger);
+  padding-left: 6px;
+  background: linear-gradient(90deg, rgba(231, 76, 60, .14) 0%, transparent 55%);
+  border-radius: 0 3px 3px 0;
+}
+.bp-change.bp-label-required .bp-item-img {
+  box-shadow: 0 0 0 1px var(--danger), 0 0 5px 0 rgba(231, 76, 60, .35);
+  border-radius: 3px;
+}
+
+/* Signature (gold — preserves the previous "staple" feel) */
+@keyframes bp-signature-glow {
   0%, 100% { box-shadow: 0 0 0 1.5px var(--gold), 0 0 5px 1px rgba(245, 200, 74, .25); }
   50%      { box-shadow: 0 0 0 1.5px var(--gold), 0 0 9px 2px rgba(245, 200, 74, .45); }
 }
-.bp-summary-chip.bp-staple { position: relative; }
-.bp-summary-chip.bp-staple img.bp-item-img {
-  animation: bp-staple-glow 2.4s ease-in-out infinite;
+.bp-summary-chip.bp-label-signature img.bp-item-img {
+  animation: bp-signature-glow 2.4s ease-in-out infinite;
   border-radius: 3px;
 }
-.bp-summary-chip.bp-staple::before {
-  content: '★';
-  position: absolute; top: -6px; right: -4px;
-  font-size: 12px; line-height: 1;
-  color: var(--gold-lt);
-  pointer-events: none; z-index: 2;
+.bp-badge-signature {
+  background: var(--gold); color: #1a1408;
 }
-.bp-change.bp-staple {
+.bp-change.bp-label-signature {
   border-left: 2px solid var(--gold);
   padding-left: 6px;
   background: linear-gradient(90deg, rgba(245, 200, 74, .12) 0%, transparent 55%);
   border-radius: 0 3px 3px 0;
 }
-.bp-change.bp-staple .bp-item-img {
+.bp-change.bp-label-signature .bp-item-img {
   box-shadow: 0 0 0 1px var(--gold), 0 0 4px 0 rgba(245, 200, 74, .3);
+  border-radius: 3px;
+}
+
+/* Recommended (mint accent — algo affinity, no constraint origin) */
+.bp-summary-chip.bp-label-recommended img.bp-item-img {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 4px 0 rgba(117, 232, 162, .25);
+  border-radius: 3px;
+}
+.bp-badge-recommended {
+  background: var(--accent); color: #0a1a10;
+}
+.bp-change.bp-label-recommended {
+  border-left: 2px solid var(--accent);
+  padding-left: 6px;
+  background: linear-gradient(90deg, rgba(117, 232, 162, .10) 0%, transparent 55%);
+  border-radius: 0 3px 3px 0;
+}
+.bp-change.bp-label-recommended .bp-item-img {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 3px 0 rgba(117, 232, 162, .25);
   border-radius: 3px;
 }
 
@@ -1571,8 +1668,39 @@ h1, h2, .page-header h1, .display-font {
 .qa-reports-hdr {
   margin-top: 32px; margin-bottom: 12px;
   padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .qa-reports-hdr h2 { font-size: 18px; font-weight: 700; }
+
+/* Sim log comparison */
+.sim-log-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 110px 80px 80px;
+  align-items: center; gap: 12px;
+  padding: 8px 12px; margin-bottom: 4px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 12px;
+}
+.sim-log-row .slr-hero  { font-weight: 700; }
+.sim-log-row .slr-build { color: var(--muted); }
+.sim-log-bucket {
+  display: inline-block; padding: 2px 6px; border-radius: 3px;
+  font-weight: 700; font-size: 10px; letter-spacing: 0.04em;
+}
+.slr-b-win-good     { background: rgba(117, 232, 162, .25); color: var(--accent); }
+.slr-b-loss-good    { background: rgba(117, 232, 162, .15); color: var(--accent); }
+.slr-b-win-neutral  { background: rgba(245, 200, 74, .20); color: var(--gold); }
+.slr-b-loss-neutral { background: rgba(245, 200, 74, .12); color: var(--gold); }
+.slr-b-win-bad      { background: rgba(185, 70, 62, .15);  color: var(--danger); }
+.slr-b-loss-bad     { background: rgba(185, 70, 62, .30);  color: var(--danger); }
+.sim-log-report {
+  background: var(--bg-elev); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px; margin-top: 12px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px; line-height: 1.5;
+  white-space: pre-wrap; max-height: 70vh; overflow: auto;
+}
 
 .qa-scenario-card, .qa-report-card {
   display: flex; align-items: center; gap: 16px;
@@ -1957,7 +2085,10 @@ h1, h2, .page-header h1, .display-font {
 
 .sim-card {
   position: relative;
-  display: flex; gap: 8px; padding: 8px;
+  display: flex; gap: 8px;
+  /* Extra bottom padding leaves room for the RECOMMENDED badge + Block button
+     strip so they don't overlap the attribution mini-icons row. */
+  padding: 8px 8px 22px 8px;
   background: var(--card); border: 1px solid var(--border);
   border-radius: 3px; cursor: pointer;
   transition: border-color .12s, transform .12s, box-shadow .12s;
@@ -1968,33 +2099,88 @@ h1, h2, .page-header h1, .display-font {
   background: transparent;
 }
 .sim-card.is-preview:hover { transform: none; border-color: var(--border-soft); }
-/* Highlight hierarchy. Each state uses a distinct color so they stack readably:
-     selected   = white   (your active pick this tick)
-     signature  = gold    (build-defined sig item)
-     required   = red     (build-defined required, must-buy)
-     most-rec   = green   (algorithm's overall top recommendation)                */
+/* Highlight hierarchy.
+     dotted border = "component of" something (red = of-required, gold = of-signature)
+     solid  border = the whole item itself
+     halo (box-shadow) = color identity, stacks additively for selected/most-rec
+   Selected and most-rec only paint halos — they never overwrite border style. */
 .sim-card.is-most-rec {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px 1px rgba(117, 232, 162, .25);
+  box-shadow: 0 0 12px 1px rgba(117, 232, 162, .45);
 }
+.sim-card.is-req-comp { border: 2px dotted var(--danger); }
+.sim-card.is-sig-comp { border: 2px dotted var(--gold); }
 .sim-card.is-signature {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 1px var(--gold), 0 0 8px 1px rgba(245, 200, 74, .35);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 8px 1px rgba(245, 200, 74, .35);
 }
 .sim-card.is-required {
-  border-color: var(--danger);
-  box-shadow: 0 0 0 2px var(--danger), 0 0 14px 2px rgba(185, 70, 62, .45);
+  border: 2px solid var(--danger);
+  box-shadow: 0 0 14px 2px rgba(185, 70, 62, .45);
 }
-/* Selected wins specificity — bright white ring sits over any other halo */
+/* Signature item that's also a component of a required item:
+   yellow dashes with red dots painted between. Two-layer background
+   keeps the card fill underneath the gradient that paints the border. */
+.sim-card.is-signature.is-req-comp {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    repeating-linear-gradient(90deg,
+      var(--gold) 0 6px, transparent 6px 9px,
+      var(--danger) 9px 11px, transparent 11px 14px) border-box;
+}
+/* Both kinds of component, no whole item: alternating red+yellow dots. */
+.sim-card.is-req-comp.is-sig-comp:not(.is-required):not(.is-signature) {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    repeating-linear-gradient(90deg,
+      var(--danger) 0 2px, transparent 2px 5px,
+      var(--gold) 5px 7px, transparent 7px 10px) border-box;
+}
+/* Hollow "component-of" flag indicators in the top-left stack. */
+.sim-flag-reqc {
+  background: transparent; color: var(--danger);
+  border: 1px solid var(--danger);
+  font-size: 9px; padding: 0 2px; letter-spacing: 0; font-weight: 700;
+}
+.sim-flag-sigc { color: var(--gold); font-size: 12px; padding: 0; opacity: .9; }
+
+/* "RECOMMENDED" badge on the algorithm's top affordable pick. Sits at the
+   bottom-left so it never collides with the block button (bottom-right) or
+   the flag stack (top-left). */
+.sim-rec-badge {
+  position: absolute; bottom: 4px; left: 4px;
+  background: var(--accent); color: #0a1a10;
+  font-size: 9px; font-weight: 900; letter-spacing: .08em;
+  padding: 2px 6px; border-radius: 2px;
+  box-shadow: 0 0 8px 1px rgba(117, 232, 162, .55);
+  pointer-events: none;
+}
+
+/* When the recommended action is "wait", the Skip button gets a brighter
+   pulsing halo and a clearer label. */
+#sim-skip.is-most-rec {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px 2px rgba(117, 232, 162, .55);
+  animation: sim-wait-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sim-wait-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 0 10px 1px rgba(117, 232, 162, .35); }
+  50%      { box-shadow: 0 0 0 1px var(--accent), 0 0 16px 3px rgba(117, 232, 162, .65); }
+}
+/* Selected: white halo ONLY — never replaces border-color/style.
+   Layers with the sig/req border underneath. */
 .sim-card.is-selected {
-  border-color: #ffffff;
   box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .45);
 }
 .sim-card.is-required.is-selected {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--danger), 0 0 14px 3px rgba(255, 255, 255, .35);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 14px 3px rgba(255, 255, 255, .35), 0 0 14px 2px rgba(185, 70, 62, .45);
 }
 .sim-card.is-signature.is-selected {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--gold), 0 0 12px 3px rgba(255, 255, 255, .35);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .35), 0 0 8px 1px rgba(245, 200, 74, .35);
+}
+.sim-card.is-most-rec.is-selected {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .35), 0 0 12px 1px rgba(117, 232, 162, .45);
 }
 .sim-card-img {
   width: 40px; height: 40px; object-fit: contain;
@@ -2023,21 +2209,35 @@ h1, h2, .page-header h1, .display-font {
   font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--muted);
 }
-.sim-flag {
+/* Flag stack — multiple flags can appear on the same card (Sig + r-comp etc.)
+   so they're laid out as a vertical stack in the top-left corner. */
+.sim-flag-stack {
   position: absolute; top: 2px; left: 2px;
+  display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+}
+.sim-flag {
   font-size: 9px; font-weight: 900; padding: 1px 4px; border-radius: 2px;
+  line-height: 1.1;
 }
 .sim-flag-req { background: var(--danger); color: #fff; letter-spacing: .08em; }
 .sim-flag-sig { color: var(--gold); font-size: 14px; padding: 0; }
+
+/* Block button — always faintly visible so it's discoverable, gets a clear
+   red affordance on hover. Lives at the bottom-right corner; the BUY badge
+   moved to bottom-left so they no longer overlap. */
 .sim-block-btn {
-  position: absolute; bottom: 2px; right: 2px;
-  background: rgba(0,0,0,.4); border: none; color: var(--muted);
-  font-size: 10px; line-height: 1; padding: 1px 4px;
-  border-radius: 2px; cursor: pointer; opacity: 0;
-  transition: opacity .12s, color .12s;
+  position: absolute; bottom: 4px; right: 4px;
+  background: rgba(30, 30, 30, .7); border: 1px solid var(--border-soft);
+  color: var(--muted);
+  font-size: 9px; font-weight: 700; line-height: 1;
+  padding: 3px 7px; border-radius: 2px; cursor: pointer; opacity: .55;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: opacity .12s, color .12s, background .12s, border-color .12s;
 }
-.sim-card:hover .sim-block-btn { opacity: .8; }
-.sim-block-btn:hover { color: var(--danger); opacity: 1; }
+.sim-card:hover .sim-block-btn { opacity: 1; }
+.sim-block-btn:hover {
+  color: #fff; background: var(--danger); border-color: var(--danger); opacity: 1;
+}
 
 /* Modals — host needs an explicit overlay above #page-sim's fullscreen z-index (500). */
 #sim-modal-host > .modal-overlay { z-index: 9000; }
@@ -2047,6 +2247,27 @@ h1, h2, .page-header h1, .display-font {
   margin-bottom: 8px;
 }
 .sim-modal-body { overflow-y: auto; max-height: calc(80vh - 90px); }
+/* Override modal search + category filter bar */
+.sim-override-filter {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 8px; padding: 6px 8px;
+  background: var(--bg-elev); border: 1px solid var(--border-soft); border-radius: 3px;
+}
+.sim-ov-search {
+  flex: 1; min-width: 140px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 9px; border-radius: 3px; font-size: 12px;
+}
+.sim-ov-search:focus { outline: none; border-color: var(--accent); }
+.sim-ov-cats { display: inline-flex; gap: 4px; }
+.sim-ov-cat {
+  background: var(--card); border: 1px solid var(--border-soft);
+  color: var(--muted); padding: 4px 10px; border-radius: 3px;
+  font-size: 11px; cursor: pointer; transition: color .12s, border-color .12s;
+}
+.sim-ov-cat:hover { color: var(--text); border-color: var(--border); }
+.sim-ov-cat.is-on { color: var(--accent); border-color: var(--accent); background: rgba(117, 232, 162, .08); }
+
 .sim-override-list, .sim-sell-list { display: flex; flex-direction: column; gap: 4px; }
 .sim-override-row, .sim-sell-row {
   display: flex; align-items: center; gap: 10px;
