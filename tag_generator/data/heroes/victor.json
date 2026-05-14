@@ -1178,5 +1178,6 @@
   "mini_image_path": "/resources/heroes/victor/mini_icon_victor.png",
   "normalized_name": "victor",
   "search_terms": [],
-  "wiki_url": "https://deadlock.wiki/Victor"
+  "wiki_url": "https://deadlock.wiki/Victor",
+  "default_build_name": "victor_gun_aura_1_ult_battery_aura"
 }

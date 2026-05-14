@@ -75,6 +75,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -111,8 +112,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -167,6 +167,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": 0.15,
           "long_range": -0.25,
           "low_max_hp": null,
@@ -203,8 +204,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_score": {
           "ability_spam": null,
@@ -259,6 +259,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": -0.25,
           "low_max_hp": null,
@@ -295,8 +296,7 @@
           "team_heal": -0.15,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_weight": {
           "ability_spam": null,
@@ -351,6 +351,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": -0.25,
           "low_max_hp": null,
@@ -387,8 +388,7 @@
           "team_heal": -0.25,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         }
       }
     },
@@ -485,6 +485,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -521,8 +522,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -577,6 +577,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -613,8 +614,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_score": {
           "ability_spam": null,
@@ -669,6 +669,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -705,8 +706,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_weight": {
           "ability_spam": -0.086,
@@ -761,6 +761,7 @@
           "horizontal_mobility": -0.294,
           "hybrid_damage_usage": -0.055,
           "interrupt": 0,
+          "lane_pusher": null,
           "large_hitbox": 0,
           "long_range": -0.201,
           "low_max_hp": -0.08,
@@ -797,8 +798,7 @@
           "team_heal": -0.125,
           "trap_block_obstruct": 0,
           "ult_focused": -0.082,
-          "vertical_mobility": -0.173,
-          "lane_pusher": null
+          "vertical_mobility": -0.173
         }
       }
     },
@@ -887,6 +887,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -923,8 +924,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -979,6 +979,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -1015,8 +1016,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_score": {
           "ability_spam": null,
@@ -1071,6 +1071,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -1107,8 +1108,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_weight": {
           "ability_spam": 0.205,
@@ -1163,6 +1163,7 @@
           "horizontal_mobility": 0,
           "hybrid_damage_usage": 0,
           "interrupt": -0.061,
+          "lane_pusher": null,
           "large_hitbox": 0,
           "long_range": -0.736,
           "low_max_hp": 0,
@@ -1199,8 +1200,7 @@
           "team_heal": -0.316,
           "trap_block_obstruct": 0,
           "ult_focused": -0.17,
-          "vertical_mobility": -0.271,
-          "lane_pusher": null
+          "vertical_mobility": -0.271
         }
       }
     }
@@ -1218,5 +1218,6 @@
   "search_terms": [
     "priest"
   ],
-  "wiki_url": "https://deadlock.wiki/Venator"
+  "wiki_url": "https://deadlock.wiki/Venator",
+  "default_build_name": "venator_braeden_gut_nade_gut_2_nade_ult_trap"
 }

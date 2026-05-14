@@ -74,6 +74,10 @@
             <input id="hf-wiki" type="text" />
           </div>
           <div class="field-row">
+            <label title="Build sent to other heroes' scoring when this hero is in a match. Sets the initial selected build on roster add.">Default Build</label>
+            <select id="hf-default-build"></select>
+          </div>
+          <div class="field-row">
             <label>Filter Colors</label>
             <div id="hf-colors" class="hf-colors-row"></div>
           </div>
@@ -415,6 +419,9 @@
               <label class="mult-item" title="How much your allies benefit from your build's output">Ally←Me <input type="number" id="mult-ally-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
               <label class="mult-item" title="How much enemies react to (punish) your build's output">Enemy→Me <input type="number" id="mult-enemy-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
             </div>
+            <label class="mult-item" title="After the first calculation, auto-promote each hero's top-scoring build and run a second pass.">
+              <input type="checkbox" id="opt-auto-regen"> Auto-regen
+            </label>
             <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
           </div>
         </div>
@@ -451,6 +458,7 @@
         <button class="btn-back" id="back-to-setup">← Setup</button>
         <h1>Match Results</h1>
         <div class="header-actions">
+          <button class="btn-ghost btn-sm" id="btn-auto-regen" title="Promote each hero's top-scoring build to selected, then re-run">Auto-Regenerate</button>
           <button class="btn-ghost btn-sm" id="btn-show-regen">Re-generate</button>
         </div>
       </div>

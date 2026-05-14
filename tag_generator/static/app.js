@@ -476,9 +476,32 @@ function renderHeroEditPage() {
   if (!Array.isArray(h.search_terms)) h.search_terms = [];
   renderHeroColorEditor();
   renderHeroTermsEditor();
+  renderDefaultBuildSelect();
   setHeroDirty(false);
   renderBuildTabs();
   renderBuildContent();
+}
+
+// Default Build dropdown: lists every build for the current hero. The chosen
+// build becomes the starting selected build whenever this hero joins a match.
+function renderDefaultBuildSelect() {
+  const sel = document.getElementById('hf-default-build');
+  if (!sel) return;
+  const h = S.currentHero;
+  sel.innerHTML = '';
+  (h.builds || []).forEach(b => {
+    const o = document.createElement('option');
+    o.value = b.normalized_build_name || b.name;
+    o.textContent = b.name || b.normalized_build_name;
+    sel.appendChild(o);
+  });
+  // Fall back to the first build's normalized name if the saved default no
+  // longer exists (e.g. user deleted that build).
+  const valid = (h.builds || []).some(b => (b.normalized_build_name || b.name) === h.default_build_name);
+  if (!valid && h.builds && h.builds.length) {
+    h.default_build_name = h.builds[0].normalized_build_name || h.builds[0].name;
+  }
+  sel.value = h.default_build_name || '';
 }
 
 function renderHeroColorEditor() {
@@ -569,8 +592,17 @@ function renderHeroTermsEditor() {
   });
 });
 
+document.getElementById('hf-default-build').addEventListener('change', () => {
+  const h = S.currentHero;
+  if (!h) return;
+  h.default_build_name = document.getElementById('hf-default-build').value;
+  setHeroDirty(true);
+});
+
 // ── Build Tabs ────────────────────────────────────────────────────────────────
 function renderBuildTabs() {
+  // Keep the Default Build dropdown in sync with adds/renames/deletes/reorders.
+  renderDefaultBuildSelect();
   const bar = document.getElementById('build-tabs');
   bar.innerHTML = '';
   S.currentHero.builds.forEach((b, i) => {
@@ -1960,6 +1992,9 @@ const MATCH = {
   itemData:       [],
   results:        null,
   selectedBuilds: {},
+  // autoRegen: when true, runCalculation runs twice — once normally, then
+  // promotes each hero's top-total build into selectedBuilds and re-runs.
+  autoRegen:      false,
   viewHeroName:   null,
   viewBuildIdx:   null,
   mult: {
@@ -1988,7 +2023,7 @@ const MATCH_LS_KEY = 'dl-match-state-v2';
 const MATCH_PERSIST_KEYS = [
   'multiMode','uncapped','include9999','self','allies','enemies',
   'mult','bpAlgo','scoreFormula','filter','simEnabled','simStates',
-  'selectedBuilds','viewHeroName','viewBuildIdx',
+  'selectedBuilds','defaultBuilds','autoRegen','viewHeroName','viewBuildIdx',
 ];
 let _matchSaveTimer = null;
 function saveMatchState() {
@@ -2057,6 +2092,7 @@ function renderCalcSetup() {
   document.getElementById('mult-enemy-build').value     = MATCH.mult.enemyBuild;
   document.getElementById('bp-algo-sel').value          = MATCH.bpAlgo;
   document.getElementById('score-formula-sel').value    = MATCH.scoreFormula;
+  document.getElementById('opt-auto-regen').checked     = !!MATCH.autoRegen;
   document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
   renderCalcFilter();
   renderTeamBars();
@@ -2368,10 +2404,52 @@ async function runCalculation() {
     MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
     cacheHeroBuilds(name);
   }
+  // Seed selectedBuilds from each hero's default_build_name. Runs every
+  // Calculate so config-side default edits propagate immediately. Override
+  // happens via the Re-generate panel (which writes directly to
+  // selectedBuilds and calls computeResults — not runCalculation).
+  allNames.forEach(name => {
+    const idx = defaultBuildIdxFor(name);
+    if (idx !== null) MATCH.selectedBuilds[name] = idx;
+  });
   MATCH.itemData = await api.get('/api/items/all');
   MATCH.results = computeResults();
+  if (MATCH.autoRegen) autoRegenPromote();
   renderCalcSummary();
   showPage('calc-summary');
+}
+
+// Resolve a hero's saved default build to a build index. Returns null when
+// hero data isn't loaded or the saved name no longer maps to any build.
+function defaultBuildIdxFor(name) {
+  const hero = MATCH.heroData[name];
+  if (!hero || !Array.isArray(hero.builds) || !hero.builds.length) return null;
+  const want = hero.default_build_name;
+  if (!want) return 0;
+  const idx = hero.builds.findIndex(b => (b.normalized_build_name || b.name) === want);
+  return idx >= 0 ? idx : 0;
+}
+
+// Promote each hero's top-total build into selectedBuilds, then re-score.
+// Used by the Auto-Regenerate button (single click) and the Auto-regenerate
+// checkbox on Calculate (one extra pass).
+function autoRegenPromote() {
+  if (!MATCH.results) return false;
+  let changed = false;
+  MATCH.results.forEach(r => {
+    if (!r.builds || !r.builds.length) return;
+    let topIdx = 0, topScore = -Infinity;
+    r.builds.forEach((b, i) => {
+      const s = b.total || 0;
+      if (s > topScore) { topScore = s; topIdx = i; }
+    });
+    if (MATCH.selectedBuilds[r.name] !== topIdx) {
+      MATCH.selectedBuilds[r.name] = topIdx;
+      changed = true;
+    }
+  });
+  if (changed) MATCH.results = computeResults();
+  return changed;
 }
 
 function tv(dict, tag) {
@@ -3747,6 +3825,229 @@ function bpEnemyTeamVec(heroNames, threshold = 0.05) {
 let bpItemMap = {};
 // Set to a plain object before computeBuildPath to enable debug capture; null = off.
 let _bpDbg = null;
+
+// ── Universal label system ───────────────────────────────────────────────
+// 10-tier priority (loudest → quietest), used by:
+//   - Build-path summary chips (only spike/required/recommended show)
+//   - Build-path step view (all 10, in the Priority column)
+//   - Simulator cards (all 10, as flag glyphs)
+//
+//   1.  spike                  ↗ (orange — Surge anchor)
+//   2.  spike-component        ↗ dim
+//   3.  required               ★ (gold — user-flagged)
+//   4.  required-component     ★ dim
+//   5.  anti (anti-spike)      ⤯ (purple — Surge counter anchor)
+//   6.  anti-component         ⤯ dim
+//   7.  signature              ✓ (mint — user-flagged secondary)
+//   8.  signature-component    ✓ dim
+//   9.  recommended            ☾ (blue — top algo pick per tier)
+//   10. recommended-component  ☾ dim
+const BP_LABEL_META = {
+  spike:                  { text: '↗', title: 'Spike — power-spike anchor',                klass: 'bp-label-spike',     summary: true  },
+  'spike-component':      { text: '↗', title: 'Component of a spike anchor',                klass: 'bp-label-spike-c',   summary: false },
+  required:               { text: '★', title: 'Required — flagged on this build',           klass: 'bp-label-required',  summary: true  },
+  'required-component':   { text: '★', title: 'Component of a required item',               klass: 'bp-label-req-c',     summary: false },
+  anti:                   { text: '⤯', title: 'Anti-spike — counter anchor',                klass: 'bp-label-anti',      summary: false },
+  'anti-component':       { text: '⤯', title: 'Component of an anti-spike anchor',          klass: 'bp-label-anti-c',    summary: false },
+  signature:              { text: '✓', title: 'Signature — flagged on this build',          klass: 'bp-label-signature', summary: false },
+  'signature-component':  { text: '✓', title: 'Component of a signature item',              klass: 'bp-label-sig-c',     summary: false },
+  recommended:            { text: '☾', title: 'Recommended — top algo pick in this tier',   klass: 'bp-label-recommended', summary: true  },
+  'recommended-component':{ text: '☾', title: 'Component of a recommended item',            klass: 'bp-label-rec-c',     summary: false },
+};
+
+// Compute the full label sets for a build: spike/anti anchors (from
+// surgeAnchors which is now always attached), the user's required/signature
+// from the hero config, the per-tier-top recommended set, and the four
+// component-expansion sets. Returns { labelFor, sets }.
+function computeBuildLabels(b, pathData) {
+  let requiredKeys  = new Set();
+  let signatureKeys = new Set();
+  const heroBuilds = MATCH.heroData[b.heroName]?.builds;
+  if (heroBuilds) {
+    const own = heroBuilds[b.buildIdx] || heroBuilds.find(hb => hb.name === b.name);
+    if (own) {
+      try {
+        const r = resolveBuildConstraints(own, heroBuilds);
+        requiredKeys  = new Set(r.required_items);
+        signatureKeys = new Set([...r.signature_items].filter(k => !requiredKeys.has(k)));
+      } catch { /* fall through */ }
+    }
+  }
+  // Recommended = top-self per tier (excluding required/signature)
+  const tierGroups = {};
+  b.items.forEach(it => {
+    if ((it.self || 0) > 0) {
+      const t = it.tier || 0;
+      if (!tierGroups[t]) tierGroups[t] = [];
+      tierGroups[t].push(it);
+    }
+  });
+  const recommendedKeys = new Set();
+  Object.values(tierGroups).forEach(group => {
+    const top = [...group]
+      .filter(it => !requiredKeys.has(it.key) && !signatureKeys.has(it.key))
+      .sort((a, c) => c.self - a.self)[0];
+    if (top) recommendedKeys.add(top.key);
+  });
+  // Anchors (from surgeAnchors — universal now)
+  const anchors = (pathData && pathData.surgeAnchors) || (b.buildPath && b.buildPath.surgeAnchors) || {};
+  const spikeSet = new Set(anchors.spikes || []);
+  const antiSet  = new Set(anchors.antiSpikes || []);
+  // Component-expansion helper
+  function expand(seedSet) {
+    const out = new Set();
+    const stack = [];
+    seedSet.forEach(k => (bpItemMap[k]?.upgrades_from || []).forEach(c => stack.push(c)));
+    while (stack.length) {
+      const c = stack.pop();
+      if (out.has(c)) continue;
+      out.add(c);
+      (bpItemMap[c]?.upgrades_from || []).forEach(s => { if (!out.has(s)) stack.push(s); });
+    }
+    return out;
+  }
+  // Exclusive component sets (each one omits keys already claimed by a
+  // higher-priority category so labels remain unambiguous).
+  const spikeCompSet = expand(spikeSet);
+  const reqCompSet   = new Set([...expand(requiredKeys)].filter(k => !spikeSet.has(k) && !spikeCompSet.has(k)));
+  const antiCompSet  = new Set([...expand(antiSet)].filter(k =>
+    !spikeSet.has(k) && !spikeCompSet.has(k) && !requiredKeys.has(k) && !reqCompSet.has(k)));
+  const sigCompSet   = new Set([...expand(signatureKeys)].filter(k =>
+    !spikeSet.has(k) && !spikeCompSet.has(k) && !requiredKeys.has(k) && !reqCompSet.has(k) &&
+    !antiSet.has(k)  && !antiCompSet.has(k)));
+  const recCompSet   = new Set([...expand(recommendedKeys)].filter(k =>
+    !spikeSet.has(k) && !spikeCompSet.has(k) && !requiredKeys.has(k) && !reqCompSet.has(k) &&
+    !antiSet.has(k)  && !antiCompSet.has(k)  && !signatureKeys.has(k) && !sigCompSet.has(k) &&
+    !recommendedKeys.has(k)));
+  function labelFor(key) {
+    if (spikeSet.has(key))        return 'spike';
+    if (spikeCompSet.has(key))    return 'spike-component';
+    if (requiredKeys.has(key))    return 'required';
+    if (reqCompSet.has(key))      return 'required-component';
+    if (antiSet.has(key))         return 'anti';
+    if (antiCompSet.has(key))     return 'anti-component';
+    if (signatureKeys.has(key))   return 'signature';
+    if (sigCompSet.has(key))      return 'signature-component';
+    if (recommendedKeys.has(key)) return 'recommended';
+    if (recCompSet.has(key))      return 'recommended-component';
+    return null;
+  }
+  return {
+    labelFor,
+    sets: {
+      requiredKeys, signatureKeys, recommendedKeys,
+      spikeSet, antiSet,
+      spikeCompSet, reqCompSet, antiCompSet, sigCompSet, recCompSet,
+    },
+  };
+}
+
+// Surge anchors are now a universal label concept — every build gets its
+// 4 anchors computed (firstSpike, secondSpike, firstAntiSpike, secondAntiSpike)
+// regardless of which algorithm is selected. Anchors then drive the
+// spike / spike-component / anti / anti-component labels in the build-path
+// summary chips, step view, and simulator.
+//
+// The function takes the build object + already-resolved constraint sets and
+// reads `bpItemMap` from module scope (which `computeBuildPath` populates).
+// Output: { spikes: [key, key?], antiSpikes: [key, key?] }
+function computeSurgeAnchors(b, sets) {
+  const SURGE_T3_BIAS      = 1.15;
+  const SURGE_T4_BIAS      = 1.15;
+  const SURGE_ANTI_REQ_TIE = 1.05;
+  const SURGE_ANTI_SIG_TIE = 1.03;
+  const requiredSet     = sets.requiredSet     || new Set();
+  const signatureSet    = sets.signatureSet    || new Set();
+  const blacklistSet    = sets.blacklistSet    || new Set();
+  const reqComponentSet = sets.reqComponentSet || new Set();
+  const sigComponentSet = sets.sigComponentSet || new Set();
+
+  const tierBucket = key => {
+    const t = bpItemMap[key]?.tier || 0;
+    if (t <= 800)  return 1;
+    if (t <= 1600) return 2;
+    if (t <= 3200) return 3;
+    return 4;
+  };
+  const isReqAny = k => requiredSet.has(k)  || reqComponentSet.has(k);
+  const isSigAny = k => signatureSet.has(k) || sigComponentSet.has(k);
+
+  // Top-4 self-weight tags
+  const selfWeight = (b.rv && b.rv.self_weight) || {};
+  const topSelfTags = Object.entries(selfWeight)
+    .sort((a, c) => (c[1] || 0) - (a[1] || 0))
+    .slice(0, 4).filter(e => (e[1] || 0) > 0).map(e => e[0]);
+
+  // Top-4 enemy-counter tags, derived from item.enemy correlations
+  const enemyTagAgg = {};
+  b.items.forEach(it => {
+    const e = it.enemy || 0;
+    if (!e) return;
+    for (const [t, v] of Object.entries(it.values || {})) {
+      if (!v) continue;
+      enemyTagAgg[t] = (enemyTagAgg[t] || 0) + v * e;
+    }
+  });
+  const topEnemyTags = Object.entries(enemyTagAgg)
+    .sort((a, c) => (c[1] || 0) - (a[1] || 0))
+    .slice(0, 4).filter(e => (e[1] || 0) > 0).map(e => e[0]);
+
+  const spikeScore = it => {
+    let s = 0;
+    const vals = it.values || {};
+    for (const t of topSelfTags) s += (vals[t] || 0) * (selfWeight[t] || 0);
+    return s;
+  };
+  const antiScore = it => {
+    let s = 0;
+    const vals = it.values || {};
+    for (const t of topEnemyTags) s += (vals[t] || 0) * (enemyTagAgg[t] || 0);
+    return s;
+  };
+
+  const pool   = b.items.filter(it => !blacklistSet.has(it.key));
+  const t3plus = pool.filter(it => tierBucket(it.key) >= 3);
+  const t4only = pool.filter(it => tierBucket(it.key) === 4);
+
+  function pickSpike(cands, t3Enc, t4Enc) {
+    const reqArr = cands.filter(it => isReqAny(it.key));
+    const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
+    const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
+    const tier = reqArr.length ? reqArr : (sigArr.length ? sigArr : norArr);
+    return [...tier].sort((a, c) => {
+      let sa = spikeScore(a), sc = spikeScore(c);
+      const ba = tierBucket(a.key), bc = tierBucket(c.key);
+      if (t3Enc) { if (ba === 3) sa *= SURGE_T3_BIAS; if (bc === 3) sc *= SURGE_T3_BIAS; }
+      if (t4Enc) { if (ba === 4) sa *= SURGE_T4_BIAS; if (bc === 4) sc *= SURGE_T4_BIAS; }
+      return sc - sa;
+    })[0];
+  }
+  function pickAnti(cands, t3Enc, t4Enc, exclude) {
+    return [...cands.filter(it => !exclude.has(it.key))].sort((a, c) => {
+      let sa = antiScore(a), sc = antiScore(c);
+      if (isReqAny(a.key))      sa *= SURGE_ANTI_REQ_TIE;
+      else if (isSigAny(a.key)) sa *= SURGE_ANTI_SIG_TIE;
+      if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
+      else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
+      const ba = tierBucket(a.key), bc = tierBucket(c.key);
+      if (t3Enc) { if (ba === 3) sa *= SURGE_T3_BIAS; if (bc === 3) sc *= SURGE_T3_BIAS; }
+      if (t4Enc) { if (ba === 4) sa *= SURGE_T4_BIAS; if (bc === 4) sc *= SURGE_T4_BIAS; }
+      return sc - sa;
+    })[0];
+  }
+
+  const s1 = pickSpike(t3plus, true,  false);
+  const s2 = pickSpike(t4only.filter(it => it.key !== s1?.key), false, true);
+  const exA1 = new Set([s1?.key, s2?.key].filter(Boolean));
+  const a1 = pickAnti(t3plus, true,  false, exA1);
+  const exA2 = new Set([s1?.key, s2?.key, a1?.key].filter(Boolean));
+  const a2 = pickAnti(t3plus, false, true, exA2);
+
+  return {
+    spikes:     [s1?.key, s2?.key].filter(Boolean),
+    antiSpikes: [a1?.key, a2?.key].filter(Boolean),
+  };
+}
 
 function computeBuildPath(b, algo = 'greedy-phase') {
   bpItemMap = {};
@@ -5909,61 +6210,62 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
     // ── TUNABLE KNOBS ───────────────────────────────────────────────────────
 
-    // Per-tick strategic weight. Flatter than v1 because we now integrate the
-    // *remaining* weight from purchase tick forward — Lane items get credit
-    // for being active across the whole game, Late items only across the tail.
-    // The cumulative integration handles "early items have long active life"
-    // automatically; SPIKE_WEIGHT just shapes the relative importance.
-    //
-    // COMPLAINT → ADJUSTMENT:
-    //   "Doesn't buy in Lane / waits the whole laning phase"
-    //       → already fixed by bracket gating, but if it still happens raise
-    //         Lane values (0.8 → 1.0+)
-    //   "Final builds skew T1 / never builds T4s"
-    //       → raise the Late tail (1.7 → 2.0+) OR lower the Lane head
-    //   "Always peaks at the wrong tick"
-    //       → shift the peak left/right within the vector
-    const SPIKE_WEIGHT = [
-      // Lane ticks 0-5
-      0.8, 0.8, 0.9, 0.9, 1.0, 1.0,
-      // Early ticks 6-11
-      1.0, 1.0, 1.1, 1.1, 1.2, 1.2,
-      // Mid ticks 12-17
-      1.2, 1.3, 1.3, 1.4, 1.4, 1.5,
-      // Late ticks 18-26 (peak)
-      1.5, 1.6, 1.6, 1.7, 1.7, 1.7, 1.7, 1.7, 1.7,
-      // Extra Late ticks 27-34
-      1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
-    ];
+    // Tier nudges in anchor selection. T3 bias makes the first spike/anti land
+    // sooner; T4 bias makes the second spike/anti the "huge one".
+    const SURGE_T3_BIAS = 1.15;
+    const SURGE_T4_BIAS = 1.15;
 
-    // Tag-saturation damping. For each tag the candidate provides, its value
-    // is reduced by 1 / (1 + λ_sat × coverage[tag]). Higher = diminishing
-    // returns kick in faster (more diversification). Replaces v1's pair-
-    // synergy term, which created a counter-spam feedback loop.
-    //
-    // COMPLAINT → ADJUSTMENT:
-    //   "Floods build with counter items / mono-axis specialization"
-    //       → raise (0.5 → 0.8)
-    //   "Doesn't commit to a strategy / build feels scattered"
-    //       → lower (0.5 → 0.3)
-    const SURGE_SAT_LAMBDA = 0.5;
+    // Anchor priority boost when an anchor is bought IN its spike window.
+    // Higher = anchors fire on time more reliably (but starves other picks).
+    const SURGE_ANCHOR_BOOST = 5.0;
 
-    // Role boosts (multiplicative on spike value). Required/signature items
-    // need to bypass tag saturation because their value comes from build
-    // identity, not raw tag coverage. Kept from v1.
-    const SURGE_REQ_BOOST      = 2.5;
-    const SURGE_REQ_COMP_BOOST = 1.4;
+    // Spike windows — tick ranges aligned to Deadlock objective fights.
+    //   Window 1 = guardian/walker contest (late Early → start of Mid)
+    //   Window 2 = midboss/siege contest   (late Mid  → start of Late)
+    const SPIKE1_WINDOW = [10, 14];
+    const SPIKE2_WINDOW = [17, 21];
+
+    // Anti-spike tie-breaker bias for required/signature. TINY by design —
+    // anti picks should be driven by counter score, not role.
+    const SURGE_ANTI_REQ_TIE = 1.05;
+    const SURGE_ANTI_SIG_TIE = 1.03;
+
+    // Chain-of-anchor bonuses. Items that are in the spike/anti upgrade chain
+    // dominate priority so the algo accumulates the right components before
+    // the spike window opens, instead of blowing souls on unrelated T2/T3
+    // upgrades and missing the spike's timing.
+    const SURGE_SPIKE_CHAIN_BONUS = 2.5;   // for ancestors of spike anchors
+    const SURGE_ANTI_CHAIN_BONUS  = 1.4;   // for ancestors of anti anchors
+
+    // Sell mechanic — Late + Extra Late only. When at slot cap with no
+    // affordable upgrade, the algo can sell its lowest-priority non-anchor
+    // owned item if it lets us buy something significantly better.
+    const SURGE_SELL_RATIO_THRESH = 1.5;   // replacement priorityScore must be
+                                           //  ≥ this × sold item's priorityScore
+    const SURGE_SELL_REFUND_FRAC  = 0.5;   // 50% refund — matches Deadlock
+
+    // Execution role boosts (Architect-style).
+    const SURGE_REQ_BOOST      = 3.0;
+    const SURGE_REQ_COMP_BOOST = 1.7;
     const SURGE_SIG_BOOST      = 1.5;
     const SURGE_SIG_COMP_BOOST = 1.2;
 
-    // Souls brackets — same as Architect. The bracket determines which item
-    // tiers are *eligible* this tick; spike scoring picks within that pool.
+    // Souls brackets — same as Architect.
     const BR_T1_LO   =  800;
     const BR_T2_LO   = 1600;
     const BR_SAVE_LO = 3200;
     const BR_T4_LO   = 6400;
+    const SAVE_ESCAPE_SOULS = 5500;
 
     // ── HELPERS ─────────────────────────────────────────────────────────────
+
+    function tierBucket(key) {
+      const t = bpItemMap[key]?.tier || 0;
+      if (t <= 800)  return 1;
+      if (t <= 1600) return 2;
+      if (t <= 3200) return 3;
+      return 4;
+    }
 
     function effCost(key, owned) {
       const tier = bpItemMap[key]?.tier || 0;
@@ -5990,8 +6292,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       for (const c of (bpItemMap[key]?.upgrades_from || [])) {
         if (owned.has(c)) return true;
       }
-      const all = ownedAncestors(key, owned);
-      return all.size > 0;
+      return ownedAncestors(key, owned).size > 0;
     }
 
     function roleBoost(k) {
@@ -6002,66 +6303,213 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return 1.0;
     }
 
-    // Cumulative remaining tick weight from `tick` to end of game. Pre-computed
-    // so each scoring call is O(1) instead of O(NUM_TICKS).
-    const cumulativeWeight = new Array(SIM_NUM_TICKS + 1);
-    cumulativeWeight[SIM_NUM_TICKS] = 0;
-    for (let t = SIM_NUM_TICKS - 1; t >= 0; t--) {
-      cumulativeWeight[t] = cumulativeWeight[t + 1] +
-        (SPIKE_WEIGHT[t] ?? SPIKE_WEIGHT[SPIKE_WEIGHT.length - 1]);
+    function isReqAny(k) { return requiredSet.has(k)  || reqComponentSet.has(k); }
+    function isSigAny(k) { return signatureSet.has(k) || sigComponentSet.has(k); }
+
+    // ── PHASE 1: Plan the 4 anchors ─────────────────────────────────────────
+    // Two power spikes (top self-axis) + two anti-spikes (top counter-axis).
+    //
+    // Pool: T3 + T4 only (T1/T2 are too weak to be a "spike").
+    //
+    // Spike scoring axis = top-4 self-weight tags (the hero's strongest tags).
+    // Anti scoring axis  = top-4 enemy-counter tags (what the enemy team is
+    //                      hurt by most). Both derived from already-computed
+    //                      build state so no extra data plumbing needed.
+    //
+    // Spike picker: HARD priority required → signature → normal. If any
+    // required item is in pool, pick from required only. If not, signature
+    // only. Else normal. (NO score shifting between tiers, just IF/THEN.)
+    //
+    // Anti picker: required/signature only get a tiny tie-breaker multiplier.
+
+    // Top 4 self tags = hero's strongest weighted tags.
+    const selfWeight = (b.rv && b.rv.self_weight) || {};
+    const topSelfTags = Object.entries(selfWeight)
+      .sort((a, c) => (c[1] || 0) - (a[1] || 0))
+      .slice(0, 4)
+      .filter(e => (e[1] || 0) > 0)
+      .map(e => e[0]);
+
+    // Top 4 enemy-counter tags: derived from items. For each tag t, sum
+    // item.values[t] × item.enemy across all items. Tags strongly correlated
+    // with high item.enemy are the enemy team's top counter tags.
+    const enemyTagAgg = {};
+    b.items.forEach(it => {
+      const e = it.enemy || 0;
+      if (!e) return;
+      const vals = it.values || {};
+      for (const [t, v] of Object.entries(vals)) {
+        if (!v) continue;
+        enemyTagAgg[t] = (enemyTagAgg[t] || 0) + v * e;
+      }
+    });
+    const topEnemyTags = Object.entries(enemyTagAgg)
+      .sort((a, c) => (c[1] || 0) - (a[1] || 0))
+      .slice(0, 4)
+      .filter(e => (e[1] || 0) > 0)
+      .map(e => e[0]);
+
+    // Restricted-tag scoring: item only scores on its top-4 axis tags.
+    function spikeScore(it) {
+      let s = 0;
+      const vals = it.values || {};
+      for (const t of topSelfTags) {
+        s += (vals[t] || 0) * (selfWeight[t] || 0);
+      }
+      return s;
+    }
+    function antiScore(it) {
+      let s = 0;
+      const vals = it.values || {};
+      for (const t of topEnemyTags) {
+        s += (vals[t] || 0) * (enemyTagAgg[t] || 0);
+      }
+      return s;
     }
 
-    // Spike value: per-tag value with saturation damping, times role boost,
-    // times cumulative remaining weight from this tick forward.
-    function spikeValue(candidate, ownedItems, tick) {
-      const candVals = candidate.values || {};
-      // Build coverage map from owned items (only for tags this candidate provides)
-      let raw = 0;
-      for (const tag of Object.keys(candVals)) {
-        const v = candVals[tag] || 0;
-        if (v === 0) continue;
-        let coverage = 0;
-        for (const o of ownedItems) {
-          coverage += (o.values?.[tag] || 0);
+    const pool = b.items.filter(it => !blacklistSet.has(it.key));
+    const t3plus = pool.filter(it => tierBucket(it.key) >= 3);
+    const t4only = pool.filter(it => tierBucket(it.key) === 4);
+
+    // Pick a spike anchor — HARD priority required > signature > normal.
+    function pickSpike(cands, t3Encourage, t4Encourage) {
+      const reqArr = cands.filter(it => isReqAny(it.key));
+      const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
+      const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
+      const tier = reqArr.length ? reqArr : (sigArr.length ? sigArr : norArr);
+      return [...tier].sort((a, c) => {
+        const ba = tierBucket(a.key), bc = tierBucket(c.key);
+        let sa = spikeScore(a), sc = spikeScore(c);
+        if (t3Encourage) {
+          if (ba === 3) sa *= SURGE_T3_BIAS;
+          if (bc === 3) sc *= SURGE_T3_BIAS;
         }
-        // Tag-saturation damping: this tag's contribution falls as coverage rises.
-        raw += v / (1 + SURGE_SAT_LAMBDA * Math.max(0, coverage));
-      }
-      const role     = roleBoost(candidate.key);
-      const cumWeight = cumulativeWeight[tick] || 1;
-      return raw * role * cumWeight;
+        if (t4Encourage) {
+          if (ba === 4) sa *= SURGE_T4_BIAS;
+          if (bc === 4) sc *= SURGE_T4_BIAS;
+        }
+        return sc - sa;
+      })[0];
     }
+
+    // Pick an anti-spike anchor — required/signature only get a tiny boost.
+    function pickAnti(cands, t3Encourage, t4Encourage, exclude) {
+      const filtered = cands.filter(it => !exclude.has(it.key));
+      return [...filtered].sort((a, c) => {
+        const ba = tierBucket(a.key), bc = tierBucket(c.key);
+        let sa = antiScore(a), sc = antiScore(c);
+        if (isReqAny(a.key))      sa *= SURGE_ANTI_REQ_TIE;
+        else if (isSigAny(a.key)) sa *= SURGE_ANTI_SIG_TIE;
+        if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
+        else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
+        if (t3Encourage) {
+          if (ba === 3) sa *= SURGE_T3_BIAS;
+          if (bc === 3) sc *= SURGE_T3_BIAS;
+        }
+        if (t4Encourage) {
+          if (ba === 4) sa *= SURGE_T4_BIAS;
+          if (bc === 4) sc *= SURGE_T4_BIAS;
+        }
+        return sc - sa;
+      })[0];
+    }
+
+    // firstSpike: T3+T4, T3-encouraged
+    const firstSpike = pickSpike(t3plus, /*t3*/ true, /*t4*/ false);
+    // secondSpike: T4 only (the huge one)
+    const secondSpike = pickSpike(
+      t4only.filter(it => it.key !== firstSpike?.key),
+      /*t3*/ false, /*t4*/ true,
+    );
+    // firstAntiSpike: T3+T4, T3-encouraged, exclude both spikes
+    const excludeAnti1 = new Set([firstSpike?.key, secondSpike?.key].filter(Boolean));
+    const firstAntiSpike = pickAnti(t3plus, /*t3*/ true, /*t4*/ false, excludeAnti1);
+    // secondAntiSpike: T3+T4, T4-encouraged
+    const excludeAnti2 = new Set([firstSpike?.key, secondSpike?.key, firstAntiSpike?.key].filter(Boolean));
+    const secondAntiSpike = pickAnti(t3plus, /*t3*/ false, /*t4*/ true, excludeAnti2);
+
+    const anchors      = { firstSpike, secondSpike, firstAntiSpike, secondAntiSpike };
+    const anchorKeySet = new Set(Object.values(anchors).filter(Boolean).map(it => it.key));
+    const window1Set   = new Set([firstSpike?.key, firstAntiSpike?.key].filter(Boolean));
+    const window2Set   = new Set([secondSpike?.key, secondAntiSpike?.key].filter(Boolean));
+
+    // Compute upgrade-chain sets for each anchor. expandChain(key) returns
+    // every transitive component of `key` (NOT including key itself).
+    function expandChain(key) {
+      const out = new Set();
+      if (!key) return out;
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(s => { if (!out.has(s)) stack.push(s); });
+      }
+      return out;
+    }
+    const spikeChainSet = new Set();
+    [firstSpike, secondSpike].forEach(a => {
+      if (!a) return;
+      expandChain(a.key).forEach(k => spikeChainSet.add(k));
+    });
+    const antiChainSet = new Set();
+    [firstAntiSpike, secondAntiSpike].forEach(a => {
+      if (!a) return;
+      expandChain(a.key).forEach(k => {
+        // Spike chain wins over anti chain (priority is higher)
+        if (!spikeChainSet.has(k)) antiChainSet.add(k);
+      });
+    });
 
     // ── EXECUTION ───────────────────────────────────────────────────────────
+    // Architect-style: priority-score (it.total + role boost + chain bonus)
+    // with an anchor-window multiplier applied when an anchor is buyable IN
+    // its spike window. Souls brackets gate which tier can fire each tick.
+    // Late + Extra Late also get a sell-and-replace mechanic so accumulated
+    // souls don't sit idle at slot cap when no upgrade is reachable.
     let souls = 0;
-    const owned      = new Set();
-    const ownedItems = [];
+    const owned        = new Set();
     const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
-    const tickDbg     = [];
-    const powerCurve  = [];
+    const tickDbg      = [];
+    const sellsByPhase = { 'Lane': 0, 'Early': 0, 'Mid': 0, 'Late': 0, 'Extra Late': 0 };
 
-    function fire(candidate, phaseName) {
-      const cost = effCost(candidate.key, owned);
-      const consumed = [...ownedAncestors(candidate.key, owned)];
-      consumed.forEach(c => {
-        owned.delete(c);
-        const idx = ownedItems.findIndex(it => it.key === c);
-        if (idx >= 0) ownedItems.splice(idx, 1);
-      });
-      owned.add(candidate.key);
-      ownedItems.push(candidate);
+    function priorityScore(it, tick) {
+      const k = it.key;
+      let s = (it.total || 0);
+      s *= roleBoost(k);
+      if (hasOwnedAncestor(k, owned)) s *= 1.15;
+      // Chain-of-anchor bonus — applies always so the algo accumulates the
+      // right T1/T2/T3 components ahead of the spike window opening.
+      if (anchorKeySet.has(k)) {
+        // anchor itself — leave to the window-boost below (no double-counting)
+      } else if (spikeChainSet.has(k)) {
+        s *= SURGE_SPIKE_CHAIN_BONUS;
+      } else if (antiChainSet.has(k)) {
+        s *= SURGE_ANTI_CHAIN_BONUS;
+      }
+      // Window boost — when the anchor itself is buyable in its tick window
+      if (window1Set.has(k) && tick >= SPIKE1_WINDOW[0] && tick <= SPIKE1_WINDOW[1]) {
+        s *= SURGE_ANCHOR_BOOST;
+      } else if (window2Set.has(k) && tick >= SPIKE2_WINDOW[0] && tick <= SPIKE2_WINDOW[1]) {
+        s *= SURGE_ANCHOR_BOOST;
+      }
+      return s;
+    }
+
+    function fire(item, phaseName) {
+      const cost = effCost(item.key, owned);
+      const consumed = [...ownedAncestors(item.key, owned)];
+      consumed.forEach(c => owned.delete(c));
+      owned.add(item.key);
       souls -= cost;
       phaseChanges[phaseName].push({
         action:     consumed.length ? 'upgrade' : 'buy',
-        key:        candidate.key,
+        key:        item.key,
         components: consumed,
         cost,
       });
     }
 
-    // Build affordable-and-eligible candidate list for this tick under a tier
-    // band (loose, in absolute item-tier souls). `requireUpgrade` forces an
-    // owned-ancestor — used in the 3200-6399 save bracket.
     function findBest(tierLo, tierHi, tick, requireUpgrade = false) {
       let best = null, bestSc = -Infinity;
       for (const it of b.items) {
@@ -6075,18 +6523,65 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const cost = effCost(k, owned);
         if (cost > souls) continue;
         if (requireUpgrade && !hasOwnedAncestor(k, owned)) continue;
-        const sc = spikeValue(it, ownedItems, tick);
+        const sc = priorityScore(it, tick);
         if (sc > bestSc) { bestSc = sc; best = { it, sc, cost }; }
       }
       return best;
     }
 
-    function currentPower() {
-      // Simple sum of tag values with saturation already accounted for
-      // implicitly by the buy sequence. Just sum item.total for the debug curve.
-      let p = 0;
-      ownedItems.forEach(it => { p += (it.total || 0); });
-      return p;
+    // Late/Extra-Late fallback: at slot cap, no affordable upgrade — look for
+    // a sell+buy pair. Returns { sellKey, refund, replacement } or null. Won't
+    // sell spike/anti anchors (those are the whole point of the build) and
+    // won't sell required items (user explicitly asked for them).
+    function considerSellAndReplace(tick) {
+      // Find the LOWEST-priority owned item we'd be willing to sell.
+      let sellCand = null;
+      let sellCandSc = Infinity;
+      let sellCandTier = 0;
+      for (const k of owned) {
+        if (anchorKeySet.has(k))   continue;   // never sell the spike itself
+        if (requiredSet.has(k))    continue;   // never sell user-required
+        // Find the item record (same shape used in priorityScore)
+        const it = b.items.find(x => x.key === k);
+        if (!it) continue;
+        const sc = priorityScore(it, tick);
+        if (sc < sellCandSc) {
+          sellCandSc = sc; sellCand = it;
+          sellCandTier = bpItemMap[k]?.tier || 0;
+        }
+      }
+      if (!sellCand) return null;
+
+      const refund = Math.floor(sellCandTier * SURGE_SELL_REFUND_FRAC);
+      const projectedSouls = souls + refund;
+
+      // Find the best replacement we could afford after the sell. Considers
+      // anything we don't already own and isn't blacklisted (no upgrade
+      // requirement — selling frees a slot, so any tier is fair game).
+      let bestRep = null, bestRepSc = -Infinity, bestRepCost = 0;
+      for (const it of b.items) {
+        const k = it.key;
+        if (owned.has(k))         continue;
+        if (k === sellCand.key)   continue;
+        if (blacklistSet.has(k))  continue;
+        const ups = upgradesTo[k] || [];
+        if (ups.some(u => owned.has(u))) continue;
+        const cost = effCost(k, owned);
+        if (cost > projectedSouls) continue;
+        const sc = priorityScore(it, tick);
+        if (sc > bestRepSc) { bestRepSc = sc; bestRep = it; bestRepCost = cost; }
+      }
+      if (!bestRep) return null;
+
+      // Only sell if the replacement is meaningfully better (avoids churning
+      // the inventory just to swap equivalent items).
+      if (bestRepSc < sellCandSc * SURGE_SELL_RATIO_THRESH) return null;
+
+      return {
+        sellKey:     sellCand.key,
+        refund,
+        replacement: { it: bestRep, sc: bestRepSc, cost: bestRepCost },
+      };
     }
 
     for (let tick = 0; tick < SIM_NUM_TICKS; tick++) {
@@ -6098,24 +6593,35 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       let pick = null;
       let mode = '';
 
+      const atCap = owned.size >= phaseCap;
+
       if (souls < BR_T1_LO) {
         mode = 'sub-T1';
-      } else if (owned.size >= phaseCap) {
-        mode = 'slot-cap';
+      } else if (atCap) {
+        // At slot cap — only upgrades are allowed (they consume an owned
+        // ancestor so net slot count = 0). Keeps Extra Late progressing past
+        // the natural slot-fill point.
+        mode = 'cap-upg';
+        if (souls >= BR_T4_LO) {
+          pick = findBest(3201, 99999, tick, /* requireUpgrade */ true);
+          if (!pick) pick = findBest(1601, 3200, tick, /* requireUpgrade */ true);
+        } else if (souls >= BR_SAVE_LO) {
+          pick = findBest(1, 3200, tick, /* requireUpgrade */ true);
+        } else if (souls >= BR_T2_LO) {
+          pick = findBest(1, 3200, tick, /* requireUpgrade */ true);
+        } else {
+          pick = findBest(1, 800,  tick, /* requireUpgrade */ true);
+        }
       } else if (souls < BR_T2_LO) {
         mode = 'T1';
         pick = findBest(1, 800, tick);
       } else if (souls < BR_SAVE_LO) {
         mode = 'T2/upg';
-        // Allow T1-3200 band so upgrades from owned components fit here.
         pick = findBest(1, 3200, tick);
       } else if (souls < BR_T4_LO) {
         mode = 'save';
-        // Upgrade-only: must consume an owned ancestor.
         pick = findBest(1, 3200, tick, /* requireUpgrade */ true);
-        // Escape valve: if nothing upgrade-eligible, allow a fresh T3 buy.
-        // Prevents endless saving when no chain is set up.
-        if (!pick && souls >= 5500) {
+        if (!pick && souls >= SAVE_ESCAPE_SOULS) {
           pick = findBest(1601, 3200, tick);
           if (pick) mode = 'save-escape';
         }
@@ -6128,45 +6634,110 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         }
       }
 
+      // Sell-and-replace fallback for Late + Extra Late.
+      // When at slot cap with no affordable upgrade, look for a sell+buy pair
+      // where selling our lowest-priority non-anchor item lets us buy
+      // something with much higher priorityScore. Capped by phase.maxSells.
+      let sellInfo = null;
+      if (!pick && atCap && (phaseName === 'Late' || phaseName === 'Extra Late')) {
+        const maxSells = BUILD_PHASES[phaseIdx]?.maxSells || 0;
+        if (sellsByPhase[phaseName] < maxSells) {
+          sellInfo = considerSellAndReplace(tick);
+          if (sellInfo) {
+            mode = 'sell+buy';
+            // Execute the sell: drop from owned, refund half tier
+            owned.delete(sellInfo.sellKey);
+            souls += sellInfo.refund;
+            sellsByPhase[phaseName]++;
+            phaseChanges[phaseName].push({
+              action:    'sell',
+              key:        sellInfo.sellKey,
+              refund:     sellInfo.refund,
+            });
+            pick = sellInfo.replacement;
+          }
+        }
+      }
+
       if (pick) fire(pick.it, phaseName);
 
-      const pwr = currentPower();
-      powerCurve.push({ tick, power: +pwr.toFixed(2), souls });
-
       if (_bpDbg && tickDbg.length < 40) {
+        const inW1 = tick >= SPIKE1_WINDOW[0] && tick <= SPIKE1_WINDOW[1];
+        const inW2 = tick >= SPIKE2_WINDOW[0] && tick <= SPIKE2_WINDOW[1];
+        const winTag = inW1 ? 'W1' : inW2 ? 'W2' : '  ';
+        const action = pick
+          ? (sellInfo ? `SELL ${sellInfo.sellKey} +${sellInfo.refund}, BUY ${pick.it.key} -${pick.cost}` : `BUY ${pick.it.key} cost=${pick.cost}`)
+          : 'skip';
         tickDbg.push(
-          `t${String(tick).padStart(2)} ${phaseName.padEnd(11)} ` +
-          `souls=${String(souls + (pick ? pick.cost : 0)).padStart(5)} ` +
-          `w_cum=${cumulativeWeight[tick].toFixed(1)} pow=${pwr.toFixed(1)} ` +
-          `mode=${mode.padEnd(13)} ${pick ? `BUY ${pick.it.key} cost=${pick.cost}` : 'skip'}`
+          `t${String(tick).padStart(2)} ${phaseName.padEnd(11)} ${winTag} ` +
+          `souls=${String(souls + (pick ? pick.cost : 0) - (sellInfo ? sellInfo.refund : 0)).padStart(5)} ` +
+          `mode=${mode.padEnd(13)} ${action}`
         );
       }
     }
 
     if (_bpDbg) {
-      _bpDbg.surgeTicks  = tickDbg;
-      _bpDbg.surgePower  = powerCurve;
-      _bpDbg.surgeKnobs  = {
-        SPIKE_WEIGHT_summary: `Lane Σ=${SPIKE_WEIGHT.slice(0,6).reduce((a,b)=>a+b,0).toFixed(1)} · Early Σ=${SPIKE_WEIGHT.slice(6,12).reduce((a,b)=>a+b,0).toFixed(1)} · Mid Σ=${SPIKE_WEIGHT.slice(12,18).reduce((a,b)=>a+b,0).toFixed(1)} · Late Σ=${SPIKE_WEIGHT.slice(18,27).reduce((a,b)=>a+b,0).toFixed(1)} · ExLate Σ=${SPIKE_WEIGHT.slice(27).reduce((a,b)=>a+b,0).toFixed(1)}`,
-        SURGE_SAT_LAMBDA,
+      _bpDbg.surgeTicks   = tickDbg;
+      _bpDbg.surgeAnchors = {
+        firstSpike:      firstSpike?.key      || null,
+        secondSpike:     secondSpike?.key     || null,
+        firstAntiSpike:  firstAntiSpike?.key  || null,
+        secondAntiSpike: secondAntiSpike?.key || null,
+        window1: SPIKE1_WINDOW, window2: SPIKE2_WINDOW,
+        topSelfTags, topEnemyTags,
+      };
+      _bpDbg.surgeKnobs   = {
+        SURGE_T3_BIAS, SURGE_T4_BIAS, SURGE_ANCHOR_BOOST,
+        SURGE_ANTI_REQ_TIE, SURGE_ANTI_SIG_TIE,
       };
     }
 
-    return PHASE_NAMES.map(name => ({
-      phase: name, changes: phaseChanges[name], assistChanges: [], counterChanges: [],
-    }));
+    // ── Assist/counter columns ─────────────────────────────────────────────
+    // Build the full main-path blacklist (all items + components purchased in
+    // ANY phase) so assist/counter never doubles up an item the main path
+    // already plans to buy. Then run greedyAssist per phase.
+    const fullBPBlacklist = new Set();
+    PHASE_NAMES.forEach(n => {
+      (phaseChanges[n] || []).forEach(ch => {
+        fullBPBlacklist.add(ch.key);
+        (ch.components || []).forEach(c => fullBPBlacklist.add(c));
+      });
+    });
+    const globalAssistUsed  = new Set();
+    const globalCounterUsed = new Set();
+    const result = PHASE_NAMES.map(name => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  name, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, name, 'enemy');
+      return { phase: name, changes: phaseChanges[name], assistChanges, counterChanges };
+    });
+    // Attach anchor info so renderers (build-path step view + summary chips
+    // + simulator + live-match) can mark spike / anti-spike items.
+    result.surgeAnchors = {
+      spikes:     [firstSpike?.key, secondSpike?.key].filter(Boolean),
+      antiSpikes: [firstAntiSpike?.key, secondAntiSpike?.key].filter(Boolean),
+    };
+    return result;
+  }
+
+  // Spike / anti-spike anchors are now a universal label concept — every
+  // algorithm gets them attached so the build-path summary chips, step view,
+  // and simulator can mark them regardless of which run mode is selected.
+  const anchorSets = { requiredSet, signatureSet, blacklistSet, reqComponentSet, sigComponentSet };
+  function withAnchors(result) {
+    if (!result.surgeAnchors) result.surgeAnchors = computeSurgeAnchors(b, anchorSets);
+    return result;
   }
 
   // ── Phase loop ─────────────────────────────────────────────────────────────
-  if (algo === 'expert')    return applyConstraintsFixup(runExpertGreedy());
-  if (algo === 'assassin')  return applyConstraintsFixup(runTargetAssassin());
-  if (algo === 'adaptive') return applyConstraintsFixup(runHybridRotation('adaptive'));
-  if (algo === 'fusion')   return applyConstraintsFixup(runHybridRotation('fusion'));
-  if (algo === 'oracle')   return applyConstraintsFixup(runHybridRotation('oracle'));
-  if (algo === 'beam')     return applyConstraintsFixup(runBeamSearch());
-  if (algo === 'architect') return runArchitect();   // strict plan → no fixup wrap
-  if (algo === 'inverse')   return runInverse();     // endgame-first backward induction
-  if (algo === 'surge')     return runSurge();       // power-spike optimizer
+  if (algo === 'expert')    return withAnchors(applyConstraintsFixup(runExpertGreedy()));
+  if (algo === 'assassin')  return withAnchors(applyConstraintsFixup(runTargetAssassin()));
+  if (algo === 'adaptive') return withAnchors(applyConstraintsFixup(runHybridRotation('adaptive')));
+  if (algo === 'fusion')   return withAnchors(applyConstraintsFixup(runHybridRotation('fusion')));
+  if (algo === 'oracle')   return withAnchors(applyConstraintsFixup(runHybridRotation('oracle')));
+  if (algo === 'beam')     return withAnchors(applyConstraintsFixup(runBeamSearch()));
+  if (algo === 'architect') return withAnchors(runArchitect());   // strict plan → no fixup wrap
+  if (algo === 'inverse')   return withAnchors(runInverse());     // endgame-first backward induction
+  if (algo === 'surge')     return withAnchors(runSurge());       // power-spike optimizer (already attaches)
 
   const useCosine = algo === 'cosine';
 
@@ -6220,7 +6791,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     }
     return { phase: phase.name, changes, assistChanges, counterChanges };
   });
-  return applyConstraintsFixup(result);
+  return withAnchors(applyConstraintsFixup(result));
 }
 
 function formatBpDebug(allHeroDbgList) {
@@ -6269,6 +6840,24 @@ function formatBpDebug(allHeroDbgList) {
         sig.forEach(([t, d]) => {
           lines.push(`    ${t.padEnd(32)} sig=${d.sigCount}/${d.N}  frac=${d.fraction.toFixed(2)}  scale=${d.scale.toFixed(3)}  avgSig=${d.avgSig.toFixed(3)}  result=${d.result.toFixed(4)}`);
         });
+      }
+    }
+
+    if (dbg.surgeAnchors) {
+      const a = dbg.surgeAnchors;
+      const k = dbg.surgeKnobs || {};
+      lines.push('', '  Surge anchors:');
+      lines.push(`    firstSpike     : ${a.firstSpike      ? `${iname(a.firstSpike)} (${itier(a.firstSpike)})`           : '—'}`);
+      lines.push(`    secondSpike    : ${a.secondSpike     ? `${iname(a.secondSpike)} (${itier(a.secondSpike)})`         : '—'}`);
+      lines.push(`    firstAntiSpike : ${a.firstAntiSpike  ? `${iname(a.firstAntiSpike)} (${itier(a.firstAntiSpike)})`   : '—'}`);
+      lines.push(`    secondAntiSpike: ${a.secondAntiSpike ? `${iname(a.secondAntiSpike)} (${itier(a.secondAntiSpike)})` : '—'}`);
+      lines.push(`    window1=[${a.window1?.join(',')}]  window2=[${a.window2?.join(',')}]`);
+      if (a.topSelfTags)  lines.push(`    topSelfTags  (spike axis) : ${a.topSelfTags.join(', ')  || '—'}`);
+      if (a.topEnemyTags) lines.push(`    topEnemyTags (anti axis)  : ${a.topEnemyTags.join(', ') || '—'}`);
+      lines.push(`    knobs: ${Object.entries(k).map(([kn, v]) => `${kn}=${v}`).join('  ')}`);
+      if (dbg.surgeTicks?.length) {
+        lines.push('', '  Surge tick trace (first 40 ticks):');
+        dbg.surgeTicks.forEach(t => lines.push('    ' + t));
       }
     }
 
@@ -6351,54 +6940,18 @@ function buildPathPanelContents(pathData, b) {
     changes.forEach(c => { if (c.action === 'sell') soldEver.add(c.key); });
   });
 
-  // Resolve required + signature from the hero build chain (UI-only — these
-  // are the same sets computeBuildPath uses internally, just surfaced here).
-  let requiredKeys  = new Set();
-  let signatureKeys = new Set();
-  const heroBuilds = MATCH.heroData[b.heroName]?.builds;
-  if (heroBuilds) {
-    const ownBuild = heroBuilds[b.buildIdx] || heroBuilds.find(hb => hb.name === b.name);
-    if (ownBuild) {
-      try {
-        const resolved = resolveBuildConstraints(ownBuild, heroBuilds);
-        requiredKeys  = new Set(resolved.required_items);
-        signatureKeys = new Set([...resolved.signature_items].filter(k => !requiredKeys.has(k)));
-      } catch { /* fall through with empty sets */ }
-    }
-  }
+  // Resolve all label sets via the shared computeBuildLabels helper.
+  const { labelFor } = computeBuildLabels(b, pathData);
+  const LABEL_META = BP_LABEL_META;
 
-  // Recommended = top-4 self-score per tier that ended up in final inventory,
-  // minus anything already required/signature. This is what the algorithm
-  // "really liked" without being told to by the build constraints.
-  const tierGroups = {};
-  b.items.forEach(it => {
-    if (it.self > 0) {
-      const t = it.tier || 0;
-      if (!tierGroups[t]) tierGroups[t] = [];
-      tierGroups[t].push(it);
-    }
-  });
-  const topSelfKeys = new Set();
-  Object.values(tierGroups).forEach(group => {
-    group.sort((a, bc) => bc.self - a.self).slice(0, 4).forEach(it => topSelfKeys.add(it.key));
-  });
-  const recommendedKeys = new Set([...summaryOwned].filter(k =>
-    topSelfKeys.has(k) && !soldEver.has(k)
-       && !requiredKeys.has(k) && !signatureKeys.has(k)
-  ));
-
-  // Helper: which exclusive label applies to this key (or null).
-  function labelFor(key) {
-    if (requiredKeys.has(key))    return 'required';
-    if (signatureKeys.has(key))   return 'signature';
-    if (recommendedKeys.has(key)) return 'recommended';
+  // Legacy single-mark helper retained for the old spike-only summary path.
+  function spikeMarkFor(key) {
+    const spikeSet = new Set((pathData && pathData.surgeAnchors?.spikes) || []);
+    const antiSet  = new Set((pathData && pathData.surgeAnchors?.antiSpikes) || []);
+    if (spikeSet.has(key)) return { cls: 'bp-spike-mark', sym: '↗', title: 'Surge power spike anchor' };
+    if (antiSet.has(key))  return { cls: 'bp-anti-mark',  sym: '⤯', title: 'Surge counter-spike anchor' };
     return null;
   }
-  const LABEL_META = {
-    required:    { text: 'REQ', title: 'Required — flagged on this build' },
-    signature:   { text: 'SIG', title: 'Signature — flagged on this build' },
-    recommended: { text: 'REC', title: 'Recommended — high algo affinity' },
-  };
 
   // Title bar with toggle + debug
   let detailOpen = false;
@@ -6406,7 +6959,7 @@ function buildPathPanelContents(pathData, b) {
   titleBar.className = 'bp-title-bar';
   titleBar.innerHTML = `<span class="calc-panel-title" style="margin:0">Build Path Guide</span>
     <div style="display:flex;gap:6px;align-items:center;">
-      <button class="btn-ghost btn-sm bp-debug-btn">Debug Roster</button>
+      <button class="btn-ghost btn-sm bp-debug-btn">Debug Build</button>
       <button class="btn-ghost btn-sm bp-detail-toggle">Show Step-by-Step &#9662;</button>
     </div>`;
   wrap.appendChild(titleBar);
@@ -6414,42 +6967,48 @@ function buildPathPanelContents(pathData, b) {
   titleBar.querySelector('.bp-debug-btn').addEventListener('click', () => {
     const debugBtn = titleBar.querySelector('.bp-debug-btn');
     debugBtn.disabled = true; debugBtn.textContent = 'Collecting…';
-    const allHeroes = [...(MATCH.allies || []), ...(MATCH.enemies || [])];
-    const allDbgData = [];
-    allHeroes.forEach(heroName => {
-      const r    = (MATCH.results || []).find(x => x.name === heroName);
-      const bidx = MATCH.selectedBuilds?.[heroName] ?? 0;
-      const b2   = r?.builds?.[bidx];
-      if (!b2) return;
-      _bpDbg = { hero: heroName, algo: MATCH.bpAlgo || 'greedy-phase', phases: [] };
-      try { computeBuildPath(b2, MATCH.bpAlgo); } catch (e) { _bpDbg.error = String(e); }
-      allDbgData.push(_bpDbg);
-      _bpDbg = null;
-    });
-    const text = formatBpDebug(allDbgData);
+    // Run only the build this panel is for — not the whole roster.
+    _bpDbg = { hero: b.heroName || '?', algo: MATCH.bpAlgo || 'greedy-phase', phases: [] };
+    try { computeBuildPath(b, MATCH.bpAlgo); } catch (e) { _bpDbg.error = String(e); }
+    const dbgData = _bpDbg;
+    _bpDbg = null;
+    const text = formatBpDebug([dbgData]);
     navigator.clipboard.writeText(text).then(() => {
       debugBtn.disabled = false; debugBtn.textContent = 'Copied!';
-      setTimeout(() => { debugBtn.textContent = 'Debug Roster'; }, 2500);
+      setTimeout(() => { debugBtn.textContent = 'Debug Build'; }, 2500);
     }).catch(() => {
       debugBtn.disabled = false; debugBtn.textContent = 'Failed';
-      setTimeout(() => { debugBtn.textContent = 'Debug Roster'; }, 2500);
+      setTimeout(() => { debugBtn.textContent = 'Debug Build'; }, 2500);
     });
   });
 
   // Summary row of item icons (end of Late)
+  // Layout per chip (flex-column, top → bottom):
+  //   [symbol slot]   ← fixed-height even when empty so chips don't get jagged
+  //   [item image]
+  //   [item name]
+  // Only spike / required / recommended are eligible for the symbol slot
+  // (controlled by LABEL_META[label].summary). Component variants and the
+  // other categories show no symbol here — they're visible in the step view.
   const summaryEl = document.createElement('div');
   summaryEl.className = 'bp-summary-row';
   if (summaryOwned.size) {
     summaryOwned.forEach(k => {
-      const it  = itemNameMap[k];
-      const img = srcUrl(it?.imagePath || '');
-      const chip = document.createElement('span');
+      const it    = itemNameMap[k];
+      const img   = srcUrl(it?.imagePath || '');
       const label = labelFor(k);
-      chip.className = 'bp-summary-chip' + (label ? ' bp-label-' + label : '');
-      const meta = label ? LABEL_META[label] : null;
-      chip.title = (meta ? `${meta.text} — ` : '') + (it?.name || k);
-      chip.innerHTML = (img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`) +
-        (meta ? `<span class="bp-chip-badge bp-badge-${label}">${meta.text}</span>` : '');
+      const meta  = label ? LABEL_META[label] : null;
+      const showSummaryBadge = !!(meta && meta.summary);
+      const chip  = document.createElement('span');
+      chip.className = 'bp-summary-chip' + (showSummaryBadge ? ' ' + meta.klass : '');
+      chip.title = (showSummaryBadge ? `${meta.title} — ` : '') + (it?.name || k);
+      // Symbol slot always present (empty if no eligible label) — keeps the
+      // row vertically aligned regardless of which chips carry a badge.
+      const badgeHtml = showSummaryBadge
+        ? `<span class="bp-chip-badge bp-badge-${label}">${meta.text}</span>`
+        : `<span class="bp-chip-badge bp-badge-empty">&nbsp;</span>`;
+      chip.innerHTML = badgeHtml +
+        (img ? `<img class="bp-item-img" src="${img}" alt="${it?.name || k}">` : `<span class="bp-empty-img"></span>`);
       const nameLbl = document.createElement('span');
       nameLbl.className = 'bp-summary-name';
       nameLbl.textContent = it?.name || k;
@@ -6464,7 +7023,9 @@ function buildPathPanelContents(pathData, b) {
   // Detail view (hidden by default)
   const detailEl = document.createElement('div');
   detailEl.className = 'bp-detail hidden';
-  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, { requiredKeys, signatureKeys, recommendedKeys }));
+  detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, {
+    labelFor, LABEL_META,
+  }));
   wrap.appendChild(detailEl);
 
   titleBar.querySelector('.bp-detail-toggle').addEventListener('click', () => {
@@ -6479,14 +7040,21 @@ function buildPathPanelContents(pathData, b) {
     const simRow = document.createElement('div');
     simRow.className = 'bp-sim-row';
     const sst = SIM.states[`${b.heroName}::${b.buildIdx ?? 0}`];
-    const resumeable = !!sst && (sst.tick > 0 || (sst.history && sst.history.length));
+    const resumeable = !!sst && sst.mode !== 'live' && (sst.tick > 0 || (sst.history && sst.history.length));
+    const liveResumeable = !!sst && sst.mode === 'live';
     simRow.innerHTML = `
       <button class="btn-primary btn-sm sim-start-btn">
         ${resumeable ? '▶ Resume Simulation' : '▶ Simulate this build'}
       </button>
+      <button class="btn-secondary btn-sm sim-live-btn" title="Like the simulator, but budget-driven — type your current souls instead of advancing ticks.">
+        ${liveResumeable ? '▶ Resume Live Match' : '▶ Live Match'}
+      </button>
       ${resumeable ? `<span class="bp-sim-resume-hint">tick ${sst.tick + 1} / ${SIM_NUM_TICKS}</span>` : ''}`;
     simRow.querySelector('.sim-start-btn').addEventListener('click', () => {
-      openSimulation(b.heroName, b.buildIdx ?? 0, b);
+      openSimulation(b.heroName, b.buildIdx ?? 0, b, 'tick');
+    });
+    simRow.querySelector('.sim-live-btn').addEventListener('click', () => {
+      openSimulation(b.heroName, b.buildIdx ?? 0, b, 'live');
     });
     wrap.appendChild(simRow);
   }
@@ -6496,14 +7064,10 @@ function buildPathPanelContents(pathData, b) {
 
 function renderBuildPath(pathData, b, itemNameMap, labels = {}) {
   if (!itemNameMap) { itemNameMap = {}; b.items.forEach(it => { itemNameMap[it.key] = it; }); }
-  const requiredKeys    = labels.requiredKeys    || new Set();
-  const signatureKeys   = labels.signatureKeys   || new Set();
-  const recommendedKeys = labels.recommendedKeys || new Set();
-  const labelFor = k => requiredKeys.has(k)    ? 'required'
-                      : signatureKeys.has(k)   ? 'signature'
-                      : recommendedKeys.has(k) ? 'recommended'
-                      : null;
-  const LABEL_TEXT = { required: 'REQ', signature: 'SIG', recommended: 'REC' };
+  // Caller (buildPathPanelContents) passes both the resolver and the metadata
+  // table so we don't have to re-derive label sets here.
+  const labelFor  = labels.labelFor  || (() => null);
+  const LABEL_META = labels.LABEL_META || {};
   const container = document.createElement('div');
   container.className = 'bp-container';
 
@@ -6540,19 +7104,30 @@ function renderBuildPath(pathData, b, itemNameMap, labels = {}) {
         const hasAlt  = c.action !== 'sell' && !!altItem;
         const row     = document.createElement('div');
         const rowLabel = c.action !== 'sell' ? labelFor(c.key) : null;
+        const meta     = rowLabel ? LABEL_META[rowLabel] : null;
+        // Row-highlight class: only the highest-priority top-level labels get
+        // background tint (spike strongest, required less, recommended a hint).
+        // Components and the rest get the symbol in the Priority column but
+        // no row background.
+        const highlightClass =
+          rowLabel === 'spike'       ? ' bp-row-hl-spike'    :
+          rowLabel === 'required'    ? ' bp-row-hl-required' :
+          rowLabel === 'recommended' ? ' bp-row-hl-recommended' : '';
         row.className = `bp-change bp-${c.action}` +
-          (rowLabel ? ' bp-label-' + rowLabel : '') +
+          (rowLabel ? ' ' + meta.klass : '') + highlightClass +
           (hasAlt ? ' bp-has-alt' : '');
         const badge   = c.action === 'sell' ? '−' : c.action === 'upgrade' ? '↑' : '+';
         const costTxt = c.action === 'sell' ? `+${c.refund}s` : `-${c.cost}s`;
-        const tagBadge = rowLabel
-          ? `<span class="bp-tag-badge bp-badge-${rowLabel}" title="${LABEL_TEXT[rowLabel]}">${LABEL_TEXT[rowLabel]}</span>`
-          : '';
+        // Priority column: shows the symbol for ANY label that applies
+        // (including components). The CSS sizes/colors come from the meta.klass.
+        const priorityCell = meta
+          ? `<span class="bp-priority" title="${meta.title}"><span class="bp-priority-sym">${meta.text}</span></span>`
+          : `<span class="bp-priority bp-priority-empty">&nbsp;</span>`;
         row.innerHTML = `
           <span class="bp-action-badge bp-${c.action}-badge">${badge}</span>
           ${img ? `<img class="bp-item-img" src="${img}" alt="">` : ''}
-          ${tagBadge}
           <span class="bp-item-name">${scored.name}</span>
+          ${priorityCell}
           <span class="bp-cost">${costTxt}</span>`;
         if (hasAlt) {
           const altImg = srcUrl(altItem.imagePath || '');
@@ -6693,12 +7268,22 @@ document.getElementById('btn-regen-run').addEventListener('click', () => {
   document.getElementById('regen-panel').classList.add('hidden');
   toast('Recalculated');
 });
+document.getElementById('btn-auto-regen').addEventListener('click', () => {
+  if (!MATCH.results) { toast('Run a calculation first', 'error'); return; }
+  const changed = autoRegenPromote();
+  renderCalcSummary();
+  toast(changed ? 'Auto-regenerated to top builds' : 'Already on top builds');
+});
 document.getElementById('back-to-summary').addEventListener('click', () => showPage('calc-summary'));
 document.getElementById('back-to-hero').addEventListener('click', () => openCalcHero(MATCH.viewHeroName));
 document.getElementById('bp-algo-sel').addEventListener('change', e => { MATCH.bpAlgo = e.target.value; saveMatchState(); });
 document.getElementById('score-formula-sel').addEventListener('change', e => {
   MATCH.scoreFormula = e.target.value;
   document.getElementById('v2-mult-group').style.display = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') ? '' : 'none';
+  saveMatchState();
+});
+document.getElementById('opt-auto-regen').addEventListener('change', e => {
+  MATCH.autoRegen = e.target.checked;
   saveMatchState();
 });
 
@@ -8143,9 +8728,10 @@ const SIM = {
 
 function simKey(heroName, buildIdx) { return `${heroName}::${buildIdx}`; }
 
-function simNewState() {
+function simNewState(mode = 'tick') {
   return {
-    tick: 0,
+    mode,                 // 'tick' = SIM_TICK_INCOME progression; 'live' = user-typed budget
+    tick: 0,              // in live mode, this is the INFERRED tick (from budget); user can edit
     totalEarned: 0,
     remaining: 0,
     owned: [],            // array of item keys (preserves order)
@@ -8159,6 +8745,51 @@ function simNewState() {
     outcome: null,        // 'win'|'loss'|'unfinished'
     feel:    null,        // 'good'|'bad'|'neutral'
   };
+}
+
+// Given a soul total (typically the player's CURRENT total earned), find the
+// tick whose cumulative SIM_TICK_INCOME is closest. Used in Live Match to
+// infer phase from a user-typed budget.
+function simInferTickFromSouls(totalEarned) {
+  let cum = 0, best = 0, bestDiff = Infinity;
+  for (let t = 0; t < SIM_NUM_TICKS; t++) {
+    cum += SIM_TICK_INCOME[t] || 0;
+    const diff = Math.abs(cum - totalEarned);
+    if (diff < bestDiff) { bestDiff = diff; best = t; }
+  }
+  return best;
+}
+
+// Suggested starting total-earned for a fresh Live Match session — defaults
+// to whatever tick 7 would have granted (~mid-Early), which is roughly when
+// most players first open the tool to check what to buy.
+function simSuggestedLiveStart() {
+  let cum = 0;
+  for (let t = 0; t <= 7; t++) cum += SIM_TICK_INCOME[t] || 0;
+  return cum;
+}
+
+// Live Match: derive total souls earned from current pocket + net items
+// spent in this session. tick/phase is inferred from totalEarned so the
+// recommendation context (Lane/Early/Mid/Late) tracks reality as the user
+// types their current souls. Sells refund souls — they count back against
+// net-spent so totalEarned stays stable across a buy→sell→buy sequence.
+function simLiveTotalEarned(state) {
+  let netSpent = 0;
+  for (const h of state.history || []) {
+    if (h.action === 'buy' || h.action === 'upgrade') netSpent += h.costEffective || 0;
+    else if (h.action === 'sell') netSpent -= h.refund || 0;
+  }
+  return Math.max(0, (state.remaining || 0) + netSpent);
+}
+
+// Quick-add helper for Live Match buttons (+1k / +5k / -1k etc.)
+function simLiveAdjust(delta) {
+  const state = simStateOrFail(); if (!state || state.mode !== 'live') return;
+  state.remaining = Math.max(0, state.remaining + delta);
+  state.totalEarned = simLiveTotalEarned(state);
+  state.tick = simInferTickFromSouls(state.totalEarned);
+  renderSim();
 }
 
 // Weighted-average build vector (matches bpAvgRsvVec) with focused heroes
@@ -8480,7 +9111,7 @@ function simAttributionIcons(itemKey, b, ctx) {
 }
 
 // ── Open / resume / reset ───────────────────────────────────────────────
-async function openSimulation(heroName, buildIdx, b) {
+async function openSimulation(heroName, buildIdx, b, mode = 'tick') {
   // Ensure heroData/items are loaded for scoring
   if (!MATCH.itemData.length) MATCH.itemData = await api.get('/api/items');
   bpItemMap = {};
@@ -8491,15 +9122,31 @@ async function openSimulation(heroName, buildIdx, b) {
     if (!MATCH.heroData[n]) MATCH.heroData[n] = await api.get(`/api/heroes/${n}`);
   }
   const key = simKey(heroName, buildIdx);
-  if (!MATCH.simStates[key]) MATCH.simStates[key] = simNewState();
-  // First tick income hasn't been granted yet?
+  // Reset state when switching modes so leftover tick progress doesn't leak
+  // into Live Match (or vice versa).
+  if (MATCH.simStates[key] && MATCH.simStates[key].mode !== mode) {
+    MATCH.simStates[key] = simNewState(mode);
+  }
+  if (!MATCH.simStates[key]) MATCH.simStates[key] = simNewState(mode);
   const st = MATCH.simStates[key];
-  if (st.tick === 0 && st.totalEarned === 0 && !st.history.length) {
-    st.remaining   = SIM_TICK_INCOME[0];
-    st.totalEarned = SIM_TICK_INCOME[0];
+  if (mode === 'tick') {
+    // First tick income hasn't been granted yet?
+    if (st.tick === 0 && st.totalEarned === 0 && !st.history.length) {
+      st.remaining   = SIM_TICK_INCOME[0];
+      st.totalEarned = SIM_TICK_INCOME[0];
+    }
+  } else {
+    // Live Match: seed budget from a tick-7-equivalent if this is a fresh
+    // session. User edits it via the souls input.
+    if (st.totalEarned === 0 && !st.history.length) {
+      st.totalEarned = simSuggestedLiveStart();
+      st.remaining   = st.totalEarned;
+      st.tick        = simInferTickFromSouls(st.totalEarned);
+    }
   }
   SIM.current = { heroName, buildIdx, b, key };
-  document.getElementById('sim-title').textContent = `${MATCH.heroData[heroName]?.eng_name || heroName} — ${b.name}`;
+  const modeLbl = mode === 'live' ? 'Live Match' : 'Simulation';
+  document.getElementById('sim-title').textContent = `${MATCH.heroData[heroName]?.eng_name || heroName} — ${b.name}  ·  ${modeLbl}`;
   document.getElementById('sim-subtitle').textContent =
     `${MATCH.allies.filter(n=>n!==heroName).length} allies vs ${MATCH.enemies.length} enemies · ${MATCH.bpAlgo} · ${MATCH.scoreFormula}`;
   showPage('sim');
@@ -8523,9 +9170,58 @@ function renderSim() {
   const phase = SIM_TICK_PHASE[state.tick] || 'Done';
 
   // Stats
-  document.getElementById('sim-souls').textContent  = state.remaining.toLocaleString();
+  const isLive = state.mode === 'live';
+  const soulsEl = document.getElementById('sim-souls');
+  if (isLive) {
+    // Editable souls in live mode — user types their current budget. The
+    // quick-adjust buttons (−800 / +800 / +3200) sit next to the input so
+    // you don't have to retype after a kill / orb pickup / late-game gain.
+    if (soulsEl.tagName !== 'INPUT' || !document.querySelector('.sim-souls-adjust')) {
+      // Build a wrapper containing the input + three buttons. The wrapper
+      // replaces the existing span/input so the .sim-stat cell holds them all.
+      const wrap = document.createElement('span');
+      wrap.className = 'sim-souls-wrap';
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.min = '0'; inp.id = 'sim-souls';
+      inp.className = 'sim-stat-val sim-souls-input';
+      const mkBtn = (label, delta, cls = '') => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn-ghost btn-xs sim-souls-adjust ' + cls;
+        b.textContent = label;
+        b.addEventListener('click', () => simLiveAdjust(delta));
+        return b;
+      };
+      wrap.appendChild(mkBtn('−800', -800, 'sim-adj-down'));
+      wrap.appendChild(inp);
+      wrap.appendChild(mkBtn('+800',   +800));
+      wrap.appendChild(mkBtn('+3200', +3200));
+      soulsEl.replaceWith(wrap);
+      inp.addEventListener('input', () => {
+        const st = simStateOrFail(); if (!st) return;
+        const v = Math.max(0, parseInt(inp.value, 10) || 0);
+        st.remaining = v;
+        st.totalEarned = simLiveTotalEarned(st);
+        st.tick = simInferTickFromSouls(st.totalEarned);
+        // Update only the dependent cells so the input keeps focus/caret.
+        document.getElementById('sim-earned').textContent = st.totalEarned.toLocaleString();
+        document.getElementById('sim-tick').textContent   = `~${st.tick + 1}/${SIM_NUM_TICKS}`;
+        document.getElementById('sim-phase').textContent  = SIM_TICK_PHASE[st.tick] || 'Late';
+        simRerenderColumns(st);
+      });
+    }
+    document.getElementById('sim-souls').value = state.remaining;
+  } else {
+    if (soulsEl.tagName === 'INPUT' || soulsEl.classList?.contains('sim-souls-wrap')) {
+      const sp = document.createElement('span');
+      sp.id = 'sim-souls'; sp.className = 'sim-stat-val';
+      const wrap = document.querySelector('.sim-souls-wrap');
+      (wrap || soulsEl).replaceWith(sp);
+    }
+    document.getElementById('sim-souls').textContent = state.remaining.toLocaleString();
+  }
   document.getElementById('sim-earned').textContent = state.totalEarned.toLocaleString();
-  document.getElementById('sim-tick').textContent   = `${state.tick + 1}/${SIM_NUM_TICKS}`;
+  document.getElementById('sim-tick').textContent   = (isLive ? '~' : '') + `${state.tick + 1}/${SIM_NUM_TICKS}`;
   document.getElementById('sim-phase').textContent  = phase;
   document.getElementById('sim-slots').textContent  = `${ownedCount}/${slotCap}`;
   document.getElementById('sim-slot-unlock').disabled = slotCap >= SIM_MAX_SLOT_CAP;
@@ -8533,9 +9229,12 @@ function renderSim() {
   document.getElementById('sim-back').disabled    = state.history.length === 0;
   document.getElementById('sim-forward').disabled = !state.pendingChoice;
   document.getElementById('sim-sell').style.display = ownedCount >= slotCap ? '' : 'none';
+  // Skip = "advance a tick without buying" — only meaningful in tick mode.
+  document.getElementById('sim-skip').style.display = isLive ? 'none' : '';
 
-  // Done?
-  const done = state.tick >= SIM_NUM_TICKS;
+  // Done? Only applicable to tick-based runs — Live Match never "ends"
+  // because the user is the one driving the budget.
+  const done = !isLive && state.tick >= SIM_NUM_TICKS;
   document.getElementById('sim-skip').disabled    = done;
   document.getElementById('sim-override').disabled = done;
   if (done) {
@@ -8583,6 +9282,41 @@ function renderSim() {
   saveMatchState();
 }
 
+// Re-render only the 3 recommendation columns (and the Skip button label).
+// Used by Live Match's souls input so typing doesn't blow away input focus.
+function simRerenderColumns(state) {
+  const cur = SIM.current; if (!cur) return;
+  const b = cur.b;
+  const ctx = simBuildCtx(b, state);
+  const constraints = simResolveConstraints(b);
+  const recBal = simRecommendCol(state, b, ctx, simScoreBalance,  constraints, true);
+  const recStr = simRecommendCol(state, b, ctx, simScoreStrength, constraints);
+  const recCtr = simRecommendCol(state, b, ctx, simScoreCounter,  constraints);
+  const collectAffordable = (rec, col) => {
+    const arr = rec.affordable.map(c => ({ ...c, col }));
+    if (rec.soon  && rec.soon.eff  <= state.remaining) arr.push({ ...rec.soon,  col });
+    if (rec.later && rec.later.eff <= state.remaining) arr.push({ ...rec.later, col });
+    return arr;
+  };
+  const all = [
+    ...collectAffordable(recBal, 'balance'),
+    ...collectAffordable(recStr, 'strength'),
+    ...collectAffordable(recCtr, 'counter'),
+  ];
+  const topAffordable = all.sort((a,c) => c.score - a.score)[0];
+  const skipBase = all.length ? (all.reduce((s,c)=>s+c.score,0) / all.length) * 0.7 : 0;
+  const shouldSkip = !topAffordable || topAffordable.score < skipBase;
+  const topKey = topAffordable ? topAffordable.key : null;
+  renderSimCol('sim-col-balance',  recBal, b, ctx, constraints, state, topKey, 'balance');
+  renderSimCol('sim-col-strength', recStr, b, ctx, constraints, state, topKey, 'strength');
+  renderSimCol('sim-col-counter',  recCtr, b, ctx, constraints, state, topKey, 'counter');
+  const skipBtn = document.getElementById('sim-skip');
+  if (skipBtn) {
+    skipBtn.classList.toggle('is-most-rec', shouldSkip);
+    skipBtn.textContent = shouldSkip ? 'Wait ⏸' : 'Skip';
+  }
+}
+
 function renderSimCol(elId, rec, b, ctx, constraints, state, topKey, colName) {
   const el = document.getElementById(elId);
   el.innerHTML = '';
@@ -8602,22 +9336,16 @@ function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
   const isAffordable = c.eff <= state.remaining;
   const isPreview = !isAffordable;
   const card = document.createElement('div');
-  // Class stacking — each card carries up to four identity classes that
-  // combine in the border styling. Rule of thumb: solid border + solid symbol
-  // mean the item itself is sig/req; dotted border + hollow symbol mean it's
-  // only a component of one. An item can be both at once (e.g. a Signature
-  // that's also a Req-component) — the combo border shows both colors and
-  // both symbols stack. SC (sig-component) is suppressed when the item is
-  // itself Required, because Required already implies you'll consume it.
   card.className = 'sim-card' + (isPreview ? ' is-preview' : '');
-  const flagReq     = constraints.required.has(c.key);
-  const flagSig     = constraints.signature.has(c.key);  // sig/req mutually exclusive at resolve time
-  const flagReqComp = constraints.reqComp.has(c.key);
-  const flagSigComp = constraints.sigComp.has(c.key) && !flagReq;
-  if (flagReq)     card.classList.add('is-required');
-  if (flagSig)     card.classList.add('is-signature');
-  if (flagReqComp) card.classList.add('is-req-comp');
-  if (flagSigComp) card.classList.add('is-sig-comp');
+
+  // Resolve the universal label kind for this item. The card gets a class
+  // matching the LABEL_META.klass so CSS can target it directly. Hard outline
+  // is reserved for spike + required; signature gets a soft halo; everything
+  // else is just a glyph in the flag stack.
+  const labels = b._cachedBpLabels || (b._cachedBpLabels = computeBuildLabels(b, b.buildPath));
+  const labelKind = labels.labelFor(c.key);
+  const labelMeta = labelKind ? BP_LABEL_META[labelKind] : null;
+  if (labelMeta) card.classList.add(labelMeta.klass);
   if (c.key === topKey && !isPreview) card.classList.add('is-most-rec');
   if (state.pendingChoice && state.pendingChoice.key === c.key && state.pendingChoice.col === colName) {
     card.classList.add('is-selected');
@@ -8632,6 +9360,11 @@ function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
   const enemyIcons = attrib.enemies.map(e =>
     `<img class="sim-attrib-mini sim-attrib-enemy" src="${srcUrl(e.mini)}" title="Counters ${MATCH.heroData[e.name]?.eng_name||e.name}">`
   ).join('') + (attrib.enemyExtra ? `<span class="sim-attrib-extra">+${attrib.enemyExtra}</span>` : '');
+  // Single universal label glyph — one symbol per card, highest-priority wins.
+  // CSS for `.sim-card.bp-label-XYZ .sim-flag` carries the color/size scaling.
+  const flagStack = labelMeta
+    ? `<div class="sim-flag-stack"><span class="sim-flag sim-flag-${labelKind}" title="${labelMeta.title}">${labelMeta.text}</span></div>`
+    : '';
   card.innerHTML = `
     ${img ? `<img class="sim-card-img" src="${img}" alt="">` : '<div class="sim-card-img sim-card-noimg"></div>'}
     <div class="sim-card-body">
@@ -8640,17 +9373,12 @@ function makeSimCard(c, b, ctx, constraints, state, topKey, colName) {
         <span class="sim-card-cost">${c.eff.toLocaleString()}</span>
         <span class="sim-card-tier">T${Math.round(tier/800)} · ${tier}</span>
       </div>
+      ${flagStack}
       <div class="sim-card-attrib">${allyIcons}${enemyIcons}</div>
     </div>
     ${c.slot === 'soon'  ? '<div class="sim-preview-badge">next</div>'    : ''}
     ${c.slot === 'later' ? '<div class="sim-preview-badge">horizon</div>' : ''}
-    <div class="sim-flag-stack">
-      ${flagReq     ? '<div class="sim-flag sim-flag-req"  title="Required item">REQ</div>'                            : ''}
-      ${flagReqComp ? '<div class="sim-flag sim-flag-reqc" title="Component of a required item">REQ</div>'             : ''}
-      ${flagSig     ? '<div class="sim-flag sim-flag-sig"  title="Signature item">★</div>'                             : ''}
-      ${flagSigComp ? '<div class="sim-flag sim-flag-sigc" title="Component of a signature item">☆</div>'              : ''}
-    </div>
-    ${c.key === topKey && !isPreview ? '<div class="sim-rec-badge">RECOMMENDED</div>' : ''}
+    ${c.key === topKey && !isPreview ? '<div class="sim-rec-badge">Recommended</div>' : ''}
     <button class="sim-block-btn" title="Don't recommend this item again">Block</button>`;
   card.addEventListener('click', e => {
     if (e.target.closest('.sim-block-btn')) return;
@@ -8921,10 +9649,11 @@ function simConfirmForward() {
       });
     }
     state.pendingChoice = null;
-  } else {
+  } else if (state.mode !== 'live') {
     state.history.push({ tick: state.tick, action: 'skip', phase, soulsBefore });
   }
-  simAdvanceTick(state);
+  // Live Match doesn't auto-advance — the user types their current souls.
+  if (state.mode !== 'live') simAdvanceTick(state);
   renderSim();
 }
 
@@ -8939,10 +9668,14 @@ function simBack() {
   const state = simStateOrFail(); if (!state) return;
   const last = state.history.pop();
   if (!last) return;
-  // Roll the tick back: subtract last income gain and undo the action
-  state.tick = Math.max(0, state.tick - 1);
-  state.totalEarned -= SIM_TICK_INCOME[state.tick] || 0;
-  state.remaining   -= SIM_TICK_INCOME[state.tick] || 0;
+  // Roll the tick back: subtract last income gain and undo the action. Live
+  // Match has no per-tick income, so just rewind the inferred tick number
+  // and skip the income subtraction.
+  if (state.mode !== 'live') {
+    state.tick = Math.max(0, state.tick - 1);
+    state.totalEarned -= SIM_TICK_INCOME[state.tick] || 0;
+    state.remaining   -= SIM_TICK_INCOME[state.tick] || 0;
+  }
   if (last.action === 'buy' || last.action === 'upgrade') {
     state.owned = state.owned.filter(k => k !== last.key);
     // Restore consumed components (best-effort: we don't track per-buy what was consumed,
