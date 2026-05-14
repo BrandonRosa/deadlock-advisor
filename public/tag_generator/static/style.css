@@ -1357,91 +1357,88 @@ h1, h2, .page-header h1, .display-font {
    a muted bordered "−" action chip, Required uses a saturated filled badge
    with bold "REQ" text + glow halo so it can't be mistaken for sell. */
 
-/* Shared badge (summary chip corner + step-by-step row prefix) */
-.bp-chip-badge, .bp-tag-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  padding: 1px 4px;
-  border-radius: 3px;
-  line-height: 1.1;
-}
-/* Summary chip corner badge — sits over the top-right of the icon */
-.bp-summary-chip { position: relative; }
+/* ── Build-path symbol system ─────────────────────────────────────────────
+   New 10-tier priority (loudest → quietest):
+     spike > spike-child > required > req-child > anti > anti-child >
+     signature > sig-child > recommended > rec-child
+   Summary chips only show: spike / required / recommended.
+   Step view has a Priority column showing the symbol for EVERY tier;
+   rows only get background tint for spike / required / recommended. */
 .bp-chip-badge {
-  position: absolute; top: -3px; right: -4px;
-  z-index: 2; pointer-events: none;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.4);
+  display: block;
+  font-weight: 900; line-height: 1;
+  background: transparent; border: 0; padding: 0;
+  margin-bottom: 2px;
+  min-height: 18px;             /* reserves space even when there's no badge */
+  text-shadow: 0 0 2px rgba(0,0,0,.55);
+  text-align: center;
 }
-/* Step-by-step row badge — inline, after the action badge */
-.bp-tag-badge { margin: 0 2px; }
+.bp-badge-empty { visibility: hidden; }
 
-/* Required (saturated red filled — different texture from sell's muted border) */
-@keyframes bp-required-pulse {
-  0%, 100% { box-shadow: 0 0 0 1.5px var(--danger), 0 0 6px 1px rgba(231, 76, 60, .35); }
-  50%      { box-shadow: 0 0 0 1.5px var(--danger), 0 0 10px 2px rgba(231, 76, 60, .55); }
+/* Summary chip — only spike / required / recommended are eligible (filtered
+   in app.js by LABEL_META[label].summary). */
+.bp-summary-chip { position: relative; }
+.bp-badge-spike       { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .65); }
+.bp-badge-required    { color: var(--gold);    font-size: 16px; }
+.bp-badge-recommended { color: var(--info);    font-size: 15px; }
+
+/* Step-view Priority column — fixed-width cell after the name, before cost.
+   Symbol shows for every tier (including components, which are scaled down
+   and dimmed via the meta.klass below). */
+.bp-priority {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; min-width: 28px; font-weight: 900;
 }
-.bp-summary-chip.bp-label-required img.bp-item-img {
-  animation: bp-required-pulse 2.4s ease-in-out infinite;
-  border-radius: 3px;
-}
-.bp-badge-required {
-  background: var(--danger); color: #fff;
-  text-shadow: 0 0 2px rgba(0,0,0,.5);
-}
-.bp-change.bp-label-required {
-  border-left: 3px solid var(--danger);
+.bp-priority-sym { line-height: 1; }
+.bp-priority-empty { visibility: hidden; }
+
+/* Per-label symbol color/size in the step-view Priority column */
+.bp-change.bp-label-spike       .bp-priority-sym { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .65); }
+.bp-change.bp-label-spike-c     .bp-priority-sym { color: #ffb05a; font-size: 13px; opacity: .55; }
+.bp-change.bp-label-required    .bp-priority-sym { color: var(--gold); font-size: 16px; }
+.bp-change.bp-label-req-c       .bp-priority-sym { color: var(--gold); font-size: 12px; opacity: .55; }
+.bp-change.bp-label-anti        .bp-priority-sym { color: #c79bff; font-size: 15px; }
+.bp-change.bp-label-anti-c      .bp-priority-sym { color: #c79bff; font-size: 11px; opacity: .55; }
+.bp-change.bp-label-signature   .bp-priority-sym { color: var(--accent);  font-size: 13px; opacity: .85; }
+.bp-change.bp-label-sig-c       .bp-priority-sym { color: var(--accent);  font-size: 10px; opacity: .5;  }
+.bp-change.bp-label-recommended .bp-priority-sym { color: var(--info);    font-size: 14px; }
+.bp-change.bp-label-rec-c       .bp-priority-sym { color: var(--info);    font-size: 10px; opacity: .55; }
+
+/* Row highlights — only the loudest 3 categories tint the row background.
+   Spike strongest, required medium, recommended just a hint. */
+.bp-change.bp-row-hl-spike {
+  background: linear-gradient(90deg, rgba(255, 176, 90, .18) 0%, transparent 70%);
+  border-left: 3px solid #ffb05a;
   padding-left: 6px;
-  background: linear-gradient(90deg, rgba(231, 76, 60, .14) 0%, transparent 55%);
   border-radius: 0 3px 3px 0;
 }
-.bp-change.bp-label-required .bp-item-img {
-  box-shadow: 0 0 0 1px var(--danger), 0 0 5px 0 rgba(231, 76, 60, .35);
-  border-radius: 3px;
-}
-
-/* Signature (gold — preserves the previous "staple" feel) */
-@keyframes bp-signature-glow {
-  0%, 100% { box-shadow: 0 0 0 1.5px var(--gold), 0 0 5px 1px rgba(245, 200, 74, .25); }
-  50%      { box-shadow: 0 0 0 1.5px var(--gold), 0 0 9px 2px rgba(245, 200, 74, .45); }
-}
-.bp-summary-chip.bp-label-signature img.bp-item-img {
-  animation: bp-signature-glow 2.4s ease-in-out infinite;
-  border-radius: 3px;
-}
-.bp-badge-signature {
-  background: var(--gold); color: #1a1408;
-}
-.bp-change.bp-label-signature {
+.bp-change.bp-row-hl-required {
+  background: linear-gradient(90deg, rgba(245, 200, 74, .12) 0%, transparent 60%);
   border-left: 2px solid var(--gold);
   padding-left: 6px;
-  background: linear-gradient(90deg, rgba(245, 200, 74, .12) 0%, transparent 55%);
   border-radius: 0 3px 3px 0;
 }
-.bp-change.bp-label-signature .bp-item-img {
-  box-shadow: 0 0 0 1px var(--gold), 0 0 4px 0 rgba(245, 200, 74, .3);
-  border-radius: 3px;
+.bp-change.bp-row-hl-recommended {
+  background: linear-gradient(90deg, rgba(98, 167, 175, .07) 0%, transparent 40%);
+  border-left: 1px solid rgba(98, 167, 175, .4);
+  padding-left: 6px;
+  border-radius: 0 3px 3px 0;
 }
 
-/* Recommended (mint accent — algo affinity, no constraint origin) */
-.bp-summary-chip.bp-label-recommended img.bp-item-img {
-  box-shadow: 0 0 0 1px var(--accent), 0 0 4px 0 rgba(117, 232, 162, .25);
-  border-radius: 3px;
+/* ── Surge spike anchors (algo-specific markers) ─────────────────────────
+   Loud glyphs, but still BARE (no border around the item image — same rule
+   as build-role labels). Priority is communicated via size, weight, color,
+   and (for spike only) a gentle text-shadow pulse on the glyph itself.
+     1. Spike (↗ orange)      — TOP attention, big bold pulsing glyph
+     2. Anti-spike (⤯ purple) — bold glyph, no animation
+   Sim/live views amplify the glyph further — see .sim-flag-spike below. */
+/* Spike glyph pulse — applied to the Priority column for spike rows so the
+   ↗ symbol breathes a bit to draw the eye. */
+@keyframes bp-spike-glyph-pulse {
+  0%, 100% { text-shadow: 0 0 4px rgba(255, 176, 90, .5); }
+  50%      { text-shadow: 0 0 10px rgba(255, 176, 90, .85); }
 }
-.bp-badge-recommended {
-  background: var(--accent); color: #0a1a10;
-}
-.bp-change.bp-label-recommended {
-  border-left: 2px solid var(--accent);
-  padding-left: 6px;
-  background: linear-gradient(90deg, rgba(117, 232, 162, .10) 0%, transparent 55%);
-  border-radius: 0 3px 3px 0;
-}
-.bp-change.bp-label-recommended .bp-item-img {
-  box-shadow: 0 0 0 1px var(--accent), 0 0 3px 0 rgba(117, 232, 162, .25);
-  border-radius: 3px;
-}
+.bp-change.bp-label-spike .bp-priority-sym { animation: bp-spike-glyph-pulse 1.8s ease-in-out infinite; }
 
 /* ── Close-alt item hover ───────────────────────────────── */
 .bp-change.bp-has-alt { position: relative; cursor: default; }
@@ -1898,6 +1895,42 @@ h1, h2, .page-header h1, .display-font {
 }
 .bp-sim-resume-hint { font-size: 11px; color: var(--muted); }
 
+/* Editable souls input for Live Match — sits in the .sim-stats row where the
+   tick-mode souls span lives. Matches the stat-value styling so the row
+   reads consistently. */
+.sim-souls-wrap {
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.sim-souls-input {
+  width: 80px;
+  background: var(--bg-elev); color: var(--gold);
+  border: 1px solid var(--border);
+  border-radius: 3px; padding: 1px 5px;
+  font: inherit; font-weight: 700;
+  text-align: right;
+}
+.sim-souls-input:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+/* Hide the number input spinners — souls are typed, not clicked up/down */
+.sim-souls-input::-webkit-outer-spin-button,
+.sim-souls-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.sim-souls-input { -moz-appearance: textfield; }
+/* Quick-adjust buttons (−800 / +800 / +3200) next to the souls input. */
+.sim-souls-adjust {
+  font-size: 11px; font-weight: 700; padding: 1px 6px;
+  line-height: 1.4; min-width: auto;
+}
+.sim-souls-adjust.sim-adj-down { color: var(--danger); }
+.btn-xs {
+  font-size: 11px; padding: 1px 6px; border-radius: 2px;
+  background: var(--bg-elev); border: 1px solid var(--border-soft);
+  color: var(--cream); cursor: pointer;
+}
+.btn-xs:hover { border-color: var(--gold); color: var(--gold); }
+.sim-souls-adjust.sim-adj-down:hover { border-color: var(--danger); color: var(--danger); }
+
 .sim-header-bar { gap: 12px; }
 .sim-title-block { flex: 1; min-width: 0; }
 .sim-title-block h1 { font-size: 22px; }
@@ -2104,83 +2137,66 @@ h1, h2, .page-header h1, .display-font {
      solid  border = the whole item itself
      halo (box-shadow) = color identity, stacks additively for selected/most-rec
    Selected and most-rec only paint halos — they never overwrite border style. */
-.sim-card.is-most-rec {
-  box-shadow: 0 0 12px 1px rgba(117, 232, 162, .45);
+/* ── Sim card priority outlines + flag glyphs ────────────────────────────
+   Visual rules:
+     - Spike anchors  → hard orange outline (no halo, no glow, no animation)
+     - Required items → hard gold outline
+     - Signature       → small mint halo glow (subtle)
+     - Anti-spike      → no outline; loud purple glyph in the flag stack
+     - Recommended (sim's "most-rec" word badge) → blue halo
+     - Component variants → glyph only, smaller / dimmer in the flag stack
+   The .sim-card class carries one of the .bp-label-* tags from the
+   universal label system so all targeting is consistent. */
+.sim-card.bp-label-spike    { outline: 2px solid #ffb05a; outline-offset: -2px; }
+.sim-card.bp-label-required { outline: 2px solid var(--gold); outline-offset: -2px; }
+.sim-card.bp-label-signature {
+  box-shadow: 0 0 8px 1px rgba(117, 232, 162, .35);
 }
-.sim-card.is-req-comp { border: 2px dotted var(--danger); }
-.sim-card.is-sig-comp { border: 2px dotted var(--gold); }
-.sim-card.is-signature {
-  border: 2px solid var(--gold);
-  box-shadow: 0 0 8px 1px rgba(245, 200, 74, .35);
-}
-.sim-card.is-required {
-  border: 2px solid var(--danger);
-  box-shadow: 0 0 14px 2px rgba(185, 70, 62, .45);
-}
-/* Signature item that's also a component of a required item:
-   yellow dashes with red dots painted between. Two-layer background
-   keeps the card fill underneath the gradient that paints the border. */
-.sim-card.is-signature.is-req-comp {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--card), var(--card)) padding-box,
-    repeating-linear-gradient(90deg,
-      var(--gold) 0 6px, transparent 6px 9px,
-      var(--danger) 9px 11px, transparent 11px 14px) border-box;
-}
-/* Both kinds of component, no whole item: alternating red+yellow dots. */
-.sim-card.is-req-comp.is-sig-comp:not(.is-required):not(.is-signature) {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--card), var(--card)) padding-box,
-    repeating-linear-gradient(90deg,
-      var(--danger) 0 2px, transparent 2px 5px,
-      var(--gold) 5px 7px, transparent 7px 10px) border-box;
-}
-/* Hollow "component-of" flag indicators in the top-left stack. */
-.sim-flag-reqc {
-  background: transparent; color: var(--danger);
-  border: 1px solid var(--danger);
-  font-size: 9px; padding: 0 2px; letter-spacing: 0; font-weight: 700;
-}
-.sim-flag-sigc { color: var(--gold); font-size: 12px; padding: 0; opacity: .9; }
+.sim-card.is-most-rec { box-shadow: 0 0 10px 1px rgba(98, 167, 175, .45); }
+
+/* Flag-stack glyph colors per label kind */
+.sim-card.bp-label-spike     .sim-flag { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .75); }
+.sim-card.bp-label-spike-c   .sim-flag { color: #ffb05a; font-size: 12px; opacity: .55; }
+.sim-card.bp-label-required  .sim-flag { color: var(--gold); font-size: 16px; }
+.sim-card.bp-label-req-c     .sim-flag { color: var(--gold); font-size: 12px; opacity: .55; }
+.sim-card.bp-label-anti      .sim-flag { color: #c79bff; font-size: 16px; text-shadow: 0 0 4px rgba(199, 155, 255, .55); }
+.sim-card.bp-label-anti-c    .sim-flag { color: #c79bff; font-size: 11px; opacity: .55; }
+.sim-card.bp-label-signature .sim-flag { color: var(--accent);  font-size: 13px; opacity: .85; }
+.sim-card.bp-label-sig-c     .sim-flag { color: var(--accent);  font-size: 10px; opacity: .5;  }
+.sim-card.bp-label-recommended .sim-flag { color: var(--info);  font-size: 14px; }
+.sim-card.bp-label-rec-c     .sim-flag { color: var(--info);    font-size: 10px; opacity: .55; }
 
 /* "RECOMMENDED" badge on the algorithm's top affordable pick. Sits at the
    bottom-left so it never collides with the block button (bottom-right) or
    the flag stack (top-left). */
 .sim-rec-badge {
   position: absolute; bottom: 4px; left: 4px;
-  background: var(--accent); color: #0a1a10;
-  font-size: 9px; font-weight: 900; letter-spacing: .08em;
+  background: var(--info); color: #06222a;
+  font-size: 10px; font-weight: 900; letter-spacing: .04em;
   padding: 2px 6px; border-radius: 2px;
-  box-shadow: 0 0 8px 1px rgba(117, 232, 162, .55);
+  box-shadow: 0 0 8px 1px rgba(98, 167, 175, .55);
   pointer-events: none;
+  text-transform: none;
 }
 
 /* When the recommended action is "wait", the Skip button gets a brighter
    pulsing halo and a clearer label. */
 #sim-skip.is-most-rec {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px 2px rgba(117, 232, 162, .55);
+  border-color: var(--info);
+  box-shadow: 0 0 0 1px var(--info), 0 0 12px 2px rgba(98, 167, 175, .55);
   animation: sim-wait-pulse 1.6s ease-in-out infinite;
 }
 @keyframes sim-wait-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 0 10px 1px rgba(117, 232, 162, .35); }
-  50%      { box-shadow: 0 0 0 1px var(--accent), 0 0 16px 3px rgba(117, 232, 162, .65); }
+  0%, 100% { box-shadow: 0 0 0 1px var(--info), 0 0 10px 1px rgba(98, 167, 175, .35); }
+  50%      { box-shadow: 0 0 0 1px var(--info), 0 0 16px 3px rgba(98, 167, 175, .65); }
 }
-/* Selected: white halo ONLY — never replaces border-color/style.
-   Layers with the sig/req border underneath. */
+/* Selected: white halo so the card visibly highlights when clicked, regardless
+   of which role glyphs it carries. */
 .sim-card.is-selected {
   box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .45);
 }
-.sim-card.is-required.is-selected {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 14px 3px rgba(255, 255, 255, .35), 0 0 14px 2px rgba(185, 70, 62, .45);
-}
-.sim-card.is-signature.is-selected {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .35), 0 0 8px 1px rgba(245, 200, 74, .35);
-}
 .sim-card.is-most-rec.is-selected {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .35), 0 0 12px 1px rgba(117, 232, 162, .45);
+  box-shadow: 0 0 0 2px #ffffff, 0 0 12px 3px rgba(255, 255, 255, .35), 0 0 12px 1px rgba(255, 226, 148, .45);
 }
 .sim-card-img {
   width: 40px; height: 40px; object-fit: contain;
@@ -2209,18 +2225,19 @@ h1, h2, .page-header h1, .display-font {
   font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--muted);
 }
-/* Flag stack — multiple flags can appear on the same card (Sig + r-comp etc.)
-   so they're laid out as a vertical stack in the top-left corner. */
+/* Flag stack — inline row INSIDE the card body, after the name. Doesn't
+   overlap the item image. Order is fixed by the rendering order: spike
+   first, then anti, then role glyphs. */
 .sim-flag-stack {
-  position: absolute; top: 2px; left: 2px;
-  display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+  display: flex; flex-direction: row; gap: 6px; align-items: center;
+  margin-top: 2px; min-height: 16px;
 }
 .sim-flag {
-  font-size: 9px; font-weight: 900; padding: 1px 4px; border-radius: 2px;
-  line-height: 1.1;
+  font-weight: 900; padding: 0; line-height: 1;
+  background: transparent; border: 0;
 }
-.sim-flag-req { background: var(--danger); color: #fff; letter-spacing: .08em; }
-.sim-flag-sig { color: var(--gold); font-size: 14px; padding: 0; }
+.sim-flag-req { color: var(--gold);    font-size: 15px; }
+.sim-flag-sig { color: var(--accent);  font-size: 14px; }
 
 /* Block button — always faintly visible so it's discoverable, gets a clear
    red affordance on hover. Lives at the bottom-right corner; the BUY badge

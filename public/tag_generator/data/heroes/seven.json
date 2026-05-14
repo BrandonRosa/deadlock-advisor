@@ -2745,6 +2745,7 @@
     },
     {
       "build_description_eng": "Closest thing to hybrid Seven has. Great at shredding groups and tanks. Awful against Aerial/TinyHitBox/Fast enemies.",
+      "disabled": true,
       "followed_build": "General",
       "name": "Power Surge",
       "normalized_build_name": "seven_power_surge",
@@ -3124,8 +3125,7 @@
           "ult_focused": 0.1,
           "vertical_mobility": 0.2
         }
-      },
-      "disabled": true
+      }
     }
   ],
   "colors": [
@@ -3138,5 +3138,6 @@
   "mini_image_path": "/resources/heroes/seven/mini_icon_seven.png",
   "normalized_name": "seven",
   "search_terms": [],
-  "wiki_url": "https://deadlock.wiki/Seven"
+  "wiki_url": "https://deadlock.wiki/Seven",
+  "default_build_name": "seven_gvs_power_surge"
 }

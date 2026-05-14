@@ -58,6 +58,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -94,8 +95,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -150,6 +150,7 @@
           "horizontal_mobility": -0.15,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": -0.5,
           "low_max_hp": 0.15,
@@ -186,8 +187,7 @@
           "team_heal": -0.1,
           "trap_block_obstruct": 0.15,
           "ult_focused": null,
-          "vertical_mobility": -0.15,
-          "lane_pusher": null
+          "vertical_mobility": -0.15
         },
         "self_score": {
           "ability_spam": null,
@@ -242,6 +242,7 @@
           "horizontal_mobility": 0.25,
           "hybrid_damage_usage": 0.25,
           "interrupt": null,
+          "lane_pusher": 1,
           "large_hitbox": 0.15,
           "long_range": 0.15,
           "low_max_hp": -0.1,
@@ -278,8 +279,7 @@
           "team_heal": 0.33,
           "trap_block_obstruct": 0.66,
           "ult_focused": null,
-          "vertical_mobility": 0.25,
-          "lane_pusher": 1
+          "vertical_mobility": 0.25
         },
         "self_weight": {
           "ability_spam": null,
@@ -334,6 +334,7 @@
           "horizontal_mobility": 0.45,
           "hybrid_damage_usage": 0.1,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": 0.15,
           "low_max_hp": null,
@@ -370,8 +371,7 @@
           "team_heal": 0.2,
           "trap_block_obstruct": 0.1,
           "ult_focused": 0,
-          "vertical_mobility": 0.33,
-          "lane_pusher": null
+          "vertical_mobility": 0.33
         }
       }
     },
@@ -467,6 +467,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -503,8 +504,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -559,6 +559,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -595,8 +596,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_score": {
           "ability_spam": null,
@@ -651,6 +651,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": "+-0.1",
           "low_max_hp": null,
@@ -687,8 +688,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_weight": {
           "ability_spam": 0.059,
@@ -743,6 +743,7 @@
           "horizontal_mobility": 1.005,
           "hybrid_damage_usage": -1.037,
           "interrupt": 0,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": 0.655,
           "low_max_hp": -0.459,
@@ -779,8 +780,7 @@
           "team_heal": -0.224,
           "trap_block_obstruct": -0.088,
           "ult_focused": 0.64,
-          "vertical_mobility": 0.768,
-          "lane_pusher": null
+          "vertical_mobility": 0.768
         }
       }
     },
@@ -788,23 +788,28 @@
       "blacklist_items": [],
       "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Mystic Slow, Compress Cooldown, Mystic Expansion… | Sig: Mystic Slow, Compress Cooldown, Mystic Expansion, Extra Charge, Healbane, Stamina Mastery, Superior Duration, Escalating Exposure, Spirit Burn, Lightning Scroll | Req: Arcane Surge, Duration Extender",
       "followed_build": "General",
-      "name": "Ult - Rushin Russian",
+      "name": "Ult (Ult>Turret>Heal)",
       "normalized_build_name": "mcginnis_ult_rushin_russian",
       "required_items": [
         "arcane_surge",
-        "duration_extender"
+        "duration_extender",
+        "mystic_slow",
+        "extra_stamina",
+        "escalating_exposure",
+        "spirit_burn"
       ],
       "signature_items": [
-        "mystic_slow",
         "compress_cooldown",
         "mystic_expansion",
         "extra_charge",
         "healbane",
         "stamina_mastery",
         "superior_duration",
-        "escalating_exposure",
-        "spirit_burn",
-        "lightning_scroll"
+        "lightning_scroll",
+        "mystic_vulnerability",
+        "decay",
+        "transcendent_cooldown",
+        "boundless_spirit"
       ],
       "values": {
         "ally_weight": {
@@ -860,6 +865,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -896,8 +902,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -952,6 +957,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": null,
           "low_max_hp": null,
@@ -988,8 +994,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_score": {
           "ability_spam": null,
@@ -1044,6 +1049,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": "+0.05",
           "low_max_hp": null,
@@ -1080,8 +1086,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "self_weight": {
           "ability_spam": 0.146,
@@ -1136,6 +1141,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": -0.466,
           "interrupt": 0,
+          "lane_pusher": null,
           "large_hitbox": 0,
           "long_range": 0.307,
           "low_max_hp": -0.183,
@@ -1172,8 +1178,7 @@
           "team_heal": -0.173,
           "trap_block_obstruct": 0,
           "ult_focused": 0.344,
-          "vertical_mobility": 0.543,
-          "lane_pusher": null
+          "vertical_mobility": 0.543
         }
       }
     }
@@ -1191,5 +1196,6 @@
   "search_terms": [
     "engineer"
   ],
-  "wiki_url": "https://deadlock.wiki/McGinnis"
+  "wiki_url": "https://deadlock.wiki/McGinnis",
+  "default_build_name": "mcginnis_general"
 }
