@@ -3840,8 +3840,8 @@ let _bpDbg = null;
 //   6.  anti-component         ⤯ dim
 //   7.  signature              ✓ (mint — user-flagged secondary)
 //   8.  signature-component    ✓ dim
-//   9.  recommended            ☾ (blue — top algo pick per tier)
-//   10. recommended-component  ☾ dim
+//   9.  recommended            ⏾ (blue — top algo pick per tier)
+//   10. recommended-component  ⏾ dim
 const BP_LABEL_META = {
   spike:                  { text: '↗', title: 'Spike — power-spike anchor',                klass: 'bp-label-spike',     summary: true  },
   'spike-component':      { text: '↗', title: 'Component of a spike anchor',                klass: 'bp-label-spike-c',   summary: false },
@@ -3851,8 +3851,8 @@ const BP_LABEL_META = {
   'anti-component':       { text: '⤯', title: 'Component of an anti-spike anchor',          klass: 'bp-label-anti-c',    summary: false },
   signature:              { text: '✓', title: 'Signature — flagged on this build',          klass: 'bp-label-signature', summary: false },
   'signature-component':  { text: '✓', title: 'Component of a signature item',              klass: 'bp-label-sig-c',     summary: false },
-  recommended:            { text: '☾', title: 'Recommended — top algo pick in this tier',   klass: 'bp-label-recommended', summary: true  },
-  'recommended-component':{ text: '☾', title: 'Component of a recommended item',            klass: 'bp-label-rec-c',     summary: false },
+  recommended:            { text: '⏾', title: 'Recommended — top algo pick in this tier',   klass: 'bp-label-recommended', summary: true  },
+  'recommended-component':{ text: '⏾', title: 'Component of a recommended item',            klass: 'bp-label-rec-c',     summary: false },
 };
 
 // Compute the full label sets for a build: spike/anti anchors (from
@@ -3952,10 +3952,13 @@ function computeBuildLabels(b, pathData) {
 // reads `bpItemMap` from module scope (which `computeBuildPath` populates).
 // Output: { spikes: [key, key?], antiSpikes: [key, key?] }
 function computeSurgeAnchors(b, sets) {
-  const SURGE_T3_BIAS      = 1.15;
-  const SURGE_T4_BIAS      = 1.15;
-  const SURGE_ANTI_REQ_TIE = 1.05;
-  const SURGE_ANTI_SIG_TIE = 1.03;
+  // Must mirror runSurge's anchor picker so labels match the items the algo
+  // actually buys. See runSurge() for full doc on these knobs.
+  const SURGE_T3_BIAS_STRONG  = 1.40;  // spike 1 + anti 1 — T3-dominant
+  const SURGE_T4_BIAS         = 1.15;
+  const SURGE_T2_FALLBACK_PEN = 0.85;  // anti 1 only — T2 mildly damped
+  const SURGE_ANTI_REQ_TIE    = 1.05;
+  const SURGE_ANTI_SIG_TIE    = 1.03;
   const requiredSet     = sets.requiredSet     || new Set();
   const signatureSet    = sets.signatureSet    || new Set();
   const blacklistSet    = sets.blacklistSet    || new Set();
@@ -4009,7 +4012,7 @@ function computeSurgeAnchors(b, sets) {
   const t3plus = pool.filter(it => tierBucket(it.key) >= 3);
   const t4only = pool.filter(it => tierBucket(it.key) === 4);
 
-  function pickSpike(cands, t3Enc, t4Enc) {
+  function pickSpike(cands, t3Strong, t4Enc) {
     const reqArr = cands.filter(it => isReqAny(it.key));
     const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
     const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
@@ -4017,12 +4020,12 @@ function computeSurgeAnchors(b, sets) {
     return [...tier].sort((a, c) => {
       let sa = spikeScore(a), sc = spikeScore(c);
       const ba = tierBucket(a.key), bc = tierBucket(c.key);
-      if (t3Enc) { if (ba === 3) sa *= SURGE_T3_BIAS; if (bc === 3) sc *= SURGE_T3_BIAS; }
-      if (t4Enc) { if (ba === 4) sa *= SURGE_T4_BIAS; if (bc === 4) sc *= SURGE_T4_BIAS; }
+      if (t3Strong) { if (ba === 3) sa *= SURGE_T3_BIAS_STRONG; if (bc === 3) sc *= SURGE_T3_BIAS_STRONG; }
+      if (t4Enc)    { if (ba === 4) sa *= SURGE_T4_BIAS;        if (bc === 4) sc *= SURGE_T4_BIAS; }
       return sc - sa;
     })[0];
   }
-  function pickAnti(cands, t3Enc, t4Enc, exclude) {
+  function pickAnti(cands, t3Strong, t4Enc, exclude, anti1TierWeights = false) {
     return [...cands.filter(it => !exclude.has(it.key))].sort((a, c) => {
       let sa = antiScore(a), sc = antiScore(c);
       if (isReqAny(a.key))      sa *= SURGE_ANTI_REQ_TIE;
@@ -4030,18 +4033,27 @@ function computeSurgeAnchors(b, sets) {
       if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
       else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
       const ba = tierBucket(a.key), bc = tierBucket(c.key);
-      if (t3Enc) { if (ba === 3) sa *= SURGE_T3_BIAS; if (bc === 3) sc *= SURGE_T3_BIAS; }
-      if (t4Enc) { if (ba === 4) sa *= SURGE_T4_BIAS; if (bc === 4) sc *= SURGE_T4_BIAS; }
+      if (t3Strong) { if (ba === 3) sa *= SURGE_T3_BIAS_STRONG; if (bc === 3) sc *= SURGE_T3_BIAS_STRONG; }
+      if (t4Enc)    { if (ba === 4) sa *= SURGE_T4_BIAS;        if (bc === 4) sc *= SURGE_T4_BIAS; }
+      if (anti1TierWeights) {
+        if (ba === 2) sa *= SURGE_T2_FALLBACK_PEN;
+        if (bc === 2) sc *= SURGE_T2_FALLBACK_PEN;
+      }
       return sc - sa;
     })[0];
   }
 
-  const s1 = pickSpike(t3plus, true,  false);
-  const s2 = pickSpike(t4only.filter(it => it.key !== s1?.key), false, true);
+  const t2t3only = pool.filter(it => {
+    const t = tierBucket(it.key);
+    return t === 2 || t === 3;
+  });
+  const s1 = pickSpike(t3plus, /*t3Strong*/ true,  /*t4*/ false);
+  const s2 = pickSpike(t4only.filter(it => it.key !== s1?.key), /*t3Strong*/ false, /*t4*/ true);
   const exA1 = new Set([s1?.key, s2?.key].filter(Boolean));
-  const a1 = pickAnti(t3plus, true,  false, exA1);
+  // anti1: T2+T3 only — T3 ×1.40 dominates, T2 ×0.85 plausible. No T4.
+  const a1 = pickAnti(t2t3only, /*t3Strong*/ true, /*t4*/ false, exA1, /*anti1TierWeights*/ true);
   const exA2 = new Set([s1?.key, s2?.key, a1?.key].filter(Boolean));
-  const a2 = pickAnti(t3plus, false, true, exA2);
+  const a2 = pickAnti(t3plus, /*t3Strong*/ false, /*t4*/ true, exA2);
 
   return {
     spikes:     [s1?.key, s2?.key].filter(Boolean),
@@ -6210,20 +6222,35 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
     // ── TUNABLE KNOBS ───────────────────────────────────────────────────────
 
-    // Tier nudges in anchor selection. T3 bias makes the first spike/anti land
-    // sooner; T4 bias makes the second spike/anti the "huge one".
-    const SURGE_T3_BIAS = 1.15;
-    const SURGE_T4_BIAS = 1.15;
+    // Tier biases for anchor selection.
+    //  - Spike 1 lands middle Mid → stronger T3 bias so a T3 reliably wins
+    //  - Anti 1 lands late Mid    → T3 primary; T2 only as fallback w/ penalty
+    //  - Spike 2 lands mid Late   → T4 only (the "huge one")
+    //  - Anti 2 lands late Late   → T3+T4, T4-biased
+    const SURGE_T3_BIAS_STRONG = 1.40;   // spike 1 + anti 1 — T3-dominant
+    const SURGE_T4_BIAS        = 1.15;   // spike 2 + anti 2 — T4-encouraged
+    // Anti 1 tier weighting (T4 is excluded from the candidate pool entirely;
+    // anti-1 lands late-Mid where T4 antis would arrive after the window).
+    //   T3 dominates (×1.40)  >  T2 viable (×0.85)
+    // T3 vs T2 = 1.65× — T2 only wins when no strong T3 anti exists.
+    const SURGE_T2_FALLBACK_PEN = 0.85;  // anti 1 only — was 0.7, eased
 
-    // Anchor priority boost when an anchor is bought IN its spike window.
-    // Higher = anchors fire on time more reliably (but starves other picks).
+    // Anchor priority boost when an anchor is bought IN its window.
     const SURGE_ANCHOR_BOOST = 5.0;
 
-    // Spike windows — tick ranges aligned to Deadlock objective fights.
-    //   Window 1 = guardian/walker contest (late Early → start of Mid)
-    //   Window 2 = midboss/siege contest   (late Mid  → start of Late)
-    const SPIKE1_WINDOW = [10, 14];
-    const SPIKE2_WINDOW = [17, 21];
+    // Snapshot deadlines — tick by which each anchor must be in inventory.
+    // Aligned to Deadlock objective fights based on the perfect-game sim log
+    // (Kelvin win:good — anti1 T2 around tick 10, spike1 T4-upg at 14,
+    //  spike2 T4-upg at 17, anti2 T4 at 24).
+    //
+    //   SPIKE1: middle of Mid — ticks 13-15
+    //   ANTI1:  late Mid      — ticks 15-17 (T2 anti can land earlier)
+    //   SPIKE2: mid Late      — ticks 21-23
+    //   ANTI2:  late Late     — ticks 24-26
+    const SPIKE1_WINDOW = [13, 15];
+    const ANTI1_WINDOW  = [15, 17];
+    const SPIKE2_WINDOW = [21, 23];
+    const ANTI2_WINDOW  = [24, 26];
 
     // Anti-spike tie-breaker bias for required/signature. TINY by design —
     // anti picks should be driven by counter score, not role.
@@ -6238,10 +6265,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const SURGE_ANTI_CHAIN_BONUS  = 1.4;   // for ancestors of anti anchors
 
     // Sell mechanic — Late + Extra Late only. When at slot cap with no
-    // affordable upgrade, the algo can sell its lowest-priority non-anchor
-    // owned item if it lets us buy something significantly better.
-    const SURGE_SELL_RATIO_THRESH = 1.5;   // replacement priorityScore must be
-                                           //  ≥ this × sold item's priorityScore
+    // affordable upgrade, the algo can sell a non-anchor owned item to buy
+    // something better. Sort spec: role-cat ASC (standard < sig < req),
+    // priorityScore ASC, age ASC (oldest first as tie-break). Replacement
+    // must strictly out-score what's being sold.
     const SURGE_SELL_REFUND_FRAC  = 0.5;   // 50% refund — matches Deadlock
 
     // Execution role boosts (Architect-style).
@@ -6372,7 +6399,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const t4only = pool.filter(it => tierBucket(it.key) === 4);
 
     // Pick a spike anchor — HARD priority required > signature > normal.
-    function pickSpike(cands, t3Encourage, t4Encourage) {
+    // `t3Strong` flag uses SURGE_T3_BIAS_STRONG (×1.30, for spike 1).
+    function pickSpike(cands, t3Strong, t4Encourage) {
       const reqArr = cands.filter(it => isReqAny(it.key));
       const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
       const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
@@ -6380,9 +6408,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return [...tier].sort((a, c) => {
         const ba = tierBucket(a.key), bc = tierBucket(c.key);
         let sa = spikeScore(a), sc = spikeScore(c);
-        if (t3Encourage) {
-          if (ba === 3) sa *= SURGE_T3_BIAS;
-          if (bc === 3) sc *= SURGE_T3_BIAS;
+        if (t3Strong) {
+          if (ba === 3) sa *= SURGE_T3_BIAS_STRONG;
+          if (bc === 3) sc *= SURGE_T3_BIAS_STRONG;
         }
         if (t4Encourage) {
           if (ba === 4) sa *= SURGE_T4_BIAS;
@@ -6392,8 +6420,11 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       })[0];
     }
 
-    // Pick an anti-spike anchor — required/signature only get a tiny boost.
-    function pickAnti(cands, t3Encourage, t4Encourage, exclude) {
+    // Pick an anti-spike anchor — required/signature get a tiny tie-breaker.
+    // `t3Strong` boosts T3 (anti 1). `anti1TierWeights` enables the anti-1
+    // weighting profile: T3 boosted, T2 mildly penalised, T4 strongly
+    // penalised (T4 only wins when its antiScore is much higher than any T3).
+    function pickAnti(cands, t3Strong, t4Encourage, exclude, anti1TierWeights = false) {
       const filtered = cands.filter(it => !exclude.has(it.key));
       return [...filtered].sort((a, c) => {
         const ba = tierBucket(a.key), bc = tierBucket(c.key);
@@ -6402,36 +6433,58 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         else if (isSigAny(a.key)) sa *= SURGE_ANTI_SIG_TIE;
         if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
         else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
-        if (t3Encourage) {
-          if (ba === 3) sa *= SURGE_T3_BIAS;
-          if (bc === 3) sc *= SURGE_T3_BIAS;
+        if (t3Strong) {
+          if (ba === 3) sa *= SURGE_T3_BIAS_STRONG;
+          if (bc === 3) sc *= SURGE_T3_BIAS_STRONG;
         }
         if (t4Encourage) {
           if (ba === 4) sa *= SURGE_T4_BIAS;
           if (bc === 4) sc *= SURGE_T4_BIAS;
         }
+        if (anti1TierWeights) {
+          if (ba === 2) sa *= SURGE_T2_FALLBACK_PEN;
+          if (bc === 2) sc *= SURGE_T2_FALLBACK_PEN;
+        }
         return sc - sa;
       })[0];
     }
 
-    // firstSpike: T3+T4, T3-encouraged
-    const firstSpike = pickSpike(t3plus, /*t3*/ true, /*t4*/ false);
-    // secondSpike: T4 only (the huge one)
+    // firstSpike: T3+T4, STRONG T3 bias (lands middle Mid → T3 should usually win)
+    const firstSpike = pickSpike(t3plus, /*t3Strong*/ true, /*t4*/ false);
+    // secondSpike: T4 only (the huge one in mid-Late)
     const secondSpike = pickSpike(
       t4only.filter(it => it.key !== firstSpike?.key),
-      /*t3*/ false, /*t4*/ true,
+      /*t3Strong*/ false, /*t4*/ true,
     );
-    // firstAntiSpike: T3+T4, T3-encouraged, exclude both spikes
+    // firstAntiSpike: T2+T3 only (T4 antis don't fit the late-Mid window).
+    // Anti-1 tier weighting: T3 ×1.40, T2 ×0.85 — T3 dominates, T2 plausible.
+    const t2t3only = pool.filter(it => {
+      const t = tierBucket(it.key);
+      return t === 2 || t === 3;
+    });
     const excludeAnti1 = new Set([firstSpike?.key, secondSpike?.key].filter(Boolean));
-    const firstAntiSpike = pickAnti(t3plus, /*t3*/ true, /*t4*/ false, excludeAnti1);
-    // secondAntiSpike: T3+T4, T4-encouraged
+    const firstAntiSpike = pickAnti(
+      t2t3only, /*t3Strong*/ true, /*t4*/ false, excludeAnti1,
+      /*anti1TierWeights*/ true,
+    );
+    // secondAntiSpike: T3+T4, T4-encouraged (late-Late, big counter)
     const excludeAnti2 = new Set([firstSpike?.key, secondSpike?.key, firstAntiSpike?.key].filter(Boolean));
-    const secondAntiSpike = pickAnti(t3plus, /*t3*/ false, /*t4*/ true, excludeAnti2);
+    const secondAntiSpike = pickAnti(t3plus, /*t3Strong*/ false, /*t4*/ true, excludeAnti2);
 
     const anchors      = { firstSpike, secondSpike, firstAntiSpike, secondAntiSpike };
     const anchorKeySet = new Set(Object.values(anchors).filter(Boolean).map(it => it.key));
-    const window1Set   = new Set([firstSpike?.key, firstAntiSpike?.key].filter(Boolean));
-    const window2Set   = new Set([secondSpike?.key, secondAntiSpike?.key].filter(Boolean));
+    // Per-anchor windows so spike vs anti aren't lumped together — they land
+    // at different ticks (spike1 mid-Mid, anti1 late-Mid; spike2 mid-Late,
+    // anti2 late-Late) and need independent boosts.
+    const anchorWindow = {};
+    if (firstSpike)      anchorWindow[firstSpike.key]      = SPIKE1_WINDOW;
+    if (firstAntiSpike)  anchorWindow[firstAntiSpike.key]  = ANTI1_WINDOW;
+    if (secondSpike)     anchorWindow[secondSpike.key]     = SPIKE2_WINDOW;
+    if (secondAntiSpike) anchorWindow[secondAntiSpike.key] = ANTI2_WINDOW;
+    // Per-anchor deadline = end of window. Items in the anchor's upgrade chain
+    // need to be owned by anchorWindow start so the upgrade can fire IN window.
+    const anchorDeadline = {};
+    Object.entries(anchorWindow).forEach(([k, w]) => { anchorDeadline[k] = w[1]; });
 
     // Compute upgrade-chain sets for each anchor. expandChain(key) returns
     // every transitive component of `key` (NOT including key itself).
@@ -6469,28 +6522,69 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // souls don't sit idle at slot cap when no upgrade is reachable.
     let souls = 0;
     const owned        = new Set();
+    // Parallel to `owned` — preserves insertion order so the sell logic can
+    // break ties by item age (oldest item sold first). Index in array = age.
+    const ownedOrder   = [];
     const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
     const tickDbg      = [];
     const sellsByPhase = { 'Lane': 0, 'Early': 0, 'Mid': 0, 'Late': 0, 'Extra Late': 0 };
+
+    // For each tick, find the nearest upcoming anchor (window start >= tick).
+    // Used by priorityScore to ramp chain/anchor boosts as the window
+    // approaches, and by the save-for-anchor gate below.
+    function nextAnchor(tick) {
+      let best = null, bestStart = Infinity;
+      for (const [k, w] of Object.entries(anchorWindow)) {
+        if (w[1] < tick) continue;            // window has passed
+        if (owned.has(k)) continue;           // anchor already bought
+        const start = w[0];
+        if (start < bestStart) { bestStart = start; best = { key: k, window: w }; }
+      }
+      return best;
+    }
+
+    // Chain set lookup keyed by anchor for the deadline ramp.
+    const chainByAnchor = {};
+    [firstSpike, secondSpike, firstAntiSpike, secondAntiSpike].forEach(a => {
+      if (!a) return;
+      chainByAnchor[a.key] = expandChain(a.key);
+    });
 
     function priorityScore(it, tick) {
       const k = it.key;
       let s = (it.total || 0);
       s *= roleBoost(k);
       if (hasOwnedAncestor(k, owned)) s *= 1.15;
+
       // Chain-of-anchor bonus — applies always so the algo accumulates the
       // right T1/T2/T3 components ahead of the spike window opening.
-      if (anchorKeySet.has(k)) {
-        // anchor itself — leave to the window-boost below (no double-counting)
-      } else if (spikeChainSet.has(k)) {
-        s *= SURGE_SPIKE_CHAIN_BONUS;
-      } else if (antiChainSet.has(k)) {
-        s *= SURGE_ANTI_CHAIN_BONUS;
+      let isAnchor = anchorKeySet.has(k);
+      let isSpikeChain = !isAnchor && spikeChainSet.has(k);
+      let isAntiChain  = !isAnchor && !isSpikeChain && antiChainSet.has(k);
+      if (isSpikeChain) s *= SURGE_SPIKE_CHAIN_BONUS;
+      else if (isAntiChain) s *= SURGE_ANTI_CHAIN_BONUS;
+
+      // Deadline ramp: as an anchor's window approaches, boost the anchor
+      // itself AND any of its chain components that we don't own yet. This
+      // pulls the algo off random buys and onto the spike's prep work.
+      // Ramp:  ≤2 ticks before window → ×2.0
+      //         3-4 ticks before     → ×1.5
+      // The anchor itself gets the same ramp PLUS the in-window boost.
+      const upcoming = nextAnchor(tick);
+      if (upcoming) {
+        const ticksUntil = upcoming.window[0] - tick;
+        const chain = chainByAnchor[upcoming.key];
+        const isAnchorMatch = (k === upcoming.key);
+        const isChainMatch  = chain && chain.has(k) && !owned.has(k);
+        if (isAnchorMatch || isChainMatch) {
+          if (ticksUntil <= 2 && ticksUntil >= 0)      s *= 2.0;
+          else if (ticksUntil <= 4 && ticksUntil >= 0) s *= 1.5;
+        }
       }
-      // Window boost — when the anchor itself is buyable in its tick window
-      if (window1Set.has(k) && tick >= SPIKE1_WINDOW[0] && tick <= SPIKE1_WINDOW[1]) {
-        s *= SURGE_ANCHOR_BOOST;
-      } else if (window2Set.has(k) && tick >= SPIKE2_WINDOW[0] && tick <= SPIKE2_WINDOW[1]) {
+
+      // In-window boost — anchor itself buyable IN its tick window.
+      const win = anchorWindow[k];
+      if (win && tick >= win[0] && tick <= win[1]) {
         s *= SURGE_ANCHOR_BOOST;
       }
       return s;
@@ -6499,8 +6593,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     function fire(item, phaseName) {
       const cost = effCost(item.key, owned);
       const consumed = [...ownedAncestors(item.key, owned)];
-      consumed.forEach(c => owned.delete(c));
+      consumed.forEach(c => {
+        owned.delete(c);
+        const idx = ownedOrder.indexOf(c);
+        if (idx >= 0) ownedOrder.splice(idx, 1);
+      });
       owned.add(item.key);
+      ownedOrder.push(item.key);
       souls -= cost;
       phaseChanges[phaseName].push({
         action:     consumed.length ? 'upgrade' : 'buy',
@@ -6530,34 +6629,48 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     }
 
     // Late/Extra-Late fallback: at slot cap, no affordable upgrade — look for
-    // a sell+buy pair. Returns { sellKey, refund, replacement } or null. Won't
-    // sell spike/anti anchors (those are the whole point of the build) and
-    // won't sell required items (user explicitly asked for them).
+    // a sell+buy pair. Returns { sellKey, refund, replacement } or null.
+    //
+    // Sell sort (per user spec): role-category ASC, priorityScore ASC, age ASC.
+    //   - role-cat: standard(0) sells before signature(1) before required(2)
+    //   - priorityScore: lowest score first (least-valuable item goes)
+    //   - age: oldest item first (tie-break)
+    // Anchors are NEVER sold (they're the whole point of the build).
     function considerSellAndReplace(tick) {
-      // Find the LOWEST-priority owned item we'd be willing to sell.
-      let sellCand = null;
-      let sellCandSc = Infinity;
-      let sellCandTier = 0;
+      function roleCat(k) {
+        if (isReqAny(k)) return 2;
+        if (isSigAny(k)) return 1;
+        return 0;
+      }
+
+      // Build candidate list of sellable items (anchors excluded).
+      const sellables = [];
       for (const k of owned) {
-        if (anchorKeySet.has(k))   continue;   // never sell the spike itself
-        if (requiredSet.has(k))    continue;   // never sell user-required
-        // Find the item record (same shape used in priorityScore)
+        if (anchorKeySet.has(k)) continue;  // never sell anchors
         const it = b.items.find(x => x.key === k);
         if (!it) continue;
-        const sc = priorityScore(it, tick);
-        if (sc < sellCandSc) {
-          sellCandSc = sc; sellCand = it;
-          sellCandTier = bpItemMap[k]?.tier || 0;
-        }
+        sellables.push({
+          it,
+          key:  k,
+          rc:   roleCat(k),
+          sc:   priorityScore(it, tick),
+          age:  ownedOrder.indexOf(k),  // lower idx = older
+          tier: bpItemMap[k]?.tier || 0,
+        });
       }
-      if (!sellCand) return null;
+      if (!sellables.length) return null;
 
-      const refund = Math.floor(sellCandTier * SURGE_SELL_REFUND_FRAC);
+      // Sort: role-cat ASC, score ASC, age ASC.
+      sellables.sort((a, c) => {
+        if (a.rc  !== c.rc)  return a.rc  - c.rc;
+        if (a.sc  !== c.sc)  return a.sc  - c.sc;
+        return a.age - c.age;
+      });
+      const sellCand = sellables[0];
+      const refund = Math.floor(sellCand.tier * SURGE_SELL_REFUND_FRAC);
       const projectedSouls = souls + refund;
 
-      // Find the best replacement we could afford after the sell. Considers
-      // anything we don't already own and isn't blacklisted (no upgrade
-      // requirement — selling frees a slot, so any tier is fair game).
+      // Find the best replacement we could afford after the sell.
       let bestRep = null, bestRepSc = -Infinity, bestRepCost = 0;
       for (const it of b.items) {
         const k = it.key;
@@ -6573,9 +6686,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
       if (!bestRep) return null;
 
-      // Only sell if the replacement is meaningfully better (avoids churning
-      // the inventory just to swap equivalent items).
-      if (bestRepSc < sellCandSc * SURGE_SELL_RATIO_THRESH) return null;
+      // Sanity gate: replacement must out-score what we're selling. Avoids
+      // sideways swaps that churn inventory without improving the build.
+      if (bestRepSc <= sellCand.sc) return null;
 
       return {
         sellKey:     sellCand.key,
@@ -6595,7 +6708,30 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
       const atCap = owned.size >= phaseCap;
 
-      if (souls < BR_T1_LO) {
+      // ── ANCHOR-WINDOW OVERRIDE ─────────────────────────────────────────
+      // If any of the 4 anchors is currently in-window, affordable, and not
+      // owned, fire it FIRST — bypasses souls-bracket gating. Without this,
+      // standalone T4 anti-spikes get skipped in 'save' mode (which only
+      // allows upgrades), even when souls and timing are both right.
+      for (const [aKey, win] of Object.entries(anchorWindow)) {
+        if (owned.has(aKey)) continue;
+        if (tick < win[0] || tick > win[1]) continue;
+        if (blacklistSet.has(aKey)) continue;
+        const ups = upgradesTo[aKey] || [];
+        if (ups.some(u => owned.has(u))) continue;   // already replaced upstream
+        const cost = effCost(aKey, owned);
+        if (atCap && !hasOwnedAncestor(aKey, owned)) continue;  // need upgrade if capped
+        if (cost > souls) continue;
+        const it = b.items.find(x => x.key === aKey);
+        if (!it) continue;
+        pick = { it, sc: priorityScore(it, tick), cost };
+        mode = 'anchor-win';
+        break;
+      }
+
+      if (pick) {
+        // anchor fired — skip the bracket cascade below
+      } else if (souls < BR_T1_LO) {
         mode = 'sub-T1';
       } else if (atCap) {
         // At slot cap — only upgrades are allowed (they consume an owned
@@ -6645,8 +6781,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           sellInfo = considerSellAndReplace(tick);
           if (sellInfo) {
             mode = 'sell+buy';
-            // Execute the sell: drop from owned, refund half tier
+            // Execute the sell: drop from owned + ownedOrder, refund half tier
             owned.delete(sellInfo.sellKey);
+            const idx = ownedOrder.indexOf(sellInfo.sellKey);
+            if (idx >= 0) ownedOrder.splice(idx, 1);
             souls += sellInfo.refund;
             sellsByPhase[phaseName]++;
             phaseChanges[phaseName].push({
@@ -6662,9 +6800,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       if (pick) fire(pick.it, phaseName);
 
       if (_bpDbg && tickDbg.length < 40) {
-        const inW1 = tick >= SPIKE1_WINDOW[0] && tick <= SPIKE1_WINDOW[1];
-        const inW2 = tick >= SPIKE2_WINDOW[0] && tick <= SPIKE2_WINDOW[1];
-        const winTag = inW1 ? 'W1' : inW2 ? 'W2' : '  ';
+        // Per-anchor window tag — S1/A1/S2/A2 if tick is in that anchor's window
+        let winTag = '  ';
+        if (tick >= SPIKE1_WINDOW[0] && tick <= SPIKE1_WINDOW[1]) winTag = 'S1';
+        else if (tick >= ANTI1_WINDOW[0] && tick <= ANTI1_WINDOW[1]) winTag = 'A1';
+        else if (tick >= SPIKE2_WINDOW[0] && tick <= SPIKE2_WINDOW[1]) winTag = 'S2';
+        else if (tick >= ANTI2_WINDOW[0] && tick <= ANTI2_WINDOW[1]) winTag = 'A2';
         const action = pick
           ? (sellInfo ? `SELL ${sellInfo.sellKey} +${sellInfo.refund}, BUY ${pick.it.key} -${pick.cost}` : `BUY ${pick.it.key} cost=${pick.cost}`)
           : 'skip';
@@ -6683,11 +6824,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         secondSpike:     secondSpike?.key     || null,
         firstAntiSpike:  firstAntiSpike?.key  || null,
         secondAntiSpike: secondAntiSpike?.key || null,
-        window1: SPIKE1_WINDOW, window2: SPIKE2_WINDOW,
+        spike1Window: SPIKE1_WINDOW, anti1Window: ANTI1_WINDOW,
+        spike2Window: SPIKE2_WINDOW, anti2Window: ANTI2_WINDOW,
         topSelfTags, topEnemyTags,
       };
       _bpDbg.surgeKnobs   = {
-        SURGE_T3_BIAS, SURGE_T4_BIAS, SURGE_ANCHOR_BOOST,
+        SURGE_T3_BIAS_STRONG, SURGE_T4_BIAS, SURGE_T2_FALLBACK_PEN,
+        SURGE_ANCHOR_BOOST, SURGE_SPIKE_CHAIN_BONUS, SURGE_ANTI_CHAIN_BONUS,
         SURGE_ANTI_REQ_TIE, SURGE_ANTI_SIG_TIE,
       };
     }
@@ -8760,13 +8903,11 @@ function simInferTickFromSouls(totalEarned) {
   return best;
 }
 
-// Suggested starting total-earned for a fresh Live Match session — defaults
-// to whatever tick 7 would have granted (~mid-Early), which is roughly when
-// most players first open the tool to check what to buy.
+// Starting souls for a fresh Live Match session. Fixed at 800 (one T1 buy)
+// so the player types their actual current souls from scratch — no surprise
+// seed value.
 function simSuggestedLiveStart() {
-  let cum = 0;
-  for (let t = 0; t <= 7; t++) cum += SIM_TICK_INCOME[t] || 0;
-  return cum;
+  return 800;
 }
 
 // Live Match: derive total souls earned from current pocket + net items
@@ -9736,34 +9877,50 @@ function simOpenOverride() {
     return simEffectiveCost(it.key, ownedSet) <= state.remaining;
   });
 
-  // Tag each item with its priority flags
+  // Resolve the full universal label set (spike/anti/sig/req/rec) for this
+  // build so override rows show the same priority symbols as the main build
+  // path and sim cards.
+  const { labelFor } = computeBuildLabels(cur.b, cur.b.buildPath);
+
+  // Sort priority — anchor labels first, then by tier asc, then confidence.
+  // Numeric label-rank: spike=0, required=1, anti=2, signature=3, recommended=4, none=5.
+  const labelRank = {
+    spike: 0, 'spike-component': 0,
+    required: 1, 'required-component': 1,
+    anti: 2, 'anti-component': 2,
+    signature: 3, 'signature-component': 3,
+    recommended: 4, 'recommended-component': 4,
+  };
   const ALLY_THRESH  = EFFECT_THRESH.ally.norm;
   const ENEMY_THRESH = EFFECT_THRESH.enemy.norm;
   const tagged = items.map(it => {
-    const isReq = constraints.required.has(it.key);
-    const isSig = constraints.signature.has(it.key);
+    const lbl    = labelFor(it.key);
     const isAlly = it.ally >= ALLY_THRESH;
     const isCtr  = it.enemy >= ENEMY_THRESH;
-    const priority = isReq ? 0 : isSig ? 1 : (isAlly || isCtr) ? 2 : 3;
-    return { it, isReq, isSig, isAlly, isCtr, priority };
+    return { it, lbl, isAlly, isCtr, rank: lbl ? (labelRank[lbl] ?? 5) : 5 };
   }).sort((a, b) =>
-    a.priority - b.priority
+    a.rank - b.rank
     || (bpItemMap[a.it.key]?.tier||0) - (bpItemMap[b.it.key]?.tier||0)
     || itemConfidence(b.it.key) - itemConfidence(a.it.key)
   );
 
-  const makeRow = ({ it, isReq, isSig, isAlly, isCtr }) => {
+  const makeRow = ({ it, lbl, isAlly, isCtr }) => {
     const row = document.createElement('div'); row.className = 'sim-override-row';
-    if (isReq) row.classList.add('is-required');
-    else if (isSig) row.classList.add('is-signature');
+    const meta = lbl ? BP_LABEL_META[lbl] : null;
+    if (meta) row.classList.add(meta.klass);
     const obj = bpItemMap[it.key];
     const img = obj?.image_path ? `<img src="${srcUrl(obj.image_path)}">` : '';
-    const reqBadge  = isReq  ? `<span class="sim-or-badge is-req-badge">REQ</span>` : '';
-    const sigBadge  = isSig  ? `<span class="sim-or-badge is-sig-badge">★</span>` : '';
-    const allyBadge = isAlly ? `<span class="sim-or-badge is-ally-badge">A</span>` : '';
-    const ctrBadge  = isCtr  ? `<span class="sim-or-badge is-ctr-badge">C</span>` : '';
+    // Universal label badge (Spike / Anti-spike / Required / Signature / Recommended)
+    const lblBadge = meta
+      ? `<span class="sim-or-badge sim-or-label ${meta.klass}" title="${meta.title}">${meta.text}</span>`
+      : '';
+    // Ally / Counter combined column — both shown side-by-side when applicable
+    // so the row stays single-line. ▲ = assists allies, ▼ = counters enemies.
+    const allyIcon = isAlly ? `<span class="sim-or-ac sim-or-ac-ally"  title="Assists allies">▲</span>` : '';
+    const ctrIcon  = isCtr  ? `<span class="sim-or-ac sim-or-ac-enemy" title="Counters enemies">▼</span>` : '';
+    const acCell   = `<span class="sim-or-ac-cell">${allyIcon}${ctrIcon}</span>`;
     row.innerHTML = `${img}<span class="sim-or-name">${obj?.name||it.key}</span>
-      ${reqBadge}${sigBadge}${allyBadge}${ctrBadge}
+      ${lblBadge}${acCell}
       <span class="sim-or-cost">${simEffectiveCost(it.key, ownedSet).toLocaleString()}</span>
       <span class="sim-or-tier">T${Math.round((obj?.tier||0)/800)}</span>`;
     row.addEventListener('click', e => {
