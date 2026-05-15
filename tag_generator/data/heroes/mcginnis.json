@@ -142,7 +142,7 @@
           "gun_burst_resistance": null,
           "gun_continuous_damage": 0.05,
           "gun_continuous_proc": null,
-          "gun_continuous_resistance": -1,
+          "gun_continuous_resistance": -0.1,
           "headshot_damage": null,
           "high_assist_count": null,
           "high_kill_count": null,
@@ -1188,6 +1188,7 @@
     "blue",
     "black"
   ],
+  "default_build_name": "mcginnis_ult_rushin_russian",
   "desc_eng": "",
   "eng_name": "McGinnis",
   "image_path": "/resources/heroes/mcginnis/portrait_mcginnis.png",
@@ -1196,6 +1197,5 @@
   "search_terms": [
     "engineer"
   ],
-  "wiki_url": "https://deadlock.wiki/McGinnis",
-  "default_build_name": "mcginnis_general"
+  "wiki_url": "https://deadlock.wiki/McGinnis"
 }

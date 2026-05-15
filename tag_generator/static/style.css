@@ -2305,8 +2305,43 @@ h1, h2, .page-header h1, .display-font {
 .is-sig-badge  { background: rgba(240,192,64,.2); color: #f0c040; border: 1px solid rgba(240,192,64,.5); }
 .is-ally-badge { background: rgba(46,204,113,.2); color: #2ecc71; border: 1px solid rgba(46,204,113,.4); }
 .is-ctr-badge  { background: rgba(52,152,219,.2); color: #3498db; border: 1px solid rgba(52,152,219,.4); }
-.sim-override-row.is-required  { border-color: rgba(231,76,60,.4); background: rgba(231,76,60,.04); }
-.sim-override-row.is-signature { border-color: rgba(240,192,64,.35); background: rgba(240,192,64,.04); }
+
+/* Override row — universal label badge (mirrors the sim-card / build-path
+   label palette via the .bp-label-* classes already defined). */
+.sim-or-label {
+  font-size: 13px; line-height: 1; padding: 2px 5px;
+  border: 1px solid var(--border-soft); background: var(--card-2);
+}
+.sim-or-label.bp-label-spike       { color: var(--orange);  border-color: rgba(255,140,60,.5); }
+.sim-or-label.bp-label-spike-c     { color: var(--orange);  opacity: .75; }
+.sim-or-label.bp-label-required    { color: var(--gold);    border-color: rgba(245,200,74,.55); }
+.sim-or-label.bp-label-req-c       { color: var(--gold);    opacity: .75; }
+.sim-or-label.bp-label-anti        { color: var(--purple);  border-color: rgba(170,110,220,.5); }
+.sim-or-label.bp-label-anti-c      { color: var(--purple);  opacity: .75; }
+.sim-or-label.bp-label-signature   { color: var(--accent);  border-color: rgba(117,232,162,.45); }
+.sim-or-label.bp-label-sig-c       { color: var(--accent);  opacity: .75; }
+.sim-or-label.bp-label-recommended { color: var(--info);    border-color: rgba(98,167,175,.55); }
+.sim-or-label.bp-label-rec-c       { color: var(--info);    opacity: .75; }
+
+/* Combined ally/counter mini-icon column. ▲ = assists allies (mint),
+   ▼ = counters enemies (info-blue). Lives in a single fixed-width cell so
+   rows line up regardless of which of the two are set. */
+.sim-or-ac-cell {
+  display: inline-flex; gap: 2px; min-width: 28px; justify-content: flex-start;
+  flex-shrink: 0;
+}
+.sim-or-ac {
+  font-size: 11px; line-height: 1; font-weight: 700;
+}
+.sim-or-ac-ally  { color: var(--accent); }
+.sim-or-ac-enemy { color: var(--info); }
+
+/* Row-tint by label category — soft background hint mirrors sim cards. */
+.sim-override-row.bp-label-spike       { border-color: rgba(255,140,60,.45);  background: rgba(255,140,60,.04); }
+.sim-override-row.bp-label-required    { border-color: rgba(245,200,74,.45);  background: rgba(245,200,74,.04); }
+.sim-override-row.bp-label-anti        { border-color: rgba(170,110,220,.45); background: rgba(170,110,220,.04); }
+.sim-override-row.bp-label-signature   { border-color: rgba(117,232,162,.40); background: rgba(117,232,162,.03); }
+.sim-override-row.bp-label-recommended { border-color: rgba(98,167,175,.45);  background: rgba(98,167,175,.03); }
 .sim-sell-row.is-most-rec { border-color: var(--accent); }
 
 .sim-save-form { display: flex; flex-direction: column; gap: 12px; }
