@@ -1,0 +1,258 @@
+{
+  "hero": "kelvin",
+  "build_idx": 1,
+  "build_name": "Beam Damage Kelvin (Beam>Path>Ball)",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "kelvin",
+    "infernus",
+    "paradox",
+    "victor",
+    "bebop",
+    "grey_talon"
+  ],
+  "enemies": [
+    "haze",
+    "rem",
+    "seven",
+    "apollo",
+    "the_doorman",
+    "shiv"
+  ],
+  "self": "kelvin",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Rough start but ended up snowballing hard. Great team!",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "enchanters_emblem",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "sprint_boots",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "trophy_collector",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1600,
+      "costEffective": 800,
+      "components": [
+        "sprint_boots"
+      ]
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "buy",
+      "key": "enduring_speed",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 13,
+      "action": "buy",
+      "key": "reactive_barrier",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 17,
+      "action": "unlock",
+      "phase": "Mid",
+      "soulsBefore": 8000
+    },
+    {
+      "tick": 17,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "counter",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4800,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 4000
+    },
+    {
+      "tick": 21,
+      "action": "buy",
+      "key": "superior_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4000,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 24,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 10400,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    },
+    {
+      "tick": 25,
+      "action": "upgrade",
+      "key": "indomitable",
+      "col": "counter",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8800,
+      "costEffective": 4800,
+      "components": [
+        "reactive_barrier"
+      ]
+    }
+  ],
+  "owned": [
+    "mystic_expansion",
+    "enchanters_emblem",
+    "arcane_surge",
+    "trophy_collector",
+    "enduring_speed",
+    "superior_duration",
+    "spirit_burn",
+    "escalating_exposure",
+    "superior_cooldown",
+    "boundless_spirit",
+    "indomitable"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 43200,
+  "slots_unlocked": 2,
+  "ts": "2026-05-15T02:12:18.256Z"
+}
