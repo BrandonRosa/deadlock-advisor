@@ -9,7 +9,7 @@
     "mystic_regeneration"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": 1,
       "aerial": null,
       "ally_buff": null,

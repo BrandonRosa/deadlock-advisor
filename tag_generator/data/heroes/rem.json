@@ -189,7 +189,7 @@
           "vertical_mobility": null,
           "lane_pusher": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": -0.25,
           "ally_buff": 0.75,
@@ -281,7 +281,7 @@
           "vertical_mobility": 0.5,
           "lane_pusher": 1
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": 0.5,

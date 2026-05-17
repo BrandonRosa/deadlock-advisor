@@ -6,7 +6,7 @@
   "tier": 1600,
   "upgrades_from": [],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": null,
@@ -95,8 +95,12 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Bullet_Lifesteal_(item)"
+  "wiki_url": "https://deadlock.wiki/Bullet_Lifesteal_(item)",
+  "compare_to": [],
+  "remarks": "",
+  "confidence": 0.15
 }

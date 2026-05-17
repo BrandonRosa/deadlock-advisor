@@ -1,4 +1,4 @@
-Tag,ally_mult,self_mult,enemy_mult,self_score
+Tag,ally_mult,self_mult,enemy_mult,playstyle_score
 spirit_damage,,2.5,0,1.75
 bullet_damage,,,,
 melee_damage,,,,

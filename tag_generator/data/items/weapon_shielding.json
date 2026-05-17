@@ -1,12 +1,16 @@
 {
   "category": "Vitality",
+  "compare_to": [
+    "spirit_shielding",
+    "battle_vest"
+  ],
   "image_path": "/resources/items/weapon_shielding/weapon_shielding.png",
   "name": "Weapon Shielding",
   "normalized_name": "weapon_shielding",
   "tier": 1600,
   "upgrades_from": [],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": null,
@@ -20,7 +24,7 @@
       "bullet_lifesteal": null,
       "bullet_proc": null,
       "bullet_resist_shred": null,
-      "bullet_resistance": 0.33,
+      "bullet_resistance": 0.5,
       "burst_damage": null,
       "burst_heal": null,
       "burst_resistance": 0.2,
@@ -48,17 +52,18 @@
       "grounded": null,
       "gun_burst_damage": null,
       "gun_burst_proc": null,
-      "gun_burst_resistance": 0.5,
+      "gun_burst_resistance": 1,
       "gun_continuous_damage": null,
       "gun_continuous_proc": null,
       "gun_continuous_resistance": 0.75,
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": null,
+      "high_max_hp": 0.15,
       "horizontal_mobility": 0.5,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": -0.05,
       "low_max_hp": 0.75,

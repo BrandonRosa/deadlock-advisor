@@ -63,6 +63,10 @@
   --info:       #62a7af;            /* OTHER BLUE — secondary cool accent (upgrade badges) */
   --info-dk:    #3a7077;
 
+  /* Label aliases — resolved to semantic colors above */
+  --orange:     var(--weapon);      /* legacy alias — was spike color */
+  --purple:     var(--spirit);      /* legacy alias — was anti-spike color */
+
   /* Tier colors: from Fairfax / Curiosity Catalog */
   --tier-1:     #d4b07a;           /* T1 cream-gold */
   --tier-2:     #d97a1f;           /* T2 amber */
@@ -88,6 +92,30 @@ html, body {
   color: var(--text);
   font-size: 14px;
 }
+
+/* Material Symbols icon helper — use as innerHTML inside any element that
+   carries a .bp-label-* color rule so the icon inherits the right color. */
+.msym {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+  font-style: normal;
+  font-size: inherit;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  user-select: none;
+}
+/* Anti-spike icon: outlined + thin so local_police reads cleanly at small sizes */
+.bp-label-anti .msym, .bp-label-anti-c .msym,
+.bp-label-required-anti .msym:last-child,
+.bp-label-signature-anti .msym:last-child {
+  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 20;
+}
+/* Dual-label icon colors */
+.bp-label-required-anti  .msym:first-child { color: var(--gold);     }
+.bp-label-required-anti  .msym:last-child  { color: #c79bff;         }
+.bp-label-signature-anti .msym:first-child { color: var(--good);     }
+.bp-label-signature-anti .msym:last-child  { color: #c79bff;         }
 
 /* Display headings: weathered print-serif (NOT the clean Cinzel) */
 h1, h2, .page-header h1, .display-font {
@@ -1378,9 +1406,9 @@ h1, h2, .page-header h1, .display-font {
 /* Summary chip — only spike / required / recommended are eligible (filtered
    in app.js by LABEL_META[label].summary). */
 .bp-summary-chip { position: relative; }
-.bp-badge-spike       { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .65); }
-.bp-badge-required    { color: var(--gold);    font-size: 16px; }
-.bp-badge-recommended { color: var(--info);    font-size: 15px; }
+.bp-badge-spike       { color: var(--danger); font-size: 18px; text-shadow: 0 0 6px rgba(185, 70, 62, .65); }
+.bp-badge-required    { color: var(--gold);   font-size: 16px; }
+.bp-badge-recommended { color: var(--info);   font-size: 15px; }
 
 /* Step-view Priority column — fixed-width cell after the name, before cost.
    Symbol shows for every tier (including components, which are scaled down
@@ -1393,28 +1421,37 @@ h1, h2, .page-header h1, .display-font {
 .bp-priority-empty { visibility: hidden; }
 
 /* Per-label symbol color/size in the step-view Priority column */
-.bp-change.bp-label-spike       .bp-priority-sym { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .65); }
-.bp-change.bp-label-spike-c     .bp-priority-sym { color: #ffb05a; font-size: 13px; opacity: .55; }
-.bp-change.bp-label-required    .bp-priority-sym { color: var(--gold); font-size: 16px; }
-.bp-change.bp-label-req-c       .bp-priority-sym { color: var(--gold); font-size: 12px; opacity: .55; }
-.bp-change.bp-label-anti        .bp-priority-sym { color: #c79bff; font-size: 15px; }
-.bp-change.bp-label-anti-c      .bp-priority-sym { color: #c79bff; font-size: 11px; opacity: .55; }
-.bp-change.bp-label-signature   .bp-priority-sym { color: var(--accent);  font-size: 13px; opacity: .85; }
-.bp-change.bp-label-sig-c       .bp-priority-sym { color: var(--accent);  font-size: 10px; opacity: .5;  }
-.bp-change.bp-label-recommended .bp-priority-sym { color: var(--info);    font-size: 14px; }
-.bp-change.bp-label-rec-c       .bp-priority-sym { color: var(--info);    font-size: 10px; opacity: .55; }
+.bp-change.bp-label-spike            .bp-priority-sym { color: var(--danger);  font-size: 18px; text-shadow: 0 0 6px rgba(185, 70, 62, .65); }
+.bp-change.bp-label-spike-c          .bp-priority-sym { color: var(--danger);  font-size: 13px; opacity: .55; }
+.bp-change.bp-label-required         .bp-priority-sym { color: var(--gold);    font-size: 16px; }
+.bp-change.bp-label-req-c            .bp-priority-sym { color: var(--gold);    font-size: 12px; opacity: .55; }
+.bp-change.bp-label-required-anti    .bp-priority-sym { font-size: 15px; }
+.bp-change.bp-label-anti             .bp-priority-sym { color: #c79bff; font-size: 17px; text-shadow: 0 0 5px rgba(199, 155, 255, .55); }
+.bp-change.bp-label-anti-c           .bp-priority-sym { color: #c79bff; font-size: 12px; opacity: .55; }
+.bp-change.bp-label-signature        .bp-priority-sym { color: var(--good);  font-size: 13px; opacity: .85; }
+.bp-change.bp-label-sig-c            .bp-priority-sym { color: var(--good);  font-size: 10px; opacity: .5;  }
+.bp-change.bp-label-signature-anti   .bp-priority-sym { font-size: 13px; }
+.bp-change.bp-label-recommended      .bp-priority-sym { color: var(--info);   font-size: 14px; }
+.bp-change.bp-label-rec-c            .bp-priority-sym { color: var(--info);   font-size: 10px; opacity: .55; }
 
 /* Row highlights — only the loudest 3 categories tint the row background.
    Spike strongest, required medium, recommended just a hint. */
 .bp-change.bp-row-hl-spike {
-  background: linear-gradient(90deg, rgba(255, 176, 90, .18) 0%, transparent 70%);
-  border-left: 3px solid #ffb05a;
+  background: linear-gradient(90deg, rgba(185, 70, 62, .18) 0%, transparent 70%);
+  border-left: 3px solid var(--danger);
   padding-left: 6px;
   border-radius: 0 3px 3px 0;
 }
 .bp-change.bp-row-hl-required {
   background: linear-gradient(90deg, rgba(245, 200, 74, .12) 0%, transparent 60%);
   border-left: 2px solid var(--gold);
+  padding-left: 6px;
+  border-radius: 0 3px 3px 0;
+}
+.bp-change.bp-row-hl-anti,
+.bp-change.bp-row-hl-required-anti {
+  background: linear-gradient(90deg, rgba(199, 155, 255, .10) 0%, transparent 55%);
+  border-left: 2px solid rgba(199, 155, 255, .55);
   padding-left: 6px;
   border-radius: 0 3px 3px 0;
 }
@@ -1435,8 +1472,8 @@ h1, h2, .page-header h1, .display-font {
 /* Spike glyph pulse — applied to the Priority column for spike rows so the
    ↗ symbol breathes a bit to draw the eye. */
 @keyframes bp-spike-glyph-pulse {
-  0%, 100% { text-shadow: 0 0 4px rgba(255, 176, 90, .5); }
-  50%      { text-shadow: 0 0 10px rgba(255, 176, 90, .85); }
+  0%, 100% { text-shadow: 0 0 4px rgba(185, 70, 62, .5); }
+  50%      { text-shadow: 0 0 10px rgba(185, 70, 62, .85); }
 }
 .bp-change.bp-label-spike .bp-priority-sym { animation: bp-spike-glyph-pulse 1.8s ease-in-out infinite; }
 
@@ -1949,6 +1986,18 @@ h1, h2, .page-header h1, .display-font {
 }
 .sim-stat-val { font-size: 16px; font-weight: 700; color: var(--text); }
 .sim-controls { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+@keyframes save-banner-pulse {
+  0%, 100% { box-shadow: 0 0 5px 1px rgba(245,200,74,.35); }
+  50%       { box-shadow: 0 0 16px 5px rgba(245,200,74,.65); }
+}
+.sim-save-banner {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 3px;
+  background: rgba(245,200,74,.12); border: 1px solid rgba(245,200,74,.5);
+  color: var(--gold); font-size: 12px; font-weight: 700;
+  animation: save-banner-pulse 1.8s ease-in-out infinite;
+}
+.sim-save-banner .msym { font-size: 14px; vertical-align: middle; }
 #sim-skip.is-most-rec {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 0 8px 1px rgba(117, 232, 162, .35);
@@ -2147,24 +2196,80 @@ h1, h2, .page-header h1, .display-font {
      - Component variants → glyph only, smaller / dimmer in the flag stack
    The .sim-card class carries one of the .bp-label-* tags from the
    universal label system so all targeting is consistent. */
-.sim-card.bp-label-spike    { outline: 2px solid #ffb05a; outline-offset: -2px; }
+.sim-card.bp-label-spike    { outline: 2px solid var(--danger); outline-offset: -2px; }
 .sim-card.bp-label-required { outline: 2px solid var(--gold); outline-offset: -2px; }
+.sim-card.bp-label-anti {
+  outline: 1px solid rgba(199, 155, 255, .55); outline-offset: -1px;
+  box-shadow: 0 0 10px 2px rgba(199, 155, 255, .4);
+}
+
+@property --da-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes dual-anchor-sweep { to { --da-angle: 360deg; } }
+@keyframes dual-anchor-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(199,155,255,.5), 0 0 16px 4px rgba(245,200,74,.12); }
+  50%       { box-shadow: 0 0 8px 2px rgba(245,200,74,.5), 0 0 16px 4px rgba(199,155,255,.12); }
+}
+.sim-card.bp-label-required-anti,
+.sim-card.bp-label-signature-anti {
+  overflow: visible;
+  border-color: rgba(199,155,255,.45);
+  animation: dual-anchor-glow 3s ease-in-out infinite;
+}
+.sim-card.bp-label-required-anti::before,
+.sim-card.bp-label-signature-anti::before {
+  content: '';
+  position: absolute; inset: -2px;
+  border-radius: 5px;
+  padding: 2px;
+  /* 4 glow centers (purple @ 0°/180°, gold @ 90°/270°) sweep around a dim
+     base ring. The element never rotates — only the conic from-angle changes. */
+  background: conic-gradient(
+    from var(--da-angle),
+    rgba(199,155,255,.45)  0deg,
+    #c79bff                15deg,
+    rgba(199,155,255,.45)  30deg,
+    rgba(199,155,255,.45)  60deg,
+    #f5c84a                90deg,
+    rgba(199,155,255,.45) 120deg,
+    rgba(199,155,255,.45) 150deg,
+    #c79bff               180deg,
+    rgba(199,155,255,.45) 210deg,
+    rgba(199,155,255,.45) 240deg,
+    #f5c84a               270deg,
+    rgba(199,155,255,.45) 300deg,
+    rgba(199,155,255,.45) 330deg,
+    #c79bff               360deg
+  );
+  animation: dual-anchor-sweep 4s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
 .sim-card.bp-label-signature {
-  box-shadow: 0 0 8px 1px rgba(117, 232, 162, .35);
+  box-shadow: 0 0 8px 1px rgba(83, 192, 85, .35);
 }
 .sim-card.is-most-rec { box-shadow: 0 0 10px 1px rgba(98, 167, 175, .45); }
 
 /* Flag-stack glyph colors per label kind */
-.sim-card.bp-label-spike     .sim-flag { color: #ffb05a; font-size: 18px; text-shadow: 0 0 6px rgba(255, 176, 90, .75); }
-.sim-card.bp-label-spike-c   .sim-flag { color: #ffb05a; font-size: 12px; opacity: .55; }
-.sim-card.bp-label-required  .sim-flag { color: var(--gold); font-size: 16px; }
-.sim-card.bp-label-req-c     .sim-flag { color: var(--gold); font-size: 12px; opacity: .55; }
-.sim-card.bp-label-anti      .sim-flag { color: #c79bff; font-size: 16px; text-shadow: 0 0 4px rgba(199, 155, 255, .55); }
-.sim-card.bp-label-anti-c    .sim-flag { color: #c79bff; font-size: 11px; opacity: .55; }
-.sim-card.bp-label-signature .sim-flag { color: var(--accent);  font-size: 13px; opacity: .85; }
-.sim-card.bp-label-sig-c     .sim-flag { color: var(--accent);  font-size: 10px; opacity: .5;  }
-.sim-card.bp-label-recommended .sim-flag { color: var(--info);  font-size: 14px; }
-.sim-card.bp-label-rec-c     .sim-flag { color: var(--info);    font-size: 10px; opacity: .55; }
+.sim-card.bp-label-spike          .sim-flag { color: var(--danger);  font-size: 18px; text-shadow: 0 0 6px rgba(185, 70, 62, .75); }
+.sim-card.bp-label-spike-c        .sim-flag { color: var(--danger);  font-size: 12px; opacity: .55; }
+.sim-card.bp-label-required       .sim-flag { color: var(--gold);    font-size: 16px; }
+.sim-card.bp-label-req-c          .sim-flag { color: var(--gold);    font-size: 12px; opacity: .55; }
+.sim-card.bp-label-required-anti  .sim-flag { color: var(--gold);    font-size: 15px; }
+.sim-card.bp-label-anti           .sim-flag { color: #c79bff; font-size: 18px; text-shadow: 0 0 5px rgba(199, 155, 255, .55); }
+.sim-card.bp-label-anti-c         .sim-flag { color: #c79bff; font-size: 12px; opacity: .55; }
+.sim-card.bp-label-signature      .sim-flag { color: var(--good);   font-size: 13px; opacity: .85; }
+.sim-card.bp-label-sig-c          .sim-flag { color: var(--good);   font-size: 10px; opacity: .5;  }
+.sim-card.bp-label-signature-anti .sim-flag { color: var(--good);   font-size: 13px; opacity: .85; }
+.sim-card.bp-label-recommended    .sim-flag { color: var(--info);   font-size: 14px; }
+.sim-card.bp-label-rec-c          .sim-flag { color: var(--info);   font-size: 10px; opacity: .55; }
 
 /* "RECOMMENDED" badge on the algorithm's top affordable pick. Sits at the
    bottom-left so it never collides with the block button (bottom-right) or
@@ -2312,16 +2417,18 @@ h1, h2, .page-header h1, .display-font {
   font-size: 13px; line-height: 1; padding: 2px 5px;
   border: 1px solid var(--border-soft); background: var(--card-2);
 }
-.sim-or-label.bp-label-spike       { color: var(--orange);  border-color: rgba(255,140,60,.5); }
-.sim-or-label.bp-label-spike-c     { color: var(--orange);  opacity: .75; }
-.sim-or-label.bp-label-required    { color: var(--gold);    border-color: rgba(245,200,74,.55); }
-.sim-or-label.bp-label-req-c       { color: var(--gold);    opacity: .75; }
-.sim-or-label.bp-label-anti        { color: var(--purple);  border-color: rgba(170,110,220,.5); }
-.sim-or-label.bp-label-anti-c      { color: var(--purple);  opacity: .75; }
-.sim-or-label.bp-label-signature   { color: var(--accent);  border-color: rgba(117,232,162,.45); }
-.sim-or-label.bp-label-sig-c       { color: var(--accent);  opacity: .75; }
-.sim-or-label.bp-label-recommended { color: var(--info);    border-color: rgba(98,167,175,.55); }
-.sim-or-label.bp-label-rec-c       { color: var(--info);    opacity: .75; }
+.sim-or-label.bp-label-spike            { color: var(--danger);  border-color: rgba(185,70,62,.5); }
+.sim-or-label.bp-label-spike-c          { color: var(--danger);  opacity: .75; }
+.sim-or-label.bp-label-required         { color: var(--gold);    border-color: rgba(245,200,74,.55); }
+.sim-or-label.bp-label-req-c            { color: var(--gold);    opacity: .75; }
+.sim-or-label.bp-label-required-anti    { color: var(--gold);    border-color: rgba(199,155,255,.5); }
+.sim-or-label.bp-label-anti             { color: #c79bff;        border-color: rgba(199,155,255,.5); }
+.sim-or-label.bp-label-anti-c           { color: #c79bff;        opacity: .75; }
+.sim-or-label.bp-label-signature        { color: var(--good);    border-color: rgba(83,192,85,.45); }
+.sim-or-label.bp-label-sig-c            { color: var(--good);    opacity: .75; }
+.sim-or-label.bp-label-signature-anti   { color: var(--good);    border-color: rgba(199,155,255,.5); }
+.sim-or-label.bp-label-recommended      { color: var(--info);    border-color: rgba(98,167,175,.55); }
+.sim-or-label.bp-label-rec-c            { color: var(--info);    opacity: .75; }
 
 /* Combined ally/counter mini-icon column. ▲ = assists allies (mint),
    ▼ = counters enemies (info-blue). Lives in a single fixed-width cell so
@@ -2337,11 +2444,13 @@ h1, h2, .page-header h1, .display-font {
 .sim-or-ac-enemy { color: var(--info); }
 
 /* Row-tint by label category — soft background hint mirrors sim cards. */
-.sim-override-row.bp-label-spike       { border-color: rgba(255,140,60,.45);  background: rgba(255,140,60,.04); }
-.sim-override-row.bp-label-required    { border-color: rgba(245,200,74,.45);  background: rgba(245,200,74,.04); }
-.sim-override-row.bp-label-anti        { border-color: rgba(170,110,220,.45); background: rgba(170,110,220,.04); }
-.sim-override-row.bp-label-signature   { border-color: rgba(117,232,162,.40); background: rgba(117,232,162,.03); }
-.sim-override-row.bp-label-recommended { border-color: rgba(98,167,175,.45);  background: rgba(98,167,175,.03); }
+.sim-override-row.bp-label-spike            { border-color: rgba(255,140,60,.45);  background: rgba(255,140,60,.04); }
+.sim-override-row.bp-label-required         { border-color: rgba(245,200,74,.45);  background: rgba(245,200,74,.04); }
+.sim-override-row.bp-label-required-anti    { border-color: rgba(199,155,255,.45); background: rgba(199,155,255,.04); }
+.sim-override-row.bp-label-anti             { border-color: rgba(170,110,220,.45); background: rgba(170,110,220,.04); }
+.sim-override-row.bp-label-signature        { border-color: rgba(117,232,162,.40); background: rgba(117,232,162,.03); }
+.sim-override-row.bp-label-signature-anti   { border-color: rgba(199,155,255,.40); background: rgba(199,155,255,.03); }
+.sim-override-row.bp-label-recommended      { border-color: rgba(98,167,175,.45);  background: rgba(98,167,175,.03); }
 .sim-sell-row.is-most-rec { border-color: var(--accent); }
 
 .sim-save-form { display: flex; flex-direction: column; gap: 12px; }

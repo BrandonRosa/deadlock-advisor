@@ -179,7 +179,7 @@
           "engage": null,
           "escape": null
         },
-        "self_score": {
+        "playstyle_score": {
           "aerial": null,
           "ally_buff": null,
           "anti_heal": null,
@@ -266,7 +266,7 @@
           "engage": null,
           "escape": null
         },
-        "self_weight": {
+        "item_affinity": {
           "aerial": null,
           "ally_buff": null,
           "anti_heal": null,

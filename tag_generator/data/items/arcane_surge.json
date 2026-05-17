@@ -13,7 +13,7 @@
     "extra_stamina"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": 0.1,
       "ally_buff": null,

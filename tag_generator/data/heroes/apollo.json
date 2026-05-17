@@ -94,7 +94,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -156,7 +157,7 @@
           "melee_damage": null,
           "melee_resistance": null,
           "mid_range": -0.05,
-          "movement_slow": -0.25,
+          "movement_slow": -0.33,
           "multi_ability_focus": null,
           "pure_damage": null,
           "range_extender_dependant": null,
@@ -165,14 +166,14 @@
           "self_buff": null,
           "self_heal": -0.25,
           "shield": -0.25,
-          "silence": -0.75,
+          "silence": -1,
           "single_ability_focus": null,
           "single_target": -0.15,
           "small_hitbox": -0.15,
           "spawn_minions": -0.15,
           "spirit_burst_damage": null,
           "spirit_burst_proc": null,
-          "spirit_burst_resistance": -1,
+          "spirit_burst_resistance": -0.75,
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
@@ -180,14 +181,15 @@
           "spirit_lifesteal": null,
           "spirit_proc": null,
           "spirit_resist_shred": null,
-          "spirit_resistance": -1,
+          "spirit_resistance": -0.55,
           "stun": -0.25,
           "team_heal": -0.25,
           "trap_block_obstruct": null,
           "ult_focused": 0.15,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "lane_pusher": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 0.75,
           "ally_buff": null,
@@ -276,9 +278,10 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": 0.05,
-          "vertical_mobility": 1
+          "vertical_mobility": 1,
+          "lane_pusher": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": 0.25,
           "ally_buff": null,
@@ -367,7 +370,8 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "lane_pusher": null
         }
       }
     }
@@ -383,5 +387,6 @@
   "mini_image_path": "/resources/heroes/apollo/mini_icon_apollo.png",
   "normalized_name": "apollo",
   "search_terms": [],
-  "wiki_url": "https://deadlock.wiki/Apollo"
+  "wiki_url": "https://deadlock.wiki/Apollo",
+  "default_build_name": "apollo_general"
 }

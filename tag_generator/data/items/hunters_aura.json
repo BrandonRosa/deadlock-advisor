@@ -5,7 +5,7 @@
   "normalized_name": "hunters_aura",
   "tier": 3200,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.75,
       "ally_buff": null,
       "anti_heal": null,

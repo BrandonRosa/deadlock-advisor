@@ -9,7 +9,7 @@
     "melee_charge"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.75,
       "ally_buff": null,
       "anti_air": null,

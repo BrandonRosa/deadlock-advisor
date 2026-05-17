@@ -8,7 +8,7 @@
     "tesla_bullets"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": null,

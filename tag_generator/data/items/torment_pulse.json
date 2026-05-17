@@ -5,7 +5,7 @@
   "normalized_name": "torment_pulse",
   "tier": 3200,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.1,
       "ally_buff": null,
       "anti_heal": null,

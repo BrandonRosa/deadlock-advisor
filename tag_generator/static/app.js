@@ -154,7 +154,7 @@ function applyConfidenceH(scored, lookupFn) {
 
 function resolveBuildValues(build, heroBuilds, visited) {
   visited = visited || new Set();
-  const COLS = ['ally_weight','self_weight','enemy_weight','self_score'];
+  const COLS = ['ally_weight','item_affinity','enemy_weight','playstyle_score'];
   if (visited.has(build.name)) {
     const r = {};
     COLS.forEach(col => {
@@ -664,7 +664,7 @@ function renderBuildTabs() {
 }
 
 // ── Build Content ─────────────────────────────────────────────────────────────
-const HERO_COLS_KEYS = ['ally_weight','self_weight','enemy_weight','self_score'];
+const HERO_COLS_KEYS = ['ally_weight','item_affinity','enemy_weight','playstyle_score'];
 
 function isBuildEmpty(build) {
   return HERO_COLS_KEYS.every(col => {
@@ -1049,9 +1049,9 @@ async function renderBuildConstraints() {
 // ── Hero Tag Table ────────────────────────────────────────────────────────────
 const HERO_COLS = [
   { key: 'ally_weight',  label: 'Ally Weight'  },
-  { key: 'self_weight',  label: 'Self Item Weight'        },
+  { key: 'item_affinity',  label: 'Self Item Weight'        },
   { key: 'enemy_weight', label: 'Enemy Weight'            },
-  { key: 'self_score',   label: 'Playstyle/Ability Score' },
+  { key: 'playstyle_score',   label: 'Playstyle/Ability Score' },
 ];
 
 function renderHeroTagTable(build) {
@@ -1544,7 +1544,7 @@ async function submitReverseEngineer() {
     const TIER_W   = { 800: 1.0, 1600: 1.35, 3200: 1.75, 6400: 2.2, 9999: 3.0 };
 
     // ── Self weight: revealed-preference delta from tier average ─────────
-    // For each item the player chose, compute how much its self_score exceeds
+    // For each item the player chose, compute how much its playstyle_score exceeds
     // the average for items at that tier. The delta reveals WHY they picked
     // that item over alternatives at the same budget. Earlier purchases get
     // higher positional weight (the core build intent is set early).
@@ -1553,14 +1553,14 @@ async function submitReverseEngineer() {
     VALID_TIERS.forEach(tier => {
       const pool = (RE._itemData || []).filter(it => it.tier === tier);
       const avg  = {}; tagCodes.forEach(t => avg[t] = 0);
-      pool.forEach(it => { tagCodes.forEach(t => { avg[t] += it.values?.self_score?.[t] || 0; }); });
+      pool.forEach(it => { tagCodes.forEach(t => { avg[t] += it.values?.playstyle_score?.[t] || 0; }); });
       if (pool.length) tagCodes.forEach(t => { avg[t] /= pool.length; });
       tierAvg[tier] = avg;
     });
 
     // Mark multiplier — items the user flagged as Signature/Required carry
     // disproportionate weight, since they're the *defining* picks of the
-    // build. This makes Required items dominate the inferred self_weight,
+    // build. This makes Required items dominate the inferred item_affinity,
     // matching how the build will actually score those items at run-time.
     const MARK_MULT = { sig: 1.6, req: 2.5 };
     const swRaw = {}; tagCodes.forEach(t => swRaw[t] = 0);
@@ -1579,10 +1579,10 @@ async function submitReverseEngineer() {
     });
     if (totalW > 0) tagCodes.forEach(t => { swRaw[t] /= totalW; });
 
-    // ── Enemy / ally influence on self_weight ───────────────────────────
+    // ── Enemy / ally influence on item_affinity ───────────────────────────
     // Normal hero: tiny baseline influence (player was in the matchup but hero wasn't the focus).
     // Impactful hero: aggressively subtracts their counter/synergy signal so items bought
-    // specifically to answer that hero don't inflate the hero's personal self_weight.
+    // specifically to answer that hero don't inflate the hero's personal item_affinity.
     const NORMAL_INF = 0.05;
     const IMPACT_INF = 0.8;
 
@@ -1642,12 +1642,12 @@ async function submitReverseEngineer() {
     const allyW  = (algo !== 'items-only' && RE.allies.length)  ? prunedVec(awRaw, 0.75, 4) : {};
 
     // ── Build values object ──────────────────────────────────────────────
-    const buildValues = { ally_weight: {}, self_weight: {}, enemy_weight: {}, self_score: {} };
+    const buildValues = { ally_weight: {}, item_affinity: {}, enemy_weight: {}, playstyle_score: {} };
     S.tags.forEach(({ code: t }) => {
-      buildValues.self_weight[t]  = selfW[t]  ?? null;
+      buildValues.item_affinity[t]  = selfW[t]  ?? null;
       buildValues.enemy_weight[t] = enemyW[t] ?? null;
       buildValues.ally_weight[t]  = allyW[t]  ?? null;
-      buildValues.self_score[t]   = null;
+      buildValues.playstyle_score[t]   = null;
     });
 
     // ── Construct build entry ────────────────────────────────────────────
@@ -1778,11 +1778,11 @@ async function openItemEdit(name) {
   S.itemDirty = false;
 
   if (!S.currentItem.values) S.currentItem.values = {};
-  if (!S.currentItem.values.self_score) S.currentItem.values.self_score = {};
+  if (!S.currentItem.values.playstyle_score) S.currentItem.values.playstyle_score = {};
   if (!S.currentItem.upgrades_from) S.currentItem.upgrades_from = [];
   if (!S.currentItem.compare_to) S.currentItem.compare_to = [];
   S.tags.forEach(t => {
-    if (!(t.code in S.currentItem.values.self_score)) S.currentItem.values.self_score[t.code] = null;
+    if (!(t.code in S.currentItem.values.playstyle_score)) S.currentItem.values.playstyle_score[t.code] = null;
   });
 
   // Load compare_to items in parallel
@@ -1892,7 +1892,7 @@ function renderItemTagTable() {
 
   const tbody = document.getElementById('item-tag-body');
   tbody.innerHTML = '';
-  const scores = S.currentItem.values.self_score;
+  const scores = S.currentItem.values.playstyle_score;
   S.tags.forEach(tag => {
     const tr = document.createElement('tr');
     const nameTd = document.createElement('td');
@@ -1912,7 +1912,7 @@ function renderItemTagTable() {
     input.dataset.tag = tag.code;
     valToInput(input, scores[tag.code]);
     input.addEventListener('input', () => {
-      S.currentItem.values.self_score[tag.code] = inputToVal(input);
+      S.currentItem.values.playstyle_score[tag.code] = inputToVal(input);
       applyValClass(input);
       setItemDirty(true);
     });
@@ -1931,7 +1931,7 @@ function renderItemTagTable() {
     (S.compareItems || []).forEach((cit, ci) => {
       const ctd = document.createElement('td');
       ctd.dataset.colIdx = String(ci + 2);
-      const cval = (cit.values?.self_score || {})[tag.code] ?? null;
+      const cval = (cit.values?.playstyle_score || {})[tag.code] ?? null;
       const ci2 = document.createElement('input');
       ci2.type = 'number'; ci2.readOnly = true; ci2.tabIndex = -1;
       ci2.className = 'val-input'; ci2.placeholder = '—';
@@ -2055,8 +2055,8 @@ const COLOR_PALETTE = ['red','orange','yellow','green','blue','purple',
                        'pink','brown','tan','white','black','grey'];
 
 // ── Effectiveness thresholds — edit these values to adjust cutoffs ─────────
-// ally:  Σ(item.self_score × ally.ally_weight).          > norm = synergizes, > super = VERY
-// enemy: -Σ(item.self_score × enemy.enemy_weight) (neg). > norm = effective,  > super = VERY
+// ally:  Σ(item.playstyle_score × ally.ally_weight).          > norm = synergizes, > super = VERY
+// enemy: -Σ(item.playstyle_score × enemy.enemy_weight) (neg). > norm = effective,  > super = VERY
 //        (only items with a genuine negative raw product show — score <= 0 is hidden)
 // self:  item self score from build weights.             > norm = effective,  > super = VERY
 const EFFECT_THRESH = {
@@ -2523,7 +2523,7 @@ function computeResults() {
       const v3Targets = [];
       if (MATCH.scoreFormula === 'v3' && myEnemies.length > 1) {
         const selfRaw = {};
-        S.tags.forEach(tag => { if (!SKIP_TAGS.has(tag.code)) selfRaw[tag.code] = Math.max(0, rv.self_weight?.[tag.code] || 0); });
+        S.tags.forEach(tag => { if (!SKIP_TAGS.has(tag.code)) selfRaw[tag.code] = Math.max(0, rv.item_affinity?.[tag.code] || 0); });
         const selfMag = Math.sqrt(S.tags.reduce((s, tag) => s + (selfRaw[tag.code]||0)**2, 0)) || 1;
         const selfNorm = {};
         S.tags.forEach(tag => selfNorm[tag.code] = (selfRaw[tag.code]||0) / selfMag);
@@ -2546,14 +2546,14 @@ function computeResults() {
         const ew = rv.enemy_weight[t] ?? 0;
 
         myAllies.forEach(an => {
-          const ss = resolvedSrcBuildVals(an)?.self_score?.[t] ?? 0;
+          const ss = resolvedSrcBuildVals(an)?.playstyle_score?.[t] ?? 0;
           const c  = aw * ss;
           allyScore += c;
           allyBD[an] = (allyBD[an] || 0) + c;
         });
 
         activeEnemies.forEach(en => {
-          const ss = resolvedSrcBuildVals(en)?.self_score?.[t] ?? 0;
+          const ss = resolvedSrcBuildVals(en)?.playstyle_score?.[t] ?? 0;
           const c  = ew * ss;
           enemyScore += c;
           enemyBD[en] = (enemyBD[en] || 0) + c;
@@ -2574,7 +2574,7 @@ function computeResults() {
       if (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3') {
         S.tags.forEach(tag => {
           const t  = tag.code;
-          const ss = rv.self_score[t] ?? 0;
+          const ss = rv.playstyle_score[t] ?? 0;
           myAllies.forEach(an => {
             const c = ss * (resolvedSrcBuildVals(an)?.ally_weight?.[t] ?? 0);
             allyScoreSelf += c;
@@ -2593,10 +2593,10 @@ function computeResults() {
       }
 
       // vsBreakdown: how well each enemy counters this build (high = bad for us)
-      // = Σ_t(build.self_score[t] × enemy.enemy_weight[t])
+      // = Σ_t(build.playstyle_score[t] × enemy.enemy_weight[t])
       const vsBreakdown = {};
       S.tags.forEach(tag => {
-        const ss = rv.self_score[tag.code] ?? 0;
+        const ss = rv.playstyle_score[tag.code] ?? 0;
         myEnemies.forEach(en => {
           vsBreakdown[en] = (vsBreakdown[en] || 0) + ss * (resolvedSrcBuildVals(en)?.enemy_weight?.[tag.code] ?? 0);
         });
@@ -2607,8 +2607,8 @@ function computeResults() {
         let iAlly = 0, iSelf = 0, iEnemy = 0;
         S.tags.forEach(tag => {
           const t  = tag.code;
-          const is = tv(item.values?.self_score, t);
-          const sw = rv.self_weight[t] ?? 0;
+          const is = tv(item.values?.playstyle_score, t);
+          const sw = rv.item_affinity[t] ?? 0;
           iSelf += is * sw;
           myAllies.forEach(an => {
             iAlly += is * (resolvedSrcBuildVals(an)?.ally_weight?.[t] ?? 0);
@@ -2623,7 +2623,7 @@ function computeResults() {
         return {
           key: item.normalized_name, name: item.name,
           category: item.category, tier: item.tier, imagePath: item.image_path,
-          values:   item.values?.self_score || {},
+          values:   item.values?.playstyle_score || {},
           remarks:  item.remarks || '',
           upgrades_from: item.upgrades_from || [],
           total: (iAlly * MATCH.mult.itemAlly + iSelf + iEnemy * MATCH.mult.itemEnemy) * tm,
@@ -2638,9 +2638,9 @@ function computeResults() {
         S.tags.forEach(tag => {
           const t = tag.code;
           if (t === 'assist_importance' || t === 'counter_importance') return;
-          score += tv(item.values?.self_score, t) * (rv.ally_weight[t] ?? 0);
+          score += tv(item.values?.playstyle_score, t) * (rv.ally_weight[t] ?? 0);
         });
-        const aImp = tv(item.values?.self_score, 'assist_importance');
+        const aImp = tv(item.values?.playstyle_score, 'assist_importance');
         return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1), _assist_imp: aImp };
       }).filter(x => x._assist_imp > 0)
         .sort((a, b) => b.score - a.score).slice(0, 3);
@@ -2650,10 +2650,10 @@ function computeResults() {
         S.tags.forEach(tag => {
           const t = tag.code;
           if (t === 'assist_importance' || t === 'counter_importance') return;
-          score += tv(item.values?.self_score, t) * (rv.enemy_weight[t] ?? 0);
+          score += tv(item.values?.playstyle_score, t) * (rv.enemy_weight[t] ?? 0);
         });
-        const cImp = tv(item.values?.self_score, 'counter_importance');
-        return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1), _raw_values: item.values?.self_score || {} };
+        const cImp = tv(item.values?.playstyle_score, 'counter_importance');
+        return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1), _raw_values: item.values?.playstyle_score || {} };
       }).filter(x => tv(x._raw_values, 'counter_importance') > 0)
         .sort((a, b) => a.score - b.score).slice(0, 3);
 
@@ -2710,10 +2710,10 @@ function computeResults() {
 // STRENGTHS / WEAKNESSES HELPERS
 // ════════════════════════════════════════════════════════════════════════════
 
-// Per-build: strengths = top self_score tags, weaknesses = lowest enemy_weight tags
+// Per-build: strengths = top playstyle_score tags, weaknesses = lowest enemy_weight tags
 function computeStrengthsWeaknesses(heroName, buildName) {
   const rv = _rsvCache[heroName]?.[buildName] || {};
-  const selfScores   = rv.self_score   || {};
+  const selfScores   = rv.playstyle_score   || {};
   const enemyWeights = rv.enemy_weight || {};
 
   const strengths = S.tags
@@ -2731,12 +2731,12 @@ function computeStrengthsWeaknesses(heroName, buildName) {
   return { strengths, weaknesses };
 }
 
-// Team: aggregate self_score and enemy_weight across all heroes
+// Team: aggregate playstyle_score and enemy_weight across all heroes
 function computeTeamStrengthsWeaknesses(heroNames) {
   const n = heroNames.length || 1;
   const strengths = S.tags.map(t => ({
     code: t.code, name: t.name,
-    val: heroNames.reduce((s, nm) => s + (resolvedSrcBuildVals(nm)?.self_score?.[t.code] ?? 0), 0) / n,
+    val: heroNames.reduce((s, nm) => s + (resolvedSrcBuildVals(nm)?.playstyle_score?.[t.code] ?? 0), 0) / n,
   })).filter(x => x.val > 0).sort((a, b) => b.val - a.val).slice(0, 3);
 
   const weaknesses = S.tags.map(t => ({
@@ -3615,8 +3615,8 @@ function mkAssistCounterBuildPanel(b, heroName, buildIdx) {
   const allyW  = rv.ally_weight  || {};
   const enemyW = rv.enemy_weight || {};
 
-  // assistScore: Σ(item.self_score × build.ally_weight) — items allies should buy
-  // counterScore: Σ(item.self_score × build.enemy_weight) — LOWEST = items enemies buy to counter this build
+  // assistScore: Σ(item.playstyle_score × build.ally_weight) — items allies should buy
+  // counterScore: Σ(item.playstyle_score × build.enemy_weight) — LOWEST = items enemies buy to counter this build
   const scored = b.items.map(it => {
     let assistScore = 0, counterScore = 0;
     S.tags.forEach(tag => {
@@ -3697,7 +3697,7 @@ const ASSIST_PHASE_OPTIONS = {
 const PHASE_TIER_MULTS = {
   //              T1(800)  T2(1600)  T3(3200)  T4(6400+)
   'Lane':       [ 1.3,     0.95,      0.15,     0.0  ],
-  'Early':      [ 0.8,    0.95,      0.55,      0.05 ],
+  'Early':      [ 0.75,   0.90,      0.80,      0.05 ],
   'Mid':        [ 0.45,     0.8,     1.05,      0.65  ],
   'Late':       [ 0.1,     0.4,     1.0,       1.2  ],
   'Extra Late': [ 0.0,     0.2,     0.8,       1.3  ],
@@ -3738,7 +3738,7 @@ const COSINE_MATCH_MULT  = 0.5;
 const COSINE_ENEMY_MULT  = 0.75;  // used by cosine-match (linear)
 const COSINE_ENEMY_K    = 1.37;   // power-func scale: matches 0.75× linear at |signal|=0.30
 const COSINE_ENEMY_POW  = 1.5;    // super-linear: amplifies strong enemy signals, spares weak ones
-const COSINE_SW_DAMP    = 4;      // dampens enemy correction when hero already has self_weight for that tag
+const COSINE_SW_DAMP    = 4;      // dampens enemy correction when hero already has item_affinity for that tag
 const COSINE_CTR_BOOST  = 2.0;    // boost multiplier for counter-direction (negative enemy signal)
 
 function vecMagBP(v, keys) {
@@ -3834,25 +3834,27 @@ let _bpDbg = null;
 //
 //   1.  spike                  ↗ (orange — Surge anchor)
 //   2.  spike-component        ↗ dim
-//   3.  required               ★ (gold — user-flagged)
-//   4.  required-component     ★ dim
-//   5.  anti (anti-spike)      ⤯ (purple — Surge counter anchor)
-//   6.  anti-component         ⤯ dim
-//   7.  signature              ✓ (mint — user-flagged secondary)
-//   8.  signature-component    ✓ dim
-//   9.  recommended            ⏾ (blue — top algo pick per tier)
-//   10. recommended-component  ⏾ dim
+//   3.  required               star (gold — user-flagged)
+//   4.  required-component     star dim
+//   5.  anti (anti-spike)      trending_down (teal — Surge counter anchor)
+//   6.  anti-component         trending_down dim
+//   7.  signature              local_fire_department (purple — user-flagged secondary)
+//   8.  signature-component    local_fire_department dim
+//   9.  recommended            psychology (green — top algo pick per tier)
+//   10. recommended-component  psychology dim
 const BP_LABEL_META = {
-  spike:                  { text: '↗', title: 'Spike — power-spike anchor',                klass: 'bp-label-spike',     summary: true  },
-  'spike-component':      { text: '↗', title: 'Component of a spike anchor',                klass: 'bp-label-spike-c',   summary: false },
-  required:               { text: '★', title: 'Required — flagged on this build',           klass: 'bp-label-required',  summary: true  },
-  'required-component':   { text: '★', title: 'Component of a required item',               klass: 'bp-label-req-c',     summary: false },
-  anti:                   { text: '⤯', title: 'Anti-spike — counter anchor',                klass: 'bp-label-anti',      summary: false },
-  'anti-component':       { text: '⤯', title: 'Component of an anti-spike anchor',          klass: 'bp-label-anti-c',    summary: false },
-  signature:              { text: '✓', title: 'Signature — flagged on this build',          klass: 'bp-label-signature', summary: false },
-  'signature-component':  { text: '✓', title: 'Component of a signature item',              klass: 'bp-label-sig-c',     summary: false },
-  recommended:            { text: '⏾', title: 'Recommended — top algo pick in this tier',   klass: 'bp-label-recommended', summary: true  },
-  'recommended-component':{ text: '⏾', title: 'Component of a recommended item',            klass: 'bp-label-rec-c',     summary: false },
+  spike:                  { text: '<span class="msym">trending_up</span>',                                                    title: 'Spike — power-spike anchor',                       klass: 'bp-label-spike',          summary: true  },
+  'spike-component':      { text: '<span class="msym">trending_up</span>',                                                    title: 'Component of a spike anchor',                      klass: 'bp-label-spike-c',        summary: false },
+  required:               { text: '<span class="msym">star</span>',                                                           title: 'Required — flagged on this build',                 klass: 'bp-label-required',       summary: true  },
+  'required-component':   { text: '<span class="msym">star</span>',                                                           title: 'Component of a required item',                     klass: 'bp-label-req-c',          summary: false },
+  'required-anti':        { text: '<span class="msym">star</span><span class="msym">local_police</span>',                    title: 'Required & anti-spike counter anchor',             klass: 'bp-label-required-anti',  summary: true  },
+  anti:                   { text: '<span class="msym">local_police</span>',                                                   title: 'Anti-spike — counter anchor',                      klass: 'bp-label-anti',           summary: false },
+  'anti-component':       { text: '<span class="msym">local_police</span>',                                                   title: 'Component of an anti-spike anchor',                klass: 'bp-label-anti-c',         summary: false },
+  signature:              { text: '<span class="msym">thumb_up</span>',                                                       title: 'Signature — flagged on this build',                klass: 'bp-label-signature',      summary: false },
+  'signature-component':  { text: '<span class="msym">thumb_up</span>',                                                       title: 'Component of a signature item',                    klass: 'bp-label-sig-c',          summary: false },
+  'signature-anti':       { text: '<span class="msym">thumb_up</span><span class="msym">local_police</span>',                title: 'Signature & anti-spike counter anchor',            klass: 'bp-label-signature-anti', summary: true  },
+  recommended:            { text: '<span class="msym">bedtime</span>',                                                        title: 'Recommended — top algo pick in this tier',         klass: 'bp-label-recommended',    summary: true  },
+  'recommended-component':{ text: '<span class="msym">bedtime</span>',                                                        title: 'Component of a recommended item',                  klass: 'bp-label-rec-c',          summary: false },
 };
 
 // Compute the full label sets for a build: spike/anti anchors (from
@@ -3920,16 +3922,18 @@ function computeBuildLabels(b, pathData) {
     !antiSet.has(k)  && !antiCompSet.has(k)  && !signatureKeys.has(k) && !sigCompSet.has(k) &&
     !recommendedKeys.has(k)));
   function labelFor(key) {
-    if (spikeSet.has(key))        return 'spike';
-    if (spikeCompSet.has(key))    return 'spike-component';
-    if (requiredKeys.has(key))    return 'required';
-    if (reqCompSet.has(key))      return 'required-component';
-    if (antiSet.has(key))         return 'anti';
-    if (antiCompSet.has(key))     return 'anti-component';
-    if (signatureKeys.has(key))   return 'signature';
-    if (sigCompSet.has(key))      return 'signature-component';
-    if (recommendedKeys.has(key)) return 'recommended';
-    if (recCompSet.has(key))      return 'recommended-component';
+    if (spikeSet.has(key))                                   return 'spike';
+    if (spikeCompSet.has(key))                               return 'spike-component';
+    if (requiredKeys.has(key)  && antiSet.has(key))          return 'required-anti';
+    if (signatureKeys.has(key) && antiSet.has(key))          return 'signature-anti';
+    if (requiredKeys.has(key))                               return 'required';
+    if (reqCompSet.has(key))                                 return 'required-component';
+    if (antiSet.has(key))                                    return 'anti';
+    if (antiCompSet.has(key))                                return 'anti-component';
+    if (signatureKeys.has(key))                              return 'signature';
+    if (sigCompSet.has(key))                                 return 'signature-component';
+    if (recommendedKeys.has(key))                            return 'recommended';
+    if (recCompSet.has(key))                                 return 'recommended-component';
     return null;
   }
   return {
@@ -3954,11 +3958,11 @@ function computeBuildLabels(b, pathData) {
 function computeSurgeAnchors(b, sets) {
   // Must mirror runSurge's anchor picker so labels match the items the algo
   // actually buys. See runSurge() for full doc on these knobs.
-  const SURGE_T3_BIAS_STRONG  = 1.40;  // spike 1 + anti 1 — T3-dominant
-  const SURGE_T4_BIAS         = 1.15;
-  const SURGE_T2_FALLBACK_PEN = 0.85;  // anti 1 only — T2 mildly damped
-  const SURGE_ANTI_REQ_TIE    = 1.05;
-  const SURGE_ANTI_SIG_TIE    = 1.03;
+  const SURGE_T3_BIAS_STRONG   = 1.40;  // spike 1 T3-dominant
+  const SURGE_T4_BIAS          = 1.15;
+  const SURGE_ANTI_REQ_TIE     = 1.05;
+  const SURGE_ANTI_SIG_TIE     = 1.03;
+  const SURGE_ANTI1_T2_BIAS    = 4.0;   // anti1 almost always T2
   const requiredSet     = sets.requiredSet     || new Set();
   const signatureSet    = sets.signatureSet    || new Set();
   const blacklistSet    = sets.blacklistSet    || new Set();
@@ -3976,24 +3980,32 @@ function computeSurgeAnchors(b, sets) {
   const isSigAny = k => signatureSet.has(k) || sigComponentSet.has(k);
 
   // Top-4 self-weight tags
-  const selfWeight = (b.rv && b.rv.self_weight) || {};
+  const selfWeight = (b.rv && b.rv.item_affinity) || {};
   const topSelfTags = Object.entries(selfWeight)
     .sort((a, c) => (c[1] || 0) - (a[1] || 0))
     .slice(0, 4).filter(e => (e[1] || 0) > 0).map(e => e[0]);
 
-  // Top-4 enemy-counter tags, derived from item.enemy correlations
-  const enemyTagAgg = {};
-  b.items.forEach(it => {
-    const e = it.enemy || 0;
-    if (!e) return;
-    for (const [t, v] of Object.entries(it.values || {})) {
-      if (!v) continue;
-      enemyTagAgg[t] = (enemyTagAgg[t] || 0) + v * e;
-    }
+  // Top-4 enemy-counter tags: consensus across the actual enemy team.
+  // For each enemy, find their top-4 most negative enemy_weight tags (their
+  // deepest vulnerabilities). A tag wins by appearing in the most enemies'
+  // top-4 list; magnitude is the tiebreaker.
+  const _ancHeroName  = b.heroName || '';
+  const _ancOnAlly    = MATCH.allies.includes(_ancHeroName);
+  const _ancEnemyTeam = _ancOnAlly ? MATCH.enemies : MATCH.allies;
+  const _vulnCount = {}, _vulnSum = {};
+  _ancEnemyTeam.forEach(en => {
+    const hero = MATCH.heroData[en]; if (!hero) return;
+    const idx  = MATCH.selectedBuilds[en] ?? 0;
+    const bld  = hero.builds[idx] || hero.builds[0]; if (!bld) return;
+    const ew   = _rsvCache[en]?.[bld.name]?.['enemy_weight'] || {};
+    Object.entries(ew).filter(([, v]) => v < 0)
+      .sort((a, b) => a[1] - b[1]).slice(0, 4)
+      .forEach(([t, v]) => { _vulnCount[t] = (_vulnCount[t] || 0) + 1; _vulnSum[t] = (_vulnSum[t] || 0) + v; });
   });
-  const topEnemyTags = Object.entries(enemyTagAgg)
-    .sort((a, c) => (c[1] || 0) - (a[1] || 0))
-    .slice(0, 4).filter(e => (e[1] || 0) > 0).map(e => e[0]);
+  const _consensusRanked  = Object.entries(_vulnCount)
+    .sort((a, b) => b[1] !== a[1] ? b[1] - a[1] : (_vulnSum[a[0]] || 0) - (_vulnSum[b[0]] || 0))
+    .map(e => e[0]);
+  const topEnemyTags = _consensusRanked.slice(0, 4);
 
   const spikeScore = it => {
     let s = 0;
@@ -4004,10 +4016,9 @@ function computeSurgeAnchors(b, sets) {
   const antiScore = it => {
     let s = 0;
     const vals = it.values || {};
-    for (const t of topEnemyTags) s += (vals[t] || 0) * (enemyTagAgg[t] || 0);
+    for (const t of topEnemyTags) s += (vals[t] || 0) * (-(_vulnSum[t] || 0));
     return s;
   };
-
   const pool   = b.items.filter(it => !blacklistSet.has(it.key));
   const t3plus = pool.filter(it => tierBucket(it.key) >= 3);
   const t4only = pool.filter(it => tierBucket(it.key) === 4);
@@ -4025,35 +4036,50 @@ function computeSurgeAnchors(b, sets) {
       return sc - sa;
     })[0];
   }
-  function pickAnti(cands, t3Strong, t4Enc, exclude, anti1TierWeights = false) {
+  // forceT2: heavily bias T2 items so anti1 almost always lands there.
+  // scoreFn: custom scorer (anti2 uses counter+kit blend). Defaults to antiScore.
+  function pickAnti(cands, t4Enc, exclude, forceT2 = false, scoreFn = null) {
+    const score = scoreFn || antiScore;
     return [...cands.filter(it => !exclude.has(it.key))].sort((a, c) => {
-      let sa = antiScore(a), sc = antiScore(c);
+      let sa = score(a), sc = score(c);
       if (isReqAny(a.key))      sa *= SURGE_ANTI_REQ_TIE;
       else if (isSigAny(a.key)) sa *= SURGE_ANTI_SIG_TIE;
       if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
       else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
+      // counter_importance tiebreaker — items built to counter enemies score slightly higher
+      sa *= (1 + 0.04 * (a.values?.['counter_importance'] || 0));
+      sc *= (1 + 0.04 * (c.values?.['counter_importance'] || 0));
       const ba = tierBucket(a.key), bc = tierBucket(c.key);
-      if (t3Strong) { if (ba === 3) sa *= SURGE_T3_BIAS_STRONG; if (bc === 3) sc *= SURGE_T3_BIAS_STRONG; }
-      if (t4Enc)    { if (ba === 4) sa *= SURGE_T4_BIAS;        if (bc === 4) sc *= SURGE_T4_BIAS; }
-      if (anti1TierWeights) {
-        if (ba === 2) sa *= SURGE_T2_FALLBACK_PEN;
-        if (bc === 2) sc *= SURGE_T2_FALLBACK_PEN;
-      }
+      if (t4Enc)    { if (ba === 4) sa *= SURGE_T4_BIAS;       if (bc === 4) sc *= SURGE_T4_BIAS; }
+      if (forceT2)  { if (ba === 2) sa *= SURGE_ANTI1_T2_BIAS; if (bc === 2) sc *= SURGE_ANTI1_T2_BIAS; }
       return sc - sa;
     })[0];
   }
 
-  const t2t3only = pool.filter(it => {
-    const t = tierBucket(it.key);
-    return t === 2 || t === 3;
-  });
   const s1 = pickSpike(t3plus, /*t3Strong*/ true,  /*t4*/ false);
   const s2 = pickSpike(t4only.filter(it => it.key !== s1?.key), /*t3Strong*/ false, /*t4*/ true);
+  // anti1: T2+T3 pool, massive T2 bias so it almost always lands at T2
+  const anti1Pool = pool.filter(it => { const t = tierBucket(it.key); return t === 2 || t === 3; });
   const exA1 = new Set([s1?.key, s2?.key].filter(Boolean));
-  // anti1: T2+T3 only — T3 ×1.40 dominates, T2 ×0.85 plausible. No T4.
-  const a1 = pickAnti(t2t3only, /*t3Strong*/ true, /*t4*/ false, exA1, /*anti1TierWeights*/ true);
+  const a1 = pickAnti(anti1Pool, /*t4*/ false, exA1, /*forceT2*/ true);
+
+  // anti2: mask anti1's top-3 tags so we don't double down on the same coverage.
+  // Score against the same enemy consensus but zero out any tag that anti1 already handles.
+  const a1CoveredTags = new Set(
+    Object.entries(a1?.values || {}).filter(([, v]) => v > 0)
+      .sort((x, y) => y[1] - x[1]).slice(0, 3).map(e => e[0])
+  );
+  const anti2Score = it => {
+    let counter = 0;
+    const vals = it.values || {};
+    for (const t of topEnemyTags) {
+      if (a1CoveredTags.has(t)) continue;
+      counter += (vals[t] || 0) * (-(_vulnSum[t] || 0));
+    }
+    return 0.7 * counter + 0.3 * spikeScore(it);
+  };
   const exA2 = new Set([s1?.key, s2?.key, a1?.key].filter(Boolean));
-  const a2 = pickAnti(t3plus, /*t3Strong*/ false, /*t4*/ true, exA2);
+  const a2 = pickAnti(t3plus, /*t4*/ true, exA2, /*forceT2*/ false, anti2Score);
 
   return {
     spikes:     [s1?.key, s2?.key].filter(Boolean),
@@ -4326,10 +4352,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   const rv = b.rv || {};
 
   // Lazily computed raw guide vector (NOT normalized — preserves magnitude).
-  // cosine:       self_weight - 0.5*enemyAvg, clamped ≥ 0
-  // cosine-match: self_weight + 0.5*allyAvg - 0.75*enemyAvg, clamped ≥ 0
+  // cosine:       item_affinity - 0.5*enemyAvg, clamped ≥ 0
+  // cosine-match: item_affinity + 0.5*allyAvg - 0.75*enemyAvg, clamped ≥ 0
   // adaptive:     blend like cosine-match but uses team-fraction-scaled enemy vec,
-  //               then normalized back to self_weight's magnitude (rotation, not inflation)
+  //               then normalized back to item_affinity's magnitude (rotation, not inflation)
   let _cosineGuide = null;
   function getCosineGuide() {
     if (_cosineGuide) return _cosineGuide;
@@ -4344,11 +4370,11 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       const blended = {};
       tagKeys.forEach(t => {
         const ef = enemyFactor[t] || 0;
-        const sw = rv.self_weight?.[t] || 0;
+        const sw = rv.item_affinity?.[t] || 0;
         const rawCorr = ef !== 0
           ? Math.sign(-ef) * COSINE_ENEMY_K * Math.pow(Math.abs(ef), COSINE_ENEMY_POW)
           : 0;
-        // Reduce the enemy push when the hero already has self_weight for this tag
+        // Reduce the enemy push when the hero already has item_affinity for this tag
         const enemyCorr = rawCorr > 0 ? rawCorr / (1 + sw * COSINE_SW_DAMP) : rawCorr;
         blended[t] = Math.max(0,
           sw
@@ -4359,7 +4385,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       _cosineGuide = blended;
       if (_bpDbg) {
         _bpDbg.guide      = blended;
-        _bpDbg.selfWeight = rv.self_weight || {};
+        _bpDbg.selfWeight = rv.item_affinity || {};
         _bpDbg.allyAvg    = allyAvg;
         _bpDbg.enemyFactor = enemyFactor;
         _bpDbg.guideMeta  = { myAllies, myEnemies };
@@ -4370,14 +4396,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       tagKeys.forEach(t => {
         const ea = enemyAvg[t] || 0;
         guide[t] = Math.max(0,
-          (rv.self_weight?.[t] || 0)
+          (rv.item_affinity?.[t] || 0)
           + (ea < 0 ? -ea * COSINE_CTR_BOOST : -ea * COSINE_MATCH_MULT)
         );
       });
       _cosineGuide = guide;
       if (_bpDbg) {
         _bpDbg.guide      = guide;
-        _bpDbg.selfWeight = rv.self_weight || {};
+        _bpDbg.selfWeight = rv.item_affinity || {};
         _bpDbg.enemyAvg   = enemyAvg;
         _bpDbg.guideMeta  = { myAllies, myEnemies };
       }
@@ -4394,7 +4420,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // At lane start (~3200) soulScale≈3; by extra-late (~42200) soulScale≈27.
     const soulScale = 1 + totalEarned / 1600;
 
-    // Inventory contribution in guide-space: sum(self_score[t] × guide[t]) for owned items.
+    // Inventory contribution in guide-space: sum(playstyle_score[t] × guide[t]) for owned items.
     const invContrib = {};
     tagKeys.forEach(t => { invContrib[t] = 0; });
     owned.forEach(ok => {
@@ -4534,6 +4560,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         if (atMax && isCtr) continue;   // hard cap on counters this phase
         let ps = scoreFn(k, it, phaseName, owned) * itemBoostMult(k);
         if (ps <= 0) continue;
+        const _abFn = antiBoostMap[k];
+        if (_abFn) ps *= _abFn(owned);
         if (belowMin && isCtr) ps *= COUNTER_BOOST_LOW;  // in-loop counter push when below min
         // Fill mode: phase-score per soul spent (prefers cheap, phase-appropriate items)
         // Quality mode: absolute phase-score
@@ -4771,8 +4799,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const cost = chainCost(k, owned);
           if (cost <= 0 || cost > remaining || slots + 1 > phase.totalSlots) continue;
           if (bsAtMax && isCounterItem(scoredMap[k])) continue;
-          const ps = scorerFn(k, scoredMap[k], phase.name) * itemBoostMultStrong(k);
+          let ps = scorerFn(k, scoredMap[k], phase.name) * itemBoostMultStrong(k);
           if (ps <= 0) continue;
+          const _bsAbFn = antiBoostMap[k];
+          if (_bsAbFn) ps *= _bsAbFn(owned);
           const val = filling ? (ps / cost) : ps;
           if (val > bestVal) { bestVal = val; bestKey = k; }
           bsAltCands.push({ k, val });
@@ -4857,13 +4887,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Algorithm: Hybrid Vector Rotation + Beam Search ─────────────────────
-  // Replaces 'adaptive'. Guide vector: normalised self_weight rotated toward
+  // Replaces 'adaptive'. Guide vector: normalised item_affinity rotated toward
   // allies' avg ally_weight by assistPct, then toward enemies' avg enemy_weight
   // by counterPct. Both percentages derive from the build's own
   // assist/counter_importance tag values.
   //
   // Simulation: tick-by-tick budget schedule. Items are scored by
-  // dot(self_score, guideAtTick) × tierMult; unaffordable items are discounted
+  // dot(playstyle_score, guideAtTick) × tierMult; unaffordable items are discounted
   // by ticks-until-affordable. A K=3 beam search explores buy/hold/swap paths
   // simultaneously, pruning each tick by holistic inventory score.
   // Sell-swap requires 1.8× score gain to offset the 50% refund loss penalty.
@@ -4881,7 +4911,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
     const selfRaw = {};
-    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.item_affinity?.[t] || 0); });
     const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
 
     // Consensus enemy counter: tags where ≥50% of enemies share weakness, top 6
@@ -4915,7 +4945,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
     if (_bpDbg) {
       _bpDbg.guide      = guide;
-      _bpDbg.selfWeight = rv.self_weight || {};
+      _bpDbg.selfWeight = rv.item_affinity || {};
       _bpDbg.enemyAvg   = ctrNorm;
       _bpDbg.guideMeta  = { myEnemies };
     }
@@ -5017,6 +5047,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
             s += futureW * upgS * Math.exp(-0.12 * ticksAway);
           });
         }
+        const _egAbFn = antiBoostMap[k];
+        if (_egAbFn) s *= _egAbFn(owned);
         if (s > bestScore) { bestScore = s; bestKey = k; }
         egAltCands.push({ k, val: s });
       }
@@ -5126,7 +5158,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
     const selfRaw = {};
-    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.item_affinity?.[t] || 0); });
     const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
 
     const { ctrNorm, targets } = findTargetCounter(selfNorm, myEnemies, 2, 8);
@@ -5135,7 +5167,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     tagKeys.forEach(t => { guideRaw[t] = (selfNorm[t]||0) + 1.00 * (ctrNorm[t]||0); });
     const guide = vecNormalizeBP(guideRaw, tagKeys);
 
-    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.self_weight||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
+    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.item_affinity||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
 
     const EG_TIER = { 800:1.0, 1600:1.55, 3200:2.1, 6400:2.8, 9999:3.8 };
     function egTierMult(k) { return EG_TIER[bpItemMap[k]?.tier||800] || 1.0; }
@@ -5188,6 +5220,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const ticksAway = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0)) / 1500;
           s += futureW * upgS * Math.exp(-0.12 * ticksAway);
         });
+        const _psAbFn = antiBoostMap[k];
+        if (_psAbFn) s *= _psAbFn(owned);
         if (s > bestScore) { bestScore = s; bestKey = k; }
         psAltCands.push({ k, val: s });
       }
@@ -5245,7 +5279,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
     const selfRaw = {};
-    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.item_affinity?.[t] || 0); });
     const selfNorm = vecNormalizeBP(selfRaw, tagKeys);
 
     const { ctrNorm, targets } = findTargetCounter(selfNorm, myEnemies, 2, 8);
@@ -5255,7 +5289,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     tagKeys.forEach(t => { guideRaw[t] = 0.40 * (selfNorm[t]||0) + 0.60 * (ctrNorm[t]||0); });
     const guide = vecNormalizeBP(guideRaw, tagKeys);
 
-    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.self_weight||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
+    if (_bpDbg) { _bpDbg.guide = guide; _bpDbg.selfWeight = rv.item_affinity||{}; _bpDbg.enemyAvg = ctrNorm; _bpDbg.guideMeta = { targets, myEnemies }; }
 
     // Steeper tier mults: reward investing in high-damage T3/T4 items
     const EG_TIER = { 800:1.0, 1600:1.65, 3200:2.3, 6400:3.2, 9999:4.5 };
@@ -5319,6 +5353,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           const ticksAway = Math.max(0, (bpItemMap[uk]?.tier||0) - (bpItemMap[k]?.tier||0)) / 1500;
           s += futureW * upgS * Math.exp(-0.12 * ticksAway);
         });
+        const _taAbFn = antiBoostMap[k];
+        if (_taAbFn) s *= _taAbFn(owned);
         if (s > bestScore) { bestScore = s; bestKey = k; }
       }
       if (bestKey) { remaining -= beamEmit(bestKey, owned, consumed, changes[phaseName]); continue; }
@@ -5373,8 +5409,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const myAllies  = onAlly ? MATCH.allies.filter(n => n !== heroName) : MATCH.enemies.filter(n => n !== heroName);
     const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
 
-    const assistImp  = Math.max(0, rv.self_weight?.assist_importance  || 0);
-    const counterImp = Math.max(0, rv.self_weight?.counter_importance || 0);
+    const assistImp  = Math.max(0, rv.item_affinity?.assist_importance  || 0);
+    const counterImp = Math.max(0, rv.item_affinity?.counter_importance || 0);
 
     const ROT_CAP    = variant === 'adaptive' ? 0.6 : 0.5;
     const HR_CTR_MIN = 1.0;
@@ -5384,7 +5420,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
     // Build normalised self-weight (non-negative, skip special tags)
     const selfRaw = {};
-    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.self_weight?.[t] || 0); });
+    tagKeys.forEach(t => { if (!SKIP_TAGS.has(t)) selfRaw[t] = Math.max(0, rv.item_affinity?.[t] || 0); });
     const buildNorm = vecNormalizeBP(selfRaw, tagKeys);
 
     // Consensus-pruned rotation target for a hero group.
@@ -5451,7 +5487,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
 
     if (_bpDbg) {
       _bpDbg.guide      = finalGuide;
-      _bpDbg.selfWeight = rv.self_weight || {};
+      _bpDbg.selfWeight = rv.item_affinity || {};
       _bpDbg.allyAvg    = allyNorm;   // pruned consensus ally vector
       _bpDbg.enemyAvg   = enemyNorm;  // pruned negated enemy counter vector
       _bpDbg.guideMeta  = { assistImp, counterImp, assistPct, counterPct, myAllies, myEnemies };
@@ -6227,13 +6263,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     //  - Anti 1 lands late Mid    → T3 primary; T2 only as fallback w/ penalty
     //  - Spike 2 lands mid Late   → T4 only (the "huge one")
     //  - Anti 2 lands late Late   → T3+T4, T4-biased
-    const SURGE_T3_BIAS_STRONG = 1.40;   // spike 1 + anti 1 — T3-dominant
-    const SURGE_T4_BIAS        = 1.15;   // spike 2 + anti 2 — T4-encouraged
-    // Anti 1 tier weighting (T4 is excluded from the candidate pool entirely;
-    // anti-1 lands late-Mid where T4 antis would arrive after the window).
-    //   T3 dominates (×1.40)  >  T2 viable (×0.85)
-    // T3 vs T2 = 1.65× — T2 only wins when no strong T3 anti exists.
-    const SURGE_T2_FALLBACK_PEN = 0.85;  // anti 1 only — was 0.7, eased
+    const SURGE_T3_BIAS_STRONG        = 1.40;   // spike 1 — T3-dominant
+    const SURGE_T4_BIAS               = 1.15;   // spike 2 + anti 2 — T4-encouraged
+    const SURGE_ANTI1_T2_BIAS         = 4.0;    // anti1 almost always T2
+    const SURGE_ANTI_POST_SPIKE_BOOST = 1.8;    // anti scoring surge once its spike is bought
 
     // Anchor priority boost when an anchor is bought IN its window.
     const SURGE_ANCHOR_BOOST = 5.0;
@@ -6350,31 +6383,34 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // Anti picker: required/signature only get a tiny tie-breaker multiplier.
 
     // Top 4 self tags = hero's strongest weighted tags.
-    const selfWeight = (b.rv && b.rv.self_weight) || {};
+    const selfWeight = (b.rv && b.rv.item_affinity) || {};
     const topSelfTags = Object.entries(selfWeight)
       .sort((a, c) => (c[1] || 0) - (a[1] || 0))
       .slice(0, 4)
       .filter(e => (e[1] || 0) > 0)
       .map(e => e[0]);
 
-    // Top 4 enemy-counter tags: derived from items. For each tag t, sum
-    // item.values[t] × item.enemy across all items. Tags strongly correlated
-    // with high item.enemy are the enemy team's top counter tags.
-    const enemyTagAgg = {};
-    b.items.forEach(it => {
-      const e = it.enemy || 0;
-      if (!e) return;
-      const vals = it.values || {};
-      for (const [t, v] of Object.entries(vals)) {
-        if (!v) continue;
-        enemyTagAgg[t] = (enemyTagAgg[t] || 0) + v * e;
-      }
+    // Top 4 enemy-counter tags: consensus across the actual enemy team.
+    // For each enemy, find their top-4 most negative enemy_weight tags (deepest
+    // vulnerabilities). A tag wins by appearing in the most enemies' top-4 list;
+    // magnitude is the tiebreaker so an agreed tag beats a niche one.
+    const heroName  = b.heroName || '';
+    const onAlly    = MATCH.allies.includes(heroName);
+    const myEnemies = onAlly ? MATCH.enemies : MATCH.allies;
+    const vulnCount = {}, vulnSum = {};
+    myEnemies.forEach(en => {
+      const hero = MATCH.heroData[en]; if (!hero) return;
+      const idx  = MATCH.selectedBuilds[en] ?? 0;
+      const bld  = hero.builds[idx] || hero.builds[0]; if (!bld) return;
+      const ew   = _rsvCache[en]?.[bld.name]?.['enemy_weight'] || {};
+      Object.entries(ew).filter(([, v]) => v < 0)
+        .sort((a, b) => a[1] - b[1]).slice(0, 4)
+        .forEach(([t, v]) => { vulnCount[t] = (vulnCount[t] || 0) + 1; vulnSum[t] = (vulnSum[t] || 0) + v; });
     });
-    const topEnemyTags = Object.entries(enemyTagAgg)
-      .sort((a, c) => (c[1] || 0) - (a[1] || 0))
-      .slice(0, 4)
-      .filter(e => (e[1] || 0) > 0)
+    const consensusRanked  = Object.entries(vulnCount)
+      .sort((a, b) => b[1] !== a[1] ? b[1] - a[1] : (vulnSum[a[0]] || 0) - (vulnSum[b[0]] || 0))
       .map(e => e[0]);
+    const topEnemyTags = consensusRanked.slice(0, 4);
 
     // Restricted-tag scoring: item only scores on its top-4 axis tags.
     function spikeScore(it) {
@@ -6389,7 +6425,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       let s = 0;
       const vals = it.values || {};
       for (const t of topEnemyTags) {
-        s += (vals[t] || 0) * (enemyTagAgg[t] || 0);
+        s += (vals[t] || 0) * (-(vulnSum[t] || 0));
       }
       return s;
     }
@@ -6420,31 +6456,23 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       })[0];
     }
 
-    // Pick an anti-spike anchor — required/signature get a tiny tie-breaker.
-    // `t3Strong` boosts T3 (anti 1). `anti1TierWeights` enables the anti-1
-    // weighting profile: T3 boosted, T2 mildly penalised, T4 strongly
-    // penalised (T4 only wins when its antiScore is much higher than any T3).
-    function pickAnti(cands, t3Strong, t4Encourage, exclude, anti1TierWeights = false) {
+    // forceT2: heavily bias T2 so anti1 almost always lands there.
+    // scoreFn: custom scorer (anti2 uses counter+kit blend). Defaults to antiScore.
+    function pickAnti(cands, t4Encourage, exclude, forceT2 = false, scoreFn = null) {
+      const score = scoreFn || antiScore;
       const filtered = cands.filter(it => !exclude.has(it.key));
       return [...filtered].sort((a, c) => {
         const ba = tierBucket(a.key), bc = tierBucket(c.key);
-        let sa = antiScore(a), sc = antiScore(c);
+        let sa = score(a), sc = score(c);
         if (isReqAny(a.key))      sa *= SURGE_ANTI_REQ_TIE;
         else if (isSigAny(a.key)) sa *= SURGE_ANTI_SIG_TIE;
         if (isReqAny(c.key))      sc *= SURGE_ANTI_REQ_TIE;
         else if (isSigAny(c.key)) sc *= SURGE_ANTI_SIG_TIE;
-        if (t3Strong) {
-          if (ba === 3) sa *= SURGE_T3_BIAS_STRONG;
-          if (bc === 3) sc *= SURGE_T3_BIAS_STRONG;
-        }
-        if (t4Encourage) {
-          if (ba === 4) sa *= SURGE_T4_BIAS;
-          if (bc === 4) sc *= SURGE_T4_BIAS;
-        }
-        if (anti1TierWeights) {
-          if (ba === 2) sa *= SURGE_T2_FALLBACK_PEN;
-          if (bc === 2) sc *= SURGE_T2_FALLBACK_PEN;
-        }
+        // counter_importance tiebreaker — items built to counter enemies score slightly higher
+        sa *= (1 + 0.04 * (a.values?.['counter_importance'] || 0));
+        sc *= (1 + 0.04 * (c.values?.['counter_importance'] || 0));
+        if (t4Encourage) { if (ba === 4) sa *= SURGE_T4_BIAS;      if (bc === 4) sc *= SURGE_T4_BIAS; }
+        if (forceT2)     { if (ba === 2) sa *= SURGE_ANTI1_T2_BIAS; if (bc === 2) sc *= SURGE_ANTI1_T2_BIAS; }
         return sc - sa;
       })[0];
     }
@@ -6456,20 +6484,28 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       t4only.filter(it => it.key !== firstSpike?.key),
       /*t3Strong*/ false, /*t4*/ true,
     );
-    // firstAntiSpike: T2+T3 only (T4 antis don't fit the late-Mid window).
-    // Anti-1 tier weighting: T3 ×1.40, T2 ×0.85 — T3 dominates, T2 plausible.
-    const t2t3only = pool.filter(it => {
-      const t = tierBucket(it.key);
-      return t === 2 || t === 3;
-    });
+    // firstAntiSpike: T2+T3 pool, massive T2 bias so it almost always lands at T2
+    const anti1Pool = pool.filter(it => { const t = tierBucket(it.key); return t === 2 || t === 3; });
     const excludeAnti1 = new Set([firstSpike?.key, secondSpike?.key].filter(Boolean));
-    const firstAntiSpike = pickAnti(
-      t2t3only, /*t3Strong*/ true, /*t4*/ false, excludeAnti1,
-      /*anti1TierWeights*/ true,
+    const firstAntiSpike = pickAnti(anti1Pool, /*t4*/ false, excludeAnti1, /*forceT2*/ true);
+
+    // secondAntiSpike: mask firstAntiSpike's top-3 tags so anti2 doesn't double down.
+    // Score against the same enemy consensus but zero out tags anti1 already covers.
+    const anti1CoveredTags = new Set(
+      Object.entries(firstAntiSpike?.values || {}).filter(([, v]) => v > 0)
+        .sort((x, y) => y[1] - x[1]).slice(0, 3).map(e => e[0])
     );
-    // secondAntiSpike: T3+T4, T4-encouraged (late-Late, big counter)
+    const anti2Score = it => {
+      let counter = 0;
+      const vals = it.values || {};
+      for (const t of topEnemyTags) {
+        if (anti1CoveredTags.has(t)) continue;
+        counter += (vals[t] || 0) * (-(vulnSum[t] || 0));
+      }
+      return 0.7 * counter + 0.3 * spikeScore(it);
+    };
     const excludeAnti2 = new Set([firstSpike?.key, secondSpike?.key, firstAntiSpike?.key].filter(Boolean));
-    const secondAntiSpike = pickAnti(t3plus, /*t3Strong*/ false, /*t4*/ true, excludeAnti2);
+    const secondAntiSpike = pickAnti(t3plus, /*t4*/ true, excludeAnti2, /*forceT2*/ false, anti2Score);
 
     const anchors      = { firstSpike, secondSpike, firstAntiSpike, secondAntiSpike };
     const anchorKeySet = new Set(Object.values(anchors).filter(Boolean).map(it => it.key));
@@ -6564,6 +6600,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       if (isSpikeChain) s *= SURGE_SPIKE_CHAIN_BONUS;
       else if (isAntiChain) s *= SURGE_ANTI_CHAIN_BONUS;
 
+      // Dual-anchor bonus: item is both an anti-spike anchor AND required/signature.
+      const isAntiAnchorKey = (firstAntiSpike && k === firstAntiSpike.key) || (secondAntiSpike && k === secondAntiSpike.key);
+      if (isAntiAnchorKey && (requiredSet.has(k) || signatureSet.has(k))) s *= 1.5;
+
       // Deadline ramp: as an anchor's window approaches, boost the anchor
       // itself AND any of its chain components that we don't own yet. This
       // pulls the algo off random buys and onto the spike's prep work.
@@ -6586,6 +6626,17 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       const win = anchorWindow[k];
       if (win && tick >= win[0] && tick <= win[1]) {
         s *= SURGE_ANCHOR_BOOST;
+      }
+      // Post-spike anti-spike boost: pull anti-spike up queue once spike(s) bought.
+      // anti1: full boost when ANY spike is bought.
+      // anti2: partial boost after spike1, full boost after spike2.
+      if (firstAntiSpike && k === firstAntiSpike.key) {
+        const anySpikeBought = (firstSpike && owned.has(firstSpike.key)) || (secondSpike && owned.has(secondSpike.key));
+        if (anySpikeBought) s *= SURGE_ANTI_POST_SPIKE_BOOST;
+      }
+      if (secondAntiSpike && k === secondAntiSpike.key) {
+        if      (secondSpike && owned.has(secondSpike.key)) s *= SURGE_ANTI_POST_SPIKE_BOOST;
+        else if (firstSpike  && owned.has(firstSpike.key))  s *= 1.3;
       }
       return s;
     }
@@ -6866,8 +6917,27 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   // algorithm gets them attached so the build-path summary chips, step view,
   // and simulator can mark them regardless of which run mode is selected.
   const anchorSets = { requiredSet, signatureSet, blacklistSet, reqComponentSet, sigComponentSet };
+  // Pre-compute anchors so non-surge algorithms can apply the post-spike anti boost
+  const preAnchors = computeSurgeAnchors(b, anchorSets);
+  const ANTI_POST_SPIKE_BOOST         = 1.8;
+  const ANTI2_PARTIAL_SPIKE_BOOST     = 1.3;  // anti2 partial boost when spike1 (not spike2) is bought
+  // antiBoostMap: antiKey → fn(ownedSet) => multiplier
+  const antiBoostMap = {};
+  if (preAnchors.antiSpikes[0]) {
+    // anti1: full boost when ANY spike is bought
+    const spikes1 = preAnchors.spikes.filter(Boolean);
+    antiBoostMap[preAnchors.antiSpikes[0]] = owned => spikes1.some(sk => owned.has(sk)) ? ANTI_POST_SPIKE_BOOST : 1.0;
+  }
+  if (preAnchors.antiSpikes[1]) {
+    // anti2: partial boost from spike1, full boost from spike2
+    const s1 = preAnchors.spikes[0] || null, s2 = preAnchors.spikes[1] || null;
+    antiBoostMap[preAnchors.antiSpikes[1]] = owned =>
+      s2 && owned.has(s2) ? ANTI_POST_SPIKE_BOOST :
+      s1 && owned.has(s1) ? ANTI2_PARTIAL_SPIKE_BOOST : 1.0;
+  }
+
   function withAnchors(result) {
-    if (!result.surgeAnchors) result.surgeAnchors = computeSurgeAnchors(b, anchorSets);
+    if (!result.surgeAnchors) result.surgeAnchors = preAnchors;
     return result;
   }
 
@@ -7241,8 +7311,8 @@ function renderBuildPath(pathData, b, itemNameMap, labels = {}) {
       changes.forEach(c => {
         const scored  = itemNameMap[c.key] || { name: c.key, imagePath: '' };
         const img     = srcUrl(scored.imagePath || '');
-        // Runner-up: hide only if it was already bought before this decision
-        const altKey  = c.runnerUp && !buyHistory.has(c.runnerUp) ? c.runnerUp : null;
+        // Runner-up: pick first from top-3 list that hasn't been bought yet
+        const altKey  = (c.runnerUps || []).find(k => !buyHistory.has(k)) ?? null;
         const altItem = altKey ? (itemNameMap[altKey] || { name: altKey, imagePath: '' }) : null;
         const hasAlt  = c.action !== 'sell' && !!altItem;
         const row     = document.createElement('div');
@@ -7253,9 +7323,12 @@ function renderBuildPath(pathData, b, itemNameMap, labels = {}) {
         // Components and the rest get the symbol in the Priority column but
         // no row background.
         const highlightClass =
-          rowLabel === 'spike'       ? ' bp-row-hl-spike'    :
-          rowLabel === 'required'    ? ' bp-row-hl-required' :
-          rowLabel === 'recommended' ? ' bp-row-hl-recommended' : '';
+          rowLabel === 'spike'           ? ' bp-row-hl-spike'         :
+          rowLabel === 'required'        ? ' bp-row-hl-required'      :
+          rowLabel === 'required-anti'   ? ' bp-row-hl-required-anti' :
+          rowLabel === 'signature-anti'  ? ' bp-row-hl-anti'          :
+          rowLabel === 'anti'            ? ' bp-row-hl-anti'          :
+          rowLabel === 'recommended'     ? ' bp-row-hl-recommended'   : '';
         row.className = `bp-change bp-${c.action}` +
           (rowLabel ? ' ' + meta.klass : '') + highlightClass +
           (hasAlt ? ' bp-has-alt' : '');
@@ -7451,7 +7524,7 @@ document.getElementById('re-item-search').addEventListener('input', function() {
       <span class="re-item-opt-tier">${it.tier}★</span>`;
     opt.addEventListener('mousedown', e => {
       e.preventDefault();
-      RE.items.push({ key: it.normalized_name, name: it.name, tier: it.tier, imagePath: it.image_path, selfScore: it.values?.self_score || {} });
+      RE.items.push({ key: it.normalized_name, name: it.name, tier: it.tier, imagePath: it.image_path, selfScore: it.values?.playstyle_score || {} });
       this.value = ''; dd.classList.add('hidden');
       renderReChips();
     });
@@ -8114,15 +8187,15 @@ function slcCosine(a, b) {
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
-// Tag profile of an owned-item set: sum of each item's self_score per tag.
+// Tag profile of an owned-item set: sum of each item's playstyle_score per tag.
 // Items use a richer tag list than hero tags.json (extra item-only tags like
 // bullet_lifesteal, cooldown_reduction, magazine_size_dependant), so iterate
-// over whatever keys actually appear in each item's `values.self_score`.
+// over whatever keys actually appear in each item's `values.playstyle_score`.
 function slcTagProfile(itemKeySet) {
   const profile = {};
   itemKeySet.forEach(k => {
     const it = bpItemMap[k]; if (!it) return;
-    const ss = it.values?.self_score || {};
+    const ss = it.values?.playstyle_score || {};
     Object.keys(ss).forEach(tag => {
       profile[tag] = (profile[tag] || 0) + (ss[tag] || 0);
     });
@@ -8363,12 +8436,12 @@ function slcAugmentProfile(p, b, ctx) {
     else if (t <= 3200) tierBuckets[2]++;
     else                tierBuckets[3]++;
   });
-  // Counter-item count. counter_importance lives inside values.self_score, not
+  // Counter-item count. counter_importance lives inside values.playstyle_score, not
   // at values.counter_importance — the previous reads were dead and the dimension
   // showed 0 across the board. Threshold synced with COUNTER_TAG_THRESH in
   // computeBuildPath (lowered to 0.2 on 2026-05-13).
   const CTR_THRESH = 0.2;
-  const ctrImp = k => (bpItemMap[k]?.values?.self_score?.counter_importance || 0);
+  const ctrImp = k => (bpItemMap[k]?.values?.playstyle_score?.counter_importance || 0);
   let counters = 0;
   p.final.forEach(k => { if (ctrImp(k) > CTR_THRESH) counters++; });
   const countersByPhase = {};
@@ -8415,11 +8488,11 @@ async function runSimLogComparison() {
   if (!SLC.logs.length) { setStatus('No sim logs to compare.'); return; }
 
   // Ensure items + tags. Critical: use /api/items/all — the slim /api/items
-  // endpoint strips .values.self_score, which silently zeros out every tag
+  // endpoint strips .values.playstyle_score, which silently zeros out every tag
   // dot product and collapses the column classifier to "balance for everything."
   if (!S.tags.length) S.tags = await api.get('/api/tags');
   const needRichItems = !MATCH.itemData.length
-                     || !MATCH.itemData[0]?.values?.self_score;
+                     || !MATCH.itemData[0]?.values?.playstyle_score;
   if (needRichItems) MATCH.itemData = await api.get('/api/items/all');
   bpItemMap = {};
   MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
@@ -9040,14 +9113,19 @@ function simBuildCtx(b, state) {
   const focusedEnemiesSet = new Set(state?.focused?.enemies || []);
   const anyAllyFocused  = focusedAlliesSet.size  > 0;
   const anyEnemyFocused = focusedEnemiesSet.size > 0;
-  const selfWeight  = b.values?.self_weight  || {};
+  const selfWeight  = b.values?.item_affinity  || {};
   const enemyW      = b.values?.enemy_weight || {};
   const allyW       = b.values?.ally_weight  || {};
-  const allyHeroes  = MATCH.allies.filter(n => n !== b.heroName);
+  // Swap ally/enemy perspective when simulating an enemy hero — their allies
+  // are MATCH.enemies and their enemies are MATCH.allies.
+  const simOnAlly   = !MATCH.enemies.includes(b.heroName);
+  const simOwnTeam  = simOnAlly ? MATCH.allies  : MATCH.enemies;
+  const simOppTeam  = simOnAlly ? MATCH.enemies : MATCH.allies;
+  const allyHeroes  = simOwnTeam.filter(n => n !== b.heroName);
   // Focused heroes count 2× in their team vector
-  const allySelf    = simFocusedAvg(allyHeroes,    'self_score',   focusedAlliesSet);
-  const enemyEnemy  = simFocusedAvg(MATCH.enemies, 'enemy_weight', focusedEnemiesSet);
-  const allyAssist  = simFocusedAvg(allyHeroes,    'ally_weight',  focusedAlliesSet);
+  const allySelf    = simFocusedAvg(allyHeroes,  'playstyle_score',   focusedAlliesSet);
+  const enemyEnemy  = simFocusedAvg(simOppTeam,  'enemy_weight', focusedEnemiesSet);
+  const allyAssist  = simFocusedAvg(allyHeroes,  'ally_weight',  focusedAlliesSet);
   // Multipliers — bumped a notch when *any* character on that side is focused
   const balAllyMult   = anyAllyFocused  ? 0.65 : 0.5;
   const balEnemyMult  = anyEnemyFocused ? 0.95 : 0.75;
@@ -9136,12 +9214,35 @@ function simRecommendCol(state, b, ctx, scorer, constraints, forceRequired = fal
     else if (constraints.reqComp.has(k))   score *= 1.7;
     else if (constraints.signature.has(k)) score *= 1.5;
     else if (constraints.sigComp.has(k))   score *= 1.2;
+    // Surge anchor boosts — keep column recommendations aligned with the surge plan.
+    const _sa = b.buildPath?.surgeAnchors;
+    if (_sa) {
+      // Spike anchors: always boosted so they win "Recommended" once affordable
+      // and surface as the primary save-banner target while just out of reach.
+      if (_sa.spikes?.[0] === k || _sa.spikes?.[1] === k) score *= 2.5;
+      // Anti-spike: surface once the corresponding spike is owned.
+      if (_sa.antiSpikes?.[0] === k) {
+        const anySpike = (_sa.spikes?.[0] && ownedSet.has(_sa.spikes[0])) || (_sa.spikes?.[1] && ownedSet.has(_sa.spikes[1]));
+        if (anySpike) score *= 1.8;
+      }
+      if (_sa.antiSpikes?.[1] === k) {
+        if      (_sa.spikes?.[1] && ownedSet.has(_sa.spikes[1])) score *= 1.8;
+        else if (_sa.spikes?.[0] && ownedSet.has(_sa.spikes[0])) score *= 1.3;
+      }
+    }
+    // Soul-tier fit: quadratic curve — sharply penalizes items priced well below
+    // your soul ceiling, strongly favors items near it.
+    // At 4400 souls: T2(1600)→×0.63, T3(3200)→×0.90.
+    const tier = bpItemMap[k]?.tier || 800;
+    const _tierFit = Math.min(tier / Math.max(state.remaining, 800), 1.0);
+    score *= 0.55 + 0.65 * _tierFit * _tierFit;
     candidates.push({ key: k, score, eff, item: it });
   });
   // Confidence (Option H) — bias each candidate by its item-level knob,
   // scaled to this column's score range. ref is computed inside the helper.
   applyConfidenceH(candidates, c => itemConfidence(c.key));
   candidates.sort((a, b) => b.score - a.score);
+  const topOverall = candidates[0] || null; // best regardless of affordability
   // Balance: required items that are affordable always surface first
   if (forceRequired) {
     candidates.sort((a, b) => {
@@ -9178,7 +9279,7 @@ function simRecommendCol(state, b, ctx, scorer, constraints, forceRequired = fal
                    || tier >= 6400;
     if (important) { later = { ...c, slot: 'later' }; used.add(c.key); break; }
   }
-  return { affordable, soon, later };
+  return { affordable, soon, later, topOverall };
 }
 
 // Resolve constraints (signature/required/blacklist) for a build, including
@@ -9220,10 +9321,10 @@ function simResolveConstraints(b) {
 // ── Ally / enemy attribution ────────────────────────────────────────────
 function simAttributionIcons(itemKey, b, ctx) {
   const it = b.items.find(x => x.key === itemKey);
-  const itemSelfScore = bpItemMap[itemKey]?.values?.self_score || it?.values || {};
+  const itemSelfScore = bpItemMap[itemKey]?.values?.playstyle_score || it?.values || {};
   const allyMatches = [];
   const enemyMatches = [];
-  // Ally: each ally's ally_weight × this item's self_score
+  // Ally: each ally's ally_weight × this item's playstyle_score
   MATCH.allies.forEach(n => {
     if (n === b.heroName) return;
     const hero = MATCH.heroData[n]; if (!hero) return;
@@ -9234,7 +9335,7 @@ function simAttributionIcons(itemKey, b, ctx) {
     Object.keys(aw).forEach(t => { s += (itemSelfScore[t] || 0) * (aw[t] || 0); });
     if (s >= EFFECT_THRESH.ally.norm) allyMatches.push({ name: n, score: s, mini: hero.mini_image_path });
   });
-  // Enemy: -Σ(item.self_score × enemy.enemy_weight) — positive when item counters them
+  // Enemy: -Σ(item.playstyle_score × enemy.enemy_weight) — positive when item counters them
   MATCH.enemies.forEach(n => {
     const hero = MATCH.heroData[n]; if (!hero) return;
     const idx  = MATCH.selectedBuilds[n] ?? 0;
@@ -9400,21 +9501,29 @@ function renderSim() {
       ...collectAffordable(recStr, 'strength'),
       ...collectAffordable(recCtr, 'counter'),
     ];
-    const topAffordable = all.sort((a,b) => b.score - a.score)[0];
-    const skipScoreBaseline = all.length ? (all.reduce((s,c)=>s+c.score,0) / all.length) * 0.7 : 0;
-    const shouldSkip = !topAffordable || topAffordable.score < skipScoreBaseline;
-    const topKey = topAffordable ? topAffordable.key : null;
+    // Single source of truth: globally best item across all columns, affordable or not.
+    const globalBest = [recBal.topOverall, recStr.topOverall, recCtr.topOverall]
+      .filter(Boolean).sort((a, b) => b.score - a.score)[0] || null;
+    const shouldSkip = !globalBest || globalBest.eff > state.remaining;
+    const topKey = shouldSkip ? null : globalBest.key;
+    let _saveMsg = '';
+    if (shouldSkip && globalBest) {
+      const _sit = bpItemMap[globalBest.key];
+      _saveMsg = `Save up · ${(globalBest.eff - state.remaining).toLocaleString()} more → ${_sit?.name || globalBest.key}`;
+    } else if (shouldSkip) { _saveMsg = 'Nothing to buy right now'; }
 
     renderSimCol('sim-col-balance',  recBal, b, ctx, constraints, state, topKey, 'balance');
     renderSimCol('sim-col-strength', recStr, b, ctx, constraints, state, topKey, 'strength');
     renderSimCol('sim-col-counter',  recCtr, b, ctx, constraints, state, topKey, 'counter');
 
-    // Mark skip as the most-recommended choice when no affordable pick beats
-    // the skip baseline — label it WAIT so the player reads it as a positive
-    // action ("save your souls") instead of an absence of recommendation.
     const skipBtn = document.getElementById('sim-skip');
-    skipBtn.classList.toggle('is-most-rec', shouldSkip);
-    skipBtn.textContent = shouldSkip ? 'Wait ⏸' : 'Skip';
+    skipBtn.classList.toggle('is-most-rec', shouldSkip && !isLive);
+    skipBtn.textContent = (shouldSkip && !isLive) ? 'Wait ⏸' : 'Skip';
+    const _saveBanner = document.getElementById('sim-save-banner');
+    if (_saveBanner) {
+      _saveBanner.style.display = (shouldSkip && isLive) ? '' : 'none';
+      if (shouldSkip && isLive) _saveBanner.innerHTML = `<span class="msym">savings</span> ${_saveMsg}`;
+    }
   }
 
   renderSimTeamComp(state, b);
@@ -9444,17 +9553,29 @@ function simRerenderColumns(state) {
     ...collectAffordable(recStr, 'strength'),
     ...collectAffordable(recCtr, 'counter'),
   ];
-  const topAffordable = all.sort((a,c) => c.score - a.score)[0];
-  const skipBase = all.length ? (all.reduce((s,c)=>s+c.score,0) / all.length) * 0.7 : 0;
-  const shouldSkip = !topAffordable || topAffordable.score < skipBase;
-  const topKey = topAffordable ? topAffordable.key : null;
+  // Single source of truth: globally best item across all columns, affordable or not.
+  const isLive = state.mode === 'live';
+  const globalBest = [recBal.topOverall, recStr.topOverall, recCtr.topOverall]
+    .filter(Boolean).sort((a, b) => b.score - a.score)[0] || null;
+  const shouldSkip = !globalBest || globalBest.eff > state.remaining;
+  const topKey = shouldSkip ? null : globalBest.key;
+  let _saveMsgR = '';
+  if (shouldSkip && globalBest) {
+    const _sit = bpItemMap[globalBest.key];
+    _saveMsgR = `Save up · ${(globalBest.eff - state.remaining).toLocaleString()} more → ${_sit?.name || globalBest.key}`;
+  } else if (shouldSkip) { _saveMsgR = 'Nothing to buy right now'; }
   renderSimCol('sim-col-balance',  recBal, b, ctx, constraints, state, topKey, 'balance');
   renderSimCol('sim-col-strength', recStr, b, ctx, constraints, state, topKey, 'strength');
   renderSimCol('sim-col-counter',  recCtr, b, ctx, constraints, state, topKey, 'counter');
   const skipBtn = document.getElementById('sim-skip');
   if (skipBtn) {
-    skipBtn.classList.toggle('is-most-rec', shouldSkip);
-    skipBtn.textContent = shouldSkip ? 'Wait ⏸' : 'Skip';
+    skipBtn.classList.toggle('is-most-rec', shouldSkip && !isLive);
+    skipBtn.textContent = (shouldSkip && !isLive) ? 'Wait ⏸' : 'Skip';
+  }
+  const _saveBannerR = document.getElementById('sim-save-banner');
+  if (_saveBannerR) {
+    _saveBannerR.style.display = (shouldSkip && isLive) ? '' : 'none';
+    if (shouldSkip && isLive) _saveBannerR.innerHTML = `<span class="msym">savings</span> ${_saveMsgR}`;
   }
 }
 
@@ -9625,8 +9746,8 @@ function simHeroPickPreview(heroName, side, b, state) {
   const hero = MATCH.heroData[heroName];
   const idx  = MATCH.selectedBuilds[heroName] ?? 0;
   const build = hero?.builds?.[idx] || hero?.builds?.[0];
-  // Ally: "assist" = item.self_score · ally.ally_weight (positive = helps them)
-  // Enemy: "counter" = -(item.self_score · enemy.enemy_weight) (positive = hurts them)
+  // Ally: "assist" = item.playstyle_score · ally.ally_weight (positive = helps them)
+  // Enemy: "counter" = -(item.playstyle_score · enemy.enemy_weight) (positive = hurts them)
   const wKey = side === 'ally' ? 'ally_weight' : 'enemy_weight';
   const wVec = (build && _rsvCache[heroName]?.[build.name]?.[wKey]) || {};
   const sign = side === 'ally' ? 1 : -1;

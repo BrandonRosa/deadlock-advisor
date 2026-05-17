@@ -187,7 +187,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "pure_damage": 0.5,
           "spirit_damage": 0.2,
           "bullet_damage": 0.75,
@@ -278,7 +278,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": 0.75
         },
-        "self_weight": {
+        "item_affinity": {
           "pure_damage": 0.25,
           "spirit_damage": 0.2,
           "bullet_damage": 0.75,

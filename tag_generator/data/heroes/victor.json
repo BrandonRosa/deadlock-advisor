@@ -192,7 +192,7 @@
           "ult_focused": null,
           "vertical_mobility": -0.15
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": 0.75,
           "aerial": 0,
           "ally_buff": null,
@@ -284,7 +284,7 @@
           "ult_focused": 0.15,
           "vertical_mobility": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": 0.66,
           "aerial": 0.25,
           "ally_buff": -0.15,
@@ -581,7 +581,7 @@
           "ult_focused": null,
           "vertical_mobility": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -673,7 +673,7 @@
           "ult_focused": null,
           "vertical_mobility": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": 0.927,
           "aerial": 0.278,
           "ally_buff": -0.137,
@@ -981,7 +981,7 @@
           "ult_focused": null,
           "vertical_mobility": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -1073,7 +1073,7 @@
           "ult_focused": null,
           "vertical_mobility": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": 0.395,
           "aerial": 0.304,
           "ally_buff": -0.14,

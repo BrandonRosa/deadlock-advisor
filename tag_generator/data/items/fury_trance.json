@@ -9,7 +9,7 @@
     "bullet_lifesteal"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": -0.15,
       "ally_buff": null,

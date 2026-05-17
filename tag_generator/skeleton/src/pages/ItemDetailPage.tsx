@@ -15,7 +15,7 @@
 //
 // COMPARE-TO COLUMNS:
 //   An item can optionally declare a list of other item keys in
-//   compare_to: string[].  When present, those items' self_score
+//   compare_to: string[].  When present, those items' playstyle_score
 //   weights appear as read-only columns alongside the main column,
 //   so you can visually compare how similar items are weighted.
 // ============================================================
@@ -70,8 +70,8 @@ export default function ItemDetailPage() {
     //   setLocalItem({
     //     ...localItem,
     //     values: {
-    //       self_score: {
-    //         ...localItem.values.self_score,
+    //       playstyle_score: {
+    //         ...localItem.values.playstyle_score,
     //         [tagCode]: parsedValue,
     //       }
     //     }
@@ -191,7 +191,7 @@ export default function ItemDetailPage() {
                       <input
                         type="number"
                         step="0.05"
-                        value={localItem.values.self_score[tag.code] ?? ''}
+                        value={localItem.values.playstyle_score[tag.code] ?? ''}
                         onChange={e => handleWeightChange(tag.code, e.target.value)}
                         disabled={!isCustom}
                       />
@@ -202,7 +202,7 @@ export default function ItemDetailPage() {
                       <td key={ci.normalized_name}>
                         <input
                           type="number"
-                          value={ci.values.self_score[tag.code] ?? ''}
+                          value={ci.values.playstyle_score[tag.code] ?? ''}
                           readOnly
                           className="opacity-60"
                         />

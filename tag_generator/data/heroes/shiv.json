@@ -94,7 +94,8 @@
           "team_heal": 0.25,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null
+          "vertical_mobility": null,
+          "lane_pusher": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -165,7 +166,7 @@
           "self_buff": null,
           "self_heal": null,
           "shield": null,
-          "silence": -0.5,
+          "silence": -0.75,
           "single_ability_focus": null,
           "single_target": null,
           "small_hitbox": null,
@@ -185,9 +186,10 @@
           "team_heal": null,
           "trap_block_obstruct": -0.15,
           "ult_focused": null,
-          "vertical_mobility": -0.75
+          "vertical_mobility": -0.75,
+          "lane_pusher": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": 1,
           "aerial": 0.25,
           "ally_buff": null,
@@ -276,9 +278,10 @@
           "team_heal": null,
           "trap_block_obstruct": 0.1,
           "ult_focused": 0.1,
-          "vertical_mobility": 0.5
+          "vertical_mobility": 0.5,
+          "lane_pusher": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": 1,
           "aerial": 0.15,
           "ally_buff": null,
@@ -367,7 +370,8 @@
           "team_heal": null,
           "trap_block_obstruct": 0.1,
           "ult_focused": 0.1,
-          "vertical_mobility": 0.25
+          "vertical_mobility": 0.25,
+          "lane_pusher": null
         }
       }
     }
@@ -383,5 +387,6 @@
   "mini_image_path": "/resources/heroes/shiv/mini_icon_shiv.png",
   "normalized_name": "shiv",
   "search_terms": [],
-  "wiki_url": "https://deadlock.wiki/Shiv"
+  "wiki_url": "https://deadlock.wiki/Shiv",
+  "default_build_name": "shiv_general"
 }

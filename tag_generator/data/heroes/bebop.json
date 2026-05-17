@@ -187,7 +187,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 0.5,
           "ally_buff": null,
@@ -278,7 +278,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -558,7 +558,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 0.5,
           "ally_buff": null,
@@ -649,7 +649,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -929,7 +929,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 0.5,
           "ally_buff": null,
@@ -1020,7 +1020,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": 0.25,
           "ally_buff": null,
@@ -1300,7 +1300,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -1391,7 +1391,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,

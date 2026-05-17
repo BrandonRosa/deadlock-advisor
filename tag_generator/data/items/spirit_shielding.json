@@ -6,7 +6,7 @@
   "tier": 1600,
   "upgrades_from": [],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": null,
@@ -55,7 +55,7 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": null,
+      "high_max_hp": 0.15,
       "horizontal_mobility": 0.5,
       "hybrid_damage_usage": null,
       "interrupt": null,
@@ -82,7 +82,7 @@
       "spawn_minions": null,
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
-      "spirit_burst_resistance": 0.5,
+      "spirit_burst_resistance": 1,
       "spirit_continuous_damage": null,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": 0.75,
@@ -90,13 +90,17 @@
       "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,
-      "spirit_resistance": 0.33,
+      "spirit_resistance": 0.5,
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.05
+      "vertical_mobility": 0.05,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Spirit_Shielding"
+  "wiki_url": "https://deadlock.wiki/Spirit_Shielding",
+  "compare_to": [
+    "weapon_shielding"
+  ]
 }

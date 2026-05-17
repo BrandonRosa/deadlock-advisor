@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Shrink_Ray",
   "image_path": "/resources/items/shrink_ray/shrink_ray.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

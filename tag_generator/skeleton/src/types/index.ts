@@ -35,9 +35,9 @@ export type TagWeights = Record<string, /* TODO: number | string | null */ never
 // BUILD VALUES
 // A hero build has FOUR sets of TagWeights — one per relationship.
 //   ally_weight  : how much this build cares about ally traits
-//   self_weight  : how much this build benefits from items for itself
+//   item_affinity  : how much this build benefits from items for itself
 //   enemy_weight : how much this build counters enemy traits
-//   self_score   : this build's own strengths/weaknesses (used by item scoring)
+//   playstyle_score   : this build's own strengths/weaknesses (used by item scoring)
 // -----------------------------------------------------------
 export interface BuildValues {
   // TODO: add all four fields — all are TagWeights
@@ -86,7 +86,7 @@ export type ItemCategory = /* TODO: 'Weapon' | ... */ never;
 // Fields in the JSON:
 //   name, normalized_name, category, tier,
 //   image_path, wiki_url, remarks, upgrades_from, values
-// NOTE: values is an object with ONE field: self_score (TagWeights)
+// NOTE: values is an object with ONE field: playstyle_score (TagWeights)
 //
 // NEW: compare_to — optional list of item keys to compare against
 //      in the item editor weight table.
@@ -96,7 +96,7 @@ export interface Item {
   normalized_name: string;
   // TODO: remaining fields
   // HINT: upgrades_from is string[]  (list of item keys this one upgrades from)
-  // HINT: values is  { self_score: TagWeights }
+  // HINT: values is  { playstyle_score: TagWeights }
   compare_to?: string[];   // item keys shown as comparison columns in the editor
 }
 

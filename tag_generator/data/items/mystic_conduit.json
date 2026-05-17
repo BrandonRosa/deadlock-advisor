@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Mystic_Conduit",
   "image_path": "/resources/items/mystic_conduit/mystic_conduit.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

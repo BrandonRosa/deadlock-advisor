@@ -6,7 +6,7 @@
   "remarks": "Use against spirit heavy characters to squash their damage. ",
   "tier": 1600,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,

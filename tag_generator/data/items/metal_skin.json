@@ -5,7 +5,7 @@
   "normalized_name": "metal_skin",
   "tier": 3200,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.15,
       "ally_buff": null,
       "anti_heal": null,

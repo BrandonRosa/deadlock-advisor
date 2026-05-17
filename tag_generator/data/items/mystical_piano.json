@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Mystical_Piano",
   "image_path": "/resources/items/mystical_piano/mystical_piano.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

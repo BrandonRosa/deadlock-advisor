@@ -5,7 +5,7 @@
   "normalized_name": "electric_slippers",
   "tier": 9999,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.75,
       "ally_buff": null,
       "anti_heal": null,
