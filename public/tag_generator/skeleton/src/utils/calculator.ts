@@ -5,14 +5,14 @@
 //
 // THE ALGORITHM (in plain English):
 //   For each tag in the game:
-//     item.values.self_score[tag]  = how much the item provides this stat
+//     item.values.playstyle_score[tag]  = how much the item provides this stat
 //     build.values.ally_weight[tag]  = how much this build wants it for ally synergy
-//     build.values.self_weight[tag]  = how much this build wants it for itself
+//     build.values.item_affinity[tag]  = how much this build wants it for itself
 //     build.values.enemy_weight[tag] = how much this build uses it to counter enemies
 //
 //   Item total score =
 //     ( Σ(item[tag] × build.ally_weight[tag])  × allyMult
-//     + Σ(item[tag] × build.self_weight[tag])
+//     + Σ(item[tag] × build.item_affinity[tag])
 //     + Σ(item[tag] × build.enemy_weight[tag]) × enemyMult
 //     ) × tierMultiplier
 //
@@ -104,11 +104,11 @@ export function scoreItem(
   resolved: /* TODO: ResolvedBuildValues */ never,
   config:   CalculatorConfig = { allyMult: 1.0, enemyMult: 1.0 }
 ): ItemScore {
-  // TODO: Get the item's self_score weights: item.values.self_score
+  // TODO: Get the item's playstyle_score weights: item.values.playstyle_score
   //       Cast to Record<string, number | null> — item scores are never strings.
 
   // TODO: allyScore  = dotProduct(resolved.ally_weight,  itemScores)
-  // TODO: selfScore  = dotProduct(resolved.self_weight,  itemScores)
+  // TODO: selfScore  = dotProduct(resolved.item_affinity,  itemScores)
   // TODO: enemyScore = dotProduct(resolved.enemy_weight, itemScores)
 
   // TODO: Get the tier multiplier: TIER_MULTIPLIERS[item.tier] ?? 1.0
@@ -134,11 +134,11 @@ export function scoreBuild(
   //
   // For each ally hero, for each of that ally's builds:
   //   const allyResolved = resolveBuildValues(allyBuild, allyHero.builds)
-  //   score += dotProduct(resolved.ally_weight, allyResolved.self_score)
+  //   score += dotProduct(resolved.ally_weight, allyResolved.playstyle_score)
   //
   // For each enemy hero, for each of that enemy's builds:
   //   const enemyResolved = resolveBuildValues(enemyBuild, enemyHero.builds)
-  //   score += dotProduct(resolved.enemy_weight, enemyResolved.self_score)
+  //   score += dotProduct(resolved.enemy_weight, enemyResolved.playstyle_score)
   //
   // TODO: return score
   return 0; // placeholder

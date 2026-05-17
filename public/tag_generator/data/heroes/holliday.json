@@ -187,7 +187,7 @@
           "ult_focused": null,
           "vertical_mobility": -0.15
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 1.5,
           "ally_buff": null,
@@ -278,7 +278,7 @@
           "ult_focused": null,
           "vertical_mobility": 1
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": 0.75,
           "ally_buff": null,

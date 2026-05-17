@@ -187,7 +187,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 0.33,
           "ally_buff": null,
@@ -278,7 +278,7 @@
           "spirit_lifesteal": null,
           "bullet_lifesteal": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": 0.15,
           "ally_buff": null,

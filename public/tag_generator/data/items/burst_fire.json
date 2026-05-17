@@ -9,7 +9,7 @@
     "rapid_rounds"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,

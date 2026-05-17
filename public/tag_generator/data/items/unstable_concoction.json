@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Unstable_Concoction",
   "image_path": "/resources/items/unstable_concoction/unstable_concoction.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

@@ -349,7 +349,7 @@ npx shadcn@latest add button input label badge dialog select tabs card table sli
 
     <div class="hint box">
       <div class="box-lbl">Hint — BuildValues</div>
-      <p>A hero build's <code>values</code> field contains four maps, all of type <code>TagWeights</code>: <code>ally_weight</code>, <code>self_weight</code>, <code>enemy_weight</code>, <code>self_score</code>. Open abrams.json and look at the <code>builds[0].values</code> structure.</p>
+      <p>A hero build's <code>values</code> field contains four maps, all of type <code>TagWeights</code>: <code>ally_weight</code>, <code>item_affinity</code>, <code>enemy_weight</code>, <code>playstyle_score</code>. Open abrams.json and look at the <code>builds[0].values</code> structure.</p>
     </div>
 
     <div class="checklist">
@@ -669,7 +669,7 @@ useEffect(() =&gt; {
 
     <div class="concept box">
       <div class="box-lbl">Immutable nested updates</div>
-      <p>Changing one weight deep inside <code>hero.builds[i].values.self_score[tagCode]</code> requires spreading at every level. The skeleton file has the exact pattern written out in the comment at the top. Key rule: <strong>never mutate in place.</strong></p>
+      <p>Changing one weight deep inside <code>hero.builds[i].values.playstyle_score[tagCode]</code> requires spreading at every level. The skeleton file has the exact pattern written out in the comment at the top. Key rule: <strong>never mutate in place.</strong></p>
     </div>
 
     <div class="hint box">

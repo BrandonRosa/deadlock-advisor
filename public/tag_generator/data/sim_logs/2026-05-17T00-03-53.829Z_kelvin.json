@@ -1,0 +1,144 @@
+{
+  "hero": "kelvin",
+  "build_idx": 1,
+  "build_name": "Beam Damage Kelvin (Beam>Path>Ball)",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "kelvin",
+    "lash",
+    "mo_&_krill",
+    "haze",
+    "drifter",
+    "venator"
+  ],
+  "enemies": [
+    "silver",
+    "graves",
+    "mcginnis",
+    "apollo",
+    "paradox"
+  ],
+  "self": "kelvin",
+  "outcome": "loss",
+  "feel": "neutral",
+  "notes": "Didnt get to pop off, viper was a menace",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "trophy_collector",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "buy",
+      "key": "enduring_speed",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "superior_duration",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3200,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "buy",
+      "key": "enchanters_emblem",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4800,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    }
+  ],
+  "owned": [
+    "mystic_expansion",
+    "trophy_collector",
+    "arcane_surge",
+    "enduring_speed",
+    "superior_duration",
+    "mystic_vulnerability",
+    "enchanters_emblem",
+    "boundless_spirit"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 18400,
+  "slots_unlocked": 0,
+  "ts": "2026-05-17T00:03:53.829Z"
+}

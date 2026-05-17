@@ -95,9 +95,9 @@ def init_hero(manifest, nname, tags):
             "build_description_eng":   "",
             "values": {
                 "ally_weight":  blank_vals(tags),
-                "self_weight":  blank_vals(tags),
+                "item_affinity":  blank_vals(tags),
                 "enemy_weight": blank_vals(tags),
-                "self_score":   blank_vals(tags),
+                "playstyle_score":   blank_vals(tags),
             }
         }]
     }
@@ -112,7 +112,7 @@ def init_item(manifest, nname, tags):
         "wiki_url":        manifest.get("wiki_url", ""),
         "image_path":      manifest.get("image", ""),
         "values": {
-            "self_score": blank_vals(tags)
+            "playstyle_score": blank_vals(tags)
         }
     }
 
@@ -286,9 +286,9 @@ def create_hero():
             "build_description_eng": "",
             "values": {
                 "ally_weight":  blank_vals(tags),
-                "self_weight":  blank_vals(tags),
+                "item_affinity":  blank_vals(tags),
                 "enemy_weight": blank_vals(tags),
-                "self_score":   blank_vals(tags),
+                "playstyle_score":   blank_vals(tags),
             }
         }]
     }

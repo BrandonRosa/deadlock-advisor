@@ -6,7 +6,7 @@
   "tier": 6400,
   "upgrades_from": [],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": 0.1,

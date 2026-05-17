@@ -1,0 +1,171 @@
+{
+  "hero": "grey_talon",
+  "build_idx": 1,
+  "build_name": "Charged Shot",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "grey_talon",
+    "apollo",
+    "lash",
+    "dynamo",
+    "haze",
+    "shiv"
+  ],
+  "enemies": [
+    "mina",
+    "celeste",
+    "mcginnis",
+    "paradox",
+    "victor",
+    "silver"
+  ],
+  "self": "grey_talon",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Not bad. Wouldve been better with echo shard instead of refresher",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "enchanters_emblem",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "compress_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "mystic_reverb",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 6400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 14,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 4800,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "enduring_speed",
+      "col": "counter",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 3200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8000,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 22,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 9600,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "refresher",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "enchanters_emblem",
+    "compress_cooldown",
+    "mystic_reverb",
+    "boundless_spirit",
+    "enduring_speed",
+    "spirit_burn",
+    "rapid_recharge",
+    "refresher"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 34400,
+  "slots_unlocked": 0,
+  "ts": "2026-05-17T08:23:34.787Z"
+}

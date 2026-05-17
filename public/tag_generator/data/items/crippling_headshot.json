@@ -9,7 +9,7 @@
     "weakening_headshot"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": 0.05,

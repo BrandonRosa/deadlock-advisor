@@ -189,7 +189,7 @@
           "vertical_mobility": -0.75,
           "lane_pusher": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": 1,
           "ally_buff": null,
@@ -281,7 +281,7 @@
           "vertical_mobility": 0.5,
           "lane_pusher": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": null,
           "aerial": 0.2,
           "ally_buff": null,
@@ -565,7 +565,7 @@
           "vertical_mobility": "+0.5",
           "lane_pusher": null
         },
-        "self_score": {
+        "playstyle_score": {
           "ability_spam": null,
           "aerial": null,
           "ally_buff": null,
@@ -657,7 +657,7 @@
           "vertical_mobility": null,
           "lane_pusher": null
         },
-        "self_weight": {
+        "item_affinity": {
           "ability_spam": -0.151,
           "aerial": 1.243,
           "ally_buff": -0.137,

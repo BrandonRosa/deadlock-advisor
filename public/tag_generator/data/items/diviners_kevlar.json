@@ -6,7 +6,7 @@
   "remarks": "",
   "tier": 6400,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": null,
       "anti_heal": null,

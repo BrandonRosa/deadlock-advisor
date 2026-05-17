@@ -5,7 +5,7 @@
   "normalized_name": "suppressor",
   "tier": 1600,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,

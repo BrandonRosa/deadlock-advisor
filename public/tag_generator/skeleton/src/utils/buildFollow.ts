@@ -48,9 +48,9 @@ export interface ParsedWeight {
 // ------------------------------------------------------------
 export interface ResolvedBuildValues {
   ally_weight:  Record<string, number | null>;
-  self_weight:  Record<string, number | null>;
+  item_affinity:  Record<string, number | null>;
   enemy_weight: Record<string, number | null>;
-  self_score:   Record<string, number | null>;
+  playstyle_score:   Record<string, number | null>;
 }
 
 // ------------------------------------------------------------
@@ -149,7 +149,7 @@ export function resolveBuildValues(
   //   else:
   //     parentResolved = blankResolved(build.values)  ← no parent
 
-  // TODO: const COLS = ['ally_weight', 'self_weight', 'enemy_weight', 'self_score'] as const
+  // TODO: const COLS = ['ally_weight', 'item_affinity', 'enemy_weight', 'playstyle_score'] as const
   // TODO: For each col in COLS, for each tagCode in build.values[col]:
   //   const { value, rel } = parseWeightEntry(build.values[col][tagCode])
   //   merged[col][tagCode] = applyRelation(parentResolved[col][tagCode] ?? null, value, rel)
@@ -157,9 +157,9 @@ export function resolveBuildValues(
 
   return {
     ally_weight:  {},
-    self_weight:  {},
+    item_affinity:  {},
     enemy_weight: {},
-    self_score:   {},
+    playstyle_score:   {},
   }; // placeholder
 }
 
@@ -169,9 +169,9 @@ function blankResolved(values: BuildValues): ResolvedBuildValues {
     Object.fromEntries(Object.keys(tw).map(k => [k, null]));
   return {
     ally_weight:  blank(values.ally_weight),
-    self_weight:  blank(values.self_weight),
+    item_affinity:  blank(values.item_affinity),
     enemy_weight: blank(values.enemy_weight),
-    self_score:   blank(values.self_score),
+    playstyle_score:   blank(values.playstyle_score),
   };
 }
 

@@ -11,7 +11,7 @@
     "healing_rite"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": 0.05,
       "ally_buff": 0.15,

@@ -5,7 +5,7 @@
 //
 // COMPLEXITY vs ItemDetailPage:
 //   - Heroes have MULTIPLE builds (not just one weight column)
-//   - Each build has FOUR weight columns (ally/self/enemy/self_score)
+//   - Each build has FOUR weight columns (ally/self/enemy/playstyle_score)
 //   - Builds can be added and deleted
 //   - Builds can follow another build (inherit + override values)
 //   - Same local-copy-then-save pattern applies
@@ -23,7 +23,7 @@
 //         ...b,
 //         values: {
 //           ...b.values,
-//           [weightKey]: {          ← 'ally_weight' | 'self_weight' etc.
+//           [weightKey]: {          ← 'ally_weight' | 'item_affinity' etc.
 //             ...b.values[weightKey],
 //             [tagCode]: newValue,
 //           }
@@ -58,9 +58,9 @@ import { useState, useEffect } from 'react';
 // Column definitions for the weight table
 const WEIGHT_COLUMNS: { key: keyof BuildValues; label: string }[] = [
   { key: 'ally_weight',  label: 'Ally' },
-  { key: 'self_weight',  label: 'Self' },
+  { key: 'item_affinity',  label: 'Self' },
   { key: 'enemy_weight', label: 'Enemy' },
-  { key: 'self_score',   label: 'Score' },
+  { key: 'playstyle_score',   label: 'Score' },
 ];
 
 // -----------------------------------------------------------
@@ -188,7 +188,7 @@ export default function HeroDetailPage() {
   // --- Weight edit ---
   function handleWeightChange(
     buildIdx: number,
-    weightKey: keyof BuildValues,  // 'ally_weight' | 'self_weight' | 'enemy_weight' | 'self_score'
+    weightKey: keyof BuildValues,  // 'ally_weight' | 'item_affinity' | 'enemy_weight' | 'playstyle_score'
     tagCode: string,
     newRaw: number | string | null  // already formatted by WeightCell/GeneralBuildCell
   ) {
@@ -228,9 +228,9 @@ export default function HeroDetailPage() {
     //   followed_build: undefined
     //   values: {
     //     ally_weight:  { ...all tags from data.tags set to null }
-    //     self_weight:  { ... same }
+    //     item_affinity:  { ... same }
     //     enemy_weight: { ... same }
-    //     self_score:   { ... same }
+    //     playstyle_score:   { ... same }
     //   }
     //
     // HINT to create an all-null TagWeights:

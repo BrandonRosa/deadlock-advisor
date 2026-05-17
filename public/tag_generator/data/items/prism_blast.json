@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Prism_Blast",
   "image_path": "/resources/items/prism_blast/prism_blast.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

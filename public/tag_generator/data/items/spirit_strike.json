@@ -5,7 +5,7 @@
   "normalized_name": "spirit_strike",
   "tier": 800,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.5,
       "ally_buff": null,
       "anti_air": null,

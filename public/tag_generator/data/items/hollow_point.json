@@ -5,7 +5,7 @@
   "normalized_name": "hollow_point",
   "tier": 3200,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": null,
       "anti_heal": null,

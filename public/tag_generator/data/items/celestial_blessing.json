@@ -5,7 +5,7 @@
   "normalized_name": "celestial_blessing",
   "tier": 9999,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": 0.25,
       "anti_heal": null,

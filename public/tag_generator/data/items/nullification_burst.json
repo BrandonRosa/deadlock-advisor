@@ -5,7 +5,7 @@
   "normalized_name": "nullification_burst",
   "tier": 9999,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": -0.66,
       "ally_buff": null,
       "anti_heal": 1.15,

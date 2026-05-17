@@ -8,7 +8,7 @@
     "compress_cooldown"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": 0.5,
       "aerial": null,
       "ally_buff": null,

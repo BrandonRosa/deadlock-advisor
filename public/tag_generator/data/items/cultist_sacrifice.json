@@ -9,7 +9,7 @@
     "monster_rounds"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
       "ally_buff": null,

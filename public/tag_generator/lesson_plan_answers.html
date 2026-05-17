@@ -125,9 +125,9 @@
 
 <span class="kw">export interface</span> <span class="ty">BuildValues</span> {
   ally_weight:   <span class="ty">TagWeights</span>;
-  self_weight:   <span class="ty">TagWeights</span>;
+  item_affinity:   <span class="ty">TagWeights</span>;
   enemy_weight:  <span class="ty">TagWeights</span>;
-  self_score:    <span class="ty">TagWeights</span>;
+  playstyle_score:    <span class="ty">TagWeights</span>;
 }
 
 <span class="kw">export interface</span> <span class="ty">HeroBuild</span> {
@@ -159,7 +159,7 @@
   remarks:          <span class="kw">string</span>;
   upgrades_from:    <span class="kw">string</span>[];
   values: {
-    self_score: <span class="ty">TagWeights</span>;
+    playstyle_score: <span class="ty">TagWeights</span>;
   };
 }
 
@@ -551,12 +551,12 @@
   build:  <span class="ty">HeroBuild</span>,
   config: <span class="ty">CalculatorConfig</span> = DEFAULT_CONFIG
 ): <span class="ty">ItemScore</span> {
-  <span class="kw">const</span> s    = item.values.self_score;
+  <span class="kw">const</span> s    = item.values.playstyle_score;
   <span class="kw">const</span> v    = build.values;
   <span class="kw">const</span> tier = TIER_MULTIPLIERS[item.tier] ?? 1.0;
 
   <span class="kw">const</span> allyScore  = <span class="fn">dotProduct</span>(v.ally_weight,  s);
-  <span class="kw">const</span> selfScore  = <span class="fn">dotProduct</span>(v.self_weight,  s);
+  <span class="kw">const</span> selfScore  = <span class="fn">dotProduct</span>(v.item_affinity,  s);
   <span class="kw">const</span> enemyScore = <span class="fn">dotProduct</span>(v.enemy_weight, s);
   <span class="kw">const</span> total      = (allyScore * config.allyMult + selfScore + enemyScore * config.enemyMult) * tier;
 
@@ -571,12 +571,12 @@
   <span class="kw">let</span> score = 0;
   <span class="kw">for</span> (<span class="kw">const</span> ally <span class="kw">of</span> allies) {
     <span class="kw">for</span> (<span class="kw">const</span> ab <span class="kw">of</span> ally.builds) {
-      score += <span class="fn">dotProduct</span>(build.values.ally_weight, ab.values.self_score);
+      score += <span class="fn">dotProduct</span>(build.values.ally_weight, ab.values.playstyle_score);
     }
   }
   <span class="kw">for</span> (<span class="kw">const</span> enemy <span class="kw">of</span> enemies) {
     <span class="kw">for</span> (<span class="kw">const</span> eb <span class="kw">of</span> enemy.builds) {
-      score += <span class="fn">dotProduct</span>(build.values.enemy_weight, eb.values.self_score);
+      score += <span class="fn">dotProduct</span>(build.values.enemy_weight, eb.values.playstyle_score);
     }
   }
   <span class="kw">return</span> score;
@@ -771,7 +771,7 @@
         <span class="kw">const</span> s = scoredMap[k];
         <span class="kw">if</span> (mainOwned.has(k) || globalUsed.has(k) || local.has(k)) <span class="kw">continue</span>;
         <span class="kw">if</span> (!itemMap[k] || itemMap[k].tier &gt; remaining) <span class="kw">continue</span>;
-        <span class="kw">if</span> ((s.item.values.self_score[tag] ?? 0) &lt;= 0) <span class="kw">continue</span>;
+        <span class="kw">if</span> ((s.item.values.playstyle_score[tag] ?? 0) &lt;= 0) <span class="kw">continue</span>;
         <span class="kw">const</span> score = key === <span class="st">'ally'</span> ? s.allyScore * 0.75 : s.enemyScore * 0.75;
         <span class="kw">if</span> (score &gt; bestScore &amp;&amp; score &gt; 0) { bestScore = score; bestKey = k; }
       }
@@ -1219,7 +1219,7 @@ export default function ItemDetailPage() {
 
   // Local editable copy — only written to the store when user clicks Save
   const [weights, setWeights] = useState(
-    () =&gt; ({ ...item?.values.self_score ?? {} })
+    () =&gt; ({ ...item?.values.playstyle_score ?? {} })
   );
   const [saved, setSaved] = useState(false);
 
@@ -1227,7 +1227,7 @@ export default function ItemDetailPage() {
 
   function handleSave() {
     if (!item) return;
-    updateItem({ ...item, values: { self_score: weights } });
+    updateItem({ ...item, values: { playstyle_score: weights } });
     setSaved(true);
     setTimeout(() =&gt; setSaved(false), 2000);
   }
@@ -1257,7 +1257,7 @@ export default function ItemDetailPage() {
 
       &lt;div className="bg-slate-800 rounded-lg overflow-hidden mb-6"&gt;
         &lt;div className="bg-slate-700 px-4 py-2 text-sm font-semibold"&gt;
-          Tag Weights — self_score
+          Tag Weights — playstyle_score
         &lt;/div&gt;
         &lt;div className="divide-y divide-slate-700"&gt;
           {data.tags.map(tag =&gt; {
@@ -1303,7 +1303,7 @@ export default function ItemDetailPage() {
     <span class="file-tag tag-write">You Write</span>
     <span class="file-path">src/pages/HeroDetailPage.tsx</span>
   </div>
-  <div class="file-desc">Per-build weight editor for a hero. Four weight grids per build (ally/self/enemy weights + self_score). Module 10.</div>
+  <div class="file-desc">Per-build weight editor for a hero. Four weight grids per build (ally/self/enemy weights + playstyle_score). Module 10.</div>
 <pre>
 // src/pages/HeroDetailPage.tsx
 import { useState } from 'react';
@@ -1317,9 +1317,9 @@ import type { HeroBuild } from '../types';
 // The four weight tables every build has
 const WEIGHT_FIELDS = [
   { key: 'ally_weight'  as const, label: 'Ally Weight'  },
-  { key: 'self_weight'  as const, label: 'Self Weight'  },
+  { key: 'item_affinity'  as const, label: 'Self Weight'  },
   { key: 'enemy_weight' as const, label: 'Enemy Weight' },
-  { key: 'self_score'   as const, label: 'Self Score'   },
+  { key: 'playstyle_score'   as const, label: 'Self Score'   },
 ];
 
 export default function HeroDetailPage() {

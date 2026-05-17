@@ -6,7 +6,7 @@
   "wiki_url": "https://deadlock.wiki/Omnicharge_Signet",
   "image_path": "/resources/items/omnicharge_signet/omnicharge_signet.png",
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "pure_damage": null,
       "spirit_damage": null,
       "bullet_damage": null,

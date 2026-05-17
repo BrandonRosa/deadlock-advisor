@@ -5,7 +5,7 @@
   "normalized_name": "divine_barrier",
   "tier": 6400,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": null,
       "ally_buff": 1.15,
       "anti_heal": null,

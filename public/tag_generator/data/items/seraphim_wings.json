@@ -5,7 +5,7 @@
   "normalized_name": "seraphim_wings",
   "tier": 9999,
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": 2,
       "ally_buff": null,
       "anti_heal": null,

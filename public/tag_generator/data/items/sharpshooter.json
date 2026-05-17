@@ -9,7 +9,7 @@
     "long_range"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "aerial": 0.15,
       "ally_buff": null,
       "anti_air": null,

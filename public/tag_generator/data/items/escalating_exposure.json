@@ -9,7 +9,7 @@
     "mystic_vulnerability"
   ],
   "values": {
-    "self_score": {
+    "playstyle_score": {
       "ability_spam": 0.1,
       "aerial": null,
       "ally_buff": null,
