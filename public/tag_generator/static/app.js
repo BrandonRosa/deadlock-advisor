@@ -1754,10 +1754,10 @@ function renderItemGrid() {
   }
 }
 
-// Category filter
-document.querySelectorAll('.cat-btn').forEach(btn => {
+// Category filter (only on items subpage, not on baselines subpage)
+document.querySelectorAll('#item-cat-tabs .cat-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#item-cat-tabs .cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     S.itemCat = btn.dataset.cat;
     renderItemGrid();
@@ -1769,6 +1769,105 @@ document.getElementById('item-search').addEventListener('input', e => {
   S.itemSearch = e.target.value;
   renderItemGrid();
 });
+
+// Items / Baselines sub-page tabs
+document.querySelectorAll('#item-subpage-tabs .cat-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('#item-subpage-tabs .cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const sub = btn.dataset.subpage;
+    const grid = document.getElementById('item-grid');
+    const table = document.getElementById('baseline-table-container');
+    if (sub === 'baselines') {
+      grid.style.display = 'none';
+      table.style.display = '';
+      await renderBaselineTable();
+    } else {
+      grid.style.display = '';
+      table.style.display = 'none';
+    }
+  });
+});
+
+async function renderBaselineTable() {
+  const container = document.getElementById('baseline-table-container');
+  if (!S._baselineTable) {
+    container.innerHTML = '<div style="color:var(--muted)">Loading…</div>';
+    try {
+      S._baselineTable = await api.get('/api/baselines/table');
+    } catch (e) {
+      container.innerHTML = '<div style="color:#c66">Failed to load baseline table.</div>';
+      return;
+    }
+  }
+  const t = S._baselineTable;
+  if (!t || !t.baselines || Object.keys(t.baselines).length === 0) {
+    container.innerHTML = '<div style="color:var(--muted)">No baseline table generated yet. Run <code>node scripts/wiki_audit.cjs --phase=all</code>.</div>';
+    return;
+  }
+  const tiers = [800, 1600, 3200, 6400];
+  const bands = ['1.0', '1.5', '2.0'];
+  const stats = Object.keys(t.baselines).sort();
+
+  function cellContent(stat, tier) {
+    const slot = t.baselines[stat][`tier_${tier}`];
+    if (!slot) return '<td class="bl-cell bl-na">—</td>';
+    if (slot.insufficient_data) return '<td class="bl-cell bl-na" title="no data">∅</td>';
+    if (!slot.bands) return '<td class="bl-cell bl-na">—</td>';
+    const cells = bands.map(b => {
+      const info = slot.bands[b];
+      if (!info) return `<span class="bl-band bl-na">—</span>`;
+      if (info.not_best_in_game) return `<span class="bl-band bl-na" title="not best-in-game (tier max=${info.tier_max}, game max=${info.game_max})">—</span>`;
+      const derived = info.derived ? ' (~)' : '';
+      const unit = slot.unit || '';
+      const curScore = info.current_score_at_band ? info.current_score_at_band.mean : null;
+      const tooltip = `Score ${b}: ${info.raw}${unit}${derived}` + (curScore != null ? ` | current avg score: ${curScore}` : '');
+      const cls = 'bl-band bl-band-' + b.replace('.','_') + (info.derived ? ' bl-derived' : '');
+      return `<span class="${cls}" title="${tooltip}">${b}: ${info.raw}${unit}${derived}</span>`;
+    }).join(' ');
+    return `<td class="bl-cell">${cells}</td>`;
+  }
+
+  let html = `
+    <style>
+      .bl-table { border-collapse: collapse; font-size: 13px; }
+      .bl-table th, .bl-table td { border: 1px solid var(--border, #333); padding: 4px 8px; vertical-align: top; }
+      .bl-table th { background: var(--panel, #1a1d24); position: sticky; top: 0; z-index: 1; }
+      .bl-cell { white-space: nowrap; }
+      .bl-band { display: inline-block; margin-right: 8px; padding: 1px 6px; border-radius: 3px; background: rgba(120,180,90,0.15); }
+      .bl-band-1_5 { background: rgba(180,160,90,0.18); }
+      .bl-band-2_0 { background: rgba(200,120,80,0.22); }
+      .bl-band.bl-derived { background: rgba(120,120,200,0.18); }
+      .bl-band.bl-na { background: transparent; color: var(--muted); }
+      .bl-stat { font-weight: 600; }
+      .bl-tag { color: var(--muted); font-size: 11px; }
+    </style>
+    <div style="margin-bottom:8px; color:var(--muted); font-size:12px">
+      Methodology: 1.0 = high for tier (p50), 1.5 = very good for tier (p75), 2.0 = best in the entire game (cross-tier).
+      Effective values: conditional bonuses are uptime-discounted (lowhp=0.30, ambush=duration/cd, per_stack=0.5×max, etc.).
+      Cells marked <code>(~)</code> are extrapolated from neighboring tiers. Global tier ratio: <b>${t.global_tier_ratio}</b>.
+    </div>
+    <table class="bl-table">
+      <thead>
+        <tr>
+          <th>Stat</th>
+          ${tiers.map(tr => `<th>T${[800,1600,3200,6400].indexOf(tr)+1} (${tr})</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${stats.map(stat => {
+          const tag = t.stat_to_tag_mapping[stat] && t.stat_to_tag_mapping[stat].tag;
+          const tagDisp = tag == null ? '(unmapped)' : (Array.isArray(tag) ? tag.join('+') : tag);
+          return `<tr>
+            <td><span class="bl-stat">${stat}</span><br><span class="bl-tag">→ ${tagDisp}</span></td>
+            ${tiers.map(tr => cellContent(stat, tr)).join('')}
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+  container.innerHTML = html;
+}
 
 // ── Item Edit ─────────────────────────────────────────────────────────────────
 async function openItemEdit(name) {
@@ -1815,6 +1914,116 @@ function renderItemEditPage() {
   setItemDirty(false);
   renderCompareTo();
   renderItemTagTable();
+  renderBaselineComparePanel();
+}
+
+async function renderBaselineComparePanel() {
+  const panel = document.getElementById('baseline-compare-panel');
+  if (!panel) return;
+  const it = S.currentItem;
+  if (!it) { panel.innerHTML = ''; return; }
+  // Lazy-load baseline table + scrape cache (cached on S)
+  if (!S._baselineTable) {
+    try { S._baselineTable = await api.get('/api/baselines/table'); } catch (e) { S._baselineTable = null; }
+  }
+  if (!S._scrapeCache) {
+    try { S._scrapeCache = await api.get('/api/baselines/scrape_cache'); } catch (e) { S._scrapeCache = null; }
+  }
+  const t = S._baselineTable;
+  const sc = S._scrapeCache;
+  if (!t || !t.baselines || !sc || !sc.items) {
+    panel.innerHTML = '<div style="color:var(--muted); font-size:12px">Baseline comparison unavailable — run <code>node scripts/wiki_audit.cjs --phase=all</code> to generate.</div>';
+    return;
+  }
+  // Look up the normalized item in scrape cache
+  const normItem = sc.items.find(x => x.key === it.normalized_name || x.name === it.name);
+  if (!normItem || !normItem.has_wiki_entry) {
+    panel.innerHTML = '<div style="color:var(--muted); font-size:12px">No wiki entry for this item — baseline comparison not available.</div>';
+    return;
+  }
+  const mapped = normItem.mapped_stats || {};
+  const ps = (it.values && it.values.playstyle_score) || {};
+  const tier = it.tier;
+  const tierKey = `tier_${tier}`;
+
+  let rows = [];
+  for (const [stat, contribs] of Object.entries(mapped)) {
+    const slot = t.baselines[stat] && t.baselines[stat][tierKey];
+    if (!slot || !slot.bands) continue;
+    const effSum = contribs.reduce((s, r) => s + (r.effective != null ? r.effective : r.raw), 0);
+    const rawSum = contribs.reduce((s, r) => s + r.raw, 0);
+    const unit = contribs[0].unit || '';
+    // Figure out which band the effective value falls into
+    const b1 = slot.bands['1.0'] && slot.bands['1.0'].raw;
+    const b15 = slot.bands['1.5'] && slot.bands['1.5'].raw;
+    const b2 = slot.bands['2.0'] && !slot.bands['2.0'].not_best_in_game ? slot.bands['2.0'].raw : null;
+    let band = '<1.0';
+    if (b2 != null && effSum >= b2 * 0.95) band = '2.0';
+    else if (b15 != null && effSum >= b15 * 0.95) band = '1.5';
+    else if (b1 != null && effSum >= b1 * 0.95) band = '1.0';
+    // Find the tag's current score
+    const mapping = t.stat_to_tag_mapping[stat];
+    const tags = mapping ? (Array.isArray(mapping.tag) ? mapping.tag : (mapping.tag ? [mapping.tag] : [])) : [];
+    const currentScores = tags.map(tg => ({ tag: tg, val: ps[tg] }));
+    const expected = band === '<1.0' ? 0.5 : parseFloat(band);
+    const anyClose = currentScores.some(c => c.val != null && Math.abs(c.val - expected) <= 0.3);
+    const flag = anyClose ? '✓' : '⚠';
+    const flagColor = anyClose ? '#7ab87a' : '#c89060';
+    const detail = contribs.map(c => {
+      if (c.context && c.context !== 'passive') {
+        return `${c.wiki_key}=${c.raw}${c.unit} (${c.context}, uptime=${c.uptime})`;
+      }
+      return `${c.wiki_key}=${c.raw}${c.unit}`;
+    }).join(', ');
+    rows.push(`
+      <tr>
+        <td>${stat}</td>
+        <td style="white-space:nowrap">${detail}</td>
+        <td style="white-space:nowrap">eff=${Math.round(effSum*100)/100}${unit}</td>
+        <td>${[b1!=null?`1.0=${b1}`:'',b15!=null?`1.5=${b15}`:'',b2!=null?`2.0=${b2}`:''].filter(Boolean).join(' / ')}</td>
+        <td><b>${band}</b></td>
+        <td>${currentScores.map(c => `<code>${c.tag}=${c.val ?? 'null'}</code>`).join(' ')}</td>
+        <td style="color:${flagColor}; font-weight:600">${flag}</td>
+      </tr>
+    `);
+  }
+
+  // Synergy suggestions
+  let synergyHtml = '';
+  if (normItem.synergy_suggestions && Object.keys(normItem.synergy_suggestions).length > 0) {
+    const sgRows = Object.entries(normItem.synergy_suggestions).map(([tag, reasons]) => {
+      const v = ps[tag];
+      const flag = (v == null || v === 0) ? '⚠ unscored' : `current=${v}`;
+      return `<tr><td><code>${tag}</code></td><td>${reasons.join('; ')}</td><td>${flag}</td></tr>`;
+    }).join('');
+    synergyHtml = `
+      <div style="margin-top:12px">
+        <div style="font-weight:600; margin-bottom:4px">Synergy tags suggested by conditional bonuses</div>
+        <table style="font-size:12px; border-collapse:collapse; width:100%">
+          <thead><tr><th style="text-align:left; padding:2px 8px">Tag</th><th style="text-align:left; padding:2px 8px">Reason</th><th style="text-align:left; padding:2px 8px">Status</th></tr></thead>
+          <tbody>${sgRows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  panel.innerHTML = `
+    <div style="font-weight:600; font-size:14px; margin-bottom:8px">Baseline comparison (T${{800:1,1600:2,3200:3,6400:4}[tier]})</div>
+    <table style="font-size:12px; border-collapse:collapse; width:100%">
+      <thead style="background:var(--panel, #1a1d24)">
+        <tr>
+          <th style="text-align:left; padding:4px 8px">Stat</th>
+          <th style="text-align:left; padding:4px 8px">Wiki contribution</th>
+          <th style="text-align:left; padding:4px 8px">Effective</th>
+          <th style="text-align:left; padding:4px 8px">Tier bands</th>
+          <th style="text-align:left; padding:4px 8px">Falls in</th>
+          <th style="text-align:left; padding:4px 8px">Current score</th>
+          <th style="text-align:left; padding:4px 8px">Match</th>
+        </tr>
+      </thead>
+      <tbody>${rows.join('') || '<tr><td colspan="7" style="color:var(--muted); padding:8px">No mappable wiki stats for this item.</td></tr>'}</tbody>
+    </table>
+    ${synergyHtml}
+  `;
 }
 
 function renderCompareTo() {
@@ -2412,7 +2621,7 @@ async function runCalculation() {
     const idx = defaultBuildIdxFor(name);
     if (idx !== null) MATCH.selectedBuilds[name] = idx;
   });
-  MATCH.itemData = await api.get('/api/items/all');
+  MATCH.itemData = (await api.get('/api/items/all')).filter(it => !it.synthetic);
   MATCH.results = computeResults();
   if (MATCH.autoRegen) autoRegenPromote();
   renderCalcSummary();
@@ -7850,7 +8059,7 @@ async function runQAScenario(id) {
     MATCH.heroData[name] = await api.get(`/api/heroes/${name}`);
     cacheHeroBuilds(name);
   }
-  if (!MATCH.itemData.length) MATCH.itemData = await api.get('/api/items/all');
+  if (!MATCH.itemData.length) MATCH.itemData = (await api.get('/api/items/all')).filter(it => !it.synthetic);
 
   const savedAllies  = MATCH.allies;
   const savedEnemies = MATCH.enemies;

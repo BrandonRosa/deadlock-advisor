@@ -1,0 +1,437 @@
+# Item Anomaly Report
+
+Generated: 2026-05-18T19:07:21.775Z
+
+## 1. Semantic mismatches
+
+Items where a Default-mode wiki stat has no corresponding non-null `playstyle_score` tag.
+
+### High severity (target stat, direct tag null) (43)
+
+- **Arcane Surge** (Spirit T2) — cooldown_reduction: StaminaCooldownReduction=+12 → tag(s) `cooldown_reduction` null/zero
+- **Bullet Resilience** (Vitality T3) — health_regen: OutOfCombatHealthRegen=+3 → tag(s) `self_heal` null/zero
+- **Cheat Death** (Vitality T4) — move_speed: BonusMoveSpeed=0m → tag(s) `horizontal_mobility` null/zero
+- **Counterspell** (Vitality T3) — duration_up: BuffDuration=+6 → tag(s) `duration_dependant` null/zero
+- **Cultist Sacrifice** (Weapon T3) — health_regen: OutOfCombatHealthRegen=+2 → tag(s) `self_heal` null/zero
+- **Cultist Sacrifice** (Weapon T3) — charge_up: BonusAbilityCharges=+1 → tag(s) `charge_dependant` null/zero
+- **Dispel Magic** (Vitality T3) — duration_up: BuffDuration=+3 → tag(s) `duration_dependant` null/zero
+- **Enduring Speed** (Vitality T2) — debuff_resist: SlowResistancePercent=+25 → tag(s) `debuff_resistance` null/zero
+- **Extra Stamina** (Vitality T1) — cooldown_reduction: StaminaCooldownReduction=+12 → tag(s) `cooldown_reduction` null/zero
+- **Fleetfoot** (Weapon T2) — debuff_resist: SlowResistancePercent=+35 → tag(s) `debuff_resistance` null/zero
+- **Frenzy** (Weapon T4) — debuff_resist: FervorStatusResistancePercent=+30 → tag(s) `debuff_resistance` null/zero
+- **Glass Cannon** (Weapon T4) — ammo: BonusClipPerKill=+2 → tag(s) `magazine_size_dependant` null/zero
+- **Glass Cannon** (Weapon T4) — slow: SlowPercent=+30 → tag(s) `movement_slow` null/zero
+- **Golden Goose Egg** (Spirit T1) — health_regen: OutOfCombatHealthRegen=+1 → tag(s) `self_heal` null/zero
+- **Hunters Aura** (Weapon T3) — slow: FireRateSlow=+14 → tag(s) `movement_slow` null/zero
+- **Improved Spirit** (Spirit T2) — sprint_speed: BonusSprintSpeed=+1m → tag(s) `horizontal_mobility` null/zero
+- **Improved Spirit** (Spirit T2) — health: BonusHealth=+75 → tag(s) `high_max_hp` null/zero
+- **Indomitable** (Vitality T4) — bullet_resist: BulletResist=+8, VexBarrierCombatBarrier_Value=+325 → tag(s) `bullet_resistance` null/zero
+- **Juggernaut** (Vitality T4) — debuff_resist: SlowResistancePercent=+50 → tag(s) `debuff_resistance` null/zero
+- **Juggernaut** (Vitality T4) — slow: FireRateSlow=+36 → tag(s) `movement_slow` null/zero
+- **Kinetic Dash** (Weapon T2) — cooldown_reduction: StaminaCooldownReduction=+12 → tag(s) `cooldown_reduction` null/zero
+- **Lifestrike** (Vitality T3) — spirit_lifesteal: LifestealHealPercent_Value=+30 → tag(s) `spirit_lifesteal` null/zero
+- **Majestic Leap** (Vitality T3) — slow: SlowPercent=+40 → tag(s) `movement_slow` null/zero
+- **Majestic Leap** (Vitality T3) — bullet_resist: CombatBarrier_Value=+200 → tag(s) `bullet_resistance` null/zero
+- **Majestic Leap** (Vitality T3) — spirit_resist: CombatBarrier_Value=+200 → tag(s) `spirit_resistance` null/zero
+- **Mystic Reverb** (Spirit T4) — spirit_lifesteal: AbilityLifestealPercentHero=+8 → tag(s) `spirit_lifesteal` null/zero
+- **Reactive Barrier** (Vitality T2) — bullet_resist: VexBarrierCombatBarrier_Value=+325 → tag(s) `bullet_resistance` null/zero
+- **Rebuttal** (Vitality T1) — duration_up: BuffDuration=+6 → tag(s) `duration_dependant` null/zero
+- **Refresher** (Spirit T4) — spirit_resist: TechResist=+14 → tag(s) `spirit_resistance` null/zero
+- **Refresher** (Spirit T4) — bullet_resist: BulletResist=+15 → tag(s) `bullet_resistance` null/zero
+- **Rusted Barrel** (Spirit T1) — slow: FireRateSlow=+32 → tag(s) `movement_slow` null/zero
+- **Scourge** (Spirit T4) — debuff_resist: StatusResistancePercent=+15 → tag(s) `debuff_resistance` null/zero
+- **Shadow Weave** (Weapon T3) — health_regen: OutOfCombatHealthRegen=+5 → tag(s) `self_heal` null/zero
+- **Spellslinger** (Weapon T4) — duration_up: BuffDuration=+18 → tag(s) `duration_dependant` null/zero
+- **Spirit Rend** (Weapon T3) — health: BonusHealth=+75 → tag(s) `high_max_hp` null/zero
+- **Spirit Resilience** (Vitality T3) — health_regen: OutOfCombatHealthRegen=+3 → tag(s) `self_heal` null/zero
+- **Stamina Mastery** (Vitality T3) — cooldown_reduction: StaminaCooldownReduction=+18 → tag(s) `cooldown_reduction` null/zero
+- **Suppressor** (Spirit T2) — slow: FireRateSlow=+28 → tag(s) `movement_slow` null/zero
+- **Surge of Power** (Spirit T3) — move_speed: BonusMoveSpeed=+1.75m → tag(s) `horizontal_mobility` null/zero
+- **Trophy Collector** (Vitality T2) — bullet_damage_pct: NonPlayerBonusWeaponPower=-15 → tag(s) `bullet_damage` null/zero
+- **Veil Walker** (Vitality T3) — health: BonusHealth=+125 → tag(s) `high_max_hp` null/zero
+- **Vortex Web** (Spirit T4) — sprint_speed: BonusSprintSpeed=+0.75m → tag(s) `horizontal_mobility` null/zero
+- **Weighted Shots** (Weapon T3) — cooldown_reduction: StaminaCooldownReduction=-14 → tag(s) `cooldown_reduction` null/zero
+
+### Medium severity (target stat, composite mapping null) (0)
+
+_None._
+
+### Low severity / informational — unmapped wiki keys
+
+Wiki stat keys observed across items that are not in `STAT_MAP`. Count + sample item names.
+
+- `AbilityCooldown` — 78 items (Active Reload, Alchemical Fire, Arctic Blast, Burst Fire, Capacitor, ...)
+- `AbilityDuration` — 46 items (Active Reload, Alchemical Fire, Arcane Surge, Ballistic Enchantment, Bullet Resist Shredder, ...)
+- `AbilityCastDelay` — 21 items (Alchemical Fire, Capacitor, Cursed Relic, Decay, Disarming Hex, ...)
+- `AbilityCastRange` — 18 items (Cultist Sacrifice, Cursed Relic, Disarming Hex, Divine Barrier, Focus Lens, ...)
+- `MaxStacks` — 10 items (Berserker, Crushing Fists, Escalating Exposure, Glass Cannon, Restorative Locket, ...)
+- `DebuffDuration` — 10 items (Crippling Headshot, Crushing Fists, Hollow Point, Inhibitor, Silencer, ...)
+- `Radius` — 9 items (Alchemical Fire, Colossus, Heroic Aura, Hunters Aura, Lucky Shot, ...)
+- `SlowDuration` — 9 items (Arctic Blast, Capacitor, Glass Cannon, Lifestrike, Majestic Leap, ...)
+- `ProcChance` — 8 items (Armor Piercing Rounds, Capacitor, Headhunter, Headshot Booster, Lucky Shot, ...)
+- `GroundDashReductionPercent` — 8 items (Colossus, Lightning Scroll, Metal Skin, Mystic Slow, Slowing Bullets, ...)
+- `TickRate` — 7 items (Alchemical Fire, Blood Tribute, Decay, Scourge, Spirit Burn, ...)
+- `HealAmpReceivePenaltyPercent` — 7 items (Cheat Death, Crippling Headshot, Decay, Healbane, Inhibitor, ...)
+- `HealAmpRegenPenaltyPercent` — 7 items (Cheat Death, Crippling Headshot, Decay, Healbane, Inhibitor, ...)
+- `BuildUpDuration` — 7 items (Glass Cannon, Inhibitor, Silencer, Slowing Bullets, Spiritual Overflow, ...)
+- `BuildUpPerShot` — 7 items (Glass Cannon, Inhibitor, Silencer, Slowing Bullets, Spiritual Overflow, ...)
+- `ProcCooldown` — 6 items (Capacitor, Escalating Exposure, Mystic Shot, Siphon Bullets, Spirit Rend, ...)
+- `TechArmorDamageReduction` — 6 items (Escalating Exposure, Mystic Vulnerability, Spirit Rend, Spirit Shredder Bullets, Spirit Snatch, ...)
+- `DamageThreshold` — 6 items (Recharging Rush, Spellbreaker, Spirit Burn, Spirit Shielding, Weapon Shielding, ...)
+- `Damage_Value` — 5 items (Arctic Blast, Cold Front, Mercurial Magnum, Quicksilver Reload, Silence Wave)
+- `BulletArmorReduction` — 5 items (Bullet Resist Shredder, Disarming Hex, Hollow Point, Hunters Aura, Rusted Barrel)
+- `Damage` — 4 items (Capacitor, Lightning Scroll, Mystic Burst, Tankbuster)
+- `BulletResistReduction` — 4 items (Crippling Headshot, Crushing Fists, Stalker, Weakening Headshot)
+- `MagicResistReduction` — 4 items (Crippling Headshot, Focus Lens, Spirit Rend, Spirit Sap)
+- `AbilityChargeUpTime` — 4 items (Mercurial Magnum, Mystic Burst, Quicksilver Reload, Tankbuster)
+- `LifeThreshold` — 3 items (Battle Vest, Enchanters Emblem, Hollow Point)
+- `HealthThreshold` — 3 items (Bullet Resilience, Fortitude, Spirit Resilience)
+- `StunDuration` — 3 items (Crushing Fists, Knockdown, Lightning Scroll)
+- `OutgoingDamagePenaltyPercent` — 3 items (Cursed Relic, Golden Goose Egg, Inhibitor)
+- `TechPowerReduction` — 3 items (Focus Lens, Spirit Sap, Spirit Snatch)
+- `LightMeleeCooldownMult` — 3 items (Lifestrike, Melee Lifesteal, Spirit Strike)
+- `CombatBarrier_Value` — 3 items (Majestic Leap, Spirit Shielding, Weapon Shielding)
+- `BarrierDuration` — 3 items (Majestic Leap, Spirit Shielding, Weapon Shielding)
+- `MinimumDamage` — 3 items (Mystic Burst, Mystic Reverb, Tankbuster)
+- `DamageWindow` — 3 items (Recharging Rush, Spirit Shielding, Weapon Shielding)
+- `DPS_Value` — 2 items (Alchemical Fire, Spirit Burn)
+- `HeightOffGround` — 2 items (Alchemical Fire, Silence Wave)
+- `SpreadDuration` — 2 items (Arctic Blast, Cold Front)
+- `StartRadius` — 2 items (Arctic Blast, Cold Front)
+- `EndRadius` — 2 items (Arctic Blast, Cold Front)
+- `DamageHeight` — 2 items (Arctic Blast, Cold Front)
+- `NPCDamageMult` — 2 items (Arctic Blast, Cold Front)
+- `PercentDamage` — 2 items (Arctic Blast, Focus Lens)
+- `SlideScale` — 2 items (Burst Fire, Fleetfoot)
+- `DamagePerChain_Value` — 2 items (Capacitor, Tesla Bullets)
+- `BonusPerChain_Value` — 2 items (Capacitor, Tesla Bullets)
+- `ChainRadius` — 2 items (Capacitor, Tesla Bullets)
+- `ChainCount` — 2 items (Capacitor, Tesla Bullets)
+- `ChainTickRate` — 2 items (Capacitor, Tesla Bullets)
+- `CloseRangeBonusDamageRange` — 2 items (Close Quarters, Point Blank)
+- `DiminishingMultiplier` — 2 items (Crippling Headshot, Weakening Headshot)
+- `MeleeDistanceScale` — 2 items (Crushing Fists, Melee Charge)
+- `BonusHeavyMeleeDamage` — 2 items (Crushing Fists, Melee Charge)
+- `NonPlayerBulletResist` — 2 items (Cultist Sacrifice, Monster Rounds)
+- `DotHealthPercent_Value` — 2 items (Decay, Toxic Bullets)
+- `CombatBarrier` — 2 items (Diviners Kevlar, Divine Barrier)
+- `CooldownReductionPctOnOthers` — 2 items (Divine Barrier, Guardian Ward)
+- `BonusSpiritForChargedAbilities` — 2 items (Extra Charge, Rapid Recharge)
+- `MoveWhileShootingSpeedPenaltyReductionPercent` — 2 items (Fleetfoot, Surge of Power)
+- `MoveWhileZoomedSpeedPenaltyReductionPercent` — 2 items (Fleetfoot, Surge of Power)
+- `ActiveBonusFireRate` — 2 items (Fury Trance, Vampiric Burst)
+- `AbilityChannelTime` — 2 items (Golden Goose Egg, Rescue Beam)
+- `ThinkRate` — 2 items (Golden Goose Egg, Trophy Collector)
+- `MovementSpeedBonusDuration` — 2 items (Headhunter, Surge of Power)
+- `HealAmpCastPercent` — 2 items (Healing Booster, Healing Tempo)
+- `HealAmpRegenPercent` — 2 items (Healing Booster, Healing Tempo)
+- `TotalHealthRegen_Value` — 2 items (Healing Nova, Healing Rite)
+- `RegenDuration` — 2 items (Healing Nova, Healing Rite)
+- `AuraRadius` — 2 items (Healing Nova, Scourge)
+- `VexBarrierCombatBarrier_Value` — 2 items (Indomitable, Reactive Barrier)
+- `NonHeroAbilityLifestealTooltipOnly` — 2 items (Infuser, Spirit Lifesteal)
+- `NonHeroHealPct` — 2 items (Lifestrike, Melee Lifesteal)
+- `LongRangeBonusWeaponPower` — 2 items (Long Range, Sharpshooter)
+- `LongRangeBonusWeaponPowerMinRange` — 2 items (Long Range, Sharpshooter)
+- `BonusAttackRangePercent` — 2 items (Long Range, Sharpshooter)
+- `AmmoReloadPercent` — 2 items (Mercurial Magnum, Quicksilver Reload)
+- `RegenerationDuration` — 2 items (Mystic Regeneration, Radiant Regeneration)
+- `InvisAlertWhenFading` — 2 items (Shadow Weave, Veil Walker)
+- `InvisFadeToDuration` — 2 items (Shadow Weave, Veil Walker)
+- `SpottedRadius` — 2 items (Shadow Weave, Veil Walker)
+- `RevealOnDamageDuration` — 2 items (Shadow Weave, Veil Walker)
+- `RevealOnSpottedDuration` — 2 items (Shadow Weave, Veil Walker)
+- `SpiritDamage_Value` — 2 items (Spirit Snatch, Spirit Strike)
+- `DPSIncrease_Value` — 1 items (Alchemical Fire)
+- `DPSMax_Value` — 1 items (Alchemical Fire)
+- `NonHeroReductionPercent` — 1 items (Alchemical Fire)
+- `BulletArmorReduction_Value` — 1 items (Alchemical Fire)
+- `TechRadiusMultiplierBuff` — 1 items (Arcane Surge)
+- `TechRangeMultiplierBuff` — 1 items (Arcane Surge)
+- `FreezeDuration` — 1 items (Arctic Blast)
+- `WeaponPowerPerStackNonHero` — 1 items (Ballistic Enchantment)
+- `NonHeroStackLimit` — 1 items (Ballistic Enchantment)
+- `DamageDuration` — 1 items (Berserker)
+- `DamageToStack` — 1 items (Berserker)
+- `HealthDrainedPerSecond` — 1 items (Blood Tribute)
+- `InnateStatusResistancePercent` — 1 items (Blood Tribute)
+- `ActivatedFireRate` — 1 items (Burst Fire)
+- `MaxSlowPercent` — 1 items (Capacitor)
+- `DeathImmunityDuration` — 1 items (Cheat Death)
+- `DeathImmunityDamageReduction` — 1 items (Cheat Death)
+- `BonusBaseHealth` — 1 items (Colossus)
+- `BuffBulletResist` — 1 items (Colossus)
+- `BuffTechResist` — 1 items (Colossus)
+- `ModelScaleGrowth` — 1 items (Colossus)
+- `ModelScaleGrowthTooltip` — 1 items (Colossus)
+- `SpellParryDuration` — 1 items (Counterspell)
+- `SpiritPowerInnate` — 1 items (Counterspell)
+- `HealOnSuccess` — 1 items (Counterspell)
+- `LightMeleeStacks` — 1 items (Crushing Fists)
+- `LightMeleeAmmo` — 1 items (Crushing Fists)
+- `HeavyMeleeMultiplier` — 1 items (Crushing Fists)
+- `BonusSoulsPct` — 1 items (Cultist Sacrifice)
+- `BonusHealth_Value` — 1 items (Cultist Sacrifice)
+- `BaseAttackDamagePercent_Value` — 1 items (Cultist Sacrifice)
+- `SkipFrames` — 1 items (Cursed Relic)
+- `AbilityCastRange_Value` — 1 items (Decay)
+- `HealOnActivate` — 1 items (Dispel Magic)
+- `MagicIncreasePerStack` — 1 items (Escalating Exposure)
+- `MaxArmorStacks` — 1 items (Escalating Resilience)
+- `BulletResistDuration` — 1 items (Escalating Resilience)
+- `DampingFactor` — 1 items (Ethereal Shift)
+- `LiftHeight` — 1 items (Ethereal Shift)
+- `FloatMoveSpeed` — 1 items (Ethereal Shift)
+- `ProcAmmoConsumed` — 1 items (Express Shot)
+- `ProcBulletVelocity` — 1 items (Express Shot)
+- `ProcBaseAttackDamagePercent_Value` — 1 items (Express Shot)
+- `ProcBaseAttackDamagePercentAltFire_Value` — 1 items (Express Shot)
+- `ResistReductionDuration` — 1 items (Focus Lens)
+- `RestoreDelay` — 1 items (Fortitude)
+- `HealLifePercentOutOfCombat` — 1 items (Fortitude)
+- `LowHealthThreshold` — 1 items (Frenzy)
+- `MaxHealthLossPercent` — 1 items (Glass Cannon)
+- `BonusGoldPerMinute` — 1 items (Golden Goose Egg)
+- `StartingGold` — 1 items (Golden Goose Egg)
+- `BonusBuffsPerGold` — 1 items (Golden Goose Egg)
+- `GuardianWardCombatBarrier` — 1 items (Guardian Ward)
+- `HeadShotBonusDamage_Value` — 1 items (Headhunter)
+- `HealPercentPerHeadshot_Value` — 1 items (Headhunter)
+- `HeadShotBonusDamage` — 1 items (Headshot Booster)
+- `HealOnKill` — 1 items (Healbane)
+- `MinimumHealAmount` — 1 items (Healing Tempo)
+- `ActiveRadius` — 1 items (Heroic Aura)
+- `NonHeroMult` — 1 items (Heroic Aura)
+- `SingleTargetPlayerMultiplier` — 1 items (Hunters Aura)
+- `CooldownReductionOnProc` — 1 items (Indomitable)
+- `AbilityLifestealPercentHeroPassive` — 1 items (Infuser)
+- `ShootDurationForMax` — 1 items (Intensifying Magazine)
+- `BaseAttackDamagePercentAtMaxDuration` — 1 items (Intensifying Magazine)
+- `FireRateSlowDuration` — 1 items (Juggernaut)
+- `StunDelay` — 1 items (Knockdown)
+- `VisualContractRadius` — 1 items (Knockdown)
+- `MaxBonusDuration` — 1 items (Knockdown)
+- `MaxHeightForBonus` — 1 items (Knockdown)
+- `LifestealHeal_Value` — 1 items (Lifestrike)
+- `LifestealHealPercent_Value` — 1 items (Lifestrike)
+- `DelayBeforeStun` — 1 items (Lightning Scroll)
+- `CritDamagePercent` — 1 items (Lucky Shot)
+- `SummonDuration` — 1 items (Magic Carpet)
+- `FlyMoveSpeed` — 1 items (Magic Carpet)
+- `JumpVelocityHidden` — 1 items (Majestic Leap)
+- `InterruptCooldown` — 1 items (Majestic Leap)
+- `AirControlPercent` — 1 items (Majestic Leap)
+- `SlamDownRadius` — 1 items (Majestic Leap)
+- `VerticalDifferenceTolerance` — 1 items (Majestic Leap)
+- `TossSpeed` — 1 items (Majestic Leap)
+- `DropDownSpeed` — 1 items (Majestic Leap)
+- `MaxLandingSpeed` — 1 items (Majestic Leap)
+- `ImpactHeight` — 1 items (Majestic Leap)
+- `MinAimAngle` — 1 items (Majestic Leap)
+- `LifestrikeHeal` — 1 items (Melee Lifesteal)
+- `BulletsBonusMagicDamage_Value` — 1 items (Mercurial Magnum)
+- `ActiveMoveSpeedPenalty` — 1 items (Metal Skin)
+- `Regeneration` — 1 items (Mystic Regeneration)
+- `TechDamagePercent` — 1 items (Mystic Reverb)
+- `DelayDuration` — 1 items (Mystic Reverb)
+- `ImbueAbilityLifesteal` — 1 items (Mystic Reverb)
+- `MaxHealthDamage` — 1 items (Mystic Reverb)
+- `ProcBonusMagicDamage_Value` — 1 items (Mystic Shot)
+- `EnemyLifeThreshold` — 1 items (Opening Rounds)
+- `BaseAttackDamagePercentBonus` — 1 items (Opening Rounds)
+- `ImpactDamage_Value` — 1 items (Phantom Strike)
+- `DeflectionPercent` — 1 items (Plated Armor)
+- `BulletProcDeflectionPercent` — 1 items (Plated Armor)
+- `DeflectionRandomness` — 1 items (Plated Armor)
+- `HealingPerCast_Value` — 1 items (Radiant Regeneration)
+- `Regeneration_Value` — 1 items (Radiant Regeneration)
+- `CooldownBetweenChargeReduction` — 1 items (Rapid Recharge)
+- `CooldownReductionOnChargedAbilities` — 1 items (Rapid Recharge)
+- `ParryCooldownReduction` — 1 items (Rebuttal)
+- `BonusDamagePercent` — 1 items (Rebuttal)
+- `ParrySuccessHealPercentage` — 1 items (Rebuttal)
+- `HealPercentAmount` — 1 items (Rescue Beam)
+- `HealInterval` — 1 items (Rescue Beam)
+- `SelfModifier` — 1 items (Rescue Beam)
+- `HealPerStack_Value` — 1 items (Restorative Locket)
+- `MinStaminaRestore` — 1 items (Restorative Locket)
+- `MaxStaminaRestore` — 1 items (Restorative Locket)
+- `HealFromHero` — 1 items (Restorative Shot)
+- `HealFromNPC` — 1 items (Restorative Shot)
+- `BulletDamageReflectedPct` — 1 items (Return Fire)
+- `SpiritDamageReflectedPct` — 1 items (Return Fire)
+- `RicochetDamagePercent` — 1 items (Ricochet)
+- `RicochetRadius` — 1 items (Ricochet)
+- `RicochetTargetsTooltipOnly` — 1 items (Ricochet)
+- `MaxHealthPercentAsDPS` — 1 items (Scourge)
+- `InvisCancelOnDamage` — 1 items (Shadow Weave)
+- `InvisMoveSpeedMod` — 1 items (Shadow Weave)
+- `FullInvisDistance` — 1 items (Shadow Weave)
+- `AmbushDuration` — 1 items (Shadow Weave)
+- `BonusZoomPercent` — 1 items (Sharpshooter)
+- `TechDamageReduction` — 1 items (Silencer)
+- `SilenceDuration` — 1 items (Silencer)
+- `ImmunityDuration` — 1 items (Silencer)
+- `CooldownOnMiss` — 1 items (Silence Wave)
+- `GrowthPerMeter` — 1 items (Silence Wave)
+- `InitialWidth` — 1 items (Silence Wave)
+- `StealPerHit` — 1 items (Siphon Bullets)
+- `StealPerKill` — 1 items (Siphon Bullets)
+- `StackLostPerDeath` — 1 items (Siphon Bullets)
+- `StealDuration` — 1 items (Siphon Bullets)
+- `HealthStealPctHero` — 1 items (Siphon Bullets)
+- `ParticleRadius` — 1 items (Siphon Bullets)
+- `SpiritDamageReductionProc` — 1 items (Spellbreaker)
+- `ReloadSpeedMultipler` — 1 items (Spellslinger)
+- `DamageThresholdDuration` — 1 items (Spirit Burn)
+- `ExplosionDamage` — 1 items (Spirit Burn)
+- `ExplosionRadius` — 1 items (Spirit Burn)
+- `CooldownReductionPctOnNonHeroes` — 1 items (Spirit Burn)
+- `DamagePctVsNonHeroes` — 1 items (Spirit Burn)
+- `TechResistBelowThreshold` — 1 items (Spirit Resilience)
+- `LightMeleeReduction` — 1 items (Spirit Snatch)
+- `TechArmorGain` — 1 items (Spirit Snatch)
+- `TechPowerGain` — 1 items (Spirit Snatch)
+- `BonusShotsDuration` — 1 items (Split Shot)
+- `BulletSplitShot` — 1 items (Split Shot)
+- `SpreadAngleDegrees` — 1 items (Split Shot)
+- `WeaponDamageBonusDuration` — 1 items (Split Shot)
+- `WeaponDamagePerStack` — 1 items (Split Shot)
+- `DPS` — 1 items (Stalker)
+- `ProcRadius` — 1 items (Stalker)
+- `DebuffRadius` — 1 items (Stalker)
+- `ReduceFootstepSound` — 1 items (Stalker)
+- `AirMoveIncreasePercent` — 1 items (Stamina Mastery)
+- `ImbuedTechPower` — 1 items (Surge of Power)
+- `FireRateBonus` — 1 items (Surge of Power)
+- `ReProcLockoutTime` — 1 items (Tankbuster)
+- `WatcherMaxDuration` — 1 items (Tankbuster)
+- `CurrentHealthDamage` — 1 items (Tankbuster)
+- `DamagePulseAmount_Value` — 1 items (Torment Pulse)
+- `DamagePulseRadius` — 1 items (Torment Pulse)
+- `DotDuration` — 1 items (Toxic Bullets)
+- `DotMultiplerTroopers` — 1 items (Toxic Bullets)
+- `ItemCooldownReduction` — 1 items (Transcendent Cooldown)
+- `StackingBonusSprintSpeed` — 1 items (Trophy Collector)
+- `StackingTechRangeMultiplier` — 1 items (Trophy Collector)
+- `StackingTechRadiusMultiplier` — 1 items (Trophy Collector)
+- `StackingGoldPerMinute` — 1 items (Trophy Collector)
+- `ActiveBonusLifesteal` — 1 items (Vampiric Burst)
+- `ActiveReloadPercent` — 1 items (Vampiric Burst)
+- `InvisDuration` — 1 items (Veil Walker)
+- `HealOnVeil_Value` — 1 items (Veil Walker)
+- `CaptureRadius` — 1 items (Vortex Web)
+- `TetherDuration` — 1 items (Vortex Web)
+- `TetherRadius` — 1 items (Vortex Web)
+- `CasterBuffDuration` — 1 items (Warp Stone)
+- `CooldownReductionPerHit` — 1 items (Witchmail)
+
+## 2. Synergy-tag gaps from conditional bonuses
+
+Items where a conditional bonus (low-HP gated, Ambush, per-stack, damage-window, etc.) implies a synergy tag should be scored but it is null/zero.
+
+- **Alchemical Fire** (Weapon T3) — `spirit_burst_proc` is null/zero. Implied by: proc-style damage (DPS_Value=45, DPSMax_Value=95, activation=Press)
+- **Arctic Blast** (Spirit T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Ballistic Enchantment** (Weapon T3) — `high_kill_count` is null/zero. Implied by: WeaponPowerPerStack=20 (per_stack, uptime≈0.5)
+- **Ballistic Enchantment** (Weapon T3) — `scaling_late` is null/zero. Implied by: WeaponPowerPerStack=20 (per_stack, uptime≈0.5)
+- **Battle Vest** (Vitality T2) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Battle Vest** (Vitality T2) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Berserker** (Weapon T3) — `high_kill_count` is null/zero. Implied by: WeaponPowerPerStack=7 (per_stack, uptime≈5)
+- **Berserker** (Weapon T3) — `scaling_late` is null/zero. Implied by: WeaponPowerPerStack=7 (per_stack, uptime≈5)
+- **Blood Tribute** (Weapon T3) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Blood Tribute** (Weapon T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Boundless Spirit** (Spirit T4) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Boundless Spirit** (Spirit T4) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Bullet Resilience** (Vitality T3) — `low_max_hp` is null/zero. Implied by: BulletResistBelowThreshold=15 (lowhp, uptime≈0.3)
+- **Bullet Resilience** (Vitality T3) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Bullet Resilience** (Vitality T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Capacitor** (Weapon T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion; description applies CC ("\bsilence") — low-value suggestion
+- **Cold Front** (Spirit T2) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Crushing Fists** (Weapon T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bstun") — low-value suggestion
+- **Cultist Sacrifice** (Weapon T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=2 (out_of_combat, uptime≈0.7)
+- **Diviners Kevlar** (Vitality T4) — `escape` is null/zero. Implied by: description contains "\bbarrier|\bshield"
+- **Divine Barrier** (Vitality T4) — `stun` is null/zero. Implied by: description contains "\bstun"
+- **Divine Barrier** (Vitality T4) — `damage_sponge` is null/zero. Implied by: description contains "\bbarrier|\bshield"
+- **Enchanters Emblem** (Vitality T2) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=2 (out_of_combat, uptime≈0.7)
+- **Enchanters Emblem** (Vitality T2) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=2 (out_of_combat, uptime≈0.7)
+- **Escalating Exposure** (Spirit T4) — `high_kill_count` is null/zero. Implied by: MagicIncreasePerStack=4.5 (per_stack, uptime≈6)
+- **Escalating Exposure** (Spirit T4) — `scaling_late` is null/zero. Implied by: MagicIncreasePerStack=4.5 (per_stack, uptime≈6)
+- **Escalating Resilience** (Weapon T3) — `high_kill_count` is null/zero. Implied by: BulletResistPerStack=2 (per_stack, uptime≈0.5)
+- **Escalating Resilience** (Weapon T3) — `scaling_late` is null/zero. Implied by: BulletResistPerStack=2 (per_stack, uptime≈0.5)
+- **Ethereal Shift** (Spirit T4) — `movement_slow` is null/zero. Implied by: description contains "\bslow(?!ed)"
+- **Extra Regen** (Vitality T1) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=1 (out_of_combat, uptime≈0.7)
+- **Extra Regen** (Vitality T1) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=1 (out_of_combat, uptime≈0.7)
+- **Focus Lens** (Spirit T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bsilence") — low-value suggestion
+- **Frenzy** (Weapon T4) — `low_max_hp` is null/zero. Implied by: LowHealthThreshold=50 (lowhp, uptime≈0.3); FervorMovespeed=4m (fervor, uptime≈0.25); FervorFireRate=40 (fervor, uptime≈0.25); FervorStatusResistancePercent=30 (fervor, uptime≈0.25)
+- **Frenzy** (Weapon T4) — `scaling_late` is null/zero. Implied by: FervorMovespeed=4m (fervor, uptime≈0.25); FervorFireRate=40 (fervor, uptime≈0.25); FervorStatusResistancePercent=30 (fervor, uptime≈0.25)
+- **Glass Cannon** (Weapon T4) — `scaling_late` is null/zero. Implied by: BonusClipPerKill=2 (per_stack, uptime≈4); FireRatePerKill=7 (per_stack, uptime≈4)
+- **Guardian Ward** (Vitality T2) — `damage_sponge` is null/zero. Implied by: description contains "\bbarrier|\bshield"
+- **Guardian Ward** (Vitality T2) — `escape` is null/zero. Implied by: description contains "\bbarrier|\bshield"
+- **Headhunter** (Weapon T3) — `continous_heal` is null/zero. Implied by: HealPercentPerHeadshot=4 (sustained if firing rate keeps trigger uptime)
+- **Healing Booster** (Vitality T2) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=1 (out_of_combat, uptime≈0.7)
+- **Healing Booster** (Vitality T2) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=1 (out_of_combat, uptime≈0.7)
+- **Healing Tempo** (Vitality T4) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Healing Tempo** (Vitality T4) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Hollow Point** (Weapon T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4.5 (out_of_combat, uptime≈0.7)
+- **Indomitable** (Vitality T4) — `damage_sponge` is null/zero. Implied by: VexBarrierCombatBarrier_Value=325 (barrier counters engage)
+- **Knockdown** (Spirit T3) — `cc_resist` is null/zero. Implied by: description applies CC ("\bstun") — low-value suggestion
+- **Lifestrike** (Vitality T3) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Magic Carpet** (Spirit T4) — `movement_slow` is null/zero. Implied by: description contains "\bslow(?!ed)"
+- **Magic Carpet** (Spirit T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Majestic Leap** (Vitality T3) — `damage_sponge` is null/zero. Implied by: CombatBarrier_Value=200 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Majestic Leap** (Vitality T3) — `low_max_hp` is null/zero. Implied by: CombatBarrier_Value=200 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Majestic Leap** (Vitality T3) — `escape` is null/zero. Implied by: CombatBarrier_Value=200 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Point Blank** (Weapon T3) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Reactive Barrier** (Vitality T2) — `damage_sponge` is null/zero. Implied by: VexBarrierCombatBarrier_Value=325 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Reactive Barrier** (Vitality T2) — `silence` is null/zero. Implied by: description contains "\bsilence"
+- **Reactive Barrier** (Vitality T2) — `stun` is null/zero. Implied by: description contains "\bstun"
+- **Recharging Rush** (Weapon T2) — `damage_sponge` is null/zero. Implied by: DamageThreshold=200 (damage_window, uptime≈0.4); DamageWindow=3.5 (damage_window, uptime≈0.4)
+- **Recharging Rush** (Weapon T2) — `low_max_hp` is null/zero. Implied by: DamageThreshold=200 (damage_window, uptime≈0.4); DamageWindow=3.5 (damage_window, uptime≈0.4)
+- **Shadow Weave** (Weapon T3) — `ult_focused` is null/zero. Implied by: AmbushDuration=5 (ambush, uptime≈0.11); AmbushBonusFireRate=20 (ambush, uptime≈0.11); AmbushBonusTechPower=20 (ambush, uptime≈0.11); AmbushBonusMeleeDamage=20 (ambush, uptime≈0.11); stealth (tiny — score ≤0.2)
+- **Shadow Weave** (Weapon T3) — `single_ability_focus` is null/zero. Implied by: AmbushDuration=5 (ambush, uptime≈0.11); AmbushBonusFireRate=20 (ambush, uptime≈0.11); AmbushBonusTechPower=20 (ambush, uptime≈0.11); AmbushBonusMeleeDamage=20 (ambush, uptime≈0.11)
+- **Shadow Weave** (Weapon T3) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=5 (out_of_combat, uptime≈0.7)
+- **Silencer** (Weapon T4) — `cc_resist` is null/zero. Implied by: description applies CC ("\bsilence") — low-value suggestion
+- **Silence Wave** (Spirit T3) — `spirit_burst_proc` is null/zero. Implied by: proc-style damage (Damage_Value=75, activation=InstantCast)
+- **Silence Wave** (Spirit T3) — `cc_resist` is null/zero. Implied by: description applies CC ("\bsilence") — low-value suggestion
+- **Siphon Bullets** (Vitality T4) — `high_kill_count` is null/zero. Implied by: StealPerKill=1 (per_stack, uptime≈4999.5)
+- **Siphon Bullets** (Vitality T4) — `scaling_late` is null/zero. Implied by: StealPerKill=1 (per_stack, uptime≈4999.5)
+- **Slowing Bullets** (Weapon T2) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion
+- **Slowing Hex** (Spirit T2) — `cc_resist` is null/zero. Implied by: description applies CC ("\bslow(?!ed)") — low-value suggestion; description applies CC ("\bsilence") — low-value suggestion
+- **Spirit Burn** (Spirit T4) — `damage_sponge` is null/zero. Implied by: DamageThreshold=500 (damage_window, uptime≈0.4)
+- **Spirit Burn** (Spirit T4) — `low_max_hp` is null/zero. Implied by: DamageThreshold=500 (damage_window, uptime≈0.4)
+- **Spirit Burn** (Spirit T4) — `pure_damage` is null/zero. Implied by: description mentions burn/poison/%HP
+- **Spirit Resilience** (Vitality T3) — `low_max_hp` is null/zero. Implied by: TechResistBelowThreshold=15 (lowhp, uptime≈0.3)
+- **Spirit Resilience** (Vitality T3) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Spirit Resilience** (Vitality T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=3 (out_of_combat, uptime≈0.7)
+- **Spirit Shielding** (Vitality T2) — `damage_sponge` is null/zero. Implied by: DamageWindow=3.5 (damage_window, uptime≈0.4); DamageThreshold=225 (damage_window, uptime≈0.4); CombatBarrier_Value=300 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Spirit Shielding** (Vitality T2) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=2.5 (out_of_combat, uptime≈0.7)
+- **Spirit Shielding** (Vitality T2) — `escape` is null/zero. Implied by: CombatBarrier_Value=300 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Split Shot** (Weapon T2) — `high_kill_count` is null/zero. Implied by: WeaponDamagePerStack=8 (per_stack, uptime≈2.5)
+- **Split Shot** (Weapon T2) — `scaling_late` is null/zero. Implied by: WeaponDamagePerStack=8 (per_stack, uptime≈2.5)
+- **Superior Cooldown** (Spirit T3) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Superior Cooldown** (Spirit T3) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Torment Pulse** (Spirit T3) — `spirit_continuous_proc` is null/zero. Implied by: proc-style damage (DamagePulseAmount_Value=25, activation=Passive)
+- **Transcendent Cooldown** (Spirit T4) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Transcendent Cooldown** (Spirit T4) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=4 (out_of_combat, uptime≈0.7)
+- **Trophy Collector** (Vitality T2) — `away_from_team` is null/zero. Implied by: OutOfCombatHealthRegen=2 (out_of_combat, uptime≈0.7)
+- **Unstoppable** (Vitality T4) — `silence` is null/zero. Implied by: description contains "\bsilence"
+- **Unstoppable** (Vitality T4) — `stun` is null/zero. Implied by: description contains "\bstun"
+- **Unstoppable** (Vitality T4) — `disarm` is null/zero. Implied by: description contains "\bdisarm"
+- **Veil Walker** (Vitality T3) — `single_target` is null/zero. Implied by: description contains "\bstealth|\binvisible"
+- **Weapon Shielding** (Vitality T2) — `damage_sponge` is null/zero. Implied by: DamageWindow=4 (damage_window, uptime≈0.4); DamageThreshold=250 (damage_window, uptime≈0.4); CombatBarrier_Value=300 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Weapon Shielding** (Vitality T2) — `farmer` is null/zero. Implied by: OutOfCombatHealthRegen=2.5 (out_of_combat, uptime≈0.7)
+- **Weapon Shielding** (Vitality T2) — `escape` is null/zero. Implied by: CombatBarrier_Value=300 (barrier counters engage); description contains "\bbarrier|\bshield"
+- **Witchmail** (Vitality T4) — `low_max_hp` is null/zero. Implied by: DamageThreshold=75 (damage_window, uptime≈0.4)
+
+## 3. Missing-stat items
+
+Items with fewer than 3 non-null entries in `playstyle_score`.
+
+- **Frostbite Charm** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Mystical Piano** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Mystic Conduit** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Omnicharge Signet** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Prism Blast** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Shrink Ray** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys
+- **Titanic Magazine** (Weapon T2) — 2 non-null tags, 2 wiki stat keys
+- **Unstable Concoction** (Spirit Tundefined) — 0 non-null tags, 0 wiki stat keys

@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T1 fire_rate @1.5",
+  "normalized_name": "_bl_t1_fire_rate_1_5",
+  "category": "Weapon",
+  "tier": 800,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "fire_rate",
+    "raw_value": "+15.88",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 1,
+    "derivation": "extrapolated_from_neighbor",
+    "tier_distribution": {
+      "min": 9,
+      "median": 14.44,
+      "max": 9
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "fire_rate": 1.5
+    }
+  },
+  "wiki_url": null
+}

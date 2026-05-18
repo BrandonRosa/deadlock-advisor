@@ -361,6 +361,22 @@ def get_all_items():
     return jsonify(out)
 
 
+@app.route("/api/baselines/table")
+def get_baselines_table():
+    f = DATA / "baselines" / "_baseline_table.json"
+    if not f.exists():
+        return jsonify({"baselines": {}, "stat_to_tag_mapping": {}, "error": "no baseline table"})
+    return jsonify(json.loads(f.read_text(encoding='utf-8')))
+
+
+@app.route("/api/baselines/scrape_cache")
+def get_scrape_cache():
+    f = DATA / "_scrape_cache.json"
+    if not f.exists():
+        return jsonify({"items": [], "error": "no scrape cache"})
+    return jsonify(json.loads(f.read_text(encoding='utf-8')))
+
+
 # ── QA ───────────────────────────────────────────────────────────────────────
 def load_scenarios():
     f = QA_DIR / "scenarios.json"

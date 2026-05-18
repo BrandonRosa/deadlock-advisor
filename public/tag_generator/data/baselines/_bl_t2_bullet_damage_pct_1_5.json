@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T2 bullet_damage_pct @1.5",
+  "normalized_name": "_bl_t2_bullet_damage_pct_1_5",
+  "category": "Weapon",
+  "tier": 1600,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "bullet_damage_pct",
+    "raw_value": "+14.75",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 6,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": -15,
+      "median": 12,
+      "max": 15
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "bullet_damage": 1.5
+    }
+  },
+  "wiki_url": null
+}

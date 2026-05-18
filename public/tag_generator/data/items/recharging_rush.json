@@ -62,7 +62,7 @@
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
-      "magazine_size_dependant": 0.33,
+      "magazine_size_dependant": 0.4,
       "melee_damage": null,
       "melee_resistance": null,
       "mid_range": null,
@@ -95,8 +95,12 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Recharging_Rush"
+  "wiki_url": "https://deadlock.wiki/Recharging_Rush",
+  "compare_to": [
+    "intensifying_magazine"
+  ]
 }

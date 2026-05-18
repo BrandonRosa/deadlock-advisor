@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 health @2.0",
+  "normalized_name": "_bl_t3_health_2_0",
+  "category": "Vitality",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "health",
+    "raw_value": "+375",
+    "score_band": 2,
+    "percentile": 100,
+    "sample_count": 19,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 50,
+      "median": 75,
+      "max": 375
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "high_max_hp": 2
+    }
+  },
+  "wiki_url": null
+}

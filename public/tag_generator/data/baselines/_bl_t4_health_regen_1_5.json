@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T4 health_regen @1.5",
+  "normalized_name": "_bl_t4_health_regen_1_5",
+  "category": "Vitality",
+  "tier": 6400,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "health_regen",
+    "raw_value": "+8.2",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 4,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 2.8,
+      "median": 5.4,
+      "max": 8.8
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "self_heal": 1.5
+    }
+  },
+  "wiki_url": null
+}

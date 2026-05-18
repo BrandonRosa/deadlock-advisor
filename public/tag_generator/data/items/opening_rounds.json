@@ -7,6 +7,7 @@
   "image_path": "/resources/items/opening_rounds/opening_rounds.png",
   "name": "Opening Rounds",
   "normalized_name": "opening_rounds",
+  "remarks": "",
   "tier": 1600,
   "upgrades_from": [
     "high_velocity_rounds"
@@ -74,7 +75,7 @@
       "mid_range": null,
       "movement_slow": null,
       "multi_ability_focus": null,
-      "pure_damage": 0.05,
+      "pure_damage": 0.25,
       "range_extender_dependant": null,
       "scaling_early": null,
       "scaling_late": null,
@@ -92,7 +93,7 @@
       "spirit_continuous_damage": null,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 0.45,
+      "spirit_damage": 0.5,
       "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,
@@ -101,9 +102,9 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Opening_Rounds",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Opening_Rounds"
 }

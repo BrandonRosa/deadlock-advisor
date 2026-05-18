@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 spirit_lifesteal @1.0",
+  "normalized_name": "_bl_t3_spirit_lifesteal_1_0",
+  "category": "Spirit",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "spirit_lifesteal",
+    "raw_value": "+20",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 2,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 10,
+      "median": 20,
+      "max": 30
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "spirit_lifesteal": 1
+    }
+  },
+  "wiki_url": null
+}

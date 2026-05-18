@@ -91,7 +91,7 @@
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.1,
-      "spirit_lifesteal": 1.15,
+      "spirit_lifesteal": 0.9,
       "spirit_proc": null,
       "spirit_resist_shred": 1,
       "spirit_resistance": null,
@@ -99,7 +99,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Spirit_Shredder_Bullets"

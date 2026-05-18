@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T2 spirit_power @1.0",
+  "normalized_name": "_bl_t2_spirit_power_1_0",
+  "category": "Spirit",
+  "tier": 1600,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "spirit_power",
+    "raw_value": "+7",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 8,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 6,
+      "median": 7,
+      "max": 20
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "spirit_damage": 1
+    }
+  },
+  "wiki_url": null
+}

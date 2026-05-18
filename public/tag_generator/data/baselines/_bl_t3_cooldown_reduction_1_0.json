@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 cooldown_reduction @1.0",
+  "normalized_name": "_bl_t3_cooldown_reduction_1_0",
+  "category": "Spirit",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "cooldown_reduction",
+    "raw_value": "+18",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 3,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": -14,
+      "median": 18,
+      "max": 20
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "cooldown_reduction": 1
+    }
+  },
+  "wiki_url": null
+}

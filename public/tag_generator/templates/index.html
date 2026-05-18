@@ -261,6 +261,10 @@
       <div class="page-header">
         <h1>Items</h1>
         <div class="header-actions">
+          <div class="cat-tabs" id="item-subpage-tabs" style="margin-right:12px">
+            <button class="cat-btn active" data-subpage="items">Items</button>
+            <button class="cat-btn" data-subpage="baselines">Baselines</button>
+          </div>
           <input id="item-search" type="search" placeholder="Search…" />
           <div class="cat-tabs" id="item-cat-tabs">
             <button class="cat-btn active" data-cat="All">All</button>
@@ -271,6 +275,7 @@
         </div>
       </div>
       <div id="item-grid" class="card-grid"></div>
+      <div id="baseline-table-container" style="display:none; padding: 8px 16px; overflow:auto"></div>
     </section>
 
     <!-- ITEM EDIT -->
@@ -347,6 +352,7 @@
           <tbody id="item-tag-body"></tbody>
         </table>
       </div>
+      <div id="baseline-compare-panel" style="padding: 12px 16px; margin-top: 16px; border-top: 1px solid var(--border, #333)"></div>
     </section>
 
     <!-- TAGS -->

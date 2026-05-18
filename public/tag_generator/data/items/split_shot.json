@@ -71,7 +71,7 @@
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
-      "scaling_late": null,
+      "scaling_late": 0.25,
       "self_buff": null,
       "self_heal": null,
       "shield": null,
@@ -95,8 +95,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Split_Shot"
+  "wiki_url": "https://deadlock.wiki/Split_Shot",
+  "compare_to": []
 }
