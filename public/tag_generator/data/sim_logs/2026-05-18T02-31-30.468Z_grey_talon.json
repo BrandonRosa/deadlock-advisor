@@ -1,0 +1,187 @@
+{
+  "hero": "grey_talon",
+  "build_idx": 4,
+  "build_name": "Snare",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "grey_talon",
+    "victor",
+    "venator",
+    "apollo",
+    "paradox"
+  ],
+  "enemies": [
+    "paige",
+    "lash",
+    "shiv",
+    "infernus",
+    "haze",
+    "mo_&_krill"
+  ],
+  "self": "grey_talon",
+  "outcome": "loss",
+  "feel": "neutral",
+  "notes": "Dogshit team lol. Honestly dont count this one as bad",
+  "history": [
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "long_range",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "intensifying_magazine",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "golden_goose_egg",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "rapid_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "sharpshooter",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": [
+        "long_range"
+      ]
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "ballistic_enchantment",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3200,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 14,
+      "action": "buy",
+      "key": "glass_cannon",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "healbane",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "buy",
+      "key": "bullet_lifesteal",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 18,
+      "action": "upgrade",
+      "key": "vampiric_burst",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4800,
+      "costEffective": 4800,
+      "components": [
+        "bullet_lifesteal"
+      ]
+    },
+    {
+      "tick": 19,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 1600
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    }
+  ],
+  "owned": [
+    "intensifying_magazine",
+    "mystic_expansion",
+    "golden_goose_egg",
+    "rapid_rounds",
+    "sharpshooter",
+    "ballistic_enchantment",
+    "glass_cannon",
+    "healbane",
+    "vampiric_burst",
+    "duration_extender"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 27200,
+  "slots_unlocked": 1,
+  "ts": "2026-05-18T02:31:30.468Z"
+}

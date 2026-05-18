@@ -1556,7 +1556,7 @@
     },
     {
       "build_description_eng": "VERY off meta build. Focuses on talon's snare. Goal is to more of a supportive character for teamfights where you can continuously silence enemies. Good vs Mid range cluster focused enemies. Awful against aerial/long range characters.",
-      "confidence": -0.15,
+      "confidence": -0.2,
       "followed_build": "Gun",
       "name": "Snare",
       "normalized_build_name": "grey_talon_snare",
@@ -2693,6 +2693,7 @@
     "orange",
     "yellow"
   ],
+  "default_build_name": "grey_talon_general",
   "desc_eng": "",
   "eng_name": "Grey Talon",
   "image_path": "/resources/heroes/grey_talon/portrait_grey_talon.png",
@@ -2701,6 +2702,5 @@
   "search_terms": [
     "Talon"
   ],
-  "wiki_url": "https://deadlock.wiki/Grey_Talon",
-  "default_build_name": "grey_talon_general"
+  "wiki_url": "https://deadlock.wiki/Grey_Talon"
 }
