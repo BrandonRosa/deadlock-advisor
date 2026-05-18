@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T4 debuff_resist @2.0",
+  "normalized_name": "_bl_t4_debuff_resist_2_0",
+  "category": "Vitality",
+  "tier": 6400,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "debuff_resist",
+    "raw_value": "+50",
+    "score_band": 2,
+    "percentile": 100,
+    "sample_count": 5,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 7.5,
+      "median": 25,
+      "max": 50
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "debuff_resistance": 2
+    }
+  },
+  "wiki_url": null
+}

@@ -56,7 +56,7 @@
       "headshot_damage": 0.75,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.4,
+      "high_max_hp": 0.8,
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
@@ -96,7 +96,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Weakening_Headshot"

@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T1 range_up @1.0",
+  "normalized_name": "_bl_t1_range_up_1_0",
+  "category": "Spirit",
+  "tier": 800,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "range_up",
+    "raw_value": "+31.39",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 1,
+    "derivation": "extrapolated_from_neighbor",
+    "tier_distribution": {
+      "min": 40,
+      "median": 31.39,
+      "max": 40
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "range_extender_dependant": 1
+    }
+  },
+  "wiki_url": null
+}

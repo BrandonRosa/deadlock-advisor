@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 move_speed @2.0",
+  "normalized_name": "_bl_t3_move_speed_2_0",
+  "category": "Vitality",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "move_speed",
+    "raw_value": "+3.5m",
+    "score_band": 2,
+    "percentile": 100,
+    "sample_count": 12,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": -0.7,
+      "median": 1.75,
+      "max": 3.5
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "horizontal_mobility": 2
+    }
+  },
+  "wiki_url": null
+}

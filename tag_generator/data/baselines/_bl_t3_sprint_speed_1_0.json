@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 sprint_speed @1.0",
+  "normalized_name": "_bl_t3_sprint_speed_1_0",
+  "category": "Vitality",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "sprint_speed",
+    "raw_value": "+1m",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 7,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 0.75,
+      "median": 1,
+      "max": 2.61
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "horizontal_mobility": 1
+    }
+  },
+  "wiki_url": null
+}

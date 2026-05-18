@@ -58,7 +58,7 @@
       "headshot_damage": 0.66,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": null,
+      "high_max_hp": 0.75,
       "horizontal_mobility": null,
       "hybrid_damage_usage": 0.5,
       "interrupt": null,
@@ -98,8 +98,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Spirit_Rend"
+  "wiki_url": "https://deadlock.wiki/Spirit_Rend",
+  "compare_to": []
 }

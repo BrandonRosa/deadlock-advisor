@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T1 slow @1.5",
+  "normalized_name": "_bl_t1_slow_1_5",
+  "category": "Spirit",
+  "tier": 800,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "slow",
+    "raw_value": "+32.16",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 1,
+    "derivation": "extrapolated_from_neighbor",
+    "tier_distribution": {
+      "min": 32,
+      "median": 29.24,
+      "max": 32
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "movement_slow": 1.5
+    }
+  },
+  "wiki_url": null
+}

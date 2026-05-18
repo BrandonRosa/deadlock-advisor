@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T3 bullet_resist @2.0",
+  "normalized_name": "_bl_t3_bullet_resist_2_0",
+  "category": "Vitality",
+  "tier": 3200,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "bullet_resist",
+    "raw_value": "+34.5",
+    "score_band": 2,
+    "percentile": 100,
+    "sample_count": 8,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 1,
+      "median": 10,
+      "max": 34.5
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "bullet_resistance": 2
+    }
+  },
+  "wiki_url": null
+}

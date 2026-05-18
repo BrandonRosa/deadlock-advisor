@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/fleetfoot/fleetfoot.png",
   "name": "Fleetfoot",
   "normalized_name": "fleetfoot",
@@ -56,7 +57,7 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": null,
-      "horizontal_mobility": 1,
+      "horizontal_mobility": 1.15,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
@@ -95,9 +96,9 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Fleetfoot",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Fleetfoot"
 }

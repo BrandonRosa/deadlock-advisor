@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T4 bullet_lifesteal @1.0",
+  "normalized_name": "_bl_t4_bullet_lifesteal_1_0",
+  "category": "Weapon",
+  "tier": 6400,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "bullet_lifesteal",
+    "raw_value": "+19",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 2,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 13,
+      "median": 19,
+      "max": 25
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "bullet_lifesteal": 1
+    }
+  },
+  "wiki_url": null
+}

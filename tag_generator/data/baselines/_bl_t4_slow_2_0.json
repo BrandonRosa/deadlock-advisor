@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T4 slow @2.0",
+  "normalized_name": "_bl_t4_slow_2_0",
+  "category": "Spirit",
+  "tier": 6400,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "slow",
+    "raw_value": "+110",
+    "score_band": 2,
+    "percentile": 100,
+    "sample_count": 8,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 30,
+      "median": 38,
+      "max": 110
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "movement_slow": 2
+    }
+  },
+  "wiki_url": null
+}

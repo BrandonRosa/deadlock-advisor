@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T1 melee_damage @1.5",
+  "normalized_name": "_bl_t1_melee_damage_1_5",
+  "category": "Weapon",
+  "tier": 800,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "melee_damage",
+    "raw_value": "+6.9",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 1,
+    "derivation": "extrapolated_from_neighbor",
+    "tier_distribution": {
+      "min": 12,
+      "median": 6.27,
+      "max": 12
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "melee_damage": 1.5
+    }
+  },
+  "wiki_url": null
+}

@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/heroic_aura/heroic_aura.png",
   "name": "Heroic Aura",
   "normalized_name": "heroic_aura",
@@ -20,7 +21,7 @@
       "bullet_lifesteal": null,
       "bullet_proc": null,
       "bullet_resist_shred": null,
-      "bullet_resistance": 0.5,
+      "bullet_resistance": 1,
       "burst_damage": null,
       "burst_heal": null,
       "burst_resistance": null,
@@ -43,7 +44,7 @@
       "engage": 0.33,
       "escape": 0.1,
       "farmer": null,
-      "fire_rate": 0.45,
+      "fire_rate": 0.66,
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": null,
@@ -56,9 +57,10 @@
       "high_assist_count": 0.15,
       "high_kill_count": null,
       "high_max_hp": null,
-      "horizontal_mobility": 0.66,
+      "horizontal_mobility": 0.75,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": 2,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -95,10 +97,8 @@
       "team_heal": 0.1,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.15,
-      "lane_pusher": 2
+      "vertical_mobility": 0.15
     }
   },
-  "wiki_url": "https://deadlock.wiki/Heroic_Aura",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Heroic_Aura"
 }

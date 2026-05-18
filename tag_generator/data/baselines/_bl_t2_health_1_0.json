@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T2 health @1.0",
+  "normalized_name": "_bl_t2_health_1_0",
+  "category": "Vitality",
+  "tier": 1600,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "health",
+    "raw_value": "+62.5",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 8,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 30,
+      "median": 62.5,
+      "max": 90
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "high_max_hp": 1
+    }
+  },
+  "wiki_url": null
+}

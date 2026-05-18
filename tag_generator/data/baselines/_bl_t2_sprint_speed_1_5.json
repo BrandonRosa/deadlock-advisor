@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T2 sprint_speed @1.5",
+  "normalized_name": "_bl_t2_sprint_speed_1_5",
+  "category": "Vitality",
+  "tier": 1600,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "sprint_speed",
+    "raw_value": "+0.94m",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 6,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 0.5,
+      "median": 0.75,
+      "max": 2
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "horizontal_mobility": 1.5
+    }
+  },
+  "wiki_url": null
+}

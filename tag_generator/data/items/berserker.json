@@ -15,12 +15,12 @@
       "aoe_cluster": null,
       "assist_importance": null,
       "away_from_team": null,
-      "bullet_damage": 1,
+      "bullet_damage": 1.15,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
       "bullet_proc": null,
       "bullet_resist_shred": null,
-      "bullet_resistance": 0.33,
+      "bullet_resistance": 0.66,
       "burst_damage": null,
       "burst_heal": null,
       "burst_resistance": null,
@@ -95,8 +95,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Berserker"
+  "wiki_url": "https://deadlock.wiki/Berserker",
+  "compare_to": []
 }

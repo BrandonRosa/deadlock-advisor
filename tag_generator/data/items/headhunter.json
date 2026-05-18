@@ -58,7 +58,7 @@
       "headshot_damage": 1.25,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.15,
+      "high_max_hp": 0.45,
       "horizontal_mobility": 0.5,
       "hybrid_damage_usage": null,
       "interrupt": null,
@@ -98,8 +98,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.15
+      "vertical_mobility": 0.15,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Headhunter"
+  "wiki_url": "https://deadlock.wiki/Headhunter",
+  "compare_to": []
 }

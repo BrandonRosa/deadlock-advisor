@@ -58,7 +58,7 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.25,
+      "high_max_hp": 0.75,
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
@@ -67,7 +67,7 @@
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": 0.75,
-      "melee_resistance": 0.75,
+      "melee_resistance": 1.66,
       "mid_range": -0.25,
       "movement_slow": 0.5,
       "multi_ability_focus": null,
@@ -98,8 +98,10 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Point_Blank"
+  "wiki_url": "https://deadlock.wiki/Point_Blank",
+  "compare_to": []
 }

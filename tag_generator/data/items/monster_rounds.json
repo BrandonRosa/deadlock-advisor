@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/monster_rounds/monster_rounds.png",
   "name": "Monster Rounds",
   "normalized_name": "monster_rounds",
@@ -59,6 +60,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": 0.75,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -73,7 +75,7 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.15,
+      "self_heal": 0.2,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": 0.75
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Monster_Rounds",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Monster_Rounds"
 }

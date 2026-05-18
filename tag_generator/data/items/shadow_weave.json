@@ -1,8 +1,13 @@
 {
   "category": "Weapon",
+  "compare_to": [
+    "burst_fire"
+  ],
+  "confidence": null,
   "image_path": "/resources/items/shadow_weave/shadow_weave_T3.png",
   "name": "Shadow Weave",
   "normalized_name": "shadow_weave",
+  "remarks": "",
   "tier": 3200,
   "upgrades_from": [],
   "values": {
@@ -56,9 +61,10 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": null,
-      "horizontal_mobility": 0.25,
+      "horizontal_mobility": 1.15,
       "hybrid_damage_usage": 0.45,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -73,7 +79,7 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": 0.75,
-      "self_heal": null,
+      "self_heal": 1,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
@@ -95,14 +101,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Shadow_Weave",
-  "compare_to": [
-    "burst_fire"
-  ],
-  "remarks": "",
-  "confidence": null
+  "wiki_url": "https://deadlock.wiki/Shadow_Weave"
 }

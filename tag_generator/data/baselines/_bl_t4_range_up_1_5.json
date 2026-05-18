@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T4 range_up @1.5",
+  "normalized_name": "_bl_t4_range_up_1_5",
+  "category": "Spirit",
+  "tier": 6400,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "range_up",
+    "raw_value": "+18",
+    "score_band": 1.5,
+    "percentile": 75,
+    "sample_count": 3,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 12,
+      "median": 16,
+      "max": 20
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "range_extender_dependant": 1.5
+    }
+  },
+  "wiki_url": null
+}

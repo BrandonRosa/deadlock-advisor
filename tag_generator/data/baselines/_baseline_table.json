@@ -1,0 +1,5773 @@
+{
+  "generated_at": "2026-05-18T19:07:21.910Z",
+  "source": "Data:ItemData.json (Default mode only)",
+  "methodology": {
+    "score_semantics": "1.0=high-for-tier (p50), 1.5=very-good-for-tier (p75), 2.0=best-in-game (cross-tier)",
+    "effective_value": "raw × uptime; conditional bonuses are discounted (lowhp=0.30, ambush=duration/cooldown, per_stack=0.5×MaxStacks, etc.)",
+    "sparse_handling": "tiers with 1 sample are extrapolated using the per-stat (or global) tier-to-tier ratio; flagged with derivation: extrapolated_from_neighbor"
+  },
+  "stat_to_tag_mapping": {
+    "ammo": {
+      "wiki_keys": [
+        "BonusClipSizePercent",
+        "BonusClipSize",
+        "BonusClipPerKill"
+      ],
+      "tag": "magazine_size_dependant"
+    },
+    "bullet_damage_pct": {
+      "wiki_keys": [
+        "BaseAttackDamagePercent",
+        "WeaponPowerPerStack",
+        "CloseRangeBonusWeaponPower",
+        "NonPlayerBonusWeaponPower"
+      ],
+      "tag": "bullet_damage"
+    },
+    "melee_damage": {
+      "wiki_keys": [
+        "BonusMeleeDamagePercent",
+        "AmbushBonusMeleeDamage"
+      ],
+      "tag": "melee_damage"
+    },
+    "bullet_velocity": {
+      "wiki_keys": [
+        "BonusBulletSpeedPercent"
+      ],
+      "tag": null
+    },
+    "fire_rate": {
+      "wiki_keys": [
+        "BonusFireRate",
+        "AmbushBonusFireRate",
+        "FervorFireRate",
+        "FireRatePerKill"
+      ],
+      "tag": "fire_rate"
+    },
+    "bullet_resist": {
+      "wiki_keys": [
+        "BulletResist",
+        "BulletResistBelowThreshold",
+        "BulletResistPerStack"
+      ],
+      "tag": "bullet_resistance"
+    },
+    "spirit_resist": {
+      "wiki_keys": [
+        "TechResist"
+      ],
+      "tag": "spirit_resistance"
+    },
+    "melee_resist": {
+      "wiki_keys": [
+        "MeleeResistPercent"
+      ],
+      "tag": "melee_resistance"
+    },
+    "debuff_resist": {
+      "wiki_keys": [
+        "StatusResistancePercent",
+        "FervorStatusResistancePercent",
+        "SlowResistancePercent"
+      ],
+      "tag": "debuff_resistance"
+    },
+    "health": {
+      "wiki_keys": [
+        "BonusHealth"
+      ],
+      "tag": "high_max_hp"
+    },
+    "health_regen": {
+      "wiki_keys": [
+        "BonusHealthRegen",
+        "OutOfCombatHealthRegen"
+      ],
+      "tag": "self_heal"
+    },
+    "move_speed": {
+      "wiki_keys": [
+        "BonusMoveSpeed",
+        "FervorMovespeed",
+        "ActiveBonusMoveSpeed"
+      ],
+      "tag": "horizontal_mobility"
+    },
+    "sprint_speed": {
+      "wiki_keys": [
+        "BonusSprintSpeed"
+      ],
+      "tag": "horizontal_mobility"
+    },
+    "stamina": {
+      "wiki_keys": [
+        "Stamina",
+        "BonusStamina"
+      ],
+      "tag": null
+    },
+    "cooldown_reduction": {
+      "wiki_keys": [
+        "CooldownReduction",
+        "StaminaCooldownReduction"
+      ],
+      "tag": "cooldown_reduction"
+    },
+    "duration_up": {
+      "wiki_keys": [
+        "BonusAbilityDurationPercent",
+        "BuffDuration"
+      ],
+      "tag": "duration_dependant"
+    },
+    "range_up": {
+      "wiki_keys": [
+        "TechRangeMultiplier",
+        "TechRadiusMultiplier"
+      ],
+      "tag": "range_extender_dependant"
+    },
+    "charge_up": {
+      "wiki_keys": [
+        "BonusAbilityCharges"
+      ],
+      "tag": "charge_dependant"
+    },
+    "spirit_power": {
+      "wiki_keys": [
+        "TechPower",
+        "BonusSpirit",
+        "SpiritPower",
+        "AmbushBonusTechPower"
+      ],
+      "tag": "spirit_damage"
+    },
+    "spirit_power_pct": {
+      "wiki_keys": [
+        "TechPowerPercent"
+      ],
+      "tag": "spirit_damage"
+    },
+    "bullet_lifesteal": {
+      "wiki_keys": [
+        "BulletLifestealPercent",
+        "LowHealthLifeStealPercent"
+      ],
+      "tag": "bullet_lifesteal"
+    },
+    "spirit_lifesteal": {
+      "wiki_keys": [
+        "AbilityLifestealPercentHero"
+      ],
+      "tag": "spirit_lifesteal"
+    },
+    "slow": {
+      "wiki_keys": [
+        "SlowPercent",
+        "MovementSpeedSlow",
+        "FireRateSlow"
+      ],
+      "tag": "movement_slow"
+    }
+  },
+  "global_tier_ratio": 1.25,
+  "baselines": {
+    "ammo": {
+      "global_max": 100,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Extended Magazine",
+          "raw": 30,
+          "effective": 30
+        },
+        "ratio_used": 1.25,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 23,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 25.3,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 30,
+            "game_max": 100
+          }
+        },
+        "distribution": {
+          "min": 30,
+          "median": 23,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Extended Magazine",
+            "raw": 30,
+            "effective": 30,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 20,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 100,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.75,
+              "items": [
+                "Titanic Magazine=100 (cur=1.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 20,
+          "max": 100
+        },
+        "samples": [
+          {
+            "name": "Active Reload",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.85
+          },
+          {
+            "name": "Intensifying Magazine",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Kinetic Dash",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Recharging Rush",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Titanic Magazine",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.75
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Escalating Resilience",
+          "raw": 30,
+          "effective": 30
+        },
+        "ratio_used": 1.25,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 27.5,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 30.25,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 30,
+            "game_max": 100
+          }
+        },
+        "distribution": {
+          "min": 30,
+          "median": 27.5,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Escalating Resilience",
+            "raw": 30,
+            "effective": 30,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 1.25,
+              "items": [
+                "Mercurial Magnum=20 (cur=1.25)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 30,
+            "game_max": 100,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 8,
+          "median": 20,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Glass Cannon",
+            "raw": 2,
+            "effective": 8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Lucky Shot",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Mercurial Magnum",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      }
+    },
+    "bullet_damage_pct": {
+      "global_max": 80,
+      "tier_800": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 8,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 10,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.55,
+              "items": [
+                "Close Quarters=20 (cur=0.55)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 25,
+            "game_max": 80,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 8,
+          "max": 25
+        },
+        "samples": [
+          {
+            "name": "Close Quarters",
+            "raw": 20,
+            "effective": 10,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.55
+          },
+          {
+            "name": "Extended Magazine",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "High-Velocity Rounds",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Monster Rounds",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Restorative Shot",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 6,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 12,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.35,
+              "items": [
+                "Recharging Rush=10 (cur=0.45)",
+                "Titanic Magazine=14 (cur=0.25)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 14.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.33,
+              "items": [
+                "Battle Vest=15 (cur=0.2)",
+                "Slowing Bullets=15 (cur=0.45)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 15,
+            "game_max": 80,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": -15,
+          "median": 12,
+          "max": 15
+        },
+        "samples": [
+          {
+            "name": "Battle Vest",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Opening Rounds",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.15
+          },
+          {
+            "name": "Recharging Rush",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Slowing Bullets",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Titanic Magazine",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Trophy Collector",
+            "raw": -15,
+            "effective": -15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 9,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 25,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Point Blank=50 (cur=0.75)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 35,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.83,
+              "items": [
+                "Berserker=7 (cur=1)",
+                "Hollow Point=35 (cur=0.65)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 40,
+            "game_max": 80,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 25,
+          "max": 40
+        },
+        "samples": [
+          {
+            "name": "Ballistic Enchantment",
+            "raw": 20,
+            "effective": 10,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Berserker",
+            "raw": 7,
+            "effective": 35,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Cultist Sacrifice",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Escalating Resilience",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Express Shot",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Headhunter",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Hollow Point",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.65
+          },
+          {
+            "name": "Point Blank",
+            "raw": 50,
+            "effective": 25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Weighted Shots",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 7,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 15,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.24,
+              "items": [
+                "Colossus=15 (cur=0.25)",
+                "Phantom Strike=15 (cur=0.15)",
+                "Siphon Bullets=15 (cur=0.33)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 15,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 80,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.75,
+              "items": [
+                "Glass Cannon=80 (cur=1.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 8,
+          "median": 15,
+          "max": 80
+        },
+        "samples": [
+          {
+            "name": "Armor Piercing Rounds",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Colossus",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Glass Cannon",
+            "raw": 80,
+            "effective": 80,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.75
+          },
+          {
+            "name": "Inhibitor",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Leech",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Phantom Strike",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Siphon Bullets",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          }
+        ]
+      }
+    },
+    "melee_damage": {
+      "global_max": 30,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Melee Lifesteal",
+          "raw": 12,
+          "effective": 12
+        },
+        "ratio_used": 3.57,
+        "neighbor_tier": 3200,
+        "bands": {
+          "1.0": {
+            "raw": 6.27,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 6.9,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 12,
+            "game_max": 30
+          }
+        },
+        "distribution": {
+          "min": 12,
+          "median": 6.27,
+          "max": 12
+        },
+        "samples": [
+          {
+            "name": "Melee Lifesteal",
+            "raw": 12,
+            "effective": 12,
+            "unit": "",
+            "current_score": 0.33
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Melee Charge",
+          "raw": 10,
+          "effective": 10
+        },
+        "ratio_used": 3.57,
+        "neighbor_tier": 800,
+        "bands": {
+          "1.0": {
+            "raw": 16.2,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 17.82,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 10,
+            "game_max": 30
+          }
+        },
+        "distribution": {
+          "min": 10,
+          "median": 16.2,
+          "max": 10
+        },
+        "samples": [
+          {
+            "name": "Melee Charge",
+            "raw": 10,
+            "effective": 10,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 7,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Spirit Snatch=7 (cur=0.75)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 11.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 16,
+            "game_max": 30,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 2.22,
+          "median": 7,
+          "max": 16
+        },
+        "samples": [
+          {
+            "name": "Lifestrike",
+            "raw": 16,
+            "effective": 16,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Shadow Weave",
+            "raw": 20,
+            "effective": 2.22,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Spirit Snatch",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 25,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 27.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 30,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Colossus=30 (cur=0.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 20,
+          "median": 25,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Colossus",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Crushing Fists",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 2
+          }
+        ]
+      }
+    },
+    "fire_rate": {
+      "global_max": 35,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Rapid Rounds",
+          "raw": 9,
+          "effective": 9
+        },
+        "ratio_used": 1.01,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 14.44,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 15.88,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 9,
+            "game_max": 35
+          }
+        },
+        "distribution": {
+          "min": 9,
+          "median": 14.44,
+          "max": 9
+        },
+        "samples": [
+          {
+            "name": "Rapid Rounds",
+            "raw": 9,
+            "effective": 9,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 1.5,
+              "items": [
+                "Swift Striker=20 (cur=1.5)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.76,
+              "items": [
+                "Active Reload=25 (cur=0.66)",
+                "Kinetic Dash=25 (cur=0.85)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 25,
+            "game_max": 35,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 7,
+          "median": 20,
+          "max": 25
+        },
+        "samples": [
+          {
+            "name": "Active Reload",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Battle Vest",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Kinetic Dash",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.85
+          },
+          {
+            "name": "Quicksilver Reload",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Swift Striker",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.5
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 4,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 18,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 28.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.45,
+              "items": [
+                "Heroic Aura=26 (cur=0.45)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 35,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1,
+              "items": [
+                "Blood Tribute=35 (cur=1)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 2.22,
+          "median": 18,
+          "max": 35
+        },
+        "samples": [
+          {
+            "name": "Blood Tribute",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Burst Fire",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Heroic Aura",
+            "raw": 26,
+            "effective": 26,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Shadow Weave",
+            "raw": 20,
+            "effective": 2.22,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 10,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.27,
+              "items": [
+                "Mercurial Magnum=22 (cur=0.2)",
+                "Ricochet=18 (cur=0.33)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 27.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.58,
+              "items": [
+                "Frenzy=55 (cur=0.66)",
+                "Glass Cannon=7 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 35,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.2,
+              "items": [
+                "Healing Tempo=35 (cur=0.2)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 20,
+          "max": 35
+        },
+        "samples": [
+          {
+            "name": "Capacitor",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Echo Shard",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Focus Lens",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Frenzy",
+            "raw": 55,
+            "effective": 25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Glass Cannon",
+            "raw": 7,
+            "effective": 28,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Healing Tempo",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Mercurial Magnum",
+            "raw": 22,
+            "effective": 22,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Ricochet",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Spellslinger",
+            "raw": 11,
+            "effective": 11,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Spiritual Overflow",
+            "raw": 32,
+            "effective": 32,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          }
+        ]
+      }
+    },
+    "bullet_resist": {
+      "global_max": 34.5,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 7,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.3,
+              "items": [
+                "Bullet Resist Shredder=8 (cur=0.5)",
+                "Suppressor=8 (cur=0.1)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 8.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 18,
+            "game_max": 34.5,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 3.25,
+          "median": 7,
+          "max": 18
+        },
+        "samples": [
+          {
+            "name": "Battle Vest",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.85
+          },
+          {
+            "name": "Bullet Resist Shredder",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Fleetfoot",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Melee Charge",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          },
+          {
+            "name": "Reactive Barrier",
+            "raw": 325,
+            "effective": 3.25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Return Fire",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Suppressor",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Weapon Shielding",
+            "raw": 300,
+            "effective": 6,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.5
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 10,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.45,
+              "items": [
+                "Metal Skin=12 (cur=0.45)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 20.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Heroic Aura=17 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 34.5,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.25,
+              "items": [
+                "Bullet Resilience=45 (cur=1.25)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 1,
+          "median": 10,
+          "max": 34.5
+        },
+        "samples": [
+          {
+            "name": "Berserker",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Bullet Resilience",
+            "raw": 45,
+            "effective": 34.5,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Escalating Resilience",
+            "raw": 2,
+            "effective": 1,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Heroic Aura",
+            "raw": 17,
+            "effective": 17,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Majestic Leap",
+            "raw": 200,
+            "effective": 2,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Metal Skin",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Superior Duration",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Warp Stone",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 7,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 11.25,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Indomitable=333 (cur=0)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 13.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.22,
+              "items": [
+                "Cheat Death=15 (cur=0.5)",
+                "Crushing Fists=12 (cur=0.15)",
+                "Refresher=15 (cur=0)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 15,
+            "game_max": 34.5,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 11.25,
+          "max": 15
+        },
+        "samples": [
+          {
+            "name": "Cheat Death",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Crushing Fists",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Echo Shard",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Indomitable",
+            "raw": 333,
+            "effective": 11.25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Refresher",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Siphon Bullets",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Vampiric Burst",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          }
+        ]
+      }
+    },
+    "spirit_resist": {
+      "global_max": 40,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 6,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 7,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.44,
+              "items": [
+                "Mystic Vulnerability=8 (cur=0.44)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 9.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Restorative Locket=10 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 18,
+            "game_max": 40,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 3.25,
+          "median": 7,
+          "max": 18
+        },
+        "samples": [
+          {
+            "name": "Cold Front",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Enchanters Emblem",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Mystic Vulnerability",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.44
+          },
+          {
+            "name": "Reactive Barrier",
+            "raw": 325,
+            "effective": 3.25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Restorative Locket",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Spirit Shielding",
+            "raw": 300,
+            "effective": 6,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.5
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 6,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 10,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Dispel Magic=10 (cur=0.66)",
+                "Greater Expansion=10 (cur=0.33)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 1.25,
+              "items": [
+                "Spirit Resilience=30 (cur=1.25)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 40,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Fury Trance=40 (cur=0.5)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 2,
+          "median": 10,
+          "max": 40
+        },
+        "samples": [
+          {
+            "name": "Blood Tribute",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Dispel Magic",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Fury Trance",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Greater Expansion",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Majestic Leap",
+            "raw": 200,
+            "effective": 2,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spirit Resilience",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 12,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 14.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.38,
+              "items": [
+                "Refresher=14 (cur=0)",
+                "Silencer=15 (cur=0.75)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 18.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Spellbreaker=18 (cur=1)",
+                "Witchmail=20 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 40,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Scourge=40 (cur=0.66)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 14.5,
+          "max": 40
+        },
+        "samples": [
+          {
+            "name": "Arctic Blast",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Echo Shard",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Escalating Exposure",
+            "raw": 17,
+            "effective": 17,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Ethereal Shift",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Healing Tempo",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          },
+          {
+            "name": "Indomitable",
+            "raw": 333,
+            "effective": 11.25,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Infuser",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          },
+          {
+            "name": "Refresher",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Scourge",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Silencer",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Spellbreaker",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Witchmail",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          }
+        ]
+      }
+    },
+    "melee_resist": {
+      "global_max": 30,
+      "tier_800": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 19,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 19.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 20,
+            "game_max": 30,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 18,
+          "median": 19,
+          "max": 20
+        },
+        "samples": [
+          {
+            "name": "Close Quarters",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Rebuttal",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      },
+      "tier_1600": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_3200": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 22.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 26.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 30,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Point Blank=30 (cur=0.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 15,
+          "median": 22.5,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Point Blank",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Torment Pulse",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Juggernaut",
+          "raw": 25,
+          "effective": 25
+        },
+        "ratio_used": 1.25,
+        "neighbor_tier": 3200,
+        "bands": {
+          "1.0": {
+            "raw": 26.56,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 29.22,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 25,
+            "game_max": 30
+          }
+        },
+        "distribution": {
+          "min": 25,
+          "median": 26.56,
+          "max": 25
+        },
+        "samples": [
+          {
+            "name": "Juggernaut",
+            "raw": 25,
+            "effective": 25,
+            "unit": "",
+            "current_score": 0.5
+          }
+        ]
+      }
+    },
+    "debuff_resist": {
+      "global_max": 50,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 25,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 30,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 35,
+            "game_max": 50,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 25,
+          "median": 25,
+          "max": 35
+        },
+        "samples": [
+          {
+            "name": "Debuff Reducer",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.85
+          },
+          {
+            "name": "Enduring Speed",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Fleetfoot",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 27.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 31.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 35,
+            "game_max": 50,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 20,
+          "median": 27.5,
+          "max": 35
+        },
+        "samples": [
+          {
+            "name": "Blood Tribute",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Weighted Shots",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 25,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.29,
+              "items": [
+                "Spellbreaker=25 (cur=0.33)",
+                "Unstoppable=25 (cur=0.25)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 50,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Juggernaut=50 (cur=0)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 7.5,
+          "median": 25,
+          "max": 50
+        },
+        "samples": [
+          {
+            "name": "Frenzy",
+            "raw": 30,
+            "effective": 7.5,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Juggernaut",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Scourge",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spellbreaker",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Unstoppable",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      }
+    },
+    "health": {
+      "global_max": 375,
+      "tier_800": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 50,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Rebuttal=75 (cur=0.66)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 210,
+            "game_max": 375,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 30,
+          "median": 50,
+          "max": 210
+        },
+        "samples": [
+          {
+            "name": "Extra Health",
+            "raw": 210,
+            "effective": 210,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.15
+          },
+          {
+            "name": "Headshot Booster",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Mystic Regeneration",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Rebuttal",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Rusted Barrel",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 62.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.4,
+              "items": [
+                "Bullet Resist Shredder=65 (cur=0.4)",
+                "Weakening Headshot=60 (cur=0.4)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 71.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.33,
+              "items": [
+                "Spirit Lifesteal=70 (cur=0.33)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 90,
+            "game_max": 375,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 30,
+          "median": 62.5,
+          "max": 90
+        },
+        "samples": [
+          {
+            "name": "Bullet Lifesteal",
+            "raw": 90,
+            "effective": 90,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Bullet Resist Shredder",
+            "raw": 65,
+            "effective": 65,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          },
+          {
+            "name": "Improved Spirit",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Mystic Slow",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Spirit Lifesteal",
+            "raw": 70,
+            "effective": 70,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Spirit Sap",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.3
+          },
+          {
+            "name": "Stalker",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Weakening Headshot",
+            "raw": 60,
+            "effective": 60,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 19,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 75,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 100,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.23,
+              "items": [
+                "Fury Trance=100 (cur=0.15)",
+                "Hollow Point=125 (cur=0.5)",
+                "Hunters Aura=100 (cur=0.2)",
+                "Lifestrike=125 (cur=0.25)",
+                "Torment Pulse=100 (cur=0.25)",
+                "Veil Walker=125 (cur=0)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 375,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.33,
+              "items": [
+                "Fortitude=375 (cur=1.33)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 50,
+          "median": 75,
+          "max": 375
+        },
+        "samples": [
+          {
+            "name": "Counterspell",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Decay",
+            "raw": 65,
+            "effective": 65,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.3
+          },
+          {
+            "name": "Disarming Hex",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Escalating Resilience",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.3
+          },
+          {
+            "name": "Fortitude",
+            "raw": 375,
+            "effective": 375,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.33
+          },
+          {
+            "name": "Fury Trance",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Headhunter",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Hollow Point",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Hunters Aura",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Knockdown",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.3
+          },
+          {
+            "name": "Lifestrike",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Point Blank",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Radiant Regeneration",
+            "raw": 90,
+            "effective": 90,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Silence Wave",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Spirit Rend",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spirit Snatch",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Tankbuster",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Torment Pulse",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Veil Walker",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 13,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 125,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.32,
+              "items": [
+                "Crippling Headshot=125 (cur=0.5)",
+                "Magic Carpet=125 (cur=0.2)",
+                "Unstoppable=125 (cur=0.25)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 150,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.45,
+              "items": [
+                "Frenzy=160 (cur=0.75)",
+                "Inhibitor=150 (cur=0.33)",
+                "Leech=160 (cur=0.4)",
+                "Plated Armor=130 (cur=0.33)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 200,
+            "game_max": 375,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 50,
+          "median": 125,
+          "max": 200
+        },
+        "samples": [
+          {
+            "name": "Boundless Spirit",
+            "raw": 75,
+            "effective": 75,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Cheat Death",
+            "raw": 200,
+            "effective": 200,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Crippling Headshot",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Frenzy",
+            "raw": 160,
+            "effective": 160,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Infuser",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Inhibitor",
+            "raw": 150,
+            "effective": 150,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Leech",
+            "raw": 160,
+            "effective": 160,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.4
+          },
+          {
+            "name": "Lightning Scroll",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Magic Carpet",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Plated Armor",
+            "raw": 130,
+            "effective": 130,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Scourge",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Unstoppable",
+            "raw": 125,
+            "effective": 125,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Vampiric Burst",
+            "raw": 100,
+            "effective": 100,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      }
+    },
+    "health_regen": {
+      "global_max": 26.9,
+      "tier_800": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 1.4,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.15,
+              "items": [
+                "Sprint Boots=2 (cur=0.15)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 3.7,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 1,
+              "items": [
+                "Extra Regen=4 (cur=1)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 4.29,
+            "game_max": 26.9,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 0.7,
+          "median": 1.4,
+          "max": 4.29
+        },
+        "samples": [
+          {
+            "name": "Extra Regen",
+            "raw": 4,
+            "effective": 3.7,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Golden Goose Egg",
+            "raw": 1,
+            "effective": 0.7,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Healing Rite",
+            "raw": 300,
+            "effective": 4.29,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Monster Rounds",
+            "raw": 1,
+            "effective": 0.7,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Sprint Boots",
+            "raw": 2,
+            "effective": 1.4,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 1.58,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.15,
+              "items": [
+                "Spirit Shielding=2.5 (cur=0.15)",
+                "Weapon Shielding=2.5 (cur=0.15)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 1.84,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 3.7,
+            "game_max": 26.9,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 1.05,
+          "median": 1.58,
+          "max": 3.7
+        },
+        "samples": [
+          {
+            "name": "Battle Vest",
+            "raw": 3,
+            "effective": 2.1,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Enchanters Emblem",
+            "raw": 2,
+            "effective": 1.4,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Enduring Speed",
+            "raw": 2,
+            "effective": 1.4,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Healing Booster",
+            "raw": 4,
+            "effective": 3.7,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Improved Spirit",
+            "raw": 1.5,
+            "effective": 1.05,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Spirit Shielding",
+            "raw": 2.5,
+            "effective": 1.75,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Trophy Collector",
+            "raw": 2,
+            "effective": 1.4,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Weapon Shielding",
+            "raw": 2.5,
+            "effective": 1.75,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 9,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 2.8,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 3.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Shadow Weave=5 (cur=0)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 26.9,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.1,
+              "items": [
+                "Veil Walker=87 (cur=0.1)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 1.4,
+          "median": 2.8,
+          "max": 26.9
+        },
+        "samples": [
+          {
+            "name": "Blood Tribute",
+            "raw": 4,
+            "effective": 2.8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Bullet Resilience",
+            "raw": 3,
+            "effective": 2.1,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Cultist Sacrifice",
+            "raw": 2,
+            "effective": 1.4,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Healing Nova",
+            "raw": 325,
+            "effective": 5.42,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Hollow Point",
+            "raw": 4.5,
+            "effective": 3.15,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Shadow Weave",
+            "raw": 5,
+            "effective": 3.5,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spirit Resilience",
+            "raw": 3,
+            "effective": 2.1,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Superior Cooldown",
+            "raw": 4,
+            "effective": 2.8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Veil Walker",
+            "raw": 87,
+            "effective": 26.9,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 4,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 5.4,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 8.2,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.15,
+              "items": [
+                "Juggernaut=8 (cur=0.15)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 8.8,
+            "game_max": 26.9,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 2.8,
+          "median": 5.4,
+          "max": 8.8
+        },
+        "samples": [
+          {
+            "name": "Boundless Spirit",
+            "raw": 4,
+            "effective": 2.8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Healing Tempo",
+            "raw": 10,
+            "effective": 8.8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Juggernaut",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Transcendent Cooldown",
+            "raw": 4,
+            "effective": 2.8,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.1
+          }
+        ]
+      }
+    },
+    "move_speed": {
+      "global_max": 3.5,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 7,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 1.75,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 2.38,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.88,
+              "items": [
+                "Enduring Speed=2m (cur=1.5)",
+                "Guardian Ward=2.75m (cur=0.25)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 3,
+            "game_max": 3.5,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 0.75,
+          "median": 1.75,
+          "max": 3
+        },
+        "samples": [
+          {
+            "name": "Active Reload",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Enduring Speed",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 1.5
+          },
+          {
+            "name": "Fleetfoot",
+            "raw": 3,
+            "effective": 3,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 1
+          },
+          {
+            "name": "Guardian Ward",
+            "raw": 2.75,
+            "effective": 2.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Spirit Shielding",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.5
+          },
+          {
+            "name": "Stalker",
+            "raw": 1.5,
+            "effective": 1.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.75
+          },
+          {
+            "name": "Weapon Shielding",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.5
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 12,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 1.75,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 2,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.29,
+              "items": [
+                "Blood Tribute=2m (cur=0.33)",
+                "Dispel Magic=2m (cur=0.25)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 3.5,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Veil Walker=3.5m (cur=0.66)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": -0.7,
+          "median": 1.75,
+          "max": 3.5
+        },
+        "samples": [
+          {
+            "name": "Blood Tribute",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.33
+          },
+          {
+            "name": "Burst Fire",
+            "raw": 1.25,
+            "effective": 1.25,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.75
+          },
+          {
+            "name": "Counterspell",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.15
+          },
+          {
+            "name": "Dispel Magic",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Fortitude",
+            "raw": 1.25,
+            "effective": 1.25,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          },
+          {
+            "name": "Headhunter",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.5
+          },
+          {
+            "name": "Heroic Aura",
+            "raw": 2.25,
+            "effective": 2.25,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          },
+          {
+            "name": "Radiant Regeneration",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.45
+          },
+          {
+            "name": "Sharpshooter",
+            "raw": -0.7,
+            "effective": -0.7,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          },
+          {
+            "name": "Surge of Power",
+            "raw": 1.75,
+            "effective": 1.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          },
+          {
+            "name": "Veil Walker",
+            "raw": 3.5,
+            "effective": 3.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          },
+          {
+            "name": "Weighted Shots",
+            "raw": -0.5,
+            "effective": -0.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 5,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 2,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Juggernaut=2m (cur=0.5)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 2.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.15,
+              "items": [
+                "Divine Barrier=2.75m (cur=0.15)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 3,
+            "game_max": 3.5,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 1,
+          "median": 2,
+          "max": 3
+        },
+        "samples": [
+          {
+            "name": "Divine Barrier",
+            "raw": 2.75,
+            "effective": 2.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.15
+          },
+          {
+            "name": "Ethereal Shift",
+            "raw": 3,
+            "effective": 3,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          },
+          {
+            "name": "Frenzy",
+            "raw": 4,
+            "effective": 1,
+            "has_conditional": true,
+            "unit": "m",
+            "current_score": 0.75
+          },
+          {
+            "name": "Healing Tempo",
+            "raw": 1.25,
+            "effective": 1.25,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Juggernaut",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.5
+          }
+        ]
+      }
+    },
+    "sprint_speed": {
+      "global_max": 2.61,
+      "tier_800": {
+        "n": 4,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 1.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 2,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Healing Rite=2m (cur=0.15)",
+                "Sprint Boots=2m (cur=0.85)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 2,
+            "game_max": 2.61,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 0.5,
+          "median": 1.5,
+          "max": 2
+        },
+        "samples": [
+          {
+            "name": "Golden Goose Egg",
+            "raw": 1,
+            "effective": 1,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.33
+          },
+          {
+            "name": "Healing Rite",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.15
+          },
+          {
+            "name": "Rusted Barrel",
+            "raw": 0.5,
+            "effective": 0.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.2
+          },
+          {
+            "name": "Sprint Boots",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.85
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 6,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 0.75,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 0.94,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Improved Spirit=1m (cur=0)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 2,
+            "game_max": 2.61,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 0.5,
+          "median": 0.75,
+          "max": 2
+        },
+        "samples": [
+          {
+            "name": "Improved Spirit",
+            "raw": 1,
+            "effective": 1,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          },
+          {
+            "name": "Long Range",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Mystic Slow",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.3
+          },
+          {
+            "name": "Slowing Hex",
+            "raw": 0.5,
+            "effective": 0.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Swift Striker",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Trophy Collector",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.85
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 7,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 1,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Sharpshooter=1m (cur=0)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 1.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Heroic Aura=1.5m (cur=0.66)",
+                "Veil Walker=2m (cur=0.66)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 2.61,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.25,
+              "items": [
+                "Shadow Weave=6.5m (cur=0.25)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 0.75,
+          "median": 1,
+          "max": 2.61
+        },
+        "samples": [
+          {
+            "name": "Disarming Hex",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.15
+          },
+          {
+            "name": "Heroic Aura",
+            "raw": 1.5,
+            "effective": 1.5,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          },
+          {
+            "name": "Hunters Aura",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.15
+          },
+          {
+            "name": "Rescue Beam",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.05
+          },
+          {
+            "name": "Shadow Weave",
+            "raw": 6.5,
+            "effective": 2.61,
+            "has_conditional": true,
+            "unit": "m",
+            "current_score": 0.25
+          },
+          {
+            "name": "Sharpshooter",
+            "raw": 1,
+            "effective": 1,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          },
+          {
+            "name": "Veil Walker",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.66
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 2,
+        "unit": "m",
+        "bands": {
+          "1.0": {
+            "raw": 0.75,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 0.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 0.75,
+            "game_max": 2.61,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 0.75,
+          "median": 0.75,
+          "max": 0.75
+        },
+        "samples": [
+          {
+            "name": "Lightning Scroll",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0.2
+          },
+          {
+            "name": "Vortex Web",
+            "raw": 0.75,
+            "effective": 0.75,
+            "has_conditional": false,
+            "unit": "m",
+            "current_score": 0
+          }
+        ]
+      }
+    },
+    "cooldown_reduction": {
+      "global_max": 25,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Extra Stamina",
+          "raw": 12,
+          "effective": 12
+        },
+        "ratio_used": 0.94,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 12.35,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 13.59,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 12,
+            "game_max": 25
+          }
+        },
+        "distribution": {
+          "min": 12,
+          "median": 12.35,
+          "max": 12
+        },
+        "samples": [
+          {
+            "name": "Extra Stamina",
+            "raw": 12,
+            "effective": 12,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 4,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 12,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 13.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 18,
+            "game_max": 25,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 12,
+          "max": 18
+        },
+        "samples": [
+          {
+            "name": "Arcane Surge",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Compress Cooldown",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Enchanters Emblem",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Kinetic Dash",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 18,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Stamina Mastery=18 (cur=0)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 19,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 20,
+            "game_max": 25,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": -14,
+          "median": 18,
+          "max": 20
+        },
+        "samples": [
+          {
+            "name": "Stamina Mastery",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Superior Cooldown",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Weighted Shots",
+            "raw": -14,
+            "effective": -14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 7,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Witchmail=7 (cur=0.66)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 16,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 25,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 2,
+              "items": [
+                "Transcendent Cooldown=25 (cur=2)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 7,
+          "max": 25
+        },
+        "samples": [
+          {
+            "name": "Spellslinger",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Transcendent Cooldown",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 2
+          },
+          {
+            "name": "Witchmail",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      }
+    },
+    "duration_up": {
+      "global_max": 35,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Rebuttal",
+          "raw": 6,
+          "effective": 6
+        },
+        "ratio_used": 1.35,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 8.01,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 8.81,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 6,
+            "game_max": 35
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 8.01,
+          "max": 6
+        },
+        "samples": [
+          {
+            "name": "Rebuttal",
+            "raw": 6,
+            "effective": 6,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 4,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 13.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 16.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Arcane Surge=15 (cur=0.75)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 22,
+            "game_max": 35,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 13.5,
+          "max": 22
+        },
+        "samples": [
+          {
+            "name": "Arcane Surge",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Duration Extender",
+            "raw": 22,
+            "effective": 22,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Guardian Ward",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Quicksilver Reload",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 6,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Counterspell=6 (cur=0)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 17,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 28,
+            "game_max": 35,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 3,
+          "median": 6,
+          "max": 28
+        },
+        "samples": [
+          {
+            "name": "Counterspell",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Dispel Magic",
+            "raw": 3,
+            "effective": 3,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Superior Duration",
+            "raw": 28,
+            "effective": 28,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 2
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 13.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.46,
+              "items": [
+                "Magic Carpet=15 (cur=0.66)",
+                "Mercurial Magnum=12 (cur=0.05)",
+                "Spiritual Overflow=15 (cur=0.66)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 15.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 35,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.15,
+              "items": [
+                "Diviners Kevlar=35 (cur=0.15)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 5,
+          "median": 13.5,
+          "max": 35
+        },
+        "samples": [
+          {
+            "name": "Diviners Kevlar",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Divine Barrier",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Ethereal Shift",
+            "raw": 5,
+            "effective": 5,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Healing Tempo",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Magic Carpet",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Mercurial Magnum",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Spellslinger",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spiritual Overflow",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      }
+    },
+    "range_up": {
+      "global_max": 60,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Mystic Expansion",
+          "raw": 40,
+          "effective": 40
+        },
+        "ratio_used": 0.89,
+        "neighbor_tier": 3200,
+        "bands": {
+          "1.0": {
+            "raw": 31.39,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 34.53,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 40,
+            "game_max": 60
+          }
+        },
+        "distribution": {
+          "min": 40,
+          "median": 31.39,
+          "max": 40
+        },
+        "samples": [
+          {
+            "name": "Mystic Expansion",
+            "raw": 40,
+            "effective": 40,
+            "unit": "",
+            "current_score": 1.25
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Guardian Ward",
+          "raw": 16,
+          "effective": 16
+        },
+        "ratio_used": 0.89,
+        "neighbor_tier": 800,
+        "bands": {
+          "1.0": {
+            "raw": 21.95,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 24.15,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 16,
+            "game_max": 60
+          }
+        },
+        "distribution": {
+          "min": 16,
+          "median": 21.95,
+          "max": 16
+        },
+        "samples": [
+          {
+            "name": "Guardian Ward",
+            "raw": 16,
+            "effective": 16,
+            "unit": "",
+            "current_score": 0.1
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 6,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 18,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.38,
+              "items": [
+                "Cultist Sacrifice=24 (cur=0.66)",
+                "Rescue Beam=12 (cur=0.1)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 36,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.9,
+              "items": [
+                "Ballistic Enchantment=40 (cur=0.9)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 60,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.33,
+              "items": [
+                "Greater Expansion=60 (cur=1.33)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 10,
+          "median": 18,
+          "max": 60
+        },
+        "samples": [
+          {
+            "name": "Ballistic Enchantment",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.9
+          },
+          {
+            "name": "Cultist Sacrifice",
+            "raw": 24,
+            "effective": 24,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Greater Expansion",
+            "raw": 60,
+            "effective": 60,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.33
+          },
+          {
+            "name": "Healing Nova",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          },
+          {
+            "name": "Knockdown",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Rescue Beam",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 3,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 16,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.2,
+              "items": [
+                "Vortex Web=16 (cur=0.2)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 18,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 20,
+            "game_max": 60,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 12,
+          "median": 16,
+          "max": 20
+        },
+        "samples": [
+          {
+            "name": "Divine Barrier",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Spirit Burn",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.15
+          },
+          {
+            "name": "Vortex Web",
+            "raw": 16,
+            "effective": 16,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          }
+        ]
+      }
+    },
+    "charge_up": {
+      "global_max": 2,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Extra Charge",
+          "raw": 1,
+          "effective": 1
+        },
+        "ratio_used": 1.25,
+        "neighbor_tier": 3200,
+        "bands": {
+          "1.0": {
+            "raw": 0.98,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 1.08,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 1,
+            "game_max": 2
+          }
+        },
+        "distribution": {
+          "min": 1,
+          "median": 0.98,
+          "max": 1
+        },
+        "samples": [
+          {
+            "name": "Extra Charge",
+            "raw": 1,
+            "effective": 1,
+            "unit": "",
+            "current_score": 1.5
+          }
+        ]
+      },
+      "tier_1600": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_3200": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 1.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 1.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 2,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.75,
+              "items": [
+                "Rapid Recharge=2 (cur=1.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 1,
+          "median": 1.5,
+          "max": 2
+        },
+        "samples": [
+          {
+            "name": "Cultist Sacrifice",
+            "raw": 1,
+            "effective": 1,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Rapid Recharge",
+            "raw": 2,
+            "effective": 2,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.75
+          }
+        ]
+      },
+      "tier_6400": {
+        "insufficient_data": true,
+        "n": 0
+      }
+    },
+    "spirit_power": {
+      "global_max": 40,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Extra Spirit",
+          "raw": 10,
+          "effective": 10
+        },
+        "ratio_used": 1.59,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 7.21,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 7.93,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 10,
+            "game_max": 40
+          }
+        },
+        "distribution": {
+          "min": 10,
+          "median": 7.21,
+          "max": 10
+        },
+        "samples": [
+          {
+            "name": "Extra Spirit",
+            "raw": 10,
+            "effective": 10,
+            "unit": "",
+            "current_score": 1.33
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 7,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 15.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.5,
+              "items": [
+                "Enchanters Emblem=15 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 20,
+            "game_max": 40,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 6,
+          "median": 7,
+          "max": 20
+        },
+        "samples": [
+          {
+            "name": "Arcane Surge",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Enchanters Emblem",
+            "raw": 15,
+            "effective": 15,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Healbane",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Improved Spirit",
+            "raw": 18,
+            "effective": 18,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.33
+          },
+          {
+            "name": "Mystic Shot",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Opening Rounds",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Spirit Lifesteal",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Suppressor",
+            "raw": 6,
+            "effective": 6,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.65
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 6,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 9,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.22,
+              "items": [
+                "Alchemical Fire=10 (cur=0.33)",
+                "Veil Walker=10 (cur=0.1)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 10,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 20,
+            "game_max": 40,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 2.22,
+          "median": 9,
+          "max": 20
+        },
+        "samples": [
+          {
+            "name": "Alchemical Fire",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Counterspell",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Decay",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.35
+          },
+          {
+            "name": "Healing Nova",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.05
+          },
+          {
+            "name": "Shadow Weave",
+            "raw": 20,
+            "effective": 2.22,
+            "has_conditional": true,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Veil Walker",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.1
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 10,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 17,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.25,
+              "items": [
+                "Ethereal Shift=20 (cur=0.25)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 30,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 1.13,
+              "items": [
+                "Boundless Spirit=30 (cur=1.75)",
+                "Infuser=30 (cur=0.5)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 40,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.75,
+              "items": [
+                "Spiritual Overflow=40 (cur=0.75)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 7,
+          "median": 17,
+          "max": 40
+        },
+        "samples": [
+          {
+            "name": "Boundless Spirit",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.75
+          },
+          {
+            "name": "Diviners Kevlar",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.45
+          },
+          {
+            "name": "Ethereal Shift",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Infuser",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Leech",
+            "raw": 12,
+            "effective": 12,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Magic Carpet",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.2
+          },
+          {
+            "name": "Mercurial Magnum",
+            "raw": 7,
+            "effective": 7,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Phantom Strike",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Spiritual Overflow",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Witchmail",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.7
+          }
+        ]
+      }
+    },
+    "spirit_power_pct": {
+      "global_max": 15,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_3200": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_6400": {
+        "n": 1,
+        "unit": "",
+        "derivation": "single_sample_no_neighbor",
+        "anchor": {
+          "name": "Boundless Spirit",
+          "raw": 15,
+          "effective": 15
+        },
+        "bands": {
+          "1.0": {
+            "raw": 15,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 16.5,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 15,
+            "game_max": 15
+          }
+        },
+        "distribution": {
+          "min": 15,
+          "median": 15,
+          "max": 15
+        },
+        "samples": [
+          {
+            "name": "Boundless Spirit",
+            "raw": 15,
+            "effective": 15,
+            "unit": "",
+            "current_score": 1.75
+          }
+        ]
+      }
+    },
+    "bullet_lifesteal": {
+      "global_max": 25,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 13.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 13.75,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 14,
+            "game_max": 25,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 13,
+          "median": 13.5,
+          "max": 14
+        },
+        "samples": [
+          {
+            "name": "Active Reload",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Bullet Lifesteal",
+            "raw": 13,
+            "effective": 13,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.5
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Fury Trance",
+          "raw": 14,
+          "effective": 14
+        },
+        "ratio_used": 1.25,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 15.44,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 16.98,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 14,
+            "game_max": 25
+          }
+        },
+        "distribution": {
+          "min": 14,
+          "median": 15.44,
+          "max": 14
+        },
+        "samples": [
+          {
+            "name": "Fury Trance",
+            "raw": 14,
+            "effective": 14,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 19,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 22,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "raw": 25,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 1.25,
+              "items": [
+                "Leech=25 (cur=1.25)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 13,
+          "median": 19,
+          "max": 25
+        },
+        "samples": [
+          {
+            "name": "Leech",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Vampiric Burst",
+            "raw": 13,
+            "effective": 13,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 2
+          }
+        ]
+      }
+    },
+    "spirit_lifesteal": {
+      "global_max": 70,
+      "tier_800": {
+        "insufficient_data": true,
+        "n": 0
+      },
+      "tier_1600": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 11.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 12.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 13,
+            "game_max": 70,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 10,
+          "median": 11.5,
+          "max": 13
+        },
+        "samples": [
+          {
+            "name": "Spirit Lifesteal",
+            "raw": 13,
+            "effective": 13,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.5
+          },
+          {
+            "name": "Spirit Shredder Bullets",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.15
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 2,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 30,
+            "game_max": 70,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 10,
+          "median": 20,
+          "max": 30
+        },
+        "samples": [
+          {
+            "name": "Lifestrike",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spirit Rend",
+            "raw": 10,
+            "effective": 10,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 4,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 20.5,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "1.5": {
+            "raw": 36.25,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 1.25,
+              "items": [
+                "Leech=25 (cur=1.25)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 70,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 2,
+              "items": [
+                "Infuser=70 (cur=2)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 8,
+          "median": 20.5,
+          "max": 70
+        },
+        "samples": [
+          {
+            "name": "Infuser",
+            "raw": 70,
+            "effective": 70,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 2
+          },
+          {
+            "name": "Leech",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.25
+          },
+          {
+            "name": "Mystic Reverb",
+            "raw": 8,
+            "effective": 8,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Spiritual Overflow",
+            "raw": 16,
+            "effective": 16,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          }
+        ]
+      }
+    },
+    "slow": {
+      "global_max": 110,
+      "tier_800": {
+        "n": 1,
+        "unit": "",
+        "derivation": "extrapolated_from_neighbor",
+        "anchor": {
+          "name": "Rusted Barrel",
+          "raw": 32,
+          "effective": 32
+        },
+        "ratio_used": 1.13,
+        "neighbor_tier": 1600,
+        "bands": {
+          "1.0": {
+            "raw": 29.24,
+            "percentile": 50,
+            "derived": true
+          },
+          "1.5": {
+            "raw": 32.16,
+            "percentile": 75,
+            "derived": true
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 32,
+            "game_max": 110
+          }
+        },
+        "distribution": {
+          "min": 32,
+          "median": 29.24,
+          "max": 32
+        },
+        "samples": [
+          {
+            "name": "Rusted Barrel",
+            "raw": 32,
+            "effective": 32,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_1600": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 30,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.95,
+              "items": [
+                "Mystic Slow=30 (cur=1.15)",
+                "Slowing Bullets=30 (cur=0.75)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 30,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": []
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 60,
+            "game_max": 110,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 20,
+          "median": 30,
+          "max": 60
+        },
+        "samples": [
+          {
+            "name": "Cold Front",
+            "raw": 60,
+            "effective": 60,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Mystic Slow",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1.15
+          },
+          {
+            "name": "Slowing Bullets",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          },
+          {
+            "name": "Slowing Hex",
+            "raw": 20,
+            "effective": 20,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Suppressor",
+            "raw": 28,
+            "effective": 28,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          }
+        ]
+      },
+      "tier_3200": {
+        "n": 5,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 30,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Weighted Shots=30 (cur=0.66)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 40,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0,
+              "items": [
+                "Majestic Leap=40 (cur=0)"
+              ]
+            }
+          },
+          "2.0": {
+            "not_best_in_game": true,
+            "tier_max": 60,
+            "game_max": 110,
+            "note": "this tier does not contain the game-best provider; a higher tier exists"
+          }
+        },
+        "distribution": {
+          "min": 14,
+          "median": 30,
+          "max": 60
+        },
+        "samples": [
+          {
+            "name": "Hunters Aura",
+            "raw": 14,
+            "effective": 14,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Lifestrike",
+            "raw": 60,
+            "effective": 60,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Majestic Leap",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Point Blank",
+            "raw": 25,
+            "effective": 25,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.5
+          },
+          {
+            "name": "Weighted Shots",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          }
+        ]
+      },
+      "tier_6400": {
+        "n": 8,
+        "unit": "",
+        "bands": {
+          "1.0": {
+            "raw": 38,
+            "percentile": 50,
+            "current_score_at_band": {
+              "mean": 0.17,
+              "items": [
+                "Juggernaut=36 (cur=0)",
+                "Mystic Reverb=40 (cur=0.33)"
+              ]
+            }
+          },
+          "1.5": {
+            "raw": 52.5,
+            "percentile": 75,
+            "current_score_at_band": {
+              "mean": 0.25,
+              "items": [
+                "Phantom Strike=50 (cur=0.25)"
+              ]
+            }
+          },
+          "2.0": {
+            "raw": 110,
+            "percentile": 100,
+            "current_score_at_band": {
+              "mean": 0.66,
+              "items": [
+                "Lightning Scroll=110 (cur=0.66)"
+              ]
+            }
+          }
+        },
+        "distribution": {
+          "min": 30,
+          "median": 38,
+          "max": 110
+        },
+        "samples": [
+          {
+            "name": "Arctic Blast",
+            "raw": 60,
+            "effective": 60,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Colossus",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 1
+          },
+          {
+            "name": "Glass Cannon",
+            "raw": 30,
+            "effective": 30,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Juggernaut",
+            "raw": 36,
+            "effective": 36,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0
+          },
+          {
+            "name": "Lightning Scroll",
+            "raw": 110,
+            "effective": 110,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.66
+          },
+          {
+            "name": "Mystic Reverb",
+            "raw": 40,
+            "effective": 40,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.33
+          },
+          {
+            "name": "Phantom Strike",
+            "raw": 50,
+            "effective": 50,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.25
+          },
+          {
+            "name": "Vortex Web",
+            "raw": 35,
+            "effective": 35,
+            "has_conditional": false,
+            "unit": "",
+            "current_score": 0.75
+          }
+        ]
+      }
+    }
+  },
+  "unmappable_stats": [
+    "bullet_velocity",
+    "stamina"
+  ]
+}

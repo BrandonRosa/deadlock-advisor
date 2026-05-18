@@ -1,0 +1,27 @@
+{
+  "name": "[Baseline] T2 debuff_resist @1.0",
+  "normalized_name": "_bl_t2_debuff_resist_1_0",
+  "category": "Vitality",
+  "tier": 1600,
+  "synthetic": true,
+  "baseline_meta": {
+    "stat": "debuff_resist",
+    "raw_value": "+25",
+    "score_band": 1,
+    "percentile": 50,
+    "sample_count": 3,
+    "derivation": "measured",
+    "tier_distribution": {
+      "min": 25,
+      "median": 25,
+      "max": 35
+    }
+  },
+  "upgrades_from": [],
+  "values": {
+    "playstyle_score": {
+      "debuff_resistance": 1
+    }
+  },
+  "wiki_url": null
+}
