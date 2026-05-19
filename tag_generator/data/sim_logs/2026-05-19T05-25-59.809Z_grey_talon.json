@@ -1,0 +1,306 @@
+{
+  "hero": "grey_talon",
+  "build_idx": 6,
+  "build_name": "Damage Heavy Gun",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "grey_talon",
+    "kelvin",
+    "billy",
+    "drifter",
+    "mina",
+    "apollo"
+  ],
+  "enemies": [
+    "vindicta",
+    "mcginnis",
+    "shiv",
+    "lash",
+    "silver"
+  ],
+  "self": "grey_talon",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Became unkillable and dealt so much damage",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_stamina",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "long_range",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "rusted_barrel",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1800
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2900
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 4100
+    },
+    {
+      "tick": 8,
+      "action": "upgrade",
+      "key": "sharpshooter",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 5300,
+      "costEffective": 1600,
+      "components": [
+        "long_range"
+      ]
+    },
+    {
+      "tick": 9,
+      "action": "buy",
+      "key": "weighted_shots",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 4900,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "intensifying_magazine",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3000,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2800
+    },
+    {
+      "tick": 12,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5600
+    },
+    {
+      "tick": 14,
+      "action": "buy",
+      "key": "glass_cannon",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7100,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3800
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5500
+    },
+    {
+      "tick": 18,
+      "action": "buy",
+      "key": "lucky_shot",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7300,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2700
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 21,
+      "action": "buy",
+      "key": "indomitable",
+      "col": "counter",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6600,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "burst_fire",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3200,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 24,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 6300
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 9600
+    },
+    {
+      "tick": 25,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 9600
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "colossus",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 9600,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "buy",
+      "key": "armor_piercing_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6600,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 27,
+      "action": "skip",
+      "phase": "Extra Late",
+      "soulsBefore": 3700
+    },
+    {
+      "tick": 28,
+      "action": "unlock",
+      "phase": "Extra Late",
+      "soulsBefore": 7300
+    },
+    {
+      "tick": 28,
+      "action": "buy",
+      "key": "frenzy",
+      "col": "override",
+      "override": true,
+      "phase": "Extra Late",
+      "soulsBefore": 7300,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "extra_stamina",
+    "rusted_barrel",
+    "sharpshooter",
+    "weighted_shots",
+    "intensifying_magazine",
+    "glass_cannon",
+    "lucky_shot",
+    "indomitable",
+    "burst_fire",
+    "colossus",
+    "armor_piercing_rounds",
+    "frenzy"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 55800,
+  "slots_unlocked": 3,
+  "ts": "2026-05-19T05:25:59.809Z"
+}
