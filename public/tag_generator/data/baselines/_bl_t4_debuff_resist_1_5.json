@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "debuff_resist",
-    "raw_value": "+25",
+    "raw_value": "+35",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 5,

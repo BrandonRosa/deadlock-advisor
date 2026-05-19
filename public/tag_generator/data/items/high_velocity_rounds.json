@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/high_velocity_rounds/high_velocity_rounds.png",
   "name": "High-Velocity Rounds",
   "normalized_name": "high_velocity_rounds",
@@ -15,7 +16,7 @@
       "aoe_cluster": null,
       "assist_importance": null,
       "away_from_team": null,
-      "bullet_damage": 0.66,
+      "bullet_damage": 0.85,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
       "bullet_proc": null,
@@ -59,6 +60,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": 0.5,
       "low_max_hp": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds"
 }

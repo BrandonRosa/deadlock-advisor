@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "spirit_lifesteal": 1
+      "spirit_lifesteal": 1.0
     }
   },
   "wiki_url": null

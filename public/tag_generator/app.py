@@ -9,6 +9,7 @@ BASE        = Path(__file__).parent
 DATA        = BASE / "data"
 HEROES_DIR  = DATA / "heroes"
 ITEMS_DIR   = DATA / "items"
+BASELINES_DIR = DATA / "baselines"
 TAGS_F      = DATA / "tags.json"
 QA_DIR      = DATA / "qa"
 REPORTS_DIR = QA_DIR / "reports"
@@ -359,6 +360,283 @@ def get_all_items():
         except Exception:
             pass
     return jsonify(out)
+
+
+@app.route("/api/baselines", methods=["GET"])
+def list_baselines():
+    """List all individual baseline JSONs (one row per synthetic item).
+    The aggregated comparison table lives at /api/baselines/table; this is
+    the flat list used for the Browse view + click-to-edit lookups."""
+    out = []
+    for f in sorted(BASELINES_DIR.glob("_bl_*.json")):
+        try:
+            d = json.loads(f.read_text(encoding='utf-8'))
+            out.append({
+                "normalized_name": d["normalized_name"],
+                "name":     d["name"],
+                "category": d.get("category", ""),
+                "tier":     d.get("tier", 0),
+                "synthetic": True,
+                "baseline_meta": d.get("baseline_meta", {}),
+            })
+        except Exception:
+            pass
+    return jsonify(out)
+
+
+@app.route("/api/baselines/<name>", methods=["GET"])
+def get_baseline(name):
+    f = BASELINES_DIR / f"{name}.json"
+    if not f.exists():
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(json.loads(f.read_text(encoding='utf-8')))
+
+
+@app.route("/api/baselines/<name>", methods=["PUT"])
+def save_baseline(name):
+    """Save a baseline JSON and propagate edits into _baseline_table.json so
+    the comparison table + per-item audit panel reflect the new value
+    immediately (without rerunning wiki_audit.cjs)."""
+    f = BASELINES_DIR / f"{name}.json"
+    payload = request.json
+    f.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding='utf-8')
+    _sync_baseline_into_table(name, payload)
+    return jsonify({"ok": True})
+
+
+_TIER_IDX = {800: 1, 1600: 2, 3200: 3, 6400: 4}
+
+
+def _coerce_raw_number(raw_value):
+    """'+15%' / '15' / 15 → 15. Falls back to original value if non-numeric."""
+    if isinstance(raw_value, str):
+        cleaned = raw_value.strip().lstrip("+").rstrip("%")
+        try:
+            return float(cleaned) if "." in cleaned else int(cleaned)
+        except ValueError:
+            return raw_value
+    return raw_value
+
+
+def _apply_band_to_table(table, stat, tier_souls, band_key, raw_for_table, *,
+                         percentile=None, derivation=None,
+                         sample_count=None, tier_distribution=None):
+    """Patch one (stat, tier, band) cell in the in-memory baseline table.
+
+    Only updates fields the UI owns (raw / percentile / derived flag, plus
+    optional n + distribution at the tier level). Sample lists and
+    current_score_at_band stay owned by wiki_audit.cjs."""
+    cell = table.get("baselines", {}).get(stat, {}).get(f"tier_{tier_souls}", {})
+    bands = cell.get("bands")
+    if not bands:
+        return False
+    band_entry = bands.get(band_key)
+    if not band_entry:
+        return False
+    band_entry["raw"] = raw_for_table
+    # Populating a 2.0 cell that was previously a placeholder: drop the
+    # not-best-in-game flag so it renders as a real value.
+    if band_entry.get("not_best_in_game"):
+        band_entry.pop("not_best_in_game", None)
+        band_entry.pop("tier_max", None)
+        band_entry.pop("game_max", None)
+        band_entry.pop("note", None)
+    if percentile is not None:
+        band_entry["percentile"] = percentile
+    if derivation:
+        band_entry["derived"] = derivation == "extrapolated_from_neighbor"
+    if sample_count is not None:
+        cell["n"] = sample_count
+    td = tier_distribution or {}
+    if any(td.get(k) is not None for k in ("min", "median", "max")):
+        dist = cell.get("distribution") or {}
+        for k in ("min", "median", "max"):
+            if td.get(k) is not None:
+                dist[k] = td[k]
+        cell["distribution"] = dist
+    return True
+
+
+def _sync_baseline_into_table(name, payload):
+    """Patch the corresponding cell in _baseline_table.json from a single
+    baseline file save. The table is the rolled-up summary the UI shows —
+    keeping it in sync with the underlying _bl_*.json files means edits
+    round-trip immediately."""
+    table_f = BASELINES_DIR / "_baseline_table.json"
+    if not table_f.exists():
+        return
+    meta = (payload or {}).get("baseline_meta") or {}
+    stat = meta.get("stat")
+    if not stat:
+        return
+    tier_souls = payload.get("tier") or 0
+    if tier_souls not in _TIER_IDX:
+        return
+    band_num = meta.get("score_band")
+    if band_num is None:
+        return
+    try:
+        band_key = f"{float(band_num):.1f}"
+    except (TypeError, ValueError):
+        return
+    raw_for_table = _coerce_raw_number(meta.get("raw_value"))
+    try:
+        table = json.loads(table_f.read_text(encoding='utf-8'))
+        if not _apply_band_to_table(
+            table, stat, tier_souls, band_key, raw_for_table,
+            percentile=meta.get("percentile"),
+            derivation=meta.get("derivation"),
+            sample_count=meta.get("sample_count"),
+            tier_distribution=meta.get("tier_distribution"),
+        ):
+            return
+        table_f.write_text(json.dumps(table, indent=2, ensure_ascii=False), encoding='utf-8')
+    except Exception:
+        # Sync is best-effort — failure here doesn't block the primary save.
+        pass
+
+
+def _blank_playstyle_score():
+    """Return the canonical {tag: null, …} shape used by every _bl_*.json.
+
+    Sourced from an existing baseline file rather than tags.json so the
+    surface stays identical even if tags.json has been edited (the audit
+    script's existing files act as the authoritative shape)."""
+    for f in sorted(BASELINES_DIR.glob("_bl_*.json")):
+        try:
+            d = json.loads(f.read_text(encoding='utf-8'))
+            ps = d.get("values", {}).get("playstyle_score")
+            if isinstance(ps, dict) and ps:
+                return {k: None for k in ps.keys()}
+        except Exception:
+            continue
+    # Fallback: derive from tags.json
+    try:
+        tags = json.loads(TAGS_F.read_text(encoding='utf-8'))
+        return {t["code"]: None for t in tags}
+    except Exception:
+        return {}
+
+
+def _format_raw_display(raw_for_table, stat, table):
+    """Render a numeric threshold as the +N / +N% display string used in
+    baseline_meta.raw_value. Picks the unit from the table's tier slot if
+    one is set."""
+    if not isinstance(raw_for_table, (int, float)):
+        return str(raw_for_table)
+    unit = ""
+    stat_block = (table.get("baselines") or {}).get(stat) or {}
+    for k in ("tier_800", "tier_1600", "tier_3200", "tier_6400"):
+        u = (stat_block.get(k) or {}).get("unit")
+        if u:
+            unit = u
+            break
+    sign = "+" if raw_for_table >= 0 else ""
+    return f"{sign}{raw_for_table}{unit}"
+
+
+def _write_baseline_file(stat, tier_souls, band_key, raw_for_table, mapped_tag, table):
+    """Create or update _bl_t{idx}_{stat}_{band}.json for one cell.
+
+    On create: scaffolds a minimal synthetic-item shape so the file looks
+    identical to ones the audit script produces.
+    On update: only touches baseline_meta.raw_value and
+    values.playstyle_score[<mapped_tag>] — leaves derivation, sample counts,
+    etc. alone so a later wiki_audit run can still own them."""
+    tier_idx = _TIER_IDX[tier_souls]
+    band_slug = band_key.replace(".", "_")
+    nname = f"_bl_t{tier_idx}_{stat}_{band_slug}"
+    f = BASELINES_DIR / f"{nname}.json"
+    band_num = float(band_key)
+    raw_display = _format_raw_display(raw_for_table, stat, table)
+
+    if f.exists():
+        try:
+            d = json.loads(f.read_text(encoding='utf-8'))
+        except Exception:
+            d = None
+    else:
+        d = None
+
+    if d is None:
+        # Scaffold a new synthetic baseline item.
+        d = {
+            "baseline_meta": {
+                "derivation": "manual",
+                "percentile": {"1.0": 50, "1.5": 75, "2.0": 100}.get(band_key, None),
+                "raw_value": raw_display,
+                "sample_count": 0,
+                "score_band": band_num,
+                "stat": stat,
+                "tier_distribution": {"max": None, "median": None, "min": None},
+            },
+            "category": "Weapon",
+            "compare_to": [],
+            "name": f"[Baseline] T{tier_idx} {stat} @{band_key}",
+            "normalized_name": nname,
+            "synthetic": True,
+            "tier": tier_souls,
+            "upgrades_from": [],
+            "values": {"playstyle_score": _blank_playstyle_score()},
+            "wiki_url": None,
+        }
+    else:
+        meta = d.setdefault("baseline_meta", {})
+        meta["raw_value"] = raw_display
+        meta.setdefault("stat", stat)
+        meta.setdefault("score_band", band_num)
+
+    if mapped_tag:
+        ps = d.setdefault("values", {}).setdefault("playstyle_score", _blank_playstyle_score())
+        ps[mapped_tag] = band_num
+
+    f.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding='utf-8')
+
+
+@app.route("/api/baselines/by-stat/<stat>", methods=["PUT"])
+def save_baselines_by_stat(stat):
+    """Bulk-save all (tier × band) raw thresholds for one stat.
+
+    Payload shape:
+      { "bands": { "tier_800": {"1.0": 20, "1.5": 30, "2.0": null}, ... } }
+
+    A null value leaves that cell untouched (no file written, table cell
+    unchanged). A non-null value updates the existing _bl_*.json (or
+    creates one) and patches _baseline_table.json. Returns the fresh
+    table so the UI can refresh in one round-trip."""
+    table_f = BASELINES_DIR / "_baseline_table.json"
+    if not table_f.exists():
+        return jsonify({"error": "baseline table missing"}), 500
+    table = json.loads(table_f.read_text(encoding='utf-8'))
+    if stat not in (table.get("baselines") or {}):
+        return jsonify({"error": f"unknown stat: {stat}"}), 404
+
+    mapping = (table.get("stat_to_tag_mapping") or {}).get(stat) or {}
+    raw_tag = mapping.get("tag")
+    # tag may be a list, a string, or null. Only auto-assign the playstyle
+    # score when there's exactly one mapped tag (the common case).
+    mapped_tag = raw_tag if isinstance(raw_tag, str) else None
+
+    payload = request.json or {}
+    bands_in = payload.get("bands") or {}
+    applied = 0
+    for tier_key, tier_souls in (("tier_800", 800), ("tier_1600", 1600),
+                                 ("tier_3200", 3200), ("tier_6400", 6400)):
+        cells = bands_in.get(tier_key) or {}
+        for band_key in ("1.0", "1.5", "2.0"):
+            if band_key not in cells:
+                continue
+            v = cells[band_key]
+            if v is None or v == "":
+                continue
+            raw_for_table = _coerce_raw_number(v)
+            if not _apply_band_to_table(table, stat, tier_souls, band_key, raw_for_table):
+                continue
+            _write_baseline_file(stat, tier_souls, band_key, raw_for_table, mapped_tag, table)
+            applied += 1
+
+    table_f.write_text(json.dumps(table, indent=2, ensure_ascii=False), encoding='utf-8')
+    return jsonify({"ok": True, "applied": applied, "table": table})
 
 
 @app.route("/api/baselines/table")

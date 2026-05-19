@@ -264,6 +264,7 @@
           <div class="cat-tabs" id="item-subpage-tabs" style="margin-right:12px">
             <button class="cat-btn active" data-subpage="items">Items</button>
             <button class="cat-btn" data-subpage="baselines">Baselines</button>
+            <button class="cat-btn" data-subpage="baselines-browse" title="Browse all baseline items as cards">Browse</button>
           </div>
           <input id="item-search" type="search" placeholder="Search…" />
           <div class="cat-tabs" id="item-cat-tabs">
@@ -276,6 +277,7 @@
       </div>
       <div id="item-grid" class="card-grid"></div>
       <div id="baseline-table-container" style="display:none; padding: 8px 16px; overflow:auto"></div>
+      <div id="baseline-browse-grid" class="card-grid" style="display:none"></div>
     </section>
 
     <!-- ITEM EDIT -->
@@ -352,7 +354,21 @@
           <tbody id="item-tag-body"></tbody>
         </table>
       </div>
+      <div id="baseline-meta-panel" class="hidden" style="padding: 12px 16px; margin-top: 16px; border-top: 1px solid var(--border, #333)"></div>
       <div id="baseline-compare-panel" style="padding: 12px 16px; margin-top: 16px; border-top: 1px solid var(--border, #333)"></div>
+    </section>
+
+    <!-- BASELINE STAT EDIT -->
+    <section id="page-baseline-stat-edit" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-baselines">← Baselines</button>
+        <h1 id="bse-title">Baseline</h1>
+        <div class="header-actions">
+          <span id="bse-dirty-badge" class="dirty-badge hidden">Unsaved</span>
+          <button class="btn-primary" id="btn-save-bse" disabled>Save</button>
+        </div>
+      </div>
+      <div id="bse-body" style="padding: 16px"></div>
     </section>
 
     <!-- TAGS -->

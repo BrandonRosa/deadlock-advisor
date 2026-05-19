@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "fire_rate": 2
+      "fire_rate": 2.0
     }
   },
   "wiki_url": null

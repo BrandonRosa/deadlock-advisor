@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "duration_up",
-    "raw_value": "+13.5",
+    "raw_value": "+20",
     "score_band": 1,
     "percentile": 50,
     "sample_count": 8,
@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "duration_dependant": 1
+      "duration_dependant": 1.0
     }
   },
   "wiki_url": null

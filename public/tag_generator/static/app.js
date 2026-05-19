@@ -1770,24 +1770,80 @@ document.getElementById('item-search').addEventListener('input', e => {
   renderItemGrid();
 });
 
-// Items / Baselines sub-page tabs
+// Items / Baselines / Browse sub-page tabs
 document.querySelectorAll('#item-subpage-tabs .cat-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
     document.querySelectorAll('#item-subpage-tabs .cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const sub = btn.dataset.subpage;
-    const grid = document.getElementById('item-grid');
-    const table = document.getElementById('baseline-table-container');
+    const grid    = document.getElementById('item-grid');
+    const table   = document.getElementById('baseline-table-container');
+    const browse  = document.getElementById('baseline-browse-grid');
+    grid.style.display   = 'none';
+    table.style.display  = 'none';
+    browse.style.display = 'none';
     if (sub === 'baselines') {
-      grid.style.display = 'none';
       table.style.display = '';
       await renderBaselineTable();
+    } else if (sub === 'baselines-browse') {
+      browse.style.display = '';
+      await renderBaselineBrowseGrid();
     } else {
       grid.style.display = '';
-      table.style.display = 'none';
     }
   });
 });
+
+// Browse view — flat grid of every synthetic baseline JSON. Each card opens
+// the item editor with source='baselines' so individual baselines that don't
+// appear in the comparison table (insufficient_data, extrapolated, etc.) are
+// still reachable for editing.
+async function renderBaselineBrowseGrid() {
+  const grid = document.getElementById('baseline-browse-grid');
+  if (!S._baselineList) {
+    grid.innerHTML = '<div style="color:var(--muted); padding:8px">Loading…</div>';
+    try {
+      S._baselineList = await api.get('/api/baselines');
+    } catch (e) {
+      grid.innerHTML = '<div style="color:#c66; padding:8px">Failed to load baselines.</div>';
+      return;
+    }
+  }
+  const list = S._baselineList || [];
+  if (!list.length) {
+    grid.innerHTML = '<div style="color:var(--muted); padding:8px">No baselines found in data/baselines/.</div>';
+    return;
+  }
+  // Group by tier for at-a-glance scanning.
+  const tierIdxOf = t => ({800:1, 1600:2, 3200:3, 6400:4})[t] || 0;
+  const sorted = [...list].sort((a, b) =>
+    tierIdxOf(a.tier) - tierIdxOf(b.tier)
+    || (a.baseline_meta?.stat || '').localeCompare(b.baseline_meta?.stat || '')
+    || (a.baseline_meta?.score_band || 0) - (b.baseline_meta?.score_band || 0)
+  );
+  grid.innerHTML = sorted.map(it => {
+    const m = it.baseline_meta || {};
+    const tier = tierIdxOf(it.tier);
+    return `
+      <div class="card item-card bl-browse-card" data-bl="${it.normalized_name}" style="cursor:pointer">
+        <div class="card-body" style="padding:10px">
+          <div style="display:flex; justify-content:space-between; gap:6px; align-items:baseline">
+            <span style="font-weight:600; font-size:13px">T${tier} · ${m.stat || '?'}</span>
+            <span class="tier-badge" style="font-size:11px">@${m.score_band ?? '?'}</span>
+          </div>
+          <div style="color:var(--muted); font-size:11px; margin-top:4px">${it.name}</div>
+          <div style="margin-top:6px; font-size:13px"><strong>${m.raw_value ?? '—'}</strong></div>
+          <div style="color:var(--muted); font-size:10px; margin-top:4px">
+            p${m.percentile ?? '?'} · n=${m.sample_count ?? '?'} · ${m.derivation || ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  grid.querySelectorAll('.bl-browse-card[data-bl]').forEach(el => {
+    el.addEventListener('click', () => openItemEdit(el.dataset.bl, 'baselines'));
+  });
+}
 
 async function renderBaselineTable() {
   const container = document.getElementById('baseline-table-container');
@@ -1809,11 +1865,15 @@ async function renderBaselineTable() {
   const bands = ['1.0', '1.5', '2.0'];
   const stats = Object.keys(t.baselines).sort();
 
+  // tierBucket converts the souls tier (800/1600/3200/6400) to its 1/2/3/4
+  // index used in the synthetic baseline file naming scheme `_bl_t<n>_<stat>_<band>`.
+  function tierIdx(tier) { return ({800:1, 1600:2, 3200:3, 6400:4})[tier] || 0; }
+
   function cellContent(stat, tier) {
     const slot = t.baselines[stat][`tier_${tier}`];
-    if (!slot) return '<td class="bl-cell bl-na">—</td>';
-    if (slot.insufficient_data) return '<td class="bl-cell bl-na" title="no data">∅</td>';
-    if (!slot.bands) return '<td class="bl-cell bl-na">—</td>';
+    if (!slot) return `<td class="bl-cell bl-na bl-clickable" data-stat="${stat}">—</td>`;
+    if (slot.insufficient_data) return `<td class="bl-cell bl-na bl-clickable" data-stat="${stat}" title="no data — click to edit">∅</td>`;
+    if (!slot.bands) return `<td class="bl-cell bl-na bl-clickable" data-stat="${stat}">—</td>`;
     const cells = bands.map(b => {
       const info = slot.bands[b];
       if (!info) return `<span class="bl-band bl-na">—</span>`;
@@ -1825,7 +1885,7 @@ async function renderBaselineTable() {
       const cls = 'bl-band bl-band-' + b.replace('.','_') + (info.derived ? ' bl-derived' : '');
       return `<span class="${cls}" title="${tooltip}">${b}: ${info.raw}${unit}${derived}</span>`;
     }).join(' ');
-    return `<td class="bl-cell">${cells}</td>`;
+    return `<td class="bl-cell bl-clickable" data-stat="${stat}" title="Click to edit ${stat} thresholds">${cells}</td>`;
   }
 
   let html = `
@@ -1839,11 +1899,16 @@ async function renderBaselineTable() {
       .bl-band-2_0 { background: rgba(200,120,80,0.22); }
       .bl-band.bl-derived { background: rgba(120,120,200,0.18); }
       .bl-band.bl-na { background: transparent; color: var(--muted); }
-      .bl-stat { font-weight: 600; }
+      .bl-cell.bl-clickable { cursor: pointer; transition: background-color .12s; }
+      .bl-cell.bl-clickable:hover { background-color: rgba(120, 180, 90, 0.08); }
+      .bl-stat { font-weight: 600; cursor: pointer; }
+      .bl-stat-row { cursor: pointer; }
+      .bl-stat-row:hover .bl-stat { color: var(--accent, #75e8a2); }
       .bl-tag { color: var(--muted); font-size: 11px; }
     </style>
     <div style="margin-bottom:8px; color:var(--muted); font-size:12px">
-      Methodology: 1.0 = high for tier (p50), 1.5 = very good for tier (p75), 2.0 = best in the entire game (cross-tier).
+      Methodology: <b>1.0</b> = good, <b>1.5</b> = best for this tier (the typical ceiling — most stats max out here),
+      <b>2.0</b> = best across ALL tiers (rare; reserved for the single tier that holds the game-best provider).
       Effective values: conditional bonuses are uptime-discounted (lowhp=0.30, ambush=duration/cd, per_stack=0.5×max, etc.).
       Cells marked <code>(~)</code> are extrapolated from neighboring tiers. Global tier ratio: <b>${t.global_tier_ratio}</b>.
     </div>
@@ -1858,7 +1923,7 @@ async function renderBaselineTable() {
         ${stats.map(stat => {
           const tag = t.stat_to_tag_mapping[stat] && t.stat_to_tag_mapping[stat].tag;
           const tagDisp = tag == null ? '(unmapped)' : (Array.isArray(tag) ? tag.join('+') : tag);
-          return `<tr>
+          return `<tr class="bl-stat-row" data-stat="${stat}">
             <td><span class="bl-stat">${stat}</span><br><span class="bl-tag">→ ${tagDisp}</span></td>
             ${tiers.map(tr => cellContent(stat, tr)).join('')}
           </tr>`;
@@ -1867,12 +1932,214 @@ async function renderBaselineTable() {
     </table>
   `;
   container.innerHTML = html;
+  // Click any cell or stat name → open the per-stat threshold editor.
+  container.querySelectorAll('[data-stat]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openBaselineStatEditor(el.dataset.stat);
+    });
+  });
+}
+
+// ── Per-stat baseline editor ──────────────────────────────────────────────────
+// Focused form: edits raw thresholds for one stat across all 4 tiers × 3 bands.
+// Source of truth is _baseline_table.json plus the individual _bl_*.json files;
+// PUT /api/baselines/by-stat/<stat> writes both.
+function openBaselineStatEditor(stat) {
+  if (!S._baselineTable) {
+    toast('Baseline table not loaded yet', 'error');
+    return;
+  }
+  const t = S._baselineTable;
+  if (!t.baselines || !t.baselines[stat]) {
+    toast(`Unknown stat: ${stat}`, 'error');
+    return;
+  }
+  S.currentBaselineStat = stat;
+  S.baselineEditDirty = false;
+  S.baselineEditOriginal = collectBaselineOriginal(stat);
+  renderBaselineStatEditor();
+  showPage('baseline-stat-edit');
+}
+
+function collectBaselineOriginal(stat) {
+  // Snapshot of {tier_key: {band_key: raw_value_as_string}} so we can detect
+  // dirty state and revert on cancel.
+  const t = S._baselineTable;
+  const out = {};
+  for (const tk of ['tier_800', 'tier_1600', 'tier_3200', 'tier_6400']) {
+    out[tk] = {};
+    const slot = (t.baselines[stat] || {})[tk];
+    const bands = slot && slot.bands;
+    if (!bands) continue;
+    for (const b of ['1.0', '1.5', '2.0']) {
+      const info = bands[b];
+      if (!info || info.not_best_in_game || info.raw == null) {
+        out[tk][b] = '';
+      } else {
+        out[tk][b] = String(info.raw);
+      }
+    }
+  }
+  return out;
+}
+
+function renderBaselineStatEditor() {
+  const stat = S.currentBaselineStat;
+  const t = S._baselineTable;
+  const block = t.baselines[stat] || {};
+  const mapping = (t.stat_to_tag_mapping || {})[stat] || {};
+  const rawTag = mapping.tag;
+  const tagDisp = rawTag == null
+    ? '<span style="color:var(--muted)">(unmapped — threshold tunes the cell but no playstyle score is set)</span>'
+    : (Array.isArray(rawTag) ? rawTag.join(' + ') : rawTag);
+  // Unit: pull from the first tier that defines one.
+  let unit = '';
+  for (const tk of ['tier_800', 'tier_1600', 'tier_3200', 'tier_6400']) {
+    if (block[tk] && block[tk].unit) { unit = block[tk].unit; break; }
+  }
+
+  document.getElementById('bse-title').textContent = `Baseline: ${stat}`;
+
+  const tiers = [
+    ['tier_800',  'T1', 800],
+    ['tier_1600', 'T2', 1600],
+    ['tier_3200', 'T3', 3200],
+    ['tier_6400', 'T4', 6400],
+  ];
+  const bands = ['1.0', '1.5', '2.0'];
+
+  function cellInput(tk, b) {
+    const slot = block[tk] || {};
+    const info = (slot.bands || {})[b];
+    const orig = S.baselineEditOriginal[tk][b];
+    const notBest = info && info.not_best_in_game;
+    const placeholder = notBest ? `(tier max ${info.tier_max ?? '–'})` : '';
+    const title = notBest
+      ? `Currently marked "not best-in-game" — type a value here to override and treat this cell as a real threshold.`
+      : `Raw threshold for T${{tier_800:1,tier_1600:2,tier_3200:3,tier_6400:4}[tk]} ${b}`;
+    return `<input type="number" step="any" class="bse-input"
+      data-tk="${tk}" data-band="${b}"
+      value="${orig}" placeholder="${placeholder}" title="${title}"
+      style="width: 100px; padding: 4px 6px; font-size: 13px">`;
+  }
+
+  function contextRow(tk, tierLabel, tierSouls) {
+    const slot = block[tk] || {};
+    const n = slot.n != null ? slot.n : '–';
+    const dist = slot.distribution || {};
+    const distStr = (dist.min != null || dist.median != null || dist.max != null)
+      ? `min=${dist.min ?? '–'} / median=${dist.median ?? '–'} / max=${dist.max ?? '–'}`
+      : '(no distribution)';
+    const samples = (slot.samples || []).map(s => {
+      const rawTxt = s.effective != null && s.effective !== s.raw
+        ? `${s.raw}→eff ${s.effective}` : `${s.raw}`;
+      return `<span style="display:inline-block; margin-right:8px"><b>${s.name}</b>=${rawTxt}${slot.unit || ''}</span>`;
+    }).join('') || '<span style="color:var(--muted)">(no samples in scrape)</span>';
+    const derivNote = slot.derivation === 'extrapolated_from_neighbor'
+      ? ` <span style="color:#88a; font-size:11px">extrapolated from tier ${slot.neighbor_tier}, ratio ${slot.ratio_used}</span>`
+      : '';
+    return `
+      <tr>
+        <td style="vertical-align:top; padding:8px 10px"><b>${tierLabel}</b><br><span style="color:var(--muted); font-size:11px">${tierSouls} souls</span></td>
+        ${bands.map(b => `<td style="padding:6px 10px; vertical-align:top">${cellInput(tk, b)}</td>`).join('')}
+        <td style="padding:8px 10px; vertical-align:top; color:var(--muted); font-size:11px; min-width:300px">
+          n=${n} · ${distStr}${derivNote}<br>
+          <div style="margin-top:3px">${samples}</div>
+        </td>
+      </tr>
+    `;
+  }
+
+  const html = `
+    <div style="display:flex; gap:24px; align-items:flex-start; margin-bottom:14px; flex-wrap:wrap">
+      <div style="font-size:13px"><span style="color:var(--muted)">Stat:</span> <b>${stat}</b></div>
+      <div style="font-size:13px"><span style="color:var(--muted)">Tag:</span> ${tagDisp}</div>
+      <div style="font-size:13px"><span style="color:var(--muted)">Unit:</span> ${unit || '<span style="color:var(--muted)">(none)</span>'}</div>
+    </div>
+    <div style="color:var(--muted); font-size:12px; margin-bottom:10px; max-width:780px">
+      Edit the raw threshold for each (tier × band) cell. <b>1.0</b> = good, <b>1.5</b> = best for this tier
+      (the typical ceiling — most stats max out here), <b>2.0</b> = best across ALL tiers (only set this if
+      the game-best provider for this stat lives in this tier — usually leave it empty). Empty cells stay
+      empty (no _bl_*.json is touched).
+    </div>
+    <table style="border-collapse: collapse; font-size: 13px">
+      <thead>
+        <tr style="background: var(--panel, #1a1d24)">
+          <th style="padding:6px 10px; text-align:left; border-bottom: 1px solid var(--border, #333)">Tier</th>
+          ${bands.map(b => `<th style="padding:6px 10px; text-align:left; border-bottom: 1px solid var(--border, #333)">${b} ${({"1.0":"(good)","1.5":"(best for tier)","2.0":"(best all tiers)"}[b])}</th>`).join('')}
+          <th style="padding:6px 10px; text-align:left; border-bottom: 1px solid var(--border, #333)">Context</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tiers.map(([tk, lbl, ts]) => contextRow(tk, lbl, ts)).join('')}
+      </tbody>
+    </table>
+  `;
+  document.getElementById('bse-body').innerHTML = html;
+  setBaselineEditDirty(false);
+
+  // Wire input change → dirty.
+  document.querySelectorAll('#bse-body .bse-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const dirty = isBaselineEditDirty();
+      setBaselineEditDirty(dirty);
+    });
+  });
+}
+
+function isBaselineEditDirty() {
+  const orig = S.baselineEditOriginal || {};
+  let dirty = false;
+  document.querySelectorAll('#bse-body .bse-input').forEach(inp => {
+    const cur = inp.value.trim();
+    const was = (orig[inp.dataset.tk] && orig[inp.dataset.tk][inp.dataset.band]) || '';
+    if (cur !== was) dirty = true;
+  });
+  return dirty;
+}
+
+function setBaselineEditDirty(d) {
+  S.baselineEditDirty = !!d;
+  const badge = document.getElementById('bse-dirty-badge');
+  const btn = document.getElementById('btn-save-bse');
+  if (badge) badge.classList.toggle('hidden', !d);
+  if (btn) btn.disabled = !d;
+}
+
+async function saveBaselineStatEditor() {
+  if (!S.baselineEditDirty) return;
+  const stat = S.currentBaselineStat;
+  const payload = { bands: { tier_800: {}, tier_1600: {}, tier_3200: {}, tier_6400: {} } };
+  document.querySelectorAll('#bse-body .bse-input').forEach(inp => {
+    const v = inp.value.trim();
+    payload.bands[inp.dataset.tk][inp.dataset.band] = (v === '' ? null : parseFloat(v));
+  });
+  try {
+    const res = await api.put(`/api/baselines/by-stat/${stat}`, payload);
+    if (res && res.table) {
+      S._baselineTable = res.table;
+    } else {
+      S._baselineTable = null;
+    }
+    // Bust browse-grid cache so newly-created baseline files appear.
+    S._baselineList = null;
+    toast(`Saved ${res.applied ?? 0} threshold${(res.applied ?? 0) === 1 ? '' : 's'} ✓`);
+    await renderBaselineTable();
+    showPage('items');
+  } catch (e) {
+    toast('Failed to save baselines', 'error');
+  }
 }
 
 // ── Item Edit ─────────────────────────────────────────────────────────────────
-async function openItemEdit(name) {
+// `source` selects which API namespace backs the item: 'items' (default) reads
+// from data/items/, 'baselines' reads/writes data/baselines/ for synthetics.
+async function openItemEdit(name, source = 'items') {
   if (!S.tags.length) S.tags = await api.get('/api/tags');
-  S.currentItem = await api.get(`/api/items/${name}`);
+  const apiBase = source === 'baselines' ? '/api/baselines' : '/api/items';
+  S.currentItem = await api.get(`${apiBase}/${name}`);
+  S.currentItemSource = source;
   S.compareItems = [];
   S.itemDirty = false;
 
@@ -1914,7 +2181,94 @@ function renderItemEditPage() {
   setItemDirty(false);
   renderCompareTo();
   renderItemTagTable();
+  renderBaselineMetaPanel();
   renderBaselineComparePanel();
+}
+
+// Synthetic-only editor panel for baseline_meta. Only shown when the loaded
+// item has `synthetic: true` — otherwise hidden and the standard compare
+// panel renders below as usual.
+function renderBaselineMetaPanel() {
+  const panel = document.getElementById('baseline-meta-panel');
+  const cmpPanel = document.getElementById('baseline-compare-panel');
+  if (!panel) return;
+  const it = S.currentItem;
+  if (!it || !it.synthetic) {
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    if (cmpPanel) cmpPanel.classList.remove('hidden');
+    return;
+  }
+  // Hide the compare panel — comparing a baseline to itself is meaningless.
+  if (cmpPanel) cmpPanel.classList.add('hidden');
+  panel.classList.remove('hidden');
+
+  const meta = it.baseline_meta || (it.baseline_meta = {});
+  const td   = meta.tier_distribution || (meta.tier_distribution = {});
+
+  panel.innerHTML = `
+    <div style="font-weight:600; font-size:14px; margin-bottom:10px">Baseline metadata</div>
+    <div class="bm-grid" style="display:grid; grid-template-columns: 140px 1fr; gap:8px 12px; max-width:560px; font-size:13px">
+      <label>Stat</label>
+      <input type="text" id="bm-stat" readonly value="${meta.stat ?? ''}">
+      <label>Raw value</label>
+      <input type="text" id="bm-raw" value="${meta.raw_value ?? ''}" placeholder="+15%">
+      <label>Score band</label>
+      <input type="number" id="bm-band" step="0.5" min="0" value="${meta.score_band ?? ''}">
+      <label>Percentile</label>
+      <input type="number" id="bm-pct" step="1" min="0" max="100" value="${meta.percentile ?? ''}">
+      <label>Sample count</label>
+      <input type="number" id="bm-samples" step="1" min="0" value="${meta.sample_count ?? ''}">
+      <label title="How this band's value was derived. 'measured' = enough wiki samples in the tier. 'extrapolated_from_neighbor' = inferred from another tier via the global ratio.">Derivation</label>
+      <select id="bm-deriv">
+        <option value="">—</option>
+        <option value="measured" ${meta.derivation === 'measured' ? 'selected' : ''}>measured</option>
+        <option value="extrapolated_from_neighbor" ${meta.derivation === 'extrapolated_from_neighbor' ? 'selected' : ''}>extrapolated_from_neighbor</option>
+      </select>
+      <label>Tier distribution</label>
+      <div style="display:flex; gap:6px; align-items:center">
+        <span style="color:var(--muted); font-size:11px; width:38px">min</span>
+        <input type="number" id="bm-td-min" step="any" value="${td.min ?? ''}" style="width:64px">
+        <span style="color:var(--muted); font-size:11px; width:50px; text-align:right">median</span>
+        <input type="number" id="bm-td-median" step="any" value="${td.median ?? ''}" style="width:64px">
+        <span style="color:var(--muted); font-size:11px; width:30px; text-align:right">max</span>
+        <input type="number" id="bm-td-max" step="any" value="${td.max ?? ''}" style="width:64px">
+      </div>
+    </div>
+    <div style="color:var(--muted); font-size:11px; margin-top:8px">
+      All fields are persisted on save. Running <code>node scripts/wiki_audit.cjs --phase=all</code>
+      regenerates sample_count, derivation, and tier_distribution from wiki data — your manual
+      overrides here will be overwritten if you run that.
+    </div>
+  `;
+
+  // Wire the editable inputs to write back into S.currentItem.baseline_meta.
+  const numOrNull = v => { const n = parseFloat(v); return Number.isNaN(n) ? null : n; };
+  const intOrNull = v => { const n = parseInt(v, 10); return Number.isNaN(n) ? null : n; };
+  panel.querySelector('#bm-raw').addEventListener('input', e => {
+    meta.raw_value = e.target.value; setItemDirty(true);
+  });
+  panel.querySelector('#bm-band').addEventListener('input', e => {
+    meta.score_band = numOrNull(e.target.value); setItemDirty(true);
+  });
+  panel.querySelector('#bm-pct').addEventListener('input', e => {
+    meta.percentile = intOrNull(e.target.value); setItemDirty(true);
+  });
+  panel.querySelector('#bm-samples').addEventListener('input', e => {
+    meta.sample_count = intOrNull(e.target.value); setItemDirty(true);
+  });
+  panel.querySelector('#bm-deriv').addEventListener('change', e => {
+    meta.derivation = e.target.value || null; setItemDirty(true);
+  });
+  panel.querySelector('#bm-td-min').addEventListener('input', e => {
+    td.min = numOrNull(e.target.value); setItemDirty(true);
+  });
+  panel.querySelector('#bm-td-median').addEventListener('input', e => {
+    td.median = numOrNull(e.target.value); setItemDirty(true);
+  });
+  panel.querySelector('#bm-td-max').addEventListener('input', e => {
+    td.max = numOrNull(e.target.value); setItemDirty(true);
+  });
 }
 
 async function renderBaselineComparePanel() {
@@ -1922,6 +2276,14 @@ async function renderBaselineComparePanel() {
   if (!panel) return;
   const it = S.currentItem;
   if (!it) { panel.innerHTML = ''; return; }
+  // For synthetic baselines the compare panel is meaningless (comparing a
+  // baseline to itself) — keep it hidden and empty so the meta editor above
+  // is the whole edit surface.
+  if (it.synthetic) {
+    panel.classList.add('hidden');
+    panel.innerHTML = '';
+    return;
+  }
   // Lazy-load baseline table + scrape cache (cached on S)
   if (!S._baselineTable) {
     try { S._baselineTable = await api.get('/api/baselines/table'); } catch (e) { S._baselineTable = null; }
@@ -2159,16 +2521,35 @@ function setItemDirty(val) {
 }
 
 document.getElementById('btn-save-item').addEventListener('click', async () => {
-  const res = await api.put(`/api/items/${S.currentItem.normalized_name}`, S.currentItem);
+  const apiBase = S.currentItemSource === 'baselines' ? '/api/baselines' : '/api/items';
+  const res = await api.put(`${apiBase}/${S.currentItem.normalized_name}`, S.currentItem);
   if (res.error) { toast(res.error, 'error'); return; }
   setItemDirty(false);
-  toast('Item saved ✓');
+  if (S.currentItemSource === 'baselines') {
+    // Bust client caches so the comparison table + Browse view re-fetch the
+    // updated _baseline_table.json on next render.
+    S._baselineTable = null;
+    S._baselineList  = null;
+    // Refresh the in-page audit panel against the new value.
+    if (typeof renderBaselineComparePanel === 'function') renderBaselineComparePanel();
+    toast('Baseline saved ✓');
+  } else {
+    toast('Item saved ✓');
+  }
 });
 
 document.getElementById('back-items').addEventListener('click', async () => {
   if (S.itemDirty && !confirm('You have unsaved changes. Leave anyway?')) return;
   setItemDirty(false);
   await loadItems();
+  showPage('items');
+});
+
+// ── Baseline stat editor wiring ──────────────────────────────────────────────
+document.getElementById('btn-save-bse').addEventListener('click', saveBaselineStatEditor);
+document.getElementById('back-baselines').addEventListener('click', () => {
+  if (S.baselineEditDirty && !confirm('You have unsaved baseline changes. Leave anyway?')) return;
+  setBaselineEditDirty(false);
   showPage('items');
 });
 

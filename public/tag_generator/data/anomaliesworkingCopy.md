@@ -8,7 +8,6 @@ Items where a Default-mode wiki stat has no corresponding non-null `playstyle_sc
 
 ### High severity (target stat, direct tag null) (43)
 
-- **Arcane Surge** (Spirit T2) — cooldown_reduction: StaminaCooldownReduction=+12 → tag(s) `cooldown_reduction` null/zero
 - **Bullet Resilience** (Vitality T3) — health_regen: OutOfCombatHealthRegen=+3 → tag(s) `self_heal` null/zero
 - **Cheat Death** (Vitality T4) — move_speed: BonusMoveSpeed=0m → tag(s) `horizontal_mobility` null/zero
 - **Counterspell** (Vitality T3) — duration_up: BuffDuration=+6 → tag(s) `duration_dependant` null/zero

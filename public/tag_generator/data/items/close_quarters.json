@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/close_quarters/close_quarters.png",
   "name": "Close Quarters",
   "normalized_name": "close_quarters",
@@ -15,7 +16,7 @@
       "aoe_cluster": null,
       "assist_importance": null,
       "away_from_team": 0.15,
-      "bullet_damage": 0.55,
+      "bullet_damage": 0.6,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
       "bullet_proc": null,
@@ -59,12 +60,13 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": -1,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": 0.75,
-      "melee_resistance": 1,
+      "melee_resistance": 1.5,
       "mid_range": -0.15,
       "movement_slow": null,
       "multi_ability_focus": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Close_Quarters",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Close_Quarters"
 }

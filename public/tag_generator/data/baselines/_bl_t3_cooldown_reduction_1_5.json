@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "cooldown_reduction",
-    "raw_value": "+19",
+    "raw_value": "+22.5",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 3,

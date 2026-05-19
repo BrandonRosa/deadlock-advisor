@@ -189,12 +189,12 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 23,
+            "raw": 20,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 25.3,
+            "raw": 40,
             "percentile": 75,
             "derived": true
           },
@@ -224,7 +224,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 20,
+            "raw": 40,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -232,7 +232,7 @@
             }
           },
           "1.5": {
-            "raw": 20,
+            "raw": 60,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -311,12 +311,12 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 27.5,
+            "raw": 60,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 30.25,
+            "raw": 80,
             "percentile": 75,
             "derived": true
           },
@@ -346,7 +346,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 20,
+            "raw": 80,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 1.25,
@@ -356,7 +356,7 @@
             }
           },
           "1.5": {
-            "raw": 25,
+            "raw": 100,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -410,7 +410,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 8,
+            "raw": 10,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -418,7 +418,7 @@
             }
           },
           "1.5": {
-            "raw": 10,
+            "raw": 15,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.55,
@@ -487,7 +487,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 12,
+            "raw": 20,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.35,
@@ -498,7 +498,7 @@
             }
           },
           "1.5": {
-            "raw": 14.75,
+            "raw": 30,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.33,
@@ -576,7 +576,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 25,
+            "raw": 30,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.75,
@@ -586,7 +586,7 @@
             }
           },
           "1.5": {
-            "raw": 35,
+            "raw": 50,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.83,
@@ -688,7 +688,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 15,
+            "raw": 40,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.24,
@@ -700,7 +700,7 @@
             }
           },
           "1.5": {
-            "raw": 15,
+            "raw": 60,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -1003,7 +1003,7 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 14.44,
+            "raw": 8,
             "percentile": 50,
             "derived": true
           },
@@ -1038,7 +1038,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 20,
+            "raw": 15,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 1.5,
@@ -1048,7 +1048,7 @@
             }
           },
           "1.5": {
-            "raw": 25,
+            "raw": 20,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.76,
@@ -1126,7 +1126,7 @@
             }
           },
           "1.5": {
-            "raw": 28.25,
+            "raw": 27.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.45,
@@ -1202,7 +1202,7 @@
             }
           },
           "1.5": {
-            "raw": 27.25,
+            "raw": 30,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.58,
@@ -1323,7 +1323,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 7,
+            "raw": 10,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.3,
@@ -1334,7 +1334,7 @@
             }
           },
           "1.5": {
-            "raw": 8.5,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -1425,7 +1425,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 10,
+            "raw": 13,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.45,
@@ -1435,7 +1435,7 @@
             }
           },
           "1.5": {
-            "raw": 20.25,
+            "raw": 25,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.5,
@@ -1445,7 +1445,7 @@
             }
           },
           "2.0": {
-            "raw": 34.5,
+            "raw": 35,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 1.25,
@@ -1532,7 +1532,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 11.25,
+            "raw": 16,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -1542,7 +1542,7 @@
             }
           },
           "1.5": {
-            "raw": 13.5,
+            "raw": 33,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.22,
@@ -1636,7 +1636,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 7,
+            "raw": 12,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.44,
@@ -1646,7 +1646,7 @@
             }
           },
           "1.5": {
-            "raw": 9.5,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.5,
@@ -1723,7 +1723,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 10,
+            "raw": 16,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.5,
@@ -1734,7 +1734,7 @@
             }
           },
           "1.5": {
-            "raw": 25,
+            "raw": 22.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 1.25,
@@ -1744,7 +1744,7 @@
             }
           },
           "2.0": {
-            "raw": 40,
+            "raw": 35,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 0.5,
@@ -1815,7 +1815,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 14.5,
+            "raw": 18,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.38,
@@ -1826,7 +1826,7 @@
             }
           },
           "1.5": {
-            "raw": 18.5,
+            "raw": 25,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.75,
@@ -2119,7 +2119,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 25,
+            "raw": 10,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -2127,7 +2127,7 @@
             }
           },
           "1.5": {
-            "raw": 30,
+            "raw": 25,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -2178,7 +2178,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 27.5,
+            "raw": 20,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -2186,7 +2186,7 @@
             }
           },
           "1.5": {
-            "raw": 31.25,
+            "raw": 32.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -2194,10 +2194,7 @@
             }
           },
           "2.0": {
-            "not_best_in_game": true,
-            "tier_max": 35,
-            "game_max": 50,
-            "note": "this tier does not contain the game-best provider; a higher tier exists"
+            "raw": 50
           }
         },
         "distribution": {
@@ -2240,7 +2237,7 @@
             }
           },
           "1.5": {
-            "raw": 25,
+            "raw": 35,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -2314,7 +2311,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 50,
+            "raw": 100,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -2322,7 +2319,7 @@
             }
           },
           "1.5": {
-            "raw": 75,
+            "raw": 150,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.66,
@@ -2391,7 +2388,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 62.5,
+            "raw": 125,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.4,
@@ -2402,7 +2399,7 @@
             }
           },
           "1.5": {
-            "raw": 71.25,
+            "raw": 175,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.33,
@@ -2495,7 +2492,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 75,
+            "raw": 150,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -2503,7 +2500,7 @@
             }
           },
           "1.5": {
-            "raw": 100,
+            "raw": 200,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.23,
@@ -2693,7 +2690,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 125,
+            "raw": 175,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.32,
@@ -2705,7 +2702,7 @@
             }
           },
           "1.5": {
-            "raw": 150,
+            "raw": 225,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.45,
@@ -2718,10 +2715,7 @@
             }
           },
           "2.0": {
-            "not_best_in_game": true,
-            "tier_max": 200,
-            "game_max": 375,
-            "note": "this tier does not contain the game-best provider; a higher tier exists"
+            "raw": 450
           }
         },
         "distribution": {
@@ -2923,7 +2917,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 1.58,
+            "raw": 1.6,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.15,
@@ -2934,7 +2928,7 @@
             }
           },
           "1.5": {
-            "raw": 1.84,
+            "raw": 4,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -3025,7 +3019,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 2.8,
+            "raw": 1.8,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3033,7 +3027,7 @@
             }
           },
           "1.5": {
-            "raw": 3.5,
+            "raw": 4.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -3138,7 +3132,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 5.4,
+            "raw": 2,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3146,7 +3140,7 @@
             }
           },
           "1.5": {
-            "raw": 8.2,
+            "raw": 5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.15,
@@ -3156,10 +3150,7 @@
             }
           },
           "2.0": {
-            "not_best_in_game": true,
-            "tier_max": 8.8,
-            "game_max": 26.9,
-            "note": "this tier does not contain the game-best provider; a higher tier exists"
+            "raw": 8.8
           }
         },
         "distribution": {
@@ -3214,7 +3205,7 @@
         "unit": "m",
         "bands": {
           "1.0": {
-            "raw": 1.75,
+            "raw": 1.5,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3222,7 +3213,7 @@
             }
           },
           "1.5": {
-            "raw": 2.38,
+            "raw": 1.8,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.88,
@@ -3327,7 +3318,7 @@
             }
           },
           "2.0": {
-            "raw": 3.5,
+            "raw": 3,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 0.66,
@@ -3456,7 +3447,7 @@
             }
           },
           "1.5": {
-            "raw": 2.75,
+            "raw": 2.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.15,
@@ -3536,7 +3527,7 @@
             }
           },
           "1.5": {
-            "raw": 2,
+            "raw": 2.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.5,
@@ -3598,7 +3589,7 @@
         "unit": "m",
         "bands": {
           "1.0": {
-            "raw": 0.75,
+            "raw": 1.8,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3606,7 +3597,7 @@
             }
           },
           "1.5": {
-            "raw": 0.94,
+            "raw": 2.8,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -3683,7 +3674,7 @@
         "unit": "m",
         "bands": {
           "1.0": {
-            "raw": 1,
+            "raw": 2,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3693,7 +3684,7 @@
             }
           },
           "1.5": {
-            "raw": 1.75,
+            "raw": 3,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.66,
@@ -3783,7 +3774,7 @@
         "unit": "m",
         "bands": {
           "1.0": {
-            "raw": 0.75,
+            "raw": 2.25,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -3791,7 +3782,7 @@
             }
           },
           "1.5": {
-            "raw": 0.75,
+            "raw": 3.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -3845,12 +3836,12 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 12.35,
+            "raw": 8,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 13.59,
+            "raw": 13,
             "percentile": 75,
             "derived": true
           },
@@ -3888,7 +3879,7 @@
             }
           },
           "1.5": {
-            "raw": 13.5,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -3957,7 +3948,7 @@
             }
           },
           "1.5": {
-            "raw": 19,
+            "raw": 22.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4008,7 +3999,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 7,
+            "raw": 20,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.66,
@@ -4018,7 +4009,7 @@
             }
           },
           "1.5": {
-            "raw": 16,
+            "raw": 23,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4119,7 +4110,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 13.5,
+            "raw": 10,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -4127,7 +4118,7 @@
             }
           },
           "1.5": {
-            "raw": 16.75,
+            "raw": 17,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.75,
@@ -4188,7 +4179,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 6,
+            "raw": 15,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -4198,7 +4189,7 @@
             }
           },
           "1.5": {
-            "raw": 17,
+            "raw": 20,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4206,10 +4197,7 @@
             }
           },
           "2.0": {
-            "not_best_in_game": true,
-            "tier_max": 28,
-            "game_max": 35,
-            "note": "this tier does not contain the game-best provider; a higher tier exists"
+            "raw": 28
           }
         },
         "distribution": {
@@ -4249,7 +4237,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 13.5,
+            "raw": 20,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.46,
@@ -4261,7 +4249,7 @@
             }
           },
           "1.5": {
-            "raw": 15.75,
+            "raw": 22.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4367,12 +4355,12 @@
         "neighbor_tier": 3200,
         "bands": {
           "1.0": {
-            "raw": 31.39,
+            "raw": 20,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 34.53,
+            "raw": 30,
             "percentile": 75,
             "derived": true
           },
@@ -4410,12 +4398,12 @@
         "neighbor_tier": 800,
         "bands": {
           "1.0": {
-            "raw": 21.95,
+            "raw": 22.5,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 24.15,
+            "raw": 35,
             "percentile": 75,
             "derived": true
           },
@@ -4445,7 +4433,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 18,
+            "raw": 25,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.38,
@@ -4456,7 +4444,7 @@
             }
           },
           "1.5": {
-            "raw": 36,
+            "raw": 40,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.9,
@@ -4537,7 +4525,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 16,
+            "raw": 27.5,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.2,
@@ -4547,7 +4535,7 @@
             }
           },
           "1.5": {
-            "raw": 18,
+            "raw": 45,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4614,7 +4602,7 @@
             "derived": true
           },
           "1.5": {
-            "raw": 1.08,
+            "raw": 1,
             "percentile": 75,
             "derived": true
           },
@@ -4648,7 +4636,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 1.5,
+            "raw": 1,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -4656,7 +4644,7 @@
             }
           },
           "1.5": {
-            "raw": 1.75,
+            "raw": 1.5,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4718,12 +4706,12 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 7.21,
+            "raw": 7.5,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 7.93,
+            "raw": 10,
             "percentile": 75,
             "derived": true
           },
@@ -4753,7 +4741,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 7,
+            "raw": 10,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -4761,7 +4749,7 @@
             }
           },
           "1.5": {
-            "raw": 15.75,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0.5,
@@ -4854,7 +4842,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 9,
+            "raw": 12.5,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0.22,
@@ -4865,7 +4853,7 @@
             }
           },
           "1.5": {
-            "raw": 10,
+            "raw": 20,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -4950,7 +4938,7 @@
             }
           },
           "1.5": {
-            "raw": 30,
+            "raw": 25,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 1.13,
@@ -4961,7 +4949,7 @@
             }
           },
           "2.0": {
-            "raw": 40,
+            "raw": 50,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 0.75,
@@ -5127,7 +5115,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 13.5,
+            "raw": 13,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -5135,7 +5123,7 @@
             }
           },
           "1.5": {
-            "raw": 13.75,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -5186,12 +5174,12 @@
         "neighbor_tier": 1600,
         "bands": {
           "1.0": {
-            "raw": 15.44,
+            "raw": 20,
             "percentile": 50,
             "derived": true
           },
           "1.5": {
-            "raw": 16.98,
+            "raw": 30,
             "percentile": 75,
             "derived": true
           },
@@ -5221,7 +5209,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 19,
+            "raw": 25,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -5229,7 +5217,7 @@
             }
           },
           "1.5": {
-            "raw": 22,
+            "raw": 40,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -5237,7 +5225,7 @@
             }
           },
           "2.0": {
-            "raw": 25,
+            "raw": 63,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 1.25,
@@ -5291,7 +5279,7 @@
             }
           },
           "1.5": {
-            "raw": 12.25,
+            "raw": 13,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -5334,7 +5322,7 @@
         "unit": "",
         "bands": {
           "1.0": {
-            "raw": 20,
+            "raw": 15,
             "percentile": 50,
             "current_score_at_band": {
               "mean": 0,
@@ -5342,7 +5330,7 @@
             }
           },
           "1.5": {
-            "raw": 25,
+            "raw": 18,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 0,
@@ -5393,7 +5381,7 @@
             }
           },
           "1.5": {
-            "raw": 36.25,
+            "raw": 25,
             "percentile": 75,
             "current_score_at_band": {
               "mean": 1.25,
@@ -5403,7 +5391,7 @@
             }
           },
           "2.0": {
-            "raw": 70,
+            "raw": 50,
             "percentile": 100,
             "current_score_at_band": {
               "mean": 2,

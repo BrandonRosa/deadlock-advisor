@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "range_extender_dependant": 2
+      "range_extender_dependant": 2.0
     }
   },
   "wiki_url": null

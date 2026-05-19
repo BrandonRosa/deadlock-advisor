@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "range_up",
-    "raw_value": "+36",
+    "raw_value": "+40",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 6,

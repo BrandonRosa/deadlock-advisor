@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "move_speed",
-    "raw_value": "+2.75m",
+    "raw_value": "+2.5m",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 5,

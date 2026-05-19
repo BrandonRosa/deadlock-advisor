@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "spirit_lifesteal",
-    "raw_value": "+20",
+    "raw_value": "+15",
     "score_band": 1,
     "percentile": 50,
     "sample_count": 2,
@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "spirit_lifesteal": 1
+      "spirit_lifesteal": 1.0
     }
   },
   "wiki_url": null

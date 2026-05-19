@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "spirit_lifesteal",
-    "raw_value": "+12.25",
+    "raw_value": "+13",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 2,
