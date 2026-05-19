@@ -9730,8 +9730,17 @@ function renderSim() {
     skipBtn.textContent = (shouldSkip && !isLive) ? 'Wait ⏸' : 'Skip';
     const _saveBanner = document.getElementById('sim-save-banner');
     if (_saveBanner) {
-      _saveBanner.style.display = (shouldSkip && isLive) ? '' : 'none';
-      if (shouldSkip && isLive) _saveBanner.innerHTML = `<span class="msym">savings</span> ${_saveMsg}`;
+      _saveBanner.style.display = shouldSkip ? '' : 'none';
+      if (shouldSkip && globalBest) {
+        const _sbIt = bpItemMap[globalBest.key];
+        const _sbImg = _sbIt?.image_path ? `<img class="sim-save-banner-img" src="${srcUrl(_sbIt.image_path)}" alt="">` : `<span class="msym">savings</span>`;
+        const _lk = (b._cachedBpLabels || (b._cachedBpLabels = computeBuildLabels(b, b.buildPath))).labelFor(globalBest.key);
+        const _lm = _lk ? BP_LABEL_META[_lk] : null;
+        const _iconHtml = _lm ? ` <span class="sim-banner-icon ${_lm.klass}">${_lm.text}</span>` : '';
+        _saveBanner.innerHTML = `${_sbImg} ${_saveMsg}${_iconHtml}`;
+      } else if (shouldSkip) {
+        _saveBanner.innerHTML = `<span class="msym">savings</span> ${_saveMsg}`;
+      }
     }
   }
 
@@ -9783,8 +9792,17 @@ function simRerenderColumns(state) {
   }
   const _saveBannerR = document.getElementById('sim-save-banner');
   if (_saveBannerR) {
-    _saveBannerR.style.display = (shouldSkip && isLive) ? '' : 'none';
-    if (shouldSkip && isLive) _saveBannerR.innerHTML = `<span class="msym">savings</span> ${_saveMsgR}`;
+    _saveBannerR.style.display = shouldSkip ? '' : 'none';
+    if (shouldSkip && globalBest) {
+      const _sbIt = bpItemMap[globalBest.key];
+      const _sbImg = _sbIt?.image_path ? `<img class="sim-save-banner-img" src="${srcUrl(_sbIt.image_path)}" alt="">` : `<span class="msym">savings</span>`;
+      const _lk = (b._cachedBpLabels || (b._cachedBpLabels = computeBuildLabels(b, b.buildPath))).labelFor(globalBest.key);
+      const _lm = _lk ? BP_LABEL_META[_lk] : null;
+      const _iconHtml = _lm ? ` <span class="sim-banner-icon ${_lm.klass}">${_lm.text}</span>` : '';
+      _saveBannerR.innerHTML = `${_sbImg} ${_saveMsgR}${_iconHtml}`;
+    } else if (shouldSkip) {
+      _saveBannerR.innerHTML = `<span class="msym">savings</span> ${_saveMsgR}`;
+    }
   }
 }
 

@@ -2316,6 +2316,14 @@
       "followed_build": "Gun",
       "name": "Damage Heavy Gun",
       "normalized_build_name": "grey_talon_damage_heavy_gun",
+      "required_items": [
+        "weighted_shots"
+      ],
+      "signature_items": [
+        "quicksilver_reload",
+        "stamina_mastery",
+        "extra_stamina"
+      ],
       "values": {
         "ally_weight": {
           "ability_spam": null,

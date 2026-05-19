@@ -1,0 +1,290 @@
+{
+  "hero": "kelvin",
+  "build_idx": 1,
+  "build_name": "Beam Damage Kelvin (Beam>Path>Ball)",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "kelvin",
+    "celeste",
+    "calico",
+    "seven",
+    "paradox",
+    "venator"
+  ],
+  "enemies": [
+    "grey_talon",
+    "bebop",
+    "the_doorman",
+    "victor",
+    "infernus"
+  ],
+  "self": "kelvin",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Timing Felt great!",
+  "history": [
+    {
+      "tick": 0,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "enchanters_emblem",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "trophy_collector",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "mystic_expansion",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 900,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1000
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2100
+    },
+    {
+      "tick": 7,
+      "action": "buy",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3300,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2500
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 3800
+    },
+    {
+      "tick": 11,
+      "action": "buy",
+      "key": "arcane_surge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 5200,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 12,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5000
+    },
+    {
+      "tick": 13,
+      "action": "buy",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 1500
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3000
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 6300
+    },
+    {
+      "tick": 18,
+      "action": "buy",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 8100,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3500
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5400
+    },
+    {
+      "tick": 21,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 22,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4000
+    },
+    {
+      "tick": 23,
+      "action": "buy",
+      "key": "colossus",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7100,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 24,
+      "action": "buy",
+      "key": "superior_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 3900,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 25,
+      "action": "upgrade",
+      "key": "transcendent_cooldown",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4000,
+      "costEffective": 3200,
+      "components": [
+        "superior_cooldown"
+      ]
+    },
+    {
+      "tick": 26,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 27,
+      "action": "buy",
+      "key": "ethereal_shift",
+      "col": "counter",
+      "override": false,
+      "phase": "Extra Late",
+      "soulsBefore": 7700,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "enchanters_emblem",
+    "trophy_collector",
+    "mystic_expansion",
+    "superior_duration",
+    "arcane_surge",
+    "escalating_exposure",
+    "boundless_spirit",
+    "spirit_burn",
+    "colossus",
+    "transcendent_cooldown",
+    "ethereal_shift"
+  ],
+  "sold": [],
+  "blocked": [
+    "echo_shard"
+  ],
+  "total_earned": 52100,
+  "slots_unlocked": 2,
+  "ts": "2026-05-19T06:17:27.477Z"
+}
