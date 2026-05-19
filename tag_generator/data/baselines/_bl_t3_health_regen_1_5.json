@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "health_regen",
-    "raw_value": "+3.5",
+    "raw_value": "+4.5",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 9,

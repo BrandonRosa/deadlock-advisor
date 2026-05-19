@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "debuff_resist",
-    "raw_value": "+25",
+    "raw_value": "+10",
     "score_band": 1,
     "percentile": 50,
     "sample_count": 3,
@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "debuff_resistance": 1
+      "debuff_resistance": 1.0
     }
   },
   "wiki_url": null

@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "health",
-    "raw_value": "+150",
+    "raw_value": "+225",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 13,

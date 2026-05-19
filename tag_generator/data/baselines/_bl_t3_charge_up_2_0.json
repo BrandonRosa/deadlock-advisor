@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "charge_dependant": 2
+      "charge_dependant": 2.0
     }
   },
   "wiki_url": null

@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "cooldown_reduction": 2
+      "cooldown_reduction": 2.0
     }
   },
   "wiki_url": null

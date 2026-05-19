@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "sprint_speed",
-    "raw_value": "+0.75m",
+    "raw_value": "+1.8m",
     "score_band": 1,
     "percentile": 50,
     "sample_count": 6,
@@ -20,7 +20,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "horizontal_mobility": 1
+      "horizontal_mobility": 1.0
     }
   },
   "wiki_url": null

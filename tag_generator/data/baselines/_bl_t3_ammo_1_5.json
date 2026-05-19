@@ -6,7 +6,7 @@
   "synthetic": true,
   "baseline_meta": {
     "stat": "ammo",
-    "raw_value": "+30.25",
+    "raw_value": "+80",
     "score_band": 1.5,
     "percentile": 75,
     "sample_count": 1,
