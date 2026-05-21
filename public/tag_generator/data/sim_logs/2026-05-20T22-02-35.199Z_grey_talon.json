@@ -1,0 +1,289 @@
+{
+  "hero": "grey_talon",
+  "build_idx": 3,
+  "build_name": "Hybrid",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "grey_talon",
+    "celeste",
+    "shiv",
+    "haze",
+    "paige"
+  ],
+  "enemies": [
+    "drifter",
+    "vindicta",
+    "mina",
+    "mo_&_krill",
+    "victor",
+    "graves"
+  ],
+  "self": "grey_talon",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Fuck Victor.",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "mystic_burst",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "headshot_booster",
+      "col": "override",
+      "override": true,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "intensifying_magazine",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "long_range",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "sharpshooter",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2500,
+      "costEffective": 1600,
+      "components": [
+        "long_range"
+      ]
+    },
+    {
+      "tick": 8,
+      "action": "buy",
+      "key": "opening_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2100,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 10,
+      "action": "upgrade",
+      "key": "tankbuster",
+      "col": "balance",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 3000,
+      "costEffective": 2400,
+      "components": [
+        "mystic_burst"
+      ]
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2000
+    },
+    {
+      "tick": 12,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3400
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4800
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 6300
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "glass_cannon",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7800,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3000
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4700
+    },
+    {
+      "tick": 18,
+      "action": "buy",
+      "key": "vampiric_burst",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6500,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "quicksilver_reload",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 1900,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 20,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4200
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "spirit_burn",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 7100
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 7100
+    },
+    {
+      "tick": 24,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 7100
+    },
+    {
+      "tick": 24,
+      "action": "buy",
+      "key": "boundless_spirit",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7100,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "surge_of_power",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 4000,
+      "costEffective": 3200,
+      "components": []
+    }
+  ],
+  "owned": [
+    "headshot_booster",
+    "intensifying_magazine",
+    "sharpshooter",
+    "opening_rounds",
+    "tankbuster",
+    "glass_cannon",
+    "vampiric_burst",
+    "quicksilver_reload",
+    "spirit_burn",
+    "boundless_spirit",
+    "surge_of_power"
+  ],
+  "sold": [],
+  "blocked": [],
+  "total_earned": 45000,
+  "slots_unlocked": 3,
+  "ts": "2026-05-20T22:02:35.199Z"
+}

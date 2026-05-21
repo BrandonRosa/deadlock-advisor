@@ -1,0 +1,258 @@
+{
+  "hero": "seven",
+  "build_idx": 6,
+  "build_name": "Run and Gun",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "seven",
+    "holliday",
+    "shiv",
+    "pocket",
+    "drifter",
+    "celeste"
+  ],
+  "enemies": [
+    "calico",
+    "vyper",
+    "apollo",
+    "silver",
+    "the_doorman",
+    "infernus"
+  ],
+  "self": "seven",
+  "outcome": "win",
+  "feel": "neutral",
+  "notes": "Eh, couldve done more",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "monster_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "mystic_regeneration",
+      "col": "balance",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "healbane",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 7,
+      "action": "upgrade",
+      "key": "cultist_sacrifice",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2500,
+      "costEffective": 2400,
+      "components": [
+        "monster_rounds"
+      ]
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2500
+    },
+    {
+      "tick": 10,
+      "action": "buy",
+      "key": "surge_of_power",
+      "col": "override",
+      "override": true,
+      "phase": "Early",
+      "soulsBefore": 3800,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2000
+    },
+    {
+      "tick": 12,
+      "action": "upgrade",
+      "key": "radiant_regeneration",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 3400,
+      "costEffective": 2400,
+      "components": [
+        "mystic_regeneration"
+      ]
+    },
+    {
+      "tick": 13,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "counter",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 2400,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 14,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2300
+    },
+    {
+      "tick": 15,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3800
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 5400
+    },
+    {
+      "tick": 17,
+      "action": "buy",
+      "key": "mercurial_magnum",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7100,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2500
+    },
+    {
+      "tick": 19,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 4300
+    },
+    {
+      "tick": 20,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6200,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3400
+    },
+    {
+      "tick": 22,
+      "action": "buy",
+      "key": "colossus",
+      "col": "balance",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 6400,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 23,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 3100
+    },
+    {
+      "tick": 23,
+      "action": "unlock",
+      "phase": "Late",
+      "soulsBefore": 3100
+    }
+  ],
+  "owned": [
+    "duration_extender",
+    "healbane",
+    "cultist_sacrifice",
+    "surge_of_power",
+    "radiant_regeneration",
+    "mercurial_magnum",
+    "escalating_exposure",
+    "colossus"
+  ],
+  "sold": [],
+  "blocked": [
+    "mystic_burst",
+    "tankbuster"
+  ],
+  "total_earned": 35100,
+  "slots_unlocked": 2,
+  "ts": "2026-05-20T22:38:06.136Z"
+}
