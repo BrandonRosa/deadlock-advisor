@@ -2421,18 +2421,27 @@
         "rapid_recharge",
         "greater_expansion",
         "arcane_surge",
-        "recharging_rush"
+        "recharging_rush",
+        "improved_spirit"
       ],
       "signature_items": [
-        "rapid_recharge",
-        "cultist_sacrifice",
-        "arcane_surge"
+        "arcane_surge",
+        "swift_striker",
+        "active_reload",
+        "shadow_weave",
+        "weighted_shots",
+        "frenzy",
+        "spellslinger"
       ],
       "signature_items_excluded": [
         "slowing_bullets",
         "refresher",
         "diviners_kevlar",
-        "fleetfoot"
+        "fleetfoot",
+        "healing_rite",
+        "boundless_spirit",
+        "guardian_ward",
+        "superior_cooldown"
       ],
       "values": {
         "ally_weight": {
