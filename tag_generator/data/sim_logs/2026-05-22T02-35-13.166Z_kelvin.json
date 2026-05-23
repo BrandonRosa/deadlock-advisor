@@ -1,0 +1,215 @@
+{
+  "hero": "kelvin",
+  "build_idx": 2,
+  "build_name": "Snowball Support (Ball>Dome>Path)",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "kelvin",
+    "haze",
+    "victor",
+    "seven",
+    "mo_&_krill",
+    "grey_talon"
+  ],
+  "enemies": [
+    "bebop",
+    "shiv",
+    "sinclair",
+    "graves",
+    "drifter",
+    "billy"
+  ],
+  "self": "kelvin",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Healed teamates a crazy amount",
+  "history": [
+    {
+      "tick": 0,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 1,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "recharging_rush",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 900
+    },
+    {
+      "tick": 5,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 1800
+    },
+    {
+      "tick": 6,
+      "action": "upgrade",
+      "key": "rapid_recharge",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 2900,
+      "costEffective": 2400,
+      "components": [
+        "extra_charge"
+      ]
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1700
+    },
+    {
+      "tick": 8,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2900
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 4100
+    },
+    {
+      "tick": 10,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 5400
+    },
+    {
+      "tick": 11,
+      "action": "upgrade",
+      "key": "improved_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Early",
+      "soulsBefore": 6800,
+      "costEffective": 800,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 12,
+      "action": "upgrade",
+      "key": "boundless_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 7400,
+      "costEffective": 4800,
+      "components": [
+        "improved_spirit"
+      ]
+    },
+    {
+      "tick": 13,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4000
+    },
+    {
+      "tick": 14,
+      "action": "buy",
+      "key": "warp_stone",
+      "col": "counter",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 5500,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "heroic_aura",
+      "col": "balance",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 3800,
+      "costEffective": 3200,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 2200
+    },
+    {
+      "tick": 17,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 3900
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5700
+    },
+    {
+      "tick": 19,
+      "action": "buy",
+      "key": "refresher",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 7500,
+      "costEffective": 6400,
+      "components": []
+    }
+  ],
+  "owned": [
+    "recharging_rush",
+    "rapid_recharge",
+    "boundless_spirit",
+    "warp_stone",
+    "heroic_aura",
+    "refresher"
+  ],
+  "sold": [],
+  "blocked": [
+    "opening_rounds"
+  ],
+  "total_earned": 27000,
+  "slots_unlocked": 0,
+  "ts": "2026-05-22T02:35:13.166Z"
+}
