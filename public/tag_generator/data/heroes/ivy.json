@@ -755,6 +755,8 @@
   "image_path": "/resources/heroes/ivy/portrait_ivy.png",
   "mini_image_path": "/resources/heroes/ivy/mini_icon_ivy.png",
   "normalized_name": "ivy",
-  "search_terms": [],
+  "search_terms": [
+    ".ivy"
+  ],
   "wiki_url": "https://deadlock.wiki/Ivy"
 }

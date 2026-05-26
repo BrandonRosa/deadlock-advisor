@@ -10,7 +10,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "ability_spam": 0.5,
+      "ability_spam": 1.0,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -70,7 +70,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": null,
+      "multi_ability_focus": 0.3,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,

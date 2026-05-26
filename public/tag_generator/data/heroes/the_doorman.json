@@ -383,7 +383,8 @@
   "mini_image_path": "/resources/heroes/the_doorman/mini_icon_the_doorman.png",
   "normalized_name": "the_doorman",
   "search_terms": [
-    "Doorman"
+    "Doorman",
+    ".drm"
   ],
   "wiki_url": "https://deadlock.wiki/The_Doorman"
 }

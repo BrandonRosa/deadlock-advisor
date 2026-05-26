@@ -58,6 +58,7 @@
   "extra_health",
   "extra_regen",
   "extra_stamina",
+  "grit",
   "healing_rite",
   "melee_lifesteal",
   "rebuttal",

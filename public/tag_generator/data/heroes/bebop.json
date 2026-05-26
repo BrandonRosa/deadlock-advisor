@@ -1495,6 +1495,8 @@
   "image_path": "/resources/heroes/bebop/portrait_bebop.png",
   "mini_image_path": "/resources/heroes/bebop/mini_icon_bebop.png",
   "normalized_name": "bebop",
-  "search_terms": [],
+  "search_terms": [
+    ".bbp"
+  ],
   "wiki_url": "https://deadlock.wiki/Bebop"
 }

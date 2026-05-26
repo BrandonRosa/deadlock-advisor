@@ -382,6 +382,9 @@
   "image_path": "/resources/heroes/haze/portrait_haze.png",
   "mini_image_path": "/resources/heroes/haze/mini_icon_haze.png",
   "normalized_name": "haze",
-  "search_terms": [],
+  "search_terms": [
+    ".hze",
+    ".haz"
+  ],
   "wiki_url": "https://deadlock.wiki/Haze"
 }

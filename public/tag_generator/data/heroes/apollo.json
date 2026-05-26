@@ -386,7 +386,9 @@
   "image_path": "/resources/heroes/apollo/portrait_apollo.png",
   "mini_image_path": "/resources/heroes/apollo/mini_icon_apollo.png",
   "normalized_name": "apollo",
-  "search_terms": [],
+  "search_terms": [
+    ".apl"
+  ],
   "wiki_url": "https://deadlock.wiki/Apollo",
   "default_build_name": "apollo_general"
 }

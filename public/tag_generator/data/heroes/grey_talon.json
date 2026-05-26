@@ -2708,7 +2708,9 @@
   "mini_image_path": "/resources/heroes/grey_talon/mini_icon_grey_talon.png",
   "normalized_name": "grey_talon",
   "search_terms": [
-    "Talon"
+    "Talon",
+    ".tln",
+    ".gtn"
   ],
   "wiki_url": "https://deadlock.wiki/Grey_Talon"
 }

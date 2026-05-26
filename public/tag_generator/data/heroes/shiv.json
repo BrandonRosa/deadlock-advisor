@@ -386,7 +386,9 @@
   "image_path": "/resources/heroes/shiv/portrait_shiv.png",
   "mini_image_path": "/resources/heroes/shiv/mini_icon_shiv.png",
   "normalized_name": "shiv",
-  "search_terms": [],
+  "search_terms": [
+    ".shv"
+  ],
   "wiki_url": "https://deadlock.wiki/Shiv",
   "default_build_name": "shiv_general"
 }

@@ -378,7 +378,7 @@
     {
       "name": "DPS (Venome*1,Slide>Venom>Bola)",
       "normalized_build_name": "vyper_dps_venome_1_slide_venom_bola",
-      "build_description_eng": "RE from: High-Velocity Rounds, Opening Rounds, Extra Spirit, Split Shot, Extra Health… | Sig: Intensifying Magazine, Rapid Rounds, Quicksilver Reload, Bullet Lifesteal, Ricochet, Silencer, Weighted Shots, Armor Piercing Rounds | Req: High-Velocity Rounds, Opening Rounds, Extra Spirit, Split Shot, Burst Fire, Slowing Bullets, Stamina Mastery, Mercurial Magnum, Vampiric Burst",
+      "build_description_eng": "RE from: High-Velocity Rounds, Opening Rounds, Extra Spirit, Split Shot, Extra HealthÂ… | Sig: Intensifying Magazine, Rapid Rounds, Quicksilver Reload, Bullet Lifesteal, Ricochet, Silencer, Weighted Shots, Armor Piercing Rounds | Req: High-Velocity Rounds, Opening Rounds, Extra Spirit, Split Shot, Burst Fire, Slowing Bullets, Stamina Mastery, Mercurial Magnum, Vampiric Burst",
       "followed_build": "General",
       "signature_items": [
         "intensifying_magazine",
@@ -787,7 +787,8 @@
   "normalized_name": "vyper",
   "search_terms": [
     "snake",
-    "lizard"
+    "lizard",
+    ".vyp"
   ],
   "wiki_url": "https://deadlock.wiki/Vyper",
   "default_build_name": "vyper_dps_venome_1_slide_venom_bola"

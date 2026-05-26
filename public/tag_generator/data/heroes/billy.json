@@ -383,7 +383,8 @@
   "mini_image_path": "/resources/heroes/billy/mini_icon_billy.png",
   "normalized_name": "billy",
   "search_terms": [
-    "goat"
+    "goat",
+    ".bly"
   ],
   "wiki_url": "https://deadlock.wiki/Billy"
 }

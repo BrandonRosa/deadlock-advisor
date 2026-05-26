@@ -762,7 +762,8 @@
   "mini_image_path": "/resources/heroes/graves/mini_icon_graves.png",
   "normalized_name": "graves",
   "search_terms": [
-    "emo"
+    "emo",
+    ".grv"
   ],
   "wiki_url": "https://deadlock.wiki/Graves"
 }

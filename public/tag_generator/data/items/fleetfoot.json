@@ -27,7 +27,7 @@
       "burst_resistance": null,
       "cc_resist": null,
       "charge_dependant": null,
-      "close_range": 0.15,
+      "close_range": null,
       "close_to_team": null,
       "continous_heal": null,
       "continuous_damage": 0.1,

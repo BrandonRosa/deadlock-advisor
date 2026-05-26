@@ -1946,7 +1946,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Monster Rounds, Suppressor, Enchanters Emblem, Opening Rounds, Cultist Sacrifice… | Sig: Monster Rounds, Suppressor, Opening Rounds, Extra Spirit, Improved Spirit, Mystic Vulnerability, Toxic Bullets, Superior Duration | Req: Cultist Sacrifice, Enduring Speed, Surge of Power, Duration Extender, Spirit Lifesteal, Escalating Exposure",
+      "build_description_eng": "RE from: Monster Rounds, Suppressor, Enchanters Emblem, Opening Rounds, Cultist SacrificeÂ… | Sig: Monster Rounds, Suppressor, Opening Rounds, Extra Spirit, Improved Spirit, Mystic Vulnerability, Toxic Bullets, Superior Duration | Req: Cultist Sacrifice, Enduring Speed, Surge of Power, Duration Extender, Spirit Lifesteal, Escalating Exposure",
       "followed_build": "Power Surge",
       "name": "GVS - Power Surge",
       "normalized_build_name": "seven_gvs_power_surge",
@@ -2348,7 +2348,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Monster Rounds, Healbane, Improved Spirit, Cultist Sacrifice, Duration Extender… | Sig: Monster Rounds, Healbane, Mystic Vulnerability, Spirit Lifesteal, Toxic Bullets, Leech | Req: Cultist Sacrifice, Duration Extender, Mercurial Magnum, Escalating Exposure",
+      "build_description_eng": "RE from: Monster Rounds, Healbane, Improved Spirit, Cultist Sacrifice, Duration ExtenderÂ… | Sig: Monster Rounds, Healbane, Mystic Vulnerability, Spirit Lifesteal, Toxic Bullets, Leech | Req: Cultist Sacrifice, Duration Extender, Mercurial Magnum, Escalating Exposure",
       "followed_build": "Power Surge",
       "name": "Run and Gun",
       "normalized_build_name": "seven_run_and_gun",
@@ -3141,6 +3141,8 @@
   "image_path": "/resources/heroes/seven/portrait_seven.png",
   "mini_image_path": "/resources/heroes/seven/mini_icon_seven.png",
   "normalized_name": "seven",
-  "search_terms": [],
+  "search_terms": [
+    ".svn"
+  ],
   "wiki_url": "https://deadlock.wiki/Seven"
 }

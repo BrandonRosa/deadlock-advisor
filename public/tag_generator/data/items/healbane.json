@@ -32,7 +32,7 @@
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": null,
-      "counter_importance": 0.33,
+      "counter_importance": 1.5,
       "damage_sponge": null,
       "debuff": 0.15,
       "debuff_resistance": null,

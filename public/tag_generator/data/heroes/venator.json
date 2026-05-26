@@ -394,7 +394,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Close Quarters, Opening Rounds, Slowing Bullets, Weighted Shots, Mystic Expansion… | Sig: Close Quarters, Slowing Bullets, Battle Vest, Enduring Speed, Bullet Lifesteal, Extra Charge, Recharging Rush, Ballistic Enchantment, Rapid Recharge, Greater Expansion, Lucky Shot, Ricochet | Req: Opening Rounds, Weighted Shots, Point Blank, Glass Cannon, Vampiric Burst",
+      "build_description_eng": "RE from: Close Quarters, Opening Rounds, Slowing Bullets, Weighted Shots, Mystic ExpansionÂ… | Sig: Close Quarters, Slowing Bullets, Battle Vest, Enduring Speed, Bullet Lifesteal, Extra Charge, Recharging Rush, Ballistic Enchantment, Rapid Recharge, Greater Expansion, Lucky Shot, Ricochet | Req: Opening Rounds, Weighted Shots, Point Blank, Glass Cannon, Vampiric Burst",
       "followed_build": "General",
       "name": "Nade + Gutshot (Nade>Gutshot>Ult)",
       "normalized_build_name": "venator_nade_gutshot_nade_gutshot_ult",
@@ -804,7 +804,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Close Quarters, Monster Rounds, Battle Vest, Sprint Boots, Cultist Sacrifice… | Sig: Weighted Shots, Spellslinger, Vampiric Burst | Req: Close Quarters, Monster Rounds, Battle Vest, Cultist Sacrifice, Enduring Speed, Bullet Lifesteal, Extra Charge, Point Blank, Hollow Point, Rapid Recharge, Ballistic Enchantment",
+      "build_description_eng": "RE from: Close Quarters, Monster Rounds, Battle Vest, Sprint Boots, Cultist SacrificeÂ… | Sig: Weighted Shots, Spellslinger, Vampiric Burst | Req: Close Quarters, Monster Rounds, Battle Vest, Cultist Sacrifice, Enduring Speed, Bullet Lifesteal, Extra Charge, Point Blank, Hollow Point, Rapid Recharge, Ballistic Enchantment",
       "followed_build": "General",
       "name": "Braeden Gut Nade (Gut*2,Nade>Ult>Trap)",
       "normalized_build_name": "venator_braeden_gut_nade_gut_2_nade_ult_trap",
@@ -1216,7 +1216,8 @@
   "mini_image_path": "/resources/heroes/venator/mini_icon_venator.png",
   "normalized_name": "venator",
   "search_terms": [
-    "priest"
+    "priest",
+    ".vnt"
   ],
   "wiki_url": "https://deadlock.wiki/Venator",
   "default_build_name": "venator_braeden_gut_nade_gut_2_nade_ult_trap"

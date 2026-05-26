@@ -384,7 +384,8 @@
   "mini_image_path": "/resources/heroes/celeste/mini_icon_celeste.png",
   "normalized_name": "celeste",
   "search_terms": [
-    "Unicorn"
+    "Unicorn",
+    ".cls"
   ],
   "wiki_url": "https://deadlock.wiki/Celeste"
 }

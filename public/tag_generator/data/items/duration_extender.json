@@ -39,7 +39,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 1.25,
+      "duration_dependant": 1.88,
       "engage": null,
       "escape": null,
       "farmer": null,
@@ -94,7 +94,7 @@
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.15,
+      "ult_focused": 0.5,
       "vertical_mobility": null
     }
   },

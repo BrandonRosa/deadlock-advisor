@@ -762,7 +762,8 @@
   "mini_image_path": "/resources/heroes/vindicta/mini_icon_vindicta.png",
   "normalized_name": "vindicta",
   "search_terms": [
-    "vendicta"
+    "vendicta",
+    ".vnd"
   ],
   "wiki_url": "https://deadlock.wiki/Vindicta",
   "default_build_name": "vindicta_sniper"

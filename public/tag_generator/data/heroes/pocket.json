@@ -1146,7 +1146,8 @@
   "mini_image_path": "/resources/heroes/pocket/mini_icon_pocket.png",
   "normalized_name": "pocket",
   "search_terms": [
-    "frog"
+    "frog",
+    ".pkt"
   ],
   "wiki_url": "https://deadlock.wiki/Pocket"
 }
