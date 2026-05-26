@@ -8,7 +8,7 @@
   "values": {
     "playstyle_score": {
       "ability_spam": null,
-      "aerial": 0.33,
+      "aerial": 0.6,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
@@ -91,7 +91,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.33,
+      "vertical_mobility": 0.53,
       "burst_heal": null,
       "continous_heal": null,
       "spirit_lifesteal": null,

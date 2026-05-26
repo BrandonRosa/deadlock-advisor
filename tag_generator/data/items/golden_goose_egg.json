@@ -74,7 +74,7 @@
       "scaling_early": -0.2,
       "scaling_late": 0.2,
       "self_buff": null,
-      "self_heal": null,
+      "self_heal": 0.2,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,

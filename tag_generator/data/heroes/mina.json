@@ -382,6 +382,8 @@
   "image_path": "/resources/heroes/mina/portrait_mina.png",
   "mini_image_path": "/resources/heroes/mina/mini_icon_mina.png",
   "normalized_name": "mina",
-  "search_terms": [],
+  "search_terms": [
+    ".mna"
+  ],
   "wiki_url": "https://deadlock.wiki/Mina"
 }

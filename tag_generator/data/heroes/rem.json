@@ -386,6 +386,8 @@
   "image_path": "/resources/heroes/rem/portrait_rem.png",
   "mini_image_path": "/resources/heroes/rem/mini_icon_rem.png",
   "normalized_name": "rem",
-  "search_terms": [],
+  "search_terms": [
+    ".rem"
+  ],
   "wiki_url": "https://deadlock.wiki/Rem"
 }

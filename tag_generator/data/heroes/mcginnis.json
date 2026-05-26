@@ -377,7 +377,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Monster Rounds, Extra Charge, Intensifying Magazine, Extra Stamina, Arcane Surge… | Sig: Extra Charge, Extra Stamina, Arcane Surge, Healbane, Suppressor, Mystic Expansion, Mystic Slow, Enduring Speed | Req: Intensifying Magazine",
+      "build_description_eng": "RE from: Monster Rounds, Extra Charge, Intensifying Magazine, Extra Stamina, Arcane SurgeÂ… | Sig: Extra Charge, Extra Stamina, Arcane Surge, Healbane, Suppressor, Mystic Expansion, Mystic Slow, Enduring Speed | Req: Intensifying Magazine",
       "counter_phase_slots": [
         null,
         [
@@ -801,7 +801,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Mystic Slow, Compress Cooldown, Mystic Expansion… | Sig: Mystic Slow, Compress Cooldown, Mystic Expansion, Extra Charge, Healbane, Stamina Mastery, Superior Duration, Escalating Exposure, Spirit Burn, Lightning Scroll | Req: Arcane Surge, Duration Extender",
+      "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Mystic Slow, Compress Cooldown, Mystic ExpansionÂ… | Sig: Mystic Slow, Compress Cooldown, Mystic Expansion, Extra Charge, Healbane, Stamina Mastery, Superior Duration, Escalating Exposure, Spirit Burn, Lightning Scroll | Req: Arcane Surge, Duration Extender",
       "followed_build": "General",
       "name": "Ult (Ult>Turret>Wall)",
       "normalized_build_name": "mcginnis_ult_rushin_russian",
@@ -1210,7 +1210,8 @@
   "mini_image_path": "/resources/heroes/mcginnis/mini_icon_mcginnis.png",
   "normalized_name": "mcginnis",
   "search_terms": [
-    "engineer"
+    "engineer",
+    ".mcg"
   ],
   "wiki_url": "https://deadlock.wiki/McGinnis"
 }

@@ -380,7 +380,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Restorative Shot, Opening Rounds, Kinetic Dash, Intensifying Magazine, Monster Rounds… | Sig: Monster Rounds | Req: Opening Rounds, Kinetic Dash, Intensifying Magazine, Bullet Lifesteal, Warp Stone, Berserker, Spellslinger",
+      "build_description_eng": "RE from: Restorative Shot, Opening Rounds, Kinetic Dash, Intensifying Magazine, Monster RoundsÂ… | Sig: Monster Rounds | Req: Opening Rounds, Kinetic Dash, Intensifying Magazine, Bullet Lifesteal, Warp Stone, Berserker, Spellslinger",
       "followed_build": "General",
       "name": "Gun (Aura*1,Ult>Battery>Aura)",
       "normalized_build_name": "victor_gun_aura_1_ult_battery_aura",
@@ -769,7 +769,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Golden Goose Egg, Extra Spirit, Extra Regen, Extra Charge, Torment Pulse… | Sig: Spirit Lifesteal, Enduring Speed, Healing Booster, Compress Cooldown, Warp Stone, Transcendent Cooldown, Rapid Recharge, Ethereal Shift, Spellbreaker, Witchmail | Req: Golden Goose Egg, Extra Spirit, Extra Regen, Extra Charge, Torment Pulse, Superior Cooldown, Infuser, Escalating Exposure, Spirit Burn",
+      "build_description_eng": "RE from: Golden Goose Egg, Extra Spirit, Extra Regen, Extra Charge, Torment PulseÂ… | Sig: Spirit Lifesteal, Enduring Speed, Healing Booster, Compress Cooldown, Warp Stone, Transcendent Cooldown, Rapid Recharge, Ethereal Shift, Spellbreaker, Witchmail | Req: Golden Goose Egg, Extra Spirit, Extra Regen, Extra Charge, Torment Pulse, Superior Cooldown, Infuser, Escalating Exposure, Spirit Burn",
       "followed_build": "General",
       "name": "Spirit (Battery>Jumpstart>Ult)",
       "normalized_build_name": "victor_spirit_battery_jumpstart_ult",
@@ -1177,7 +1177,9 @@
   "image_path": "/resources/heroes/victor/portrait_victor.png",
   "mini_image_path": "/resources/heroes/victor/mini_icon_victor.png",
   "normalized_name": "victor",
-  "search_terms": [],
+  "search_terms": [
+    ".vct"
+  ],
   "wiki_url": "https://deadlock.wiki/Victor",
   "default_build_name": "victor_gun_aura_1_ult_battery_aura"
 }

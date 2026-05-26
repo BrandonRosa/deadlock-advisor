@@ -2810,6 +2810,10 @@ function onCalcFilterKey(e) {
     const name = MATCH.primedHero;
     MATCH.primedHero = null;
     assignHero(name, role);
+    MATCH.filter.text = '';
+    document.getElementById('calc-text-filter').value = '';
+    renderCalcRoster();
+    saveMatchState();
     e.preventDefault();
   }
 }
@@ -3028,8 +3032,10 @@ function autoRegenPromote() {
   let changed = false;
   MATCH.results.forEach(r => {
     if (!r.builds || !r.builds.length) return;
-    let topIdx = 0, topScore = -Infinity;
+    const startI = r.builds.length > 1 ? 1 : 0;
+    let topIdx = startI, topScore = -Infinity;
     r.builds.forEach((b, i) => {
+      if (i < startI) return;
       const s = b.total || 0;
       if (s > topScore) { topScore = s; topIdx = i; }
     });
@@ -3232,7 +3238,7 @@ function computeResults() {
         });
         const aImp = tv(item.values?.playstyle_score, 'assist_importance');
         return { name: item.name, imagePath: item.image_path, score: score * (aImp || 1), _assist_imp: aImp };
-      }).filter(x => x._assist_imp > 0)
+      }).filter(x => x._assist_imp > 0.5)
         .sort((a, b) => b.score - a.score).slice(0, 3);
 
       const counterItems = itemPool.map(item => {
@@ -3244,7 +3250,7 @@ function computeResults() {
         });
         const cImp = tv(item.values?.playstyle_score, 'counter_importance');
         return { name: item.name, imagePath: item.image_path, score: score * (cImp || 1), _raw_values: item.values?.playstyle_score || {} };
-      }).filter(x => tv(x._raw_values, 'counter_importance') > 0)
+      }).filter(x => tv(x._raw_values, 'counter_importance') > 0.5)
         .sort((a, b) => a.score - b.score).slice(0, 3);
 
       const total = (MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3')
@@ -4716,10 +4722,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   const SIG_MULT_STRONG      = 1.9;
   const SIG_COMP_MULT_STRONG = 1.35;
   const REQ_STICKY_MULT      = 1.5;   // sell-swap stickiness for required items
-  const COUNTER_TAG_THRESH   = 0.2;   // item.values.counter_importance > X → counter item
-                                       // (lowered 0.3 → 0.2 on 2026-05-13: at 0.3 no item ever
-                                       //  tripped it in either player logs or any algo's output,
-                                       //  so the counter dimension was effectively dead)
+  const COUNTER_TAG_THRESH   = 0.5;   // item.values.counter_importance > X → counter item
+                                       // (raised 0.2 → 0.5 on 2026-05-24: aligns UI gate with algo
+                                       //  gate so only purpose-built counter/assist items appear)
   const COUNTER_FORCE_FRAC   = 0.5;   // soft-min: force counter buy only if its score ≥ X × best non-counter
   const COUNTER_BOOST_LOW    = 1.8;   // in-loop multiplier for counter items when below this phase's min
   const DEFAULT_COUNTER_SLOTS = [[0,1],[0,2],[1,2],[2,3],[2,4]];  // Lane, Early, Mid, Late, Extra Late
@@ -5033,7 +5038,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     if (algo === 'adaptive') {
       const assistImp  = Math.max(0, it.values?.assist_importance  || 0);
       const counterImp = Math.max(0, it.values?.counter_importance || 0);
-      if (assistImp > 0 || counterImp > 0) {
+      if (assistImp > 0.5 || counterImp > 0.5) {
         const scale  = 1 + COSINE_MATCH_MULT * (assistImp + counterImp);
         const scaled = {};
         tagKeys.forEach(t => { scaled[t] = (itemContrib[t] || 0) * scale; });
@@ -5253,7 +5258,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         .filter(k => {
           if (buildPathBlacklist.has(k) || globalUsed.has(k)) return false;
           if ((bpItemMap[k]?.tier ?? 0) !== tier) return false;
-          return tv(scoredMap[k].values, importanceTag) > 0;
+          return tv(scoredMap[k].values, importanceTag) > 0.5;
         })
         .map(k => {
           const it = scoredMap[k];

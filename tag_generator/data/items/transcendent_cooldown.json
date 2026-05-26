@@ -9,7 +9,7 @@
   ],
   "values": {
     "playstyle_score": {
-      "ability_spam": null,
+      "ability_spam": 2.0,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -66,16 +66,16 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": null,
+      "multi_ability_focus": 0.5,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.1,
+      "self_heal": 0.5,
       "shield": null,
       "silence": null,
-      "single_ability_focus": null,
+      "single_ability_focus": 0.5,
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
@@ -93,7 +93,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null
+      "vertical_mobility": null,
+      "continous_heal": 0.5
     }
   },
   "wiki_url": "https://deadlock.wiki/Transcendent_Cooldown",

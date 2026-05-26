@@ -384,6 +384,8 @@
   "image_path": "/resources/heroes/paradox/portrait_paradox.png",
   "mini_image_path": "/resources/heroes/paradox/mini_icon_paradox.png",
   "normalized_name": "paradox",
-  "search_terms": [],
+  "search_terms": [
+    ".prx"
+  ],
   "wiki_url": "https://deadlock.wiki/Paradox"
 }

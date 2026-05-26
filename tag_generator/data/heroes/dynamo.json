@@ -1499,6 +1499,8 @@
   "image_path": "/resources/heroes/dynamo/portrait_dynamo.png",
   "mini_image_path": "/resources/heroes/dynamo/mini_icon_dynamo.png",
   "normalized_name": "dynamo",
-  "search_terms": [],
+  "search_terms": [
+    ".dyn"
+  ],
   "wiki_url": "https://deadlock.wiki/Dynamo"
 }

@@ -382,7 +382,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Sprint Boots, Trophy Collector, Extra Charge… | Sig: Extra Stamina, Transcendent Cooldown | Req: Arcane Surge, Sprint Boots, Trophy Collector, Mystic Expansion, Mystic Vulnerability, Enchanters Emblem, Enduring Speed, Superior Cooldown, Spirit Burn, Escalating Exposure, Boundless Spirit, Superior Duration",
+      "build_description_eng": "RE from: Extra Stamina, Arcane Surge, Sprint Boots, Trophy Collector, Extra ChargeÂ… | Sig: Extra Stamina, Transcendent Cooldown | Req: Arcane Surge, Sprint Boots, Trophy Collector, Mystic Expansion, Mystic Vulnerability, Enchanters Emblem, Enduring Speed, Superior Cooldown, Spirit Burn, Escalating Exposure, Boundless Spirit, Superior Duration",
       "confidence": 0.15,
       "followed_build": "General",
       "name": "Beam Damage Kelvin (Beam>Path>Ball)",
@@ -782,7 +782,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: High-Velocity Rounds, Opening Rounds, Extra Regen, Extra Spirit, Sprint Boots… | Sig: High-Velocity Rounds, Extra Regen, Extra Spirit, Sprint Boots, Trophy Collector, Slowing Bullets, Extra Charge, Improved Spirit, Healing Booster, Compress Cooldown, Warp Stone, Superior Cooldown, Refresher, Boundless Spirit, Diviners Kevlar | Req: Opening Rounds, Recharging Rush, Rapid Recharge, Arcane Surge",
+      "build_description_eng": "RE from: High-Velocity Rounds, Opening Rounds, Extra Regen, Extra Spirit, Sprint BootsÂ… | Sig: High-Velocity Rounds, Extra Regen, Extra Spirit, Sprint Boots, Trophy Collector, Slowing Bullets, Extra Charge, Improved Spirit, Healing Booster, Compress Cooldown, Warp Stone, Superior Cooldown, Refresher, Boundless Spirit, Diviners Kevlar | Req: Opening Rounds, Recharging Rush, Rapid Recharge, Arcane Surge",
       "confidence": -0.1,
       "followed_build": "General",
       "name": "Snowball Support (Ball>Dome>Path)",
@@ -1183,7 +1183,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Extra Charge, Extra Spirit, Torment Pulse, Extra Regen, Sprint Boots… | Sig: Sprint Boots, Enduring Speed, Mystic Expansion, Improved Spirit, Mystic Vulnerability, Greater Expansion, Superior Duration | Req: Extra Charge, Extra Spirit, Torment Pulse, Healbane, Spirit Lifesteal, Rapid Recharge, Boundless Spirit, Escalating Exposure",
+      "build_description_eng": "RE from: Extra Charge, Extra Spirit, Torment Pulse, Extra Regen, Sprint BootsÂ… | Sig: Sprint Boots, Enduring Speed, Mystic Expansion, Improved Spirit, Mystic Vulnerability, Greater Expansion, Superior Duration | Req: Extra Charge, Extra Spirit, Torment Pulse, Healbane, Spirit Lifesteal, Rapid Recharge, Boundless Spirit, Escalating Exposure",
       "confidence": -0.05,
       "followed_build": "General",
       "name": "Pure Damage (Ball>Beam>Path)",
@@ -1580,7 +1580,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Healing Rite, Extra Spirit, Improved Spirit, Sprint Boots, Trophy Collector… | Sig: Healing Rite, Extra Spirit, Sprint Boots, Healing Booster, Fleetfoot, Enduring Speed, Guardian Ward, Surge of Power, Boundless Spirit | Req: Improved Spirit, Trophy Collector, Rescue Beam, Greater Expansion, Heroic Aura, Juggernaut, Transcendent Cooldown",
+      "build_description_eng": "RE from: Healing Rite, Extra Spirit, Improved Spirit, Sprint Boots, Trophy CollectorÂ… | Sig: Healing Rite, Extra Spirit, Sprint Boots, Healing Booster, Fleetfoot, Enduring Speed, Guardian Ward, Surge of Power, Boundless Spirit | Req: Improved Spirit, Trophy Collector, Rescue Beam, Greater Expansion, Heroic Aura, Juggernaut, Transcendent Cooldown",
       "confidence": -0.15,
       "followed_build": "Snowball Support (Ball>Dome>Path)",
       "name": "Speedy Rescue Lane Pusher (Ball>Dome>Path)",
@@ -1994,7 +1994,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "(Use 2 to cancel heavy melee) RE from: Extra Charge, Melee Lifesteal, Close Quarters, Spirit Strike, Recharging Rush… | Sig: Extra Charge, Melee Lifesteal, Stalker, Improved Spirit, Rapid Recharge, Enduring Speed, Lifestrike, Juggernaut, Torment Pulse | Req: Close Quarters, Spirit Strike, Recharging Rush, Melee Charge, Spirit Snatch, Point Blank, Crushing Fists, Colossus",
+      "build_description_eng": "(Use 2 to cancel heavy melee) RE from: Extra Charge, Melee Lifesteal, Close Quarters, Spirit Strike, Recharging RushÂ… | Sig: Extra Charge, Melee Lifesteal, Stalker, Improved Spirit, Rapid Recharge, Enduring Speed, Lifestrike, Juggernaut, Torment Pulse | Req: Close Quarters, Spirit Strike, Recharging Rush, Melee Charge, Spirit Snatch, Point Blank, Crushing Fists, Colossus",
       "confidence": "+-0.3",
       "followed_build": "Snowball Support (Ball>Dome>Path)",
       "name": "Thunderdome (Ball>Dome>Path)",
@@ -2825,6 +2825,8 @@
   "image_path": "/resources/heroes/kelvin/portrait_kelvin.png",
   "mini_image_path": "/resources/heroes/kelvin/mini_icon_kelvin.png",
   "normalized_name": "kelvin",
-  "search_terms": [],
+  "search_terms": [
+    ".klv"
+  ],
   "wiki_url": "https://deadlock.wiki/Kelvin"
 }

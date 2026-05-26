@@ -388,7 +388,8 @@
   "search_terms": [
     "book",
     "page",
-    "librarian"
+    "librarian",
+    ".pge"
   ],
   "wiki_url": "https://deadlock.wiki/Paige",
   "default_build_name": "paige_general"

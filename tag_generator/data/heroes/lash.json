@@ -383,7 +383,8 @@
   "mini_image_path": "/resources/heroes/lash/mini_icon_lash.png",
   "normalized_name": "lash",
   "search_terms": [
-    "asshole"
+    "asshole",
+    ".lsh"
   ],
   "wiki_url": "https://deadlock.wiki/Lash"
 }

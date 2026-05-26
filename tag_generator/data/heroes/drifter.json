@@ -366,5 +366,7 @@
     "red",
     "black"
   ],
-  "search_terms": []
+  "search_terms": [
+    ".drf"
+  ]
 }

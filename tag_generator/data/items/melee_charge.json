@@ -45,7 +45,7 @@
       "farmer": 0.1,
       "fire_rate": null,
       "fire_rate_slow": null,
-      "grounded": 0.15,
+      "grounded": 0.4,
       "gun_burst_damage": 0.25,
       "gun_burst_proc": 0.25,
       "gun_burst_resistance": 0.15,

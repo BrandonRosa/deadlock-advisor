@@ -11,7 +11,7 @@
   "values": {
     "playstyle_score": {
       "ability_spam": null,
-      "aerial": 0.5,
+      "aerial": 1.5,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
@@ -45,10 +45,10 @@
       "duration_dependant": null,
       "engage": 0.75,
       "escape": 1.25,
-      "farmer": 0.05,
+      "farmer": 0.4,
       "fire_rate": null,
       "fire_rate_slow": null,
-      "grounded": 0.15,
+      "grounded": null,
       "gun_burst_damage": 0.05,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
@@ -59,7 +59,7 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": 0.15,
-      "horizontal_mobility": 0.5,
+      "horizontal_mobility": 1.0,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
@@ -98,7 +98,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.9
+      "vertical_mobility": 2.25
     }
   },
   "wiki_url": "https://deadlock.wiki/Stamina_Mastery",
