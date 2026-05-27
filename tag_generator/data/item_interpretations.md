@@ -908,8 +908,6 @@ for spirit damage add it shouldve done the +7 flat and the actual damage all at 
 | `gun_continuous_damage` | rewards sustained fire | 10 | 0.4 | adds | Hit the threshold by sustaining |
 | `gun_continuous_proc` | 200 dmg/3.5s | index | 1.0 | adds | Sustained-damage trigger |
 
-### Corrections
-gun burst proc wouldve worked here too
 ---
 
 ## Slowing Bullets
