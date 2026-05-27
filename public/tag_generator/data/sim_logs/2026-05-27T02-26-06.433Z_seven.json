@@ -1,0 +1,327 @@
+{
+  "hero": "seven",
+  "build_idx": 4,
+  "build_name": "Farmer",
+  "formula": "v3",
+  "algo": "architect",
+  "allies": [
+    "seven",
+    "silver",
+    "shiv",
+    "mcginnis",
+    "graves",
+    "lash"
+  ],
+  "enemies": [
+    "rem",
+    "celeste",
+    "mo_&_krill",
+    "drifter",
+    "haze",
+    "mina"
+  ],
+  "self": "seven",
+  "outcome": "win",
+  "feel": "good",
+  "notes": "Just kinda winged it",
+  "history": [
+    {
+      "tick": 0,
+      "action": "skip",
+      "phase": "Lane",
+      "soulsBefore": 800
+    },
+    {
+      "tick": 1,
+      "action": "buy",
+      "key": "duration_extender",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 2,
+      "action": "buy",
+      "key": "monster_rounds",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 3,
+      "action": "buy",
+      "key": "extra_charge",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 800,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 4,
+      "action": "buy",
+      "key": "extra_spirit",
+      "col": "strength",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 900,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 5,
+      "action": "buy",
+      "key": "sprint_boots",
+      "col": "counter",
+      "override": false,
+      "phase": "Lane",
+      "soulsBefore": 1000,
+      "costEffective": 800,
+      "components": []
+    },
+    {
+      "tick": 6,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 1300
+    },
+    {
+      "tick": 7,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2500
+    },
+    {
+      "tick": 8,
+      "action": "upgrade",
+      "key": "cultist_sacrifice",
+      "col": "override",
+      "override": true,
+      "phase": "Early",
+      "soulsBefore": 3700,
+      "costEffective": 2400,
+      "components": [
+        "monster_rounds"
+      ]
+    },
+    {
+      "tick": 9,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2500
+    },
+    {
+      "tick": 10,
+      "action": "upgrade",
+      "key": "surge_of_power",
+      "col": "override",
+      "override": true,
+      "phase": "Early",
+      "soulsBefore": 3800,
+      "costEffective": 2400,
+      "components": [
+        "extra_spirit"
+      ]
+    },
+    {
+      "tick": 11,
+      "action": "skip",
+      "phase": "Early",
+      "soulsBefore": 2800
+    },
+    {
+      "tick": 12,
+      "action": "upgrade",
+      "key": "enduring_speed",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 4200,
+      "costEffective": 800,
+      "components": [
+        "sprint_boots"
+      ]
+    },
+    {
+      "tick": 13,
+      "action": "buy",
+      "key": "mystic_vulnerability",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 4800,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 14,
+      "action": "buy",
+      "key": "spirit_lifesteal",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 4700,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 15,
+      "action": "buy",
+      "key": "bullet_lifesteal",
+      "col": "override",
+      "override": true,
+      "phase": "Mid",
+      "soulsBefore": 4600,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 16,
+      "action": "unlock",
+      "phase": "Mid",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 16,
+      "action": "unlock",
+      "phase": "Mid",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 16,
+      "action": "skip",
+      "phase": "Mid",
+      "soulsBefore": 4600
+    },
+    {
+      "tick": 17,
+      "action": "upgrade",
+      "key": "escalating_exposure",
+      "col": "strength",
+      "override": false,
+      "phase": "Mid",
+      "soulsBefore": 6300,
+      "costEffective": 4800,
+      "components": [
+        "mystic_vulnerability"
+      ]
+    },
+    {
+      "tick": 18,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 3300
+    },
+    {
+      "tick": 19,
+      "action": "upgrade",
+      "key": "juggernaut",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 5100,
+      "costEffective": 4800,
+      "components": [
+        "enduring_speed"
+      ]
+    },
+    {
+      "tick": 20,
+      "action": "upgrade",
+      "key": "superior_duration",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 2200,
+      "costEffective": 1600,
+      "components": [
+        "duration_extender"
+      ]
+    },
+    {
+      "tick": 21,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 2600
+    },
+    {
+      "tick": 22,
+      "action": "skip",
+      "phase": "Late",
+      "soulsBefore": 5600
+    },
+    {
+      "tick": 23,
+      "action": "buy",
+      "key": "indomitable",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 8700,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 24,
+      "action": "buy",
+      "key": "improved_spirit",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 5500,
+      "costEffective": 1600,
+      "components": []
+    },
+    {
+      "tick": 25,
+      "action": "buy",
+      "key": "plated_armor",
+      "col": "override",
+      "override": true,
+      "phase": "Late",
+      "soulsBefore": 7200,
+      "costEffective": 6400,
+      "components": []
+    },
+    {
+      "tick": 26,
+      "action": "upgrade",
+      "key": "leech",
+      "col": "strength",
+      "override": false,
+      "phase": "Late",
+      "soulsBefore": 4200,
+      "costEffective": 3200,
+      "components": [
+        "bullet_lifesteal",
+        "spirit_lifesteal"
+      ]
+    }
+  ],
+  "owned": [
+    "extra_charge",
+    "cultist_sacrifice",
+    "surge_of_power",
+    "escalating_exposure",
+    "juggernaut",
+    "superior_duration",
+    "indomitable",
+    "improved_spirit",
+    "plated_armor",
+    "leech"
+  ],
+  "sold": [],
+  "blocked": [
+    "mystic_burst"
+  ],
+  "total_earned": 48500,
+  "slots_unlocked": 2,
+  "ts": "2026-05-27T02:26:06.433Z"
+}
