@@ -1,452 +1,542 @@
 [
   {
     "code": "pure_damage",
-    "description": "",
-    "name": "Pure/Execute/MaxHP Damage"
+    "name": "Pure/Execute/MaxHP Damage",
+    "description": "Damage that bypasses resistances entirely — ignores resist, deals %max-HP, or executes at a HP threshold. The signature anti-tank damage type.",
+    "detailed_description": "Comparison unit: effective damage. Resist-bypassing damage, %max-HP damage, and execute thresholds all contribute. Flat-damage items multiplied by resistance do NOT count. On a hero/build, positive value means the hero's kit has built-in anti-tank tooling. item_affinity high for heroes who struggle against big-HP targets. enemy_weight positive when the enemy team has tanks — pure damage is the answer the hero brought. Anchors: Curse, Decay."
   },
   {
     "code": "spirit_damage",
-    "description": "",
-    "name": "Spirit Damage"
+    "name": "Spirit Damage",
+    "description": "Both raw spirit damage and potential to deal spirit damage (gaining Spirit Power). Spirit shielding (defensive) does NOT count here.",
+    "detailed_description": "Comparison unit: effective spirit damage dealt. Direct spirit damage + Spirit Power scaling. On a hero/build, positive = hero's primary or secondary damage type is spirit. item_affinity high for any spirit-leaning hero. ally_weight NEGATIVE if the hero relies on spirit damage (mass spirit gets resisted) — less negative if the hero also shreds spirit resist. enemy_weight negative ONLY if the hero is specifically vulnerable to spirit damage; positive if the hero has spirit-resist attributes (same pattern for every damage type). Separately, give a negative spirit_resistance enemy_weight when the hero relies on spirit damage and lacks spirit_resist_shred. Anchors: Mystic Reach, Improved Spirit, Boundless Spirit, Echo Shard."
   },
   {
     "code": "bullet_damage",
-    "description": "",
-    "name": "Bullet Damage"
+    "name": "Bullet Damage",
+    "description": "General gun damage + potential to deal gun damage (Weapon Damage %). Long-range scope items don't contribute to melee; close-range gun-amp items contribute a slice to melee_damage.",
+    "detailed_description": "Comparison unit: effective gun damage dealt. Direct bullet damage + Weapon Damage %. Fire rate is its own tag. On a hero/build, positive = hero leans on gunplay. item_affinity high for gun-DPS heroes. ally_weight NEGATIVE if the hero relies on bullet damage — but LESS negative than the spirit case because bullet resist is easier to bypass via debuffs, fire-rate slows, displaces. Less negative again with bullet_resist_shred. enemy_weight negative ONLY if the hero is specifically vulnerable to bullets (squishy, low bullet resist); positive if the hero stacks bullet-resist attributes. Anchors: Basic Magazine, Soul Shredder Bullets, Headshot Booster, Crippling Headshot."
   },
   {
     "code": "headshot_damage",
-    "description": "",
-    "name": "Headshot Damage"
+    "name": "Headshot Damage",
+    "description": "Both headshot damage and headshot affinity (large bullets, point-blank range, slow-firing weapons all increase how often you land heads).",
+    "detailed_description": "Comparison unit: required headshot frequency × item effectiveness multiplier. Items that boost headshot damage AND items that boost effective head-rate (large bullets, slow projectiles). Fire rate gets fractional credit. On a hero/build, positive = hero has accurate slow-firing high-damage shots or kit synergy with headshots. item_affinity high for slow-fire, large-bullet heroes; low for spirit casters and full-auto sprayers. enemy_weight NEGATIVE if the hero has a large head hitbox (Seven, Mo & Krill, Cadence) — these heroes get headshotted reliably so enemy headshot items hurt them more. Positive if the hero's head is hard to hit. Anchors: Headshot Booster, Crippling Headshot, Sharp Shooter."
   },
   {
     "code": "melee_damage",
-    "description": "",
-    "name": "Melee Damage"
+    "name": "Melee Damage",
+    "description": "Both actual melee damage and melee-damage assistance. Gun-damage-% items contribute partial credit only when they apply at melee range.",
+    "detailed_description": "Comparison unit: effective damage on melee strikes. Direct melee damage, melee-on-hit procs, ambush bonuses, and close-range gun-amps all count. Lifestrike contributes heavily. Long-range scope items contribute zero. On a hero/build, positive = hero leans on melee (Abrams, Mo & Krill). item_affinity high for melee-leaning heroes. ally_weight NEGATIVE if hero is a primary melee hero — melee-resist shuts a team down. Less negative with melee-resist shred or ranged options. enemy_weight negative ONLY if the hero is specifically vulnerable to melee (gets dived, low melee resist); positive if the hero stacks melee-resist attributes. Anchors: Melee Charge, Heavy Melee, Lifestrike."
   },
   {
     "code": "spirit_resistance",
-    "description": "",
-    "name": "Spirit Resistance"
+    "name": "Spirit Resistance",
+    "description": "Both actual spirit resistance AND pseudo-resistance (shield-on-spirit-trigger items, silences, reducing enemy spirit power).",
+    "detailed_description": "Comparison unit: effective % spirit resistance. Flat spirit resist 1:1. Shield-on-spirit-damage ~0.6x. Silencing ~0.3x (no spirit damage from silenced enemies). Spirit slow ~0.2x. On a hero/build, positive = the hero's kit is naturally tanky against spirit. item_affinity high for any hero that plays near spirit casters. enemy_weight NEGATIVE if the hero relies on spirit damage (less negative with spirit_resist_shred) — enemies stacking spirit resist directly counter the hero's damage output. Anchors: Spirit Armor, Improved Spirit Armor, Spirit Shielding."
   },
   {
     "code": "bullet_resistance",
-    "description": "",
-    "name": "Bullet Resistance"
+    "name": "Bullet Resistance",
+    "description": "Both actual bullet resistance AND pseudo-resistance (disarms, fire-rate slows, bullet-shield items). Bullet resistance implicitly counts as melee resistance (reverse not true).",
+    "detailed_description": "Comparison unit: effective % bullet resistance. Flat bullet resist 1:1. Disarm ~0.4x for its duration. Fire-rate slow proportional to slow %. On a hero/build, positive = naturally tanky against gunfire (Bebop, Abrams, Pocket). item_affinity highest for slow big-HP heroes that get focused by gun comps. enemy_weight NEGATIVE if the hero relies on bullet damage (less negative than the spirit case because bullet resist is easier to bypass). Less negative again with bullet_resist_shred. Anchors: Bullet Armor, Improved Bullet Armor, Knockdown (disarm pseudo-credit)."
   },
   {
     "code": "melee_resistance",
-    "description": "",
-    "name": "Melee Resistance"
+    "name": "Melee Resistance",
+    "description": "Both actual melee resistance and pseudo-resistance. Bullet resistance contributes partially (every bullet resist is also melee resist; reverse not true).",
+    "detailed_description": "Comparison unit: effective % melee resistance. Direct melee resist 1:1. Bullet resist ~0.5x. Knockback / pushback items that disengage melees ~0.3x. On a hero/build, positive = naturally tanky in melee range. item_affinity high for close-range heroes who get punished by melee dives. enemy_weight negative if the hero relies on melee damage (less negative with melee-resist shred). Anchors: Return Fire, Reactive Barrier."
   },
   {
     "code": "spirit_resist_shred",
-    "description": "",
-    "name": "Spirit Resist Shred"
+    "name": "Spirit Resist Shred",
+    "description": "Anything that lowers enemy spirit resist or makes enemies take more spirit damage. Lower if it only applies to your spirit damage; higher if team-wide.",
+    "detailed_description": "Comparison unit: effective % spirit resistance removed from enemies. Direct resist reduction = full credit. Vulnerability debuffs = full credit. Self-only spirit-damage amp = ~0.5x (team can't benefit). On a hero/build, positive = hero brings spirit-resist-shred natively (Mystic Vulnerability fits the kit). item_affinity high for ALL spirit-damage heroes. ally_weight POSITIVE if the hero relies on spirit damage (allies opening enemies up for your kit). Less positive if the hero is lone-wolf. Anchors: Mystic Vulnerability, Escalating Exposure, Decay."
   },
   {
     "code": "bullet_resist_shred",
-    "description": "",
-    "name": "Bullet Resist Shred"
+    "name": "Bullet Resist Shred",
+    "description": "Same as spirit_resist_shred but for bullet resist.",
+    "detailed_description": "Comparison unit: effective % bullet resistance removed from enemies. Direct armor reduction = full credit. Bullet vulnerability debuffs = full credit. Self-only bullet damage amp = ~0.5x. On a hero/build, positive = hero brings bullet-shred natively. item_affinity high for bullet-damage heroes. ally_weight POSITIVE if the hero relies on bullet damage. Anchors: Armor Piercing Rounds, Toxic Bullets (heal-shred adjacent, partial credit)."
   },
   {
     "code": "burst_damage",
-    "description": "",
-    "name": "Burst Damage"
+    "name": "Burst Damage",
+    "description": "GENERAL burst — large damage in <1s window. Used when the source is unspecified. Prefer the specific variants (spirit_burst_damage, gun_burst_damage) when known.",
+    "detailed_description": "Comparison unit: effective TOTAL damage delivered within 1s of first hit. Total damage in the 1s window. Multi-shot items sum up within 1s. On a hero/build, positive = hero has a 'delete' button. Hybrids especially benefit from the general tag. Cross-ref: spirit_burst_damage, gun_burst_damage."
   },
   {
     "code": "continuous_damage",
-    "description": "",
-    "name": "Continuous Damage"
+    "name": "Continuous Damage",
+    "description": "GENERAL sustained damage outside the 1s burst window. Prefer the specific variants when known.",
+    "detailed_description": "Comparison unit: effective TOTAL damage dealt outside the 1s window. Damage past the 1s window. DoT effects count here (also tagged with dot). On a hero/build, positive = hero applies steady pressure rather than spike damage. Cross-ref: spirit_continuous_damage, gun_continuous_damage."
   },
   {
     "code": "dot",
-    "description": "",
-    "name": "DoT"
+    "name": "DoT",
+    "description": "Damage-over-time status effects (burn, bleed, poison). Cleansable / amplifiable by debuff items.",
+    "detailed_description": "Comparison unit: total damage from DoT status effects. Direct DoT damage + items that extend/amplify enemy DoTs. Generic non-status continuous damage doesn't count here. On a hero/build, positive = hero has burn/bleed/poison in their kit (Infernus, Shiv). enemy_weight negative when enemies stack DoT threats AND the hero has no cleanse — DoTs grind down sustain. Anchors: Toxic Bullets (poison DoT), Shiv signature bleed."
   },
   {
     "code": "debuff",
-    "description": "",
-    "name": "Debuff"
+    "name": "Debuff",
+    "description": "Cleanse-priority of debuffs applied to enemies. Mystic Vulnerability stacks aren't worth dispelling; Decay / Shiv bleed / Seven stun / Infernus burn very much are.",
+    "detailed_description": "Comparison unit: debuff severity × duration × difficulty-of-cleansing. Items that apply high-impact cleansable debuffs score high. Mild routine debuffs (slows no one cleanses) score lower. On a hero/build, positive = hero loads enemies with priority debuffs. enemy_weight negative when enemies stack priority debuffs — the hero's cleanse window is contested. Anchors: Decay (high-priority), Mystic Vulnerability (low-priority), Knockdown."
   },
   {
     "code": "burst_resistance",
-    "description": "",
-    "name": "Burst Resistance"
+    "name": "Burst Resistance",
+    "description": "Resistances tailored for big damage bursts — shield/barrier items, Spellbreaker-style burst reducers, first-hit absorbers.",
+    "detailed_description": "Comparison unit: effective % reduction within first 1s window of getting hit. Shield-on-damage = full credit. Damage absorption windows = full credit. Generic flat resist contributes ~0.3x here (its job is sustained, not burst). On a hero/build, positive = hero shrugs off burst (innate shields, dodge mechanics). item_affinity high for squishy heroes who get blown up in single windows. Anchors: Spellbreaker, Etherial Shift (partial — short window), Soul Rebirth."
   },
   {
     "code": "continuous_resistance",
-    "description": "",
-    "name": "Continuous Resistance"
+    "name": "Continuous Resistance",
+    "description": "Resistances tailored for sustained engagements — flat resist items, regen-heavy items.",
+    "detailed_description": "Comparison unit: effective % reduction outside the first 1s window. Flat resist = full credit (this is its bread and butter). Health regen that scales with damage taken = high credit. Burst-flavored items (Spellbreaker, Metal Skin) score lower here than they do in burst_resistance. On a hero/build, positive = hero outlasts in long fights. item_affinity high for tanks, brawlers, lane bullies. Anchors: Improved Bullet Armor, Improved Spirit Armor, Juggernaut."
   },
   {
     "code": "debuff_resistance",
-    "description": "",
-    "name": "Debuff Resistance"
+    "name": "Debuff Resistance",
+    "description": "Reduces duration of debuffs and stuns. Cleanse / Debuff Remover effects count (full removal modulo cooldown).",
+    "detailed_description": "Comparison unit: effective % reduction in active debuff/stun duration. Direct duration reduction = full credit. Cleanse effects = full credit accounting for cooldown. On a hero/build, positive = hero is hard to lock down. item_affinity high for slow/big heroes who can't dodge stuns and for high-priority focus targets. enemy_weight (enemy stacks debuff_resistance) negative ONLY if the hero relies on debuffs/CC to win — the enemy shrugs off lockdown. Anchors: Debuff Remover, Unstoppable, Debuff Reducer."
   },
   {
     "code": "spirit_proc",
-    "description": "",
-    "name": "Spirit Proc"
+    "name": "Spirit Proc",
+    "description": "GENERAL spirit-damage proc — triggers when the enemy takes spirit damage. Roughly 50/50 burst vs continuous flavored. Prefer specific variants when known.",
+    "detailed_description": "Comparison unit: item effectiveness (proc damage × proc rate × duration). Higher proc damage / better effect = higher score. Harder-to-trigger procs (high threshold, long cooldown) = lower score even if the effect is good. On a hero/build, positive = hero's kit feeds spirit procs reliably. Anchors: Mystic Burst, Cold Front. Cross-ref: spirit_burst_proc, spirit_continuous_proc."
   },
   {
     "code": "bullet_proc",
-    "description": "",
-    "name": "Bullet Proc"
+    "name": "Bullet Proc",
+    "description": "GENERAL bullet-damage proc. Prefer specific variants (gun_burst_proc, gun_continuous_proc) when known.",
+    "detailed_description": "Comparison unit: item effectiveness (proc damage × proc rate × duration). Per-bullet procs on full-auto get more total value than per-hit-with-cooldown items. On a hero/build, positive = hero triggers bullet-procs reliably. Anchors: Toxic Bullets, Soul Shredder Bullets. Cross-ref: gun_burst_proc, gun_continuous_proc."
   },
   {
     "code": "bullet_evasion",
-    "description": "",
-    "name": "Bullet Evasion"
+    "name": "Bullet Evasion",
+    "description": "How well the item ignores bullet damage entirely. Metal Skin / Plated Armor are nearly pure evasion. Etherial Shift only partially counts — you're vulnerable / slowed AFTER the window.",
+    "detailed_description": "Comparison unit: effective % of incoming bullets evaded. True bullet immunity window = full credit. Partial protections that compromise mobility post-effect = ~0.5x. On a hero/build, positive = hero has innate dodge mechanics (Lash dive, Vyper jets). Anchors: Metal Skin, Plated Armor, Etherial Shift (partial credit)."
   },
   {
     "code": "magazine_size_dependant",
-    "description": "",
-    "name": "Magazine Size Dependant"
+    "name": "Magazine Size Dependant",
+    "description": "Blend of magazine size, reload speed, and instant reload. Items needing sustained bullet flow (procs, fire-rate) benefit fractionally.",
+    "detailed_description": "Comparison unit: effective ammo bonus × effective uptime. Direct magazine boost = full credit. Reload speed ~0.7x. Instant Reload = high credit. Fire-rate items that drain mag faster contribute ~0.3x. On a hero/build, positive = hero's kit cares deeply about magazine (Haze fixation, McGinnis sustained-fire). item_affinity high for high-fire-rate or proc-stacking heroes. Anchors: Basic Magazine, Extra Magazine, Active Reload."
   },
   {
     "code": "fire_rate",
-    "description": "",
-    "name": "Fire Rate"
+    "name": "Fire Rate",
+    "description": "Direct fire rate boost. Items whose effectiveness scales with high fire rate get fractional credit.",
+    "detailed_description": "Comparison unit: effective fire rate boost (%). Direct fire-rate % = full credit. Items whose proc effectiveness scales with fire rate get fractional credit. On a hero/build, positive = hero's kit leverages high fire rate. ally_weight same as bullet_damage — mildly negative for over-reliance, mildly positive with shred. enemy_weight negative when enemies have fire-rate threats AND the hero lacks slows/disarms. Anchors: Rapid Rounds, Berserker, Intensifying Magazine."
   },
   {
     "code": "fire_rate_slow",
-    "description": "",
-    "name": "Fire Rate Slow"
+    "name": "Fire Rate Slow",
+    "description": "How well the hero / item slows enemy fire rate. Score multiplies by AoE / affected count.",
+    "detailed_description": "Comparison unit: effective fire rate reduction (%) × duration × affected count. Direct fire-rate-slow % = full credit. AoE multi-target multiplies. Single-target with long cooldown loses score. On a hero/build, positive = hero shuts down gun comps natively. item_affinity high for tanks / brawlers who eat bullets. enemy_weight negative ONLY if the hero is gun-reliant — their bullet DPS gets throttled; neutral for spirit/ability heroes. Anchors: Rusted Barrel, Juggernaut."
   },
   {
     "code": "aoe_cluster",
-    "description": "",
-    "name": "AoE / Cluster Damage"
+    "name": "AoE / Cluster Damage",
+    "description": "How good the hero / item is at hitting multiple enemies at once. Score = enemies hit × damage per hit.",
+    "detailed_description": "Comparison unit: AoE effect importance × effective enemies affected. Area damage = full credit weighted by typical enemies-in-area. Bouncing/chaining damage = high credit. Single-target effects = 0. On a hero/build, positive = hero teamfights from one button. enemy_weight positive when enemies group up (the hero's AoE punishes their formation); less valuable into highly mobile / aerial enemy teams who scatter out of the cluster. Anchors: Mystic Burst, Boundless Spirit (passive AoE)."
   },
   {
     "code": "single_target",
-    "description": "",
-    "name": "Single Target Damage"
+    "name": "Single Target Damage",
+    "description": "How good the hero / effect is at picking and singling out a single target. Targeted debuffs count at ~0.5x.",
+    "detailed_description": "Comparison unit: effect importance × effective uptime. Single-target damage = full credit. Single-target debuffs = ~0.5x. AoE = 0. On a hero/build, positive = hero is a picker (Vindicta, Grey Talon, Vyper). Anchors: Headshot Booster, Crippling Headshot, Sharp Shooter."
   },
   {
     "code": "close_range",
-    "description": "",
-    "name": "Close Range"
+    "name": "Close Range",
+    "description": "Effectiveness × importance within 10m. Most close-range items correlate with negative long_range on the same item.",
+    "detailed_description": "Comparison unit: effectiveness × importance within 10m. Items whose value comes from being close (Close-Quarters damage, melee gun-amp) score high. Long-range items score zero or negative here. On a hero/build, positive = hero wants to be close (Abrams, Mo & Krill). item_affinity high for in-your-face brawlers. enemy_weight negative when enemies dive — the hero gets pressured in the band they want to occupy. Anchors: Close Quarters, Point Blank, Glass Cannon."
   },
   {
     "code": "mid_range",
-    "description": "",
-    "name": "Mid Range"
+    "name": "Mid Range",
+    "description": "Effectiveness within 11–19m. The 'default' band — often overlooked because kits skew close or long.",
+    "detailed_description": "Comparison unit: effectiveness × importance within 11–19m. Items whose effective range falls in this band. Most bullet items live here implicitly. On a hero/build, positive = hero plays mid. Anchors: Long-range scope items partially count; Ricochet at moderate range."
   },
   {
     "code": "long_range",
-    "description": "",
-    "name": "Long Range"
+    "name": "Long Range",
+    "description": "Effectiveness at 20m+. Long-range heroes typically require line of sight; enemies who control LOS are effective counters.",
+    "detailed_description": "Comparison unit: effectiveness × importance at 20m+. Long-range damage amps, scope items, items that scale with range bonuses. On a hero/build, positive = hero plays long (Vindicta, Grey Talon). item_affinity high for snipers and back-line heroes. enemy_weight negative when enemies have long-range pickers — the hero's range advantage gets neutralized. Anchors: Long Range, Sharp Shooter."
   },
   {
     "code": "stun",
-    "description": "",
-    "name": "Stun / CC"
+    "name": "Stun / CC",
+    "description": "Stun + general hard CC. Score = seconds locked down per use × frequency of use.",
+    "detailed_description": "Comparison unit: effective total time stunned. Direct stun durations + reliable hard CC. Disorients ~0.5x. Slows don't count (own tag). On a hero/build, positive = hero brings reliable CC (Seven's 2, Bebop hook). item_affinity high for any hero whose damage requires a stationary target. enemy_weight negative when enemies bring heavy lockdown the hero can't outplay. Anchors: Knockdown (Curse does NOT stun — it silences/disarms)."
   },
   {
     "code": "aerial",
-    "description": "",
-    "name": "Aerial"
+    "name": "Aerial",
+    "description": "Effectiveness while airborne — air-strafe damage bonuses, mid-air ability bonuses, jet-pack-friendly items.",
+    "detailed_description": "Comparison unit: effectiveness while airborne. Items with mid-air bonuses or that work best while airborne. On a hero/build, positive = hero spends time in the air (Lash, Vindicta hover, Grey Talon). item_affinity high for air-heroes. enemy_weight (enemy plays heavy air) negative ONLY if the hero lacks anti-air to contest elevation; neutral with anti-air tools. Anchors: Long Range (preserves air-shots), hover-friendly cooldown items."
   },
   {
     "code": "grounded",
-    "description": "",
-    "name": "Grounded"
+    "name": "Grounded",
+    "description": "Effectiveness while on the ground — mirror of aerial.",
+    "detailed_description": "Comparison unit: effectiveness while on the ground. Items that proc on ground stance, items with reduced uptime when airborne. Melee items are implicitly grounded (melee happens close-range and on the ground). On a hero/build, positive = hero stays grounded (most tanks, brawlers). item_affinity high for ground-fighters. Anchors: melee items (Melee Charge, Lifestrike) are implicitly grounded; heroes with no air mobility benefit from any grounded-only item."
   },
   {
     "code": "horizontal_mobility",
-    "description": "",
-    "name": "Horizontal Mobility"
+    "name": "Horizontal Mobility",
+    "description": "Raw horizontal movement speed boost.",
+    "detailed_description": "Comparison unit: effective m/s gained. Movement speed % = full credit. Sprint speed = partial credit (uptime — not available while aiming/shooting). Mobility-on-hit triggers = high credit when reliable. On a hero/build, positive = hero is mobile (Lash, Vyper). item_affinity high for mobile heroes. enemy_weight negative when enemies are mobile AND the hero lacks slows/locks. Anchors: Sprint Boots, Enduring Speed, Enduring Spirit."
   },
   {
     "code": "vertical_mobility",
-    "description": "",
-    "name": "Vertical Mobility"
+    "name": "Vertical Mobility",
+    "description": "Boost to going up or recovering air. Less raw m/s, more about reaching elevation.",
+    "detailed_description": "Comparison unit: effective vertical traverse / dash distance boost. Items that boost stamina / jump count / dash height. On a hero/build, positive = hero uses verticality (Lash divebomb, Vyper jets, Vindicta hover). item_affinity high for sky-heroes. enemy_weight negative when enemies stack verticality AND the hero lacks anti-air. Anchors: Extra Stamina, Enduring Speed (stamina component)."
   },
   {
     "code": "movement_slow",
-    "description": "",
-    "name": "Movement Slow"
+    "name": "Movement Slow",
+    "description": "How well the hero / item slows enemy movement.",
+    "detailed_description": "Comparison unit: effective movement slow % × duration × affected count. Direct slow % = full credit. AoE slows multiply by affected count. Slow + DoT combos count here for slow component. On a hero/build, positive = hero applies movement lock (Pocket, Cold Front carriers). item_affinity high for snipers / brawlers landing skill shots on slowed targets. enemy_weight negative when enemies bring sticky slows AND the hero is mobility-reliant. Anchors: Slowing Hex, Cold Front, Mystic Slow."
   },
   {
     "code": "silence",
-    "description": "",
-    "name": "Silence"
+    "name": "Silence",
+    "description": "Score = average abilities denied per use × duration.",
+    "detailed_description": "Comparison unit: effective abilities silenced × total duration. Silence duration × AoE size determines the score. On a hero/build, positive = hero shuts down casters natively. item_affinity high in matchups with ability-reliant enemy heroes. enemy_weight negative when enemies bring silences AND the hero is ability-reliant. Anchors: Silence Glyph, Curse (silence component)."
   },
   {
     "code": "disarm",
-    "description": "",
-    "name": "Disarm"
+    "name": "Disarm",
+    "description": "Prevents enemies from firing. Counts toward bullet_resistance pseudo-resistance.",
+    "detailed_description": "Comparison unit: disarm duration × affected count. Direct disarm duration × area. Items with disarm-on-trigger count proportional to trigger uptime. On a hero/build, positive = hero shuts down gun comps natively. item_affinity high for slow tanks who eat bullets — turning the gun off is huge. enemy_weight negative when enemies disarm AND the hero is gun-reliant — the hero's bullet items get gated. Anchors: Disarm (the item literally named Disarm), Knockdown."
   },
   {
     "code": "cc_resist",
-    "description": "",
-    "name": "CC Resist"
+    "name": "CC Resist",
+    "description": "How well the hero / item resists CC effects (stuns, silences, slows, disarms). Cleansing counts.",
+    "detailed_description": "Comparison unit: effective % CC resistance / reduction. Direct CC resistance % = full credit. Tenacity = full credit. Cleanse effects = high credit modulo cooldown. On a hero/build, positive = hero is hard to lock down. item_affinity high for high-priority focus targets (carries, slow tanks). enemy_weight (enemy stacks cc_resist) negative ONLY if the hero relies on CC to set up kills — the enemy breaks free. Anchors: Debuff Remover, Unstoppable, Debuff Reducer."
   },
   {
     "code": "team_heal",
-    "description": "",
-    "name": "Team Heal"
+    "name": "Team Heal",
+    "description": "Output that flows from the hero to teammates — ally-target heals, regen auras, ally-target shields. Self-only healing doesn't count.",
+    "detailed_description": "Comparison unit: amount healed/resisted/shielded to ALLIES (not self). Ally-target heals/shields = full credit by HP value. Auras count by avg ally uptime × HP/s. On a hero/build, positive = hero is a team-heal source. item_affinity high for hybrid/support kits. ally_weight positive — team healers benefit from being near allies; mutual scaling. enemy_weight negative when enemies have heavy team-heal AND the hero lacks anti_heal. Anchors: Rescue Beam, Healing Booster."
   },
   {
     "code": "self_heal",
-    "description": "",
-    "name": "Self Heal"
+    "name": "Self Heal",
+    "description": "Healing applied only to self. Lifesteal partially counts (own tag covers most of it).",
+    "detailed_description": "Comparison unit: total HP healed (to self). Direct self-heal = full credit. Lifesteal ~0.3x here. Damage-on-low-HP self-restoration counts. On a hero/build, positive = hero sustains in lane (Abrams passive, Mo & Krill burrow). item_affinity high for solo-laners. enemy_weight negative when enemies sustain AND the hero lacks anti_heal — long fights tilt against the hero. Anchors: Restorative Locket (self), Healing Rite."
   },
   {
     "code": "anti_heal",
-    "description": "",
-    "name": "Anti-Heal"
+    "name": "Anti-Heal",
+    "description": "Reduces enemy healing output. Stacks count proportionally to coverage.",
+    "detailed_description": "Comparison unit: effective % heal reduction. Direct heal-reduction % = full credit. Items that apply on hit gain credit proportional to hit uptime. On a hero/build, positive = hero brings heal-shutdown natively. item_affinity high vs. sustain-heavy enemy comps. enemy_weight NEGATIVE if the hero is the team's primary sustain source — enemy anti_heal is a direct counter to them. Anchors: Toxic Bullets (heal-shred component), Decay (heal cripple)."
   },
   {
     "code": "high_max_hp",
-    "description": "",
-    "name": "High Max HP"
+    "name": "High Max HP",
+    "description": "Both HP-pool boost AND items whose effectiveness scales with how much HP the hero has.",
+    "detailed_description": "Comparison unit: HP up + effectiveness from already having higher HP. Direct max HP boosts = full credit. % HP scaling items get the 'scales with HP' component. 'Deals % missing HP' items don't count (low_max_hp tag). On a hero/build, positive = tank hero. item_affinity high for tanks who chain HP scaling. enemy_weight (enemy is a high-HP tank) negative ONLY if the hero lacks anti-tank damage to chew through the pool; neutral/positive if the hero brings tank-shredding damage. Anchors: Colossus, Fortitude."
   },
   {
     "code": "low_max_hp",
-    "description": "",
-    "name": "Low Max HP"
+    "name": "Low Max HP",
+    "description": "Glass-cannon flavor — items whose effectiveness scales with low or missing HP. Lifestrike does NOT belong here (it's melee lifesteal).",
+    "detailed_description": "Comparison unit: temp HP up + effectiveness from having lower HP. Damage / lifesteal / mobility that scales as HP decreases. Items that grant temporary HP from low-HP triggers count (threshold matters). On a hero/build, positive = hero plays close to death (Vyper signature builds, low-HP-trigger kits). item_affinity high for aggressive low-HP brawlers. Anchors: Glass Cannon (low-HP scaling), Soul Rebirth (revive at low HP)."
   },
   {
     "code": "shield",
-    "description": "",
-    "name": "Shield"
+    "name": "Shield",
+    "description": "Shield/barrier output (vs raw HP). Includes proc-shields, spirit-trigger shields, ally-shielding (cross-credit team_heal).",
+    "detailed_description": "Comparison unit: total shield amount granted. Direct shield = full credit by HP value. Proc-shields count weighted by trigger rate. Ally-shields cross-credit team_heal. On a hero/build, positive = hero has shielding mechanics natively. item_affinity high for brittle heroes that benefit from cushioning. Anchors: Spirit Shielding (proc shield), Reactive Barrier."
   },
   {
     "code": "scaling_early",
-    "description": "",
-    "name": "Early Scaling"
+    "name": "Early Scaling",
+    "description": "Items / effects that pop off in early-mid phases — cheap items that shift lane outcomes.",
+    "detailed_description": "Comparison unit: effectiveness × importance from owning this early. T1/T2 items that punch above their souls value. Items whose value flattens at high-souls = full credit. On a hero/build, positive = early-tempo hero (lane bullies, sniper opener heroes). item_affinity high for lane-bully heroes. Anchors: Mystic Burst (early T2), Extra Stamina, Basic Magazine."
   },
   {
     "code": "scaling_late",
-    "description": "",
-    "name": "Late Scaling"
+    "name": "Late Scaling",
+    "description": "Items whose value compounds with souls / time. T4 items with stacking effects, items that scale with stats only available late.",
+    "detailed_description": "Comparison unit: effectiveness × importance from owning this late. T4 items, stacking-scaling items, items with hard prereqs. On a hero/build, positive = late-game scaler (most carries). item_affinity high for carries / scaling kits. Anchors: Boundless Spirit, Crippling Headshot, Glass Cannon."
   },
   {
     "code": "farmer",
-    "description": "",
-    "name": "Farmer"
+    "name": "Farmer",
+    "description": "Effectiveness for farming NPCs (creeps / jungle). Not many items target this — Monster Rounds is the cleanest dedicated farm item.",
+    "detailed_description": "Comparison unit: effectiveness for farming NPCs. Damage-vs-NPCs % bonuses, cleave damage that hits multiple creeps, items that proc on NPC kills. On a hero/build, positive = hero farms NPCs efficiently (cleave kits, AoE caster kits). item_affinity high for late-game-reliant carries who need to farm efficiently. Anchors: Monster Rounds."
   },
   {
     "code": "self_buff",
-    "description": "",
-    "name": "Self Buff"
+    "name": "Self Buff",
+    "description": "Items whose value is concentrated in personal stat boosts that don't directly damage / heal / CC.",
+    "detailed_description": "Comparison unit: % of item value that comes from self-only stat boosts. Generic self-stat items (a flat % spirit power passive without procs). On a hero/build, positive = hero benefits broadly from generic stat-up items. item_affinity high for stats-snowball heroes; lower for synergy/proc-driven kits. Anchors: Extra Spirit, Mystic Expansion (stat up + range), Pristine Emblem."
   },
   {
     "code": "ally_buff",
-    "description": "",
-    "name": "Ally Buff"
+    "name": "Ally Buff",
+    "description": "Auras, ally-buffing actives, items that grant bonuses to nearby teammates.",
+    "detailed_description": "Comparison unit: % of item value that comes from boosting allies (excluding heals). Aura items, ally-target buff actives. On a hero/build, positive = support / aura hero. item_affinity high for team-fight presence heroes. ally_weight positive — ally buffs scale with team presence; the hero benefits from being near teammates. Anchors: Heroic Aura, Rescue Beam."
   },
   {
     "code": "cooldown_reduction",
-    "description": "",
-    "name": "Cooldown Reduction Dependant"
+    "name": "Cooldown Reduction Dependant",
+    "description": "% CDR on abilities. Boost more if item depends on the CDR; more if covers multiple abilities; most if also reduces item cooldown. 'Add' items score larger than 'rely-on' items.",
+    "detailed_description": "Comparison unit: % cooldown reduction. Mirror the range_extender add-vs-relies logic: an item that ADDS CDR = full credit; an item that merely has its own cooldown and relies on CDR = partial credit (~0.25x). Item that grants CDR AND has its own active = full add credit; CDR covering item cooldowns (not just abilities) = highest credit. On a hero/build, positive = hero gains a lot from CDR (low-CD-spam kits, ult-reliant heroes). item_affinity high for ability-spam kits (Pocket, Wraith). Anchors: Improved Cooldown, Superior Cooldown, Mystic Slow (CDR component)."
   },
   {
     "code": "range_extender_dependant",
-    "description": "",
-    "name": "Range Dependent"
+    "name": "Range Dependent",
+    "description": "Items that extend ability range (ADD, full weight) OR items whose effectiveness scales with range (RELY, smaller weight).",
+    "detailed_description": "Comparison unit: % range up (ADD, full credit) OR % of item effectiveness that relies on range up (RELY, partial credit). Direct range % bonus = full credit. Items whose effective area / hit distance scales with range bonuses get partial credit. On a hero/build, positive = hero has range-extendable abilities (Vindicta shot, Lash slam range). item_affinity high for kits with range-bound abilities. Anchors: Improved Reach, Long Range, Mystic Expansion (range component)."
   },
   {
     "code": "duration_dependant",
-    "description": "",
-    "name": "Duration Dependent"
+    "name": "Duration Dependent",
+    "description": "Items that extend ability duration (ADD, full weight) OR items whose effectiveness scales with duration (RELY, smaller weight).",
+    "detailed_description": "Comparison unit: % duration up (ADD, full credit) OR % of item effectiveness that relies on duration up (RELY, partial credit). Direct duration % bonus = full credit. Items whose effective uptime scales with duration = partial credit. On a hero/build, positive = hero's abilities have meaningful duration (slow zones, channel ults). item_affinity high for channel-ult heroes (Pocket, Dynamo). Anchors: Superior Duration."
   },
   {
     "code": "charge_dependant",
-    "description": "",
-    "name": "Charge Dependant"
+    "name": "Charge Dependant",
+    "description": "Items with CHARGE STACKS (multi-use abilities/items with stored charges) — NOT channel times or ability windups.",
+    "detailed_description": "Comparison unit: effectiveness for charge-STACK items (multi-use abilities with stored charges). Charge-stack based items only. Items like Echo Shard, Refresher, Mystic Reverb that have multiple stored uses. NOT items with channel/windup times — that's a different mechanic. On a hero/build, positive = hero's kit has charge-stack mechanics. item_affinity high for charge-stack kits. Anchors: Rapid Recharge (charge cooldown)."
   },
   {
     "code": "large_hitbox",
-    "description": "",
-    "name": "Large Hitbox"
+    "name": "Large Hitbox",
+    "description": "Items / strategies that work well for / care about heroes with a large hitbox. Some items even INCREASE hitbox (Colossus).",
+    "detailed_description": "Comparison unit: effectiveness for having a large hitbox (the hero's own). Items whose value increases for big-hitbox heroes (extra HP, evasion, mobility). Items that make the hero larger. On a hero/build, positive = hero has a large hitbox (Mo & Krill, Bebop, Seven). item_affinity high for big-bodied heroes. enemy_weight (enemy has a large hitbox) rarely negative — POSITIVE when the hero deals lots of AoE, deals headshot damage, or plays long-range and benefits from a bigger target. Cross-ref headshot_damage, aoe_cluster, long_range. Anchors: Colossus (grows hitbox), Juggernaut."
   },
   {
     "code": "small_hitbox",
-    "description": "",
-    "name": "Small Hitbox"
+    "name": "Small Hitbox",
+    "description": "Mirror — items / strategies tuned for compact heroes who naturally dodge / are harder to hit.",
+    "detailed_description": "Comparison unit: effectiveness for having a small hitbox. Items whose value increases for small-hitbox heroes (mobility multipliers, fragile-but-fast builds). On a hero/build, positive = hero has a small hitbox (Calico, Vyper). item_affinity high for small heroes. Anchors: Sprint Boots, Enduring Speed."
   },
   {
     "code": "close_to_team",
-    "description": "",
-    "name": "Close To Team"
+    "name": "Close To Team",
+    "description": "Items / mechanics that require or reward staying within 25m of teammates — auras, ally-shielding triggers, formation play.",
+    "detailed_description": "Comparison unit: effectiveness / reliance from being within 25m of teammates. Aura items, items that proc on ally proximity, formation buffs. On a hero/build, positive = hero plays with the team (supports, brawlers in group fights). item_affinity high for team-anchor heroes. ally_weight positive — allies near you = more value. Anchors: Rescue Beam, Heroic Aura."
   },
   {
     "code": "away_from_team",
-    "description": "",
-    "name": "Away From Team"
+    "name": "Away From Team",
+    "description": "Items / mechanics that reward solo play — split-push, flanker tools, lone-wolf damage amps. Distance reference: 25m+.",
+    "detailed_description": "Comparison unit: effectiveness / reliance from being outside 25m of teammates. Solo-flank items, items that proc on isolation, split-push tools. On a hero/build, positive = hero plays solo (split pushers, flank assassins). item_affinity high for solo-flank heroes. Anchors: Phantom Strike (flank tool)."
   },
   {
     "code": "spawn_minions",
-    "description": "",
-    "name": "Spawns Minions"
+    "name": "Spawns Minions",
+    "description": "Items / effects that summon minions (turrets, pets, totems).",
+    "detailed_description": "Comparison unit: effective minions spawned (count × durability × DPS contribution). Minion DPS × uptime × survivability. On a hero/build, positive = summoner hero (McGinnis turrets). item_affinity high for summoner kits. enemy_weight (enemy spawns minions) negative ONLY if the hero lacks AoE to clear the extra bodies; neutral with strong AoE. Anchors: McGinnis-flavor turret items, Tesla Bullets (auxiliary)."
   },
   {
     "code": "assist_importance",
     "name": "Assist Importance",
-    "description": ""
+    "description": "What share of this item's value comes from helping teammates rather than self-power.",
+    "detailed_description": "Comparison unit: % of total item usage that's directed at supporting others. Heals, shields, buff auras, target-ally actives, ally-damage amps. High = the item exists to help allies. On a hero/build, positive = hero leans support / hybrid-support. item_affinity high for support / hybrid kits. ally_weight positive — team play synergy. Anchors: Spirit Rend (ally damage amp), Rescue Beam."
   },
   {
     "code": "counter_importance",
     "name": "Counter Importance",
-    "description": ""
+    "description": "What share of this item's value comes from explicit counter-play (anti-CC, anti-burst, anti-heal, anti-mobility).",
+    "detailed_description": "Comparison unit: % of total item usage that's specifically used to counter another threat. Cleanses, anti-heal, anti-burst (Spellbreaker), bullet evasion. High = the item is a reaction tool. On a hero/build, positive = hero brings tactical counter tools. item_affinity highly contextual — depends on enemy comp. Anchors: Debuff Remover, Toxic Bullets (anti-heal), Spellbreaker."
   },
   {
     "code": "ult_focused",
     "name": "Ult Focused",
-    "description": ""
+    "description": "Items / kits whose effectiveness is tied to ult uptime — ult CDR, ult-amp passives, ult-trigger procs.",
+    "detailed_description": "Comparison unit: reliance on ult being used / available. Direct ult-CDR, items that boost ult specifically, items whose value cycles around an ult window. On a hero/build, positive = ult-reliant hero (Haze ult, Seven ult). item_affinity high for ult-reliant kits. ally_weight POSITIVE if the hero relies on ults — ult-reliant heroes synergize with ult-reliant allies (ults stack, windows align for teamfights). enemy_weight negative ONLY if the hero relies on ults AND cannot interrupt or escape enemy ults easily; neutral if the hero has interrupts/escape. Anchors: Refresher (ult reset), ult-CDR items. Echo Shard re-casts the last ABILITY but specifically CANNOT re-cast ults."
   },
   {
     "code": "spirit_burst_damage",
     "name": "Spirit Burst Damage",
-    "description": ""
+    "description": "Spirit damage delivered within 1s of first hit. Prefer over general burst_damage when the source is clearly spirit.",
+    "detailed_description": "Comparison unit: total spirit damage delivered within 1s of first hit. Multi-hit spirit items within 1s sum up. On a hero/build, positive = hero has spirit-burst combos (Wraith one-shot, Vyper combo). item_affinity high for spirit burst kits. ally_weight inherits from spirit_damage — negative if hero relies on spirit, less negative with shred. enemy_weight (enemy deals spirit burst) negative ONLY if the hero is specifically susceptible to spirit burst (squishy to spirit, no spirit burst_resistance); neutral if the hero runs spirit burst defenses. Anchors: Mystic Burst, Echo Shard (double cast)."
   },
   {
     "code": "spirit_burst_resistance",
     "name": "Spirit Burst Resistance",
-    "description": ""
+    "description": "Defenses tailored for tanking spirit burst windows. Spellbreaker is the iconic anchor. Metal Skin is NOT a spirit burst tool (it's bullet evasion).",
+    "detailed_description": "Comparison unit: effective % reduction of spirit damage within 1s window. Spell-specific damage absorption / reduction in short windows = full credit. Generic spirit resist counts partially (~0.3x). On a hero/build, positive = hero shrugs off spirit bursts natively. item_affinity high for squishy heroes vulnerable to spirit combo deletes. enemy_weight negative if the hero is a spirit-burst dealer — direct counter to their gameplan. Anchors: Spellbreaker, Etherial Shift (short window)."
   },
   {
     "code": "spirit_continuous_damage",
     "name": "Spirit Continuous Damage",
-    "description": ""
+    "description": "Sustained spirit pressure — DoTs, channel damage, stack-building spirit damage.",
+    "detailed_description": "Comparison unit: total spirit damage delivered outside the 1s window of first hit. Spirit DoT / channel damage / spirit-trigger sustained ticks. On a hero/build, positive = hero sustains with spirit (Infernus, Seven). item_affinity high for spirit-sustain kits. ally_weight inherits from spirit_damage. enemy_weight (enemy deals sustained spirit damage) negative ONLY if the hero is specifically vulnerable (low spirit resist, no sustain). Anchors: Decay, Mystic Slow (slow + tick)."
   },
   {
     "code": "spirit_continuous_resistance",
     "name": "Spirit Continuous Resistance",
-    "description": ""
+    "description": "Defenses tailored for sustained spirit engagements — spirit resist tiers, regen against spirit damage.",
+    "detailed_description": "Comparison unit: effective % reduction of spirit damage outside 1s window. Direct spirit resist = full credit. Regen scaling with spirit damage taken = high credit. On a hero/build, positive = hero outlasts spirit comps. item_affinity high for brawlers in spirit-heavy lobbies. enemy_weight negative if the hero deals spirit-continuous damage — direct counter. Anchors: Improved Spirit Armor, sustained spirit-mitigation regen."
   },
   {
     "code": "gun_burst_damage",
     "name": "Gun Burst Damage",
-    "description": ""
+    "description": "Gun damage delivered within 1s of first hit. Prefer over general burst_damage when the source is gunfire.",
+    "detailed_description": "Comparison unit: total gun damage delivered within 1s of first hit. Single-trigger high-damage shots, Active Reload bursts, headshot multi-hit. On a hero/build, positive = hero has burst gun combos (Vindicta charged shot, Grey Talon). item_affinity high for burst-gun heroes. ally_weight inherits from bullet_damage. enemy_weight (enemy deals gun burst) negative ONLY if the hero is squishy to it (low HP/bullet resist, no gun burst_resistance like Metal Skin). Anchors: Express Shot, Active Reload, Headshot Booster, Crippling Headshot."
   },
   {
     "code": "gun_burst_resistance",
     "name": "Gun Burst Resistance",
-    "description": ""
+    "description": "Defenses tailored for tanking gun-burst windows.",
+    "detailed_description": "Comparison unit: effective % reduction of gun damage within 1s window. Items that absorb / dodge gun damage in short windows. On a hero/build, positive = hero shrugs off gun bursts. item_affinity high for squishy back-liners. enemy_weight negative if the hero is a gun-burst dealer — direct counter. Anchors: Metal Skin, Etherial Shift (short window), Plated Armor."
   },
   {
     "code": "gun_continuous_damage",
     "name": "Gun Continuous Damage",
-    "description": ""
+    "description": "Sustained gun damage — fire-rate-stacked engagements, mag-dependent sustained DPS.",
+    "detailed_description": "Comparison unit: total gun damage delivered outside the 1s window of first hit. Sustained-fire DPS items, stack-on-hit ramp-up damage, items that reward staying in fights. NOTE: Berserker is health-stack damage (not really sustained-DPS scaling); Frenzy is not specifically continuous. On a hero/build, positive = hero sustains gunfire (McGinnis, Haze). item_affinity high for sustained-fire kits. ally_weight inherits from bullet_damage. enemy_weight (enemy deals sustained gun damage) negative ONLY if the hero is specifically vulnerable (low bullet resist, no sustain). Anchors: Intensifying Magazine."
   },
   {
     "code": "gun_continuous_resistance",
     "name": "Gun Continuous Resistance",
-    "description": ""
+    "description": "Defenses tailored for sustained gun engagements.",
+    "detailed_description": "Comparison unit: effective % reduction of gun damage outside 1s window. Direct bullet resist = full credit. Regen scaling with damage taken = high credit. Disarms / fire-rate slows count partially. NOTE: Knockdown is more of a stun/disarm than a sustained mitigation. On a hero/build, positive = hero outlasts gun comps. item_affinity high for tanks in gun-heavy lobbies. enemy_weight negative if the hero deals gun-continuous damage — direct counter. Anchors: Juggernaut, Improved Bullet Armor."
   },
   {
     "code": "damage_sponge",
     "name": "Damage Sponginess",
-    "description": ""
+    "description": "Items / heroes whose effectiveness comes from being on the receiving end of damage — stacking armor on hit, building resources from incoming damage.",
+    "detailed_description": "Comparison unit: affinity / % of item importance / effectiveness derived from taking damage. Items that scale per-damage-taken = full credit. Items that proc on getting hit = full credit weighted by trigger uptime. On a hero/build, positive = hero builds resources from taking damage (Abrams berserker-style scaling). item_affinity high for tanks who eat damage on purpose. enemy_weight (enemy is a damage sponge) negative ONLY if the hero lacks any anti-tank damage to kill it; neutral/positive otherwise. Anchors: Reactive Barrier, Soul Rebirth, Return Fire."
   },
   {
     "code": "anti_air",
     "name": "Anti Air",
-    "description": ""
+    "description": "Items that specifically punish airborne enemies — drop them, deny air mobility, amplify damage against airborne targets.",
+    "detailed_description": "Comparison unit: % item importance against airborne enemies. Items that explicitly target / damage / pull airborne enemies score highest. Curse counts a little (ground-locks, but not its main function). On a hero/build, positive = hero counters air-heroes natively. item_affinity very high in lobbies with air-heavy enemy comps (Lash, Vindicta). enemy_weight (enemy brings anti-air) negative ONLY if the hero is air-reliant — their airborne gameplan gets denied; neutral for grounded heroes. Anchors: Knockdown (drops them — the iconic anchor)."
   },
   {
     "code": "trap_block_obstruct",
     "name": "Trap/Block/Obstruct",
-    "description": ""
+    "description": "Effects that physically gate, wall, or root enemies (not stun — they can act but can't move through). Few items do this directly.",
+    "detailed_description": "Comparison unit: effective players × seconds trapped / blocked. Wall items, root items, terrain-creating items. Score by area-time gated. On a hero/build, positive = hero brings traps / walls natively (McGinnis turrets-as-blockers, Bebop hook-back-then-wall). item_affinity high for kits that force engagements. Anchors: Vortex Web (the closest item to a trap/root in the inventory)."
   },
   {
     "code": "displace",
     "name": "Displace",
-    "description": ""
+    "description": "Effects that physically move enemies (knockback, hook, pull, fling). Not many items do this — mostly hero-ability territory.",
+    "detailed_description": "Comparison unit: effective enemies × distance displaced. Direct displacement effects. Score = avg targets × avg distance per use. On a hero/build, positive = hero displaces natively (Bebop hook, Lash slam). item_affinity high for kits that punish out-of-position enemies. enemy_weight negative when enemies displace AND the hero is a positioning-reliant ranged hero. Anchors: Vortex Web (closest item to a displacement tool)."
   },
   {
     "code": "hybrid_damage_usage",
     "name": "Hybrid/Mixed Damage",
-    "description": ""
+    "description": "Mainly items that DOUBLE-DIP — benefit spirit AND gun output at the same time. Also a tiny score for items that are staples in either damage type on its own.",
+    "detailed_description": "Comparison unit: importance to BOTH spirit damage AND gun damage/firerate simultaneously. Items granting both spirit power AND weapon damage / fire rate = full credit. Items that proc both types = full credit. Items that are universal staples in only one damage type get a SMALL partial credit (signals broadly-slotted item). On a hero/build, positive = hero is genuinely hybrid (Mo & Krill, Pocket). item_affinity high for hybrid kits. Anchors: Spiritual Overflow, Mercurial Magnum (the iconic double-dippers)."
   },
   {
     "code": "single_ability_focus",
     "name": "Single Ability Focus",
-    "description": ""
+    "description": "Items / effects that concentrate value on a single ability slot.",
+    "detailed_description": "Comparison unit: % of importance / effectiveness for ONE specific ability (its damage / duration / range / cooldown). Items that buff one specific ability slot, items that proc only off one ability. On a hero/build, positive = hero has one signature ability driving most of their damage (Vindicta 4, Wraith 3). item_affinity high for one-trick kits. Anchors: Ability-slot-specific amps (Ability 1/2/3/4 cooldown/damage boosters)."
   },
   {
     "code": "multi_ability_focus",
     "name": "Multi Ability Focus",
-    "description": ""
+    "description": "Items that touch multiple abilities — kit-wide CDR, kit-wide damage boost, kit-wide range.",
+    "detailed_description": "Comparison unit: % of abilities this affects / is important to. Universal ability boosts. Items that grant kit-wide bonuses. On a hero/build, positive = hero distributes damage across abilities evenly (Pocket, Dynamo). item_affinity high for balanced kits. Anchors: Mystic Expansion (kit-wide range), Boundless Spirit (kit-wide spirit up)."
   },
   {
     "code": "interrupt",
     "name": "Interrupt",
-    "description": ""
+    "description": "Effects that cancel enemy channels / abilities mid-cast.",
+    "detailed_description": "Comparison unit: effective interrupt frequency × ability classes interrupted. Direct interrupt effects. Long-range or AoE interrupts score higher. On a hero/build, positive = hero interrupts natively (Bebop hook, Lash slam). item_affinity high vs. channel-ult enemy heroes (Dynamo ult, Haze ult). enemy_weight NEGATIVE if the hero is ult-focused — enemy interrupts shut down the hero's gameplan. Cross-ref ult_focused. Anchors: Knockdown, Hook, stun items."
   },
   {
     "code": "spirit_burst_proc",
     "name": "Spirit Burst Proc",
-    "description": ""
+    "description": "Proc that triggers off spirit damage in a tight (<1s) window. High trigger threshold + short window + long duration + burst payout = higher score.",
+    "detailed_description": "Comparison unit: high trigger threshold + low time window + longer duration + burst payout = higher score. Items with high spirit-damage trigger thresholds but big payout durations and impactful burst windows score highest. Easy-to-trigger but low-impact procs score lower. On a hero/build, positive = hero feeds spirit-burst procs reliably with one-shot combos. item_affinity high for spirit-burst kits. Anchors: Mystic Burst, Echo Shard."
   },
   {
     "code": "spirit_continuous_proc",
     "name": "Spirit Continuous Proc",
-    "description": ""
+    "description": "Proc that triggers off a sustained stream of spirit damage. Requires the hero to keep up consistent spirit pressure.",
+    "detailed_description": "Comparison unit: spirit damage required to trigger × time window / effect duration. Sustained-spirit triggers, longer effect durations, items that compound with repeated procs over a fight. On a hero/build, positive = hero sustains spirit damage over long fights (Infernus, Seven). item_affinity high for spirit-sustain kits. Anchors: Escalating Exposure (the iconic continuous-spirit proc — requires a constant stream of damage)."
   },
   {
     "code": "gun_burst_proc",
     "name": "Gun Burst Proc",
-    "description": ""
+    "description": "Proc that triggers off a tight burst of gun damage — typically a single high-damage shot or fast cluster within <1s.",
+    "detailed_description": "Comparison unit: bullet damage (or bullets/s) required to trigger ÷ time window + effect duration. Items proccing off a single shot / short window of fire. Higher-damage single-shot procs score better. On a hero/build, positive = hero deals burst gun damage (charged shots, headshots). item_affinity high for burst-gun kits. Anchors: Express Shot, Headshot Booster (proc on first head)."
   },
   {
     "code": "gun_continuous_proc",
     "name": "Gun Continuous Proc",
-    "description": ""
+    "description": "Proc that triggers off sustained gunfire — apply-rate-capped procs that reward keeping the trigger pulled across extended fights.",
+    "detailed_description": "Comparison unit: gun damage / frequency required to trigger × time window / effect duration. Apply-rate-capped sustained procs. Items that reward maintaining fire over a long engagement. NOTE: Berserker is NOT a proc on damage YOU deal (it's a tank-stack item). Toxic Bullets is more burst-flavored (faster fire = faster proc) — works here partially but its primary scoring is elsewhere. On a hero/build, positive = hero sustains gunfire (Haze, McGinnis). item_affinity high for sustained-fire kits. Anchors: Siphon Bullets (apply-rate-capped, rewards sustained pressure — the canonical anchor)."
   },
   {
     "code": "ability_spam",
     "name": "Ability Spam",
-    "description": ""
+    "description": "Items / kits whose value scales with high ability usage rate.",
+    "detailed_description": "Comparison unit: ideal any-ability usage rate (uses/s). Items that proc on ability cast, items granting per-cast bonuses, CDR amps. On a hero/build, positive = hero spams short-CD abilities (Pocket, Wraith). item_affinity high for short-CD kits. enemy_weight (enemy is an ability-spam hero) negative ONLY if the hero is squishy to the chip / lacks silence or burst to shut a spammer down. Anchors: Improved Cooldown, Superior Cooldown."
   },
   {
     "code": "high_assist_count",
     "name": "High Assist Count",
-    "description": ""
+    "description": "Items that drive assist / kill-participation broadly. Note: kills also count as assists — kills are assists in Deadlock's scoring.",
+    "detailed_description": "Comparison unit: % of item importance to getting assists. Kills also count as assists (you don't lose the assist credit when you tag the kill). Damage-amp auras, ally-boost items, items that proc on ally-takedown, items that contribute to fight pressure. On a hero/build, positive = hero participates broadly in fights. item_affinity high for team-fight presence heroes. Anchors: Heroic Aura, ally-amp items."
   },
   {
     "code": "high_kill_count",
     "name": "High Kill Count",
-    "description": ""
+    "description": "Items that drive direct kill participation — lethal damage and kill secures.",
+    "detailed_description": "Comparison unit: % of item importance to direct kill participation. Burst damage items, execute mechanics, items that scale with kills. On a hero/build, positive = hero is a primary killer (carries, assassins). item_affinity high for damage carries. Anchors: Crippling Headshot, execute items."
   },
   {
     "code": "engage",
     "name": "Engage",
-    "description": ""
+    "description": "Items that enable committing to a fight — gap closers, dive tools, opening-burst tools.",
+    "detailed_description": "Comparison unit: effectiveness × importance for committing to an attack. Gap-closers, dive tools, items that proc on engaging. On a hero/build, positive = hero engages (Abrams charge, Bebop hook, Lash slam). item_affinity high for engagers. ally_weight positive — engagers set up the fight for the team. Anchors: Phantom Strike (engage-only — does not function as escape), Knockdown (engage stun), hook tools."
   },
   {
     "code": "escape",
     "name": "Escape",
-    "description": ""
+    "description": "Items that let the hero retreat — speed bursts, invulnerability windows, vision denial. Etherial Shift is NOT a full escape (slowed after); Phantom Strike is engage, not escape.",
+    "detailed_description": "Comparison unit: effectiveness × importance for breaking off an attack. Mobility actives with no post-slow penalty, invulnerability frames, position-warps to safety. NOTE: Etherial Shift is NOT a clean escape — you're slowed afterward so the enemy team has time to converge. Phantom Strike is engage, not escape. On a hero/build, positive = hero has reliable escape tools natively. item_affinity high for squishy / flank heroes. enemy_weight (enemy has strong escape) negative ONLY if the hero is a pick/burst hero who needs to secure kills — slippery enemies survive the burst. Anchors: Warp Stone (clean teleport away), Magic Carpet (mobility without slow penalty)."
   },
   {
     "code": "burst_heal",
     "name": "Burst Heal",
-    "description": ""
+    "description": "Heals delivered in a tight (<1s) window — emergency button heals, full-pool restores, AoE pulses.",
+    "detailed_description": "Comparison unit: total HP healed within 1s. Heals with short windows = full credit. Large-pool single-tick heals = full credit. AoE healing pulses count here. On a hero/build, positive = hero has an emergency button. item_affinity high for heroes who get blown up in burst windows. enemy_weight negative when enemies burst-heal AND the hero relies on burst damage to secure kills. Anchors: Healing Nova, Restorative Locket, Soul Rebirth, Healing Rite."
   },
   {
     "code": "continous_heal",
     "name": "Continous Heal",
-    "description": ""
+    "description": "Sustained heals — regen auras, tick-based heals, slow lifesteal in extended engagements. NOT burst pulses like Healing Nova or Restorative Locket (those are burst_heal).",
+    "detailed_description": "Comparison unit: total HP healed outside the 1s window. Heal-per-second × expected uptime. Per-tick auras count by avg in-range uptime. On a hero/build, positive = hero outlasts in long fights. item_affinity high for brawlers and tanks. enemy_weight negative when enemies sustain continuously AND the hero relies on sustained pressure to win fights. Anchors: Healing Booster, Health Regen, lifesteal tier items (sustained component)."
   },
   {
     "code": "spirit_lifesteal",
     "name": "Spirit Lifesteal",
-    "description": ""
+    "description": "% of spirit damage returned as healing. Vampiric Burst is gun-flavored and does NOT count here.",
+    "detailed_description": "Comparison unit: effective spirit lifesteal % × expected spirit damage output. Direct spirit lifesteal % = full credit weighted by hero spirit-damage output. Conditional spirit lifesteal counts proportional to trigger uptime. On a hero/build, positive = hero scales heavily with spirit lifesteal (high spirit DPS). item_affinity very high affinity for spirit-damage heroes; near-zero for gun-only heroes. Anchors: Spirit Lifesteal, Mystic Lifesteal-flavored items."
   },
   {
     "code": "bullet_lifesteal",
     "name": "Bullet Lifesteal",
-    "description": ""
+    "description": "% of bullet damage returned as healing. Lifestrike is MELEE lifesteal — does NOT count here.",
+    "detailed_description": "Comparison unit: effective bullet lifesteal % × expected bullet damage output. Direct bullet lifesteal % = full credit weighted by hero bullet-damage output. Conditional bullet lifesteal counts proportional to trigger uptime. On a hero/build, positive = hero scales heavily with bullet lifesteal. item_affinity very high affinity for gun-DPS heroes. Anchors: Bullet Lifesteal, Vampiric Burst."
   },
   {
     "code": "lane_pusher",
     "name": "Lane Pusher",
-    "description": ""
+    "description": "Solo wave-clear and tower-pressure — a hero / item that can shove a lane alone.",
+    "detailed_description": "Comparison unit: effectiveness × importance in pushing a lane WITHOUT ally support. AoE wave clear, items that boost minion damage, building-damage %. On a hero/build, positive = hero can solo split-push (McGinnis turrets, Bebop bombs). item_affinity high for solo-lane heroes and split-push enablers. enemy_weight negative when enemies have heavy split-push threats AND the hero lacks global mobility. Anchors: Heroic Aura, Monster Rounds, Tesla Bullets."
   }
 ]
