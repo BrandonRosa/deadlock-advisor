@@ -1,6 +1,6 @@
 {
-  "scraped_at": "2026-05-27 14:01",
-  "count": 171,
+  "scraped_at": "2026-05-28 14:39",
+  "count": 173,
   "items": [
     {
       "name": "Close Quarters",
@@ -18,9 +18,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Deal additional Weapon Damage when in close range to your target.",
             "stats": [
               {
                 "value": "+20%",
@@ -105,9 +105,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "9s",
+            "description": "Your next headshot against an enemy Hero deals bonus weapon damage .",
             "stats": [
               {
                 "value": "+45",
@@ -252,9 +252,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6s",
+            "description": "Your next bullet will heal you based on what target you hit.",
             "stats": [
               {
                 "value": "50",
@@ -304,9 +304,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "12s",
+            "description": "While reloading, pressing Reload during the highlighted portion will instantly finish your reload and grant you Fire Rate , Bullet Lifesteal and Move Speed .",
             "stats": [
               {
                 "value": "+25%",
@@ -369,9 +369,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "16s",
+            "description": "Gain bonus Move Speed and Slow Resistance .",
             "stats": [
               {
                 "value": "+3m",
@@ -426,9 +426,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Increases Weapon Damage as you continuously fire your weapon.",
             "stats": [
               {
                 "value": "45%",
@@ -480,9 +480,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When you Dash-Jump you gain Fire Rate and bonus Ammo until your next reload. Lasts up to 7s.",
             "stats": [
               {
                 "value": "+25%",
@@ -536,9 +536,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Deal additional Weapon Damage when beyond a minimum distance from your target.",
             "stats": [
               {
                 "value": "+40%",
@@ -590,9 +590,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "5s",
+            "description": "Your next Heavy Melee attack against an enemy deals increased damage .",
             "stats": [
               {
                 "value": "+25%",
@@ -604,7 +604,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by item's increase to Melee Damage. Moreover several abilities use heavy melee scaling and will benefit from Melee Charge's unique passive effect as well. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —"
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by item's increase to Melee Damage. Moreover several abilities use heavy melee scaling and will benefit from Melee Charge's unique passive effect as well. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —"
       },
       "changelog": [
         {
@@ -637,9 +637,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "8s",
+            "description": "Your next bullet deals bonus spirit damage .",
             "stats": [
               {
                 "value": "+40",
@@ -689,9 +689,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your attacks have additional Weapon Damage against enemies above 50% health .",
             "stats": [
               {
                 "value": "+30%",
@@ -737,9 +737,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "25s",
+            "description": "Dealing significant weapon damage replenishes a charge for each of your charged abilities .",
             "stats": [
               {
                 "value": "200",
@@ -756,7 +756,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case Recharging Rush will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Time Between Charges Notes Billy Bashdown 1 8s +1 charge on T2 upgrade. Celeste Radiant Daggers 1 2s +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 5s +1 charge on T1 upgrade. Graves Jar of Dead 4 13s Has a conditional charge.; Charges by being near when anything dies. Grey Talon Charged Shot 1 4s +1 charge on T1 upgrade. Haze Smoke Bomb — — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 3.5s +2 charges on T3 upgrade. Holliday Bounce Pad 1 3.5s — Infernus Napalm 1 6s +1 charge on T1 upgrade. Infernus Flame Dash — — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 5s +1 charge on T1 upgrade. Kelvin Frost Grenade 2 7s — Lady Geist Life Drain — — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 2s +1 charge on T3 upgrade. McGinnis Mini Turret 1 3s +2 charges on T2 upgrade. Mirage Fire Scarabs 2 1s +2 charges on T2 upgrade. Paige Bookwyrm 1 7s +1 charge on T3 upgrade. Paradox Time Wall — — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 8s +1 charge on T3 upgrade. Seven Lightning Ball 1 7s +1 charge on T1 upgrade. Shiv Serrated Knives 2 2s +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 3s — The Doorman Call Bell 1 6s +1 charge on T1 upgrade. Venator Consecrating Grenade — — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 8s +1 charge on T3 upgrade. Victor Jumpstart 1 8s +1 charge on T3 upgrade. Vindicta Assassinate 2 2.5s — Viscous Puddle Punch 1 1.7s +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 4s +1 charge on T1 upgrade. Wraith Card Trick 2 — "
+        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case Recharging Rush will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Time Between Charges Notes Billy Bashdown 1 8s +1 charge on T2 upgrade. Celeste Radiant Daggers 1 2s +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 5s +1 charge on T1 upgrade. Graves Jar of Dead 4 13s Has a conditional charge. Charges by being near when anything dies. Grey Talon Charged Shot 1 4s +1 charge on T1 upgrade. Haze Smoke Bomb — — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 3.5s +2 charges on T3 upgrade. Holliday Bounce Pad 1 3.5s — Infernus Napalm 1 6s +1 charge on T1 upgrade. Infernus Flame Dash — — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 5s +1 charge on T1 upgrade. Kelvin Frost Grenade 2 7s — Lady Geist Life Drain — — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 2s +1 charge on T3 upgrade. McGinnis Mini Turret 1 3s +2 charges on T2 upgrade. Mirage Fire Scarabs 2 1s +2 charges on T2 upgrade. Paige Bookwyrm 1 7s +1 charge on T3 upgrade. Paradox Time Wall — — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 8s +1 charge on T3 upgrade. Seven Lightning Ball 1 7s +1 charge on T1 upgrade. Shiv Serrated Knives 2 2s +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 3s — The Doorman Call Bell 1 6s +1 charge on T1 upgrade. Venator Consecrating Grenade — — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 8s +1 charge on T3 upgrade. Victor Jumpstart 1 8s +1 charge on T3 upgrade. Vindicta Assassinate 2 2.5s — Viscous Puddle Punch 1 1.7s +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 4s +1 charge on T1 upgrade. Wraith Card Trick 2 — +"
       },
       "changelog": [
         {
@@ -789,9 +789,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets build up a Movement Slow on enemies.",
             "stats": [
               {
                 "value": "-30%",
@@ -844,9 +844,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets apply a debuff that reduces the Spirit Resist of the target and grants you and your allies Spirit Lifesteal against them.",
             "stats": [
               {
                 "value": "-8%",
@@ -900,9 +900,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "27s",
+            "description": "Make your weapon fire multishot . Hitting more than one Hero per attack will grant a stacking weapon damage bonus . Targets can only be hit once per multishot.",
             "stats": [
               {
                 "value": "5",
@@ -969,9 +969,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6s",
+            "description": "Dealing weapon damage at close range opens a wound and grants you bonus move speed . Wounded enemies take spirit damage over time , have reduced bullet resist , and are revealed through walls .",
             "stats": [
               {
                 "value": "17",
@@ -1101,9 +1101,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Landing a Headshot reduces their Bullet Resist .",
             "stats": [
               {
                 "value": "-13%",
@@ -1151,9 +1151,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Throw a flask that explodes on contact, creating an area that does increasing spirit damage per second and reduces enemy Bullet Resist . 50% less effective vs non-heroes.",
             "stats": [
               {
                 "value": "45",
@@ -1225,9 +1225,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Imbue an ability with increased range . Dealing damage with that ability grants you increased weapon damage per unique hero hit . Has reduced effect on non-heroes.",
             "stats": [
               {
                 "value": "+20%",
@@ -1290,9 +1290,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your Weapon Damage increases as you take sustained damage.",
             "stats": [
               {
                 "value": "+7%",
@@ -1354,9 +1354,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
+            "header": "Active",
             "cooldown": null,
-            "description": null,
+            "description": "Toggle: Continually sacrifice Health to improve fire rate , Debuff Resistance and Move Speed .",
             "stats": [
               {
                 "value": "50/s",
@@ -1418,9 +1418,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "9s",
+            "description": "Briefly gain Fire Rate and Move Speed when one of your bullets hits an enemy hero.",
             "stats": [
               {
                 "value": "+32%",
@@ -1475,9 +1475,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "270s",
+            "description": "Target an enemy NPC and consume it for 180% Bonus Souls and grants a powerful long lasting buff.",
             "stats": [
               {
                 "value": "+10",
@@ -1539,9 +1539,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Grants Bullet Resist when your bullets hit an enemy hero. Each shot can only grant one stack.",
             "stats": [
               {
                 "value": "30%",
@@ -1597,9 +1597,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "8s",
+            "description": "Your next attack will fire twice in quick succession with increased damage and velocity. This attack consumes extra ammo.",
             "stats": [
               {
                 "value": "+125",
@@ -1660,9 +1660,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "8s",
+            "description": "Your next headshot against an enemy Hero deals bonus weapon damage , heal you, and briefly grants bonus move speed .",
             "stats": [
               {
                 "value": "+75",
@@ -1720,9 +1720,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "22s",
+            "description": "Provides Bullet Resist to nearby friendly units.",
             "stats": [
               {
                 "value": "+17%",
@@ -1738,9 +1738,9 @@
           },
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "22s",
+            "description": "Provides move speed and fire rate to you and nearby allies. Minions get double value.",
             "stats": [
               {
                 "value": "+2.25m",
@@ -1801,9 +1801,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When you are above 65% health , deal additional Weapon Damage and your bullets reduce enemy Bullet Resist .",
             "stats": [
               {
                 "value": "+35%",
@@ -1859,9 +1859,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces nearby enemies' Bullet Resist and Fire Rate . If there is only one enemy hero nearby, this effect is doubled .",
             "stats": [
               {
                 "value": "-10%",
@@ -1917,9 +1917,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When in close range to your target, gain Weapon Damage and your bullets apply a Movement Slow .",
             "stats": [
               {
                 "value": "+50%",
@@ -1985,9 +1985,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Deal additional Weapon Damage when beyond a minimum distance from your target.",
             "stats": [
               {
                 "value": "+60%",
@@ -2035,9 +2035,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "2s",
+            "description": "Your bullets apply a debuff that reduces the Spirit Resist of the target and grants you and your allies Spirit Lifesteal against them.",
             "stats": [
               {
                 "value": "-8%",
@@ -2053,9 +2053,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "2s",
+            "description": "Landing headshots against the target reduces their Spirit Resist further.",
             "stats": [
               {
                 "value": "-7%",
@@ -2109,9 +2109,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "0.2s",
+            "description": "Your bullets have a chance to shock your target. The shock will jump to a nearby enemy.",
             "stats": [
               {
                 "value": "33",
@@ -2173,9 +2173,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets build up a Bleed on enemies, causing them to lose a percentage of their Max Health over time. Also applies Healing Reduction on the bleeding target.",
             "stats": [
               {
                 "value": "1.7",
@@ -2238,9 +2238,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets build up a Movement Slow on enemies.",
             "stats": [
               {
                 "value": "-30%",
@@ -2297,9 +2297,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your Bullets have a chance to become unavoidable, piercing through enemies and ignoring their Bullet Resistance .",
             "stats": [
               {
                 "value": "55%",
@@ -2345,9 +2345,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "0.2s",
+            "description": "Your bullets have a chance to shock your target. The shock will jump to a nearby enemy.",
             "stats": [
               {
                 "value": "43",
@@ -2376,9 +2376,9 @@
           },
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "40s",
+            "description": "Launch a projectile that deals damage , applies a strong slow that recovers over time, prevents Stamina usage and Silences their movement-based items and abilities .",
             "stats": [
               {
                 "value": "100",
@@ -2433,9 +2433,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Landing a Headshot will reduce their Bullet and Spirit Resist and applies Healing Reduction .",
             "stats": [
               {
                 "value": "-16%",
@@ -2498,9 +2498,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "5s",
+            "description": "Your next Heavy Melee attack against an enemy deals increased damage .",
             "stats": [
               {
                 "value": "+25%",
@@ -2511,9 +2511,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "5s",
+            "description": "Your melee damage will restore ammo and apply a stacking bullet resist debuff on enemies. Heavy melee applies 2 stacks. If the target reaches max stacks, they will be stunned .",
             "stats": [
               {
                 "value": "+15%",
@@ -2545,7 +2545,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by this item's increase to Melee Damage . Moreover, several abilities use heavy melee scaling and will benefit from Crushing Fists' unique passive effect as well. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —"
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by this item's increase to Melee Damage . Moreover, several abilities use heavy melee scaling and will benefit from Crushing Fists' unique passive effect as well. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —"
       },
       "changelog": [
         {
@@ -2579,9 +2579,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "16s",
+            "description": "While you are below 50% health , you gain stat bonuses for a duration and existing debuffs on you are reduced.",
             "stats": [
               {
                 "value": "4m/s",
@@ -2640,9 +2640,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Each hero kill grants permanent Fire Rate (up to a max of 8 times). Death results in the loss of 1 stack.",
             "stats": [
               {
                 "value": "+7%",
@@ -2685,9 +2685,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets have a chance to be empowered, causing them to deal bonus weapon damage on hit. Bonus damage cannot Crit.",
             "stats": [
               {
                 "value": "+100%",
@@ -2737,9 +2737,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets will ricochet on enemies near your target, applying any bullet procs and dealing a percentage of the original damage.",
             "stats": [
               {
                 "value": "65%",
@@ -2782,8 +2782,8 @@
       "name": "Shadow Weave",
       "normalized_name": "shadow_weave",
       "category": "Weapon",
-      "cost_souls": 6400,
-      "tier": 4,
+      "cost_souls": 3200,
+      "tier": 3,
       "wiki_url": "https://deadlock.wiki/Shadow_Weave",
       "codename": "upgrade_cloaking_device_active",
       "has_enhanced_variant": true,
@@ -2795,9 +2795,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Become Stealthed . Whenever you take damage while Stealthed you get briefly revealed.",
             "stats": [
               {
                 "value": "Invisible",
@@ -2823,9 +2823,9 @@
           },
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Attacking or using an ability will end your stealth and start an ambush , temporarily granting you bonus Fire Rate , Spirit Power and Melee Damage .",
             "stats": [
               {
                 "value": "+25%",
@@ -2852,7 +2852,7 @@
         ]
       },
       "sections": {
-        "Melee damage abilities": "Some abilities scale with melee damage and are affected by Shadow Weave's increase to Melee Damage . This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —",
+        "Melee damage abilities": "Some abilities scale with melee damage and are affected by Shadow Weave's increase to Melee Damage . This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
         "Notes": "Targeted abilities such as Mo & Krill 's Combo and Curse 's active effect still work as normal on heroes in stealth. The increase in fire rate after ending stealth is gradual, increasing to to the full 30% after about half a second.",
         "Trivia": "Most heroes have voice lines for activating Shadow Weave, but they are not enabled in-game."
       },
@@ -2887,9 +2887,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets reduce the target's outgoing spirit damage .",
             "stats": [
               {
                 "value": "-25%",
@@ -2905,9 +2905,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets build up to a Silence . Victims are immune to the build up for 10s after silence expires.",
             "stats": [
               {
                 "value": "Silenced",
@@ -2963,9 +2963,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "While in-combat whenever you cast an ability or item, gain a stacking buff that improves fire rate and reload speed. Each stack refreshes the duration.",
             "stats": [
               {
                 "value": "+11%",
@@ -3026,9 +3026,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Gain bonus Fire Rate , Spirit Power and Spirit Lifesteal by charging up when shooting enemy heroes.",
             "stats": [
               {
                 "value": "+32%",
@@ -3082,9 +3082,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "2.5s",
+            "description": "Your next bullet applies a powerful debuff reducing the enemy's damage output, healing and movement speed. It also deals bonus spirit damage based on the targets current Health. The bullet is larger and penetrates through targets.",
             "stats": [
               {
                 "value": "10%",
@@ -3152,9 +3152,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your Bullets have a chance to become unavoidable, piercing through enemies and ignoring their Bullet Resistance .",
             "stats": [
               {
                 "value": "65%",
@@ -3197,9 +3197,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "10s",
+            "description": "Everytime you land a heavy melee, your existing cooldowns get reduced.",
             "stats": [
               {
                 "value": "16%",
@@ -3216,7 +3216,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by Runed Gauntlets' increase to Melee Damage . Since all these abilities are considered to deal melee damage Runed Gauntlets also provides a hefty 50% resist against these abilities. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —",
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by Runed Gauntlets' increase to Melee Damage . Since all these abilities are considered to deal melee damage Runed Gauntlets also provides a hefty 50% resist against these abilities. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
         "Notes": "The parry-piercing passive will go into cooldown only after a parry has been pierced. Viscous ' Puddle Punch can still be parried even when Runed Gauntlets are equipped."
       },
       "changelog": [
@@ -3339,9 +3339,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "70s",
+            "description": "Grant Regen and Sprint Speed to the target. Gets dispelled if you take damage from enemy players or objectives. Can be self-cast.",
             "stats": [
               {
                 "value": "300",
@@ -3401,9 +3401,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "8s",
+            "description": "Your next Melee attack heals you . This heal is 30% effective vs non-heroes. Cooldown is 1.5x as long for Light Melee hits.",
             "stats": [
               {
                 "value": "100",
@@ -3415,7 +3415,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by Melee Lifesteal's increase to Melee Damage . Abilities that deal melee damage will also trigger the lifesteal effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —",
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by Melee Lifesteal's increase to Melee Damage . Abilities that deal melee damage will also trigger the lifesteal effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
         "Notes": "Striking multiple targets with one attack will not increase healing gained.",
         "Trivia": "Melee Lifesteal is one of several items to feature in promotional posters around the Map . Poster for Melee Lifesteal"
       },
@@ -3452,9 +3452,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "On a successful Parry against an enemy Hero, Heal yourself for the damage parried and returns that damage to the target, and temporarily gain increased damage.",
             "stats": [
               {
                 "value": "+30%",
@@ -3539,9 +3539,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "While you are above 65% health , gain weapon damage and bonus fire rate .",
             "stats": [
               {
                 "value": "+18%",
@@ -3626,9 +3626,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces the duration of all negative effects applied to you.",
             "stats": [
               {
                 "value": "+25%",
@@ -3674,9 +3674,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "While you are above 65% health , gain bonus Spirit and Cooldown Reduction .",
             "stats": [
               {
                 "value": "+15",
@@ -3727,9 +3727,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces the effect of enemy Move Speed penalties.",
             "stats": [
               {
                 "value": "+25%",
@@ -3742,7 +3742,7 @@
       },
       "sections": {
         "Sources of Slow": "The item makes any slow applications 25% less potent. For example an ability that applies 60% Move Slow , when affecting a hero with Enduring Speed will reduce their speed only by 45%.",
-        "Move Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Move Slow Notes Abrams Shoulder Charge 40% (T1) — Apollo Disengaging Sigil 30% — Apollo Itani Lo Sahn — — Bebop Grapple Arm 90% Applies a short strong slow when the victim reaches Bebop. Bebop Hyper Beam 25% — Celeste Shining Wonder 40% T1 upgrade increases move slow by 20% (total 60%). Drifter Stalker's Mark — — Dynamo Kinetic Pulse 30% (T2) — Graves Jar of Dead 30% (T2) — Graves Borrowed Decree 80% — Grey Talon Rain of Arrows 30% (T1) — Grey Talon Spirit Snare 30% — Haze Sleep Dagger 50% (T3) — Haze Fixation 15% (T1) — Infernus Napalm 35% — Infernus Concussive Combustion — — Ivy Entangling Thorns 35% — Ivy Air Drop 40% (T2) — Kelvin Frost Grenade 40% — Kelvin Arctic Beam 20% T1 upgrade increases move slow by 25% (total 45%).; Also slows the caster for 8%. Kelvin Frozen Shelter 35% — Lady Geist Malice 15% — Lady Geist Soul Exchange 70% — Lash Ground Strike 50% (T2) — Lash Flog 35% (T1) — Lash Death Slam 50% — McGinnis Mini Turret — — McGinnis Spectral Wall 20% T3 upgrade increases move slow by 30% (total 50%). McGinnis Heavy Barrage 30% (T1) Slows McGinnis by unknown amount. Mina Love Bites 30% (T1) — Mirage Dust Devil 30% — Mirage Djinn's Mark 60% (T1) — Mo & Krill Sand Blast 25% (T2) — Paige Captivating Read 45% — Paradox Pulse Grenade 20% — Paradox Time Wall 80% — Pocket Barrage 30% — Pocket Enchanter's Satchel 40% (T3) — Seven Lightning Ball 35% (T2) — Shiv Serrated Knives 35% — Silver Entangling Bola 20% T1 upgrade increases move slow by 25% (total 45%). Silver (Transformed) Tail Whack 30% T2 upgrade increases move slow by 40% (total 70%). The Doorman Call Bell 35% — Venator Consecrating Grenade — — Victor Pain Battery 40% (T1) — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 120% — Vindicta Stake 40% — Viscous Splatter 35% — Viscous Puddle Punch 20% — Vyper Screwjab Dagger 35% — Vyper Petrifying Bola 50% — Warden Alchemical Flask 20% — Wraith Card Trick 3",
+        "Move Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Move Slow Notes Abrams Shoulder Charge 40% (T1) — Apollo Disengaging Sigil 30% — Apollo Itani Lo Sahn — — Bebop Grapple Arm 90% Applies a short strong slow when the victim reaches Bebop. Bebop Hyper Beam 25% — Celeste Shining Wonder 40% T1 upgrade increases move slow by 20% (total 60%). Drifter Stalker's Mark — — Dynamo Kinetic Pulse 30% (T2) — Graves Jar of Dead 30% (T2) — Graves Borrowed Decree 80% — Grey Talon Rain of Arrows 30% (T1) — Grey Talon Spirit Snare 30% — Haze Sleep Dagger 50% (T3) — Haze Fixation 15% (T1) — Infernus Napalm 35% — Infernus Concussive Combustion — — Ivy Entangling Thorns 35% — Ivy Air Drop 40% (T2) — Kelvin Frost Grenade 40% — Kelvin Arctic Beam 20% T1 upgrade increases move slow by 25% (total 45%); Also slows the caster for 8%. Kelvin Frozen Shelter 35% — Lady Geist Malice 15% — Lady Geist Soul Exchange 70% — Lash Ground Strike 50% (T2) — Lash Flog 35% (T1) — Lash Death Slam 50% — McGinnis Mini Turret — — McGinnis Spectral Wall 20% T3 upgrade increases move slow by 30% (total 50%). McGinnis Heavy Barrage 30% (T1) Slows McGinnis by unknown amount. Mina Love Bites 30% (T1) — Mirage Dust Devil 30% — Mirage Djinn's Mark 60% (T1) — Mo & Krill Sand Blast 25% (T2) — Paige Captivating Read 45% — Paradox Pulse Grenade 20% — Paradox Time Wall 80% — Pocket Barrage 30% — Pocket Enchanter's Satchel 40% (T3) — Seven Lightning Ball 35% (T2) — Shiv Serrated Knives 35% — Silver Entangling Bola 20% T1 upgrade increases move slow by 25% (total 45%). Silver (Transformed) Tail Whack 30% T2 upgrade increases move slow by 40% (total 70%). The Doorman Call Bell 35% — Venator Consecrating Grenade — — Victor Pain Battery 40% (T1) — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 120% — Vindicta Stake 40% — Viscous Splatter 35% — Viscous Puddle Punch 20% — Vyper Screwjab Dagger 35% — Vyper Petrifying Bola 50% — Warden Alchemical Flask 20% — Wraith Card Trick 30",
         "Move Slow Items": "This is an automatic list. Click here to correct the contents. Name Cost Category Stat change Slowing Bullets 1,600 Weapon + 30 % Movement slow Point Blank 3,200 Weapon + 25 % Movement slow Weighted Shots 3,200 Weapon + 30 % Movement slow Haunting Shot Legendary Weapon + 40 % Movement slow Lifestrike 3,200 Vitality + 60 % Movement slow Colossus 6,400 Vitality + 30 % Movement slow Phantom Strike 6,400 Vitality + 50 % Movement slow Cold Front 1,600 Spirit + 60 % Movement slow Mystic Slow 1,600 Spirit + 30 % Movement slow Slowing Hex 1,600 Spirit + 20 % Movement slow Arctic Blast 6,400 Spirit + 60 % Movement slow Lightning Scroll 6,400 Spirit + 80 % Movement slow + 30 % Movement slow Mystic Reverb 6,400 Spirit + 40 % Movement slow Vortex Web 6,400 Spirit + 35 % Movement slow",
         "Dash Slow Resist": "Enduring Speed also protects about Dash slows.",
         "Dash Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Dash Slow Notes Bebop Hyper Beam 40% — Celeste Shining Wonder 25% T1 upgrade increases dash slow by 15% (total 40%). Haze Sleep Dagger 50% (T3) — Kelvin Arctic Beam 20% — McGinnis Heavy Barrage 30% (T1) Gives 35% dash slow for the caster. Mo & Krill Sand Blast 25% (T2) — Rem Naptime 25% — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 30% —",
@@ -3780,9 +3780,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "60s",
+            "description": "Provide the target with a Barrier and temporary Move Speed . Can be self-cast. Cooldown is reduced by half when cast on someone else.",
             "stats": [
               {
                 "value": "250",
@@ -3840,9 +3840,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your spirit damage applies Healing Reduction . If an enemy hero dies under this effect, you receive a large heal.",
             "stats": [
               {
                 "value": "-35%",
@@ -3898,9 +3898,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Increases the effectiveness of your healing .",
             "stats": [
               {
                 "value": "+20%",
@@ -3946,9 +3946,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "55s",
+            "description": "Gain a Barrier when you are Stunned, Chained, Immobilized, Slept or Silenced .",
             "stats": [
               {
                 "value": "325",
@@ -4001,9 +4001,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "20s",
+            "description": "When an enemy uses an ability within 35m range from you, store one Restoration Stack . Consume all stacks to heal yourself and replenish up to 3 stamina based on how many stacks you have.",
             "stats": [
               {
                 "value": "16",
@@ -4059,9 +4059,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "23s",
+            "description": "Automatically fire a bullet towards any attacker who damages you with their abilities or weapon.",
             "stats": [
               {
                 "value": "65%",
@@ -4149,9 +4149,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "45s",
+            "description": "Gain a Barrier whenever you take significant spirit damage from enemy Heroes in a small time frame.",
             "stats": [
               {
                 "value": "300",
@@ -4214,9 +4214,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "35s",
+            "description": "Gain a Barrier whenever you take significant weapon damage from enemy Heroes in a small time frame.",
             "stats": [
               {
                 "value": "300",
@@ -4280,9 +4280,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When below 50% health , gain additional Bullet Resist .",
             "stats": [
               {
                 "value": "+15%",
@@ -4328,9 +4328,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "23s",
+            "description": "Your next parry protects you from the damage and effects of enemy abilities and items . On a successful spell parry heal and gain move speed and Spirit .",
             "stats": [
               {
                 "value": "150",
@@ -4396,9 +4396,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Purge all non-ultimate negative effects currently applied to you. If any effects were removed, heal yourself and gain a move speed bonus . Cannot be used while Stunned or Slept.",
             "stats": [
               {
                 "value": "250",
@@ -4457,9 +4457,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "After not taking damage for a period, gain health regen.",
             "stats": [
               {
                 "value": "+10s",
@@ -4475,9 +4475,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When you are above 75% health , you have bonus Move Speed .",
             "stats": [
               {
                 "value": "+1.5m",
@@ -4522,9 +4522,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "18s",
+            "description": "Grants Fire Rate and Spirit Resistance but Silences you and disables stamina usage and regeneration .",
             "stats": [
               {
                 "value": "32%",
@@ -4580,9 +4580,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "60s",
+            "description": "Heal yourself and nearby allies.",
             "stats": [
               {
                 "value": "325",
@@ -4638,9 +4638,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "4s",
+            "description": "Your Melee Attack applies Movement Slow and heals you for a percentage of the Melee Damage dealt plus a fixed amount. This heal is 40% effective vs non-heroes. Cooldown is 1.5x as long for Light Melee hits.",
             "stats": [
               {
                 "value": "-60%",
@@ -4667,7 +4667,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by Lifestrike's increase to Melee Damage . Abilities that deal Melee Damage will also trigger the lifesteal effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —"
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by Lifestrike's increase to Melee Damage . Abilities that deal Melee Damage will also trigger the lifesteal effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —"
       },
       "changelog": [
         {
@@ -4698,9 +4698,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Launch yourself high into the air and grant yourself a Barrier . While in the air, you can use the active again to drop down faster. Cannot be used for 5s if attacked by enemy Hero.",
             "stats": [
               {
                 "value": "200",
@@ -4761,9 +4761,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "24s",
+            "description": "Become immune to bullets .",
             "stats": [
               {
                 "value": "-1.5m",
@@ -4821,9 +4821,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "60s",
+            "description": "Heals a target allied hero and yourself for a percentage of Max Health . Once while healing, you can Pull the target towards you. Can be self-cast.",
             "stats": [
               {
                 "value": "20%",
@@ -4881,9 +4881,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When below 50% health , gain additional Spirit Resist.",
             "stats": [
               {
                 "value": "+15%",
@@ -4966,9 +4966,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Whenever you score an assist or kill , gain extra sprint , ability range and passive soul generation . This effect stacks and persists through death.",
             "stats": [
               {
                 "value": "+0.15m",
@@ -5031,9 +5031,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "15s",
+            "description": "Walking through a cosmic veil grants you Stealth , Heal and increased Move Speed .",
             "stats": [
               {
                 "value": "Invisible",
@@ -5092,9 +5092,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "16s",
+            "description": "Teleport straight ahead, gaining Bullet Resist .",
             "stats": [
               {
                 "value": "11m",
@@ -5150,9 +5150,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "90s",
+            "description": "When you would take lethal damage, instead become temporarily death immune and remove all non-stun debuffs . While death immune, you deal reduced damage and have reduced healing .",
             "stats": [
               {
                 "value": "4.5s",
@@ -5211,9 +5211,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "37s",
+            "description": "Grow larger in size , gaining bullet resist , spirit resist , and melee damage . Nearby enemies suffer from slow and have reduced dash speed .",
             "stats": [
               {
                 "value": "35%",
@@ -5255,7 +5255,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by Colossus' increase to Melee Damage . This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —",
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by Colossus' increase to Melee Damage . This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
         "Notes": "While active, a teal-colored circle appears around the hero to indicate the border of the enemy movement slowing effect. Activating this item cancels the windup of your heavy melee attack."
       },
       "changelog": [
@@ -5290,9 +5290,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Remove all non-stun debuffs from the target and provide them with a Barrier and Move Speed . Can be self-cast. Cooldown is reduced by half when cast on someone else.",
             "stats": [
               {
                 "value": "600",
@@ -5350,9 +5350,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "40s",
+            "description": "Upon casting an ultimate ability gain a Barrier and temporary Spirit Power .",
             "stats": [
               {
                 "value": "1000",
@@ -5410,9 +5410,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Applying heal to yourself or an ally grants the target bonus fire rate and bonus move speed . Does not apply on innate Regen or passive Bullet/Spirit Lifesteals.",
             "stats": [
               {
                 "value": "+35%",
@@ -5471,9 +5471,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Gain Spirit Lifesteal and Spirit Power .",
             "stats": [
               {
                 "value": "+70%",
@@ -5527,9 +5527,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your bullets build up to reduce the target's outgoing damage and apply healing reduction .",
             "stats": [
               {
                 "value": "-30%",
@@ -5589,9 +5589,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Enemies that shoot you have their Fire Rate slowed.",
             "stats": [
               {
                 "value": "-40%",
@@ -5609,7 +5609,7 @@
       },
       "sections": {
         "Sources of Slow": "The item makes any slow applications 50% less potent. For example an ability that applies 60% Move Slow , when affecting a hero with Juggernaut will reduce their speed only by 30%.",
-        "Move Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Move Slow Notes Abrams Shoulder Charge 40% (T1) — Apollo Disengaging Sigil 30% — Apollo Itani Lo Sahn — — Bebop Grapple Arm 90% Applies a short strong slow when the victim reaches Bebop. Bebop Hyper Beam 25% — Celeste Shining Wonder 40% T1 upgrade increases move slow by 20% (total 60%). Drifter Stalker's Mark — — Dynamo Kinetic Pulse 30% (T2) — Graves Jar of Dead 30% (T2) — Graves Borrowed Decree 80% — Grey Talon Rain of Arrows 30% (T1) — Grey Talon Spirit Snare 30% — Haze Sleep Dagger 50% (T3) — Haze Fixation 15% (T1) — Infernus Napalm 35% — Infernus Concussive Combustion — — Ivy Entangling Thorns 35% — Ivy Air Drop 40% (T2) — Kelvin Frost Grenade 40% — Kelvin Arctic Beam 20% T1 upgrade increases move slow by 25% (total 45%).; Also slows the caster for 8%. Kelvin Frozen Shelter 35% — Lady Geist Malice 15% — Lady Geist Soul Exchange 70% — Lash Ground Strike 50% (T2) — Lash Flog 35% (T1) — Lash Death Slam 50% — McGinnis Mini Turret — — McGinnis Spectral Wall 20% T3 upgrade increases move slow by 30% (total 50%). McGinnis Heavy Barrage 30% (T1) Slows McGinnis by unknown amount. Mina Love Bites 30% (T1) — Mirage Dust Devil 30% — Mirage Djinn's Mark 60% (T1) — Mo & Krill Sand Blast 25% (T2) — Paige Captivating Read 45% — Paradox Pulse Grenade 20% — Paradox Time Wall 80% — Pocket Barrage 30% — Pocket Enchanter's Satchel 40% (T3) — Seven Lightning Ball 35% (T2) — Shiv Serrated Knives 35% — Silver Entangling Bola 20% T1 upgrade increases move slow by 25% (total 45%). Silver (Transformed) Tail Whack 30% T2 upgrade increases move slow by 40% (total 70%). The Doorman Call Bell 35% — Venator Consecrating Grenade — — Victor Pain Battery 40% (T1) — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 120% — Vindicta Stake 40% — Viscous Splatter 35% — Viscous Puddle Punch 20% — Vyper Screwjab Dagger 35% — Vyper Petrifying Bola 50% — Warden Alchemical Flask 20% — Wraith Card Trick 3",
+        "Move Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Move Slow Notes Abrams Shoulder Charge 40% (T1) — Apollo Disengaging Sigil 30% — Apollo Itani Lo Sahn — — Bebop Grapple Arm 90% Applies a short strong slow when the victim reaches Bebop. Bebop Hyper Beam 25% — Celeste Shining Wonder 40% T1 upgrade increases move slow by 20% (total 60%). Drifter Stalker's Mark — — Dynamo Kinetic Pulse 30% (T2) — Graves Jar of Dead 30% (T2) — Graves Borrowed Decree 80% — Grey Talon Rain of Arrows 30% (T1) — Grey Talon Spirit Snare 30% — Haze Sleep Dagger 50% (T3) — Haze Fixation 15% (T1) — Infernus Napalm 35% — Infernus Concussive Combustion — — Ivy Entangling Thorns 35% — Ivy Air Drop 40% (T2) — Kelvin Frost Grenade 40% — Kelvin Arctic Beam 20% T1 upgrade increases move slow by 25% (total 45%); Also slows the caster for 8%. Kelvin Frozen Shelter 35% — Lady Geist Malice 15% — Lady Geist Soul Exchange 70% — Lash Ground Strike 50% (T2) — Lash Flog 35% (T1) — Lash Death Slam 50% — McGinnis Mini Turret — — McGinnis Spectral Wall 20% T3 upgrade increases move slow by 30% (total 50%). McGinnis Heavy Barrage 30% (T1) Slows McGinnis by unknown amount. Mina Love Bites 30% (T1) — Mirage Dust Devil 30% — Mirage Djinn's Mark 60% (T1) — Mo & Krill Sand Blast 25% (T2) — Paige Captivating Read 45% — Paradox Pulse Grenade 20% — Paradox Time Wall 80% — Pocket Barrage 30% — Pocket Enchanter's Satchel 40% (T3) — Seven Lightning Ball 35% (T2) — Shiv Serrated Knives 35% — Silver Entangling Bola 20% T1 upgrade increases move slow by 25% (total 45%). Silver (Transformed) Tail Whack 30% T2 upgrade increases move slow by 40% (total 70%). The Doorman Call Bell 35% — Venator Consecrating Grenade — — Victor Pain Battery 40% (T1) — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 120% — Vindicta Stake 40% — Viscous Splatter 35% — Viscous Puddle Punch 20% — Vyper Screwjab Dagger 35% — Vyper Petrifying Bola 50% — Warden Alchemical Flask 20% — Wraith Card Trick 30",
         "Move Slow Items": "This is an automatic list. Click here to correct the contents. Name Cost Category Stat change Slowing Bullets 1,600 Weapon + 30 % Movement slow Point Blank 3,200 Weapon + 25 % Movement slow Weighted Shots 3,200 Weapon + 30 % Movement slow Haunting Shot Legendary Weapon + 40 % Movement slow Lifestrike 3,200 Vitality + 60 % Movement slow Colossus 6,400 Vitality + 30 % Movement slow Phantom Strike 6,400 Vitality + 50 % Movement slow Cold Front 1,600 Spirit + 60 % Movement slow Mystic Slow 1,600 Spirit + 30 % Movement slow Slowing Hex 1,600 Spirit + 20 % Movement slow Arctic Blast 6,400 Spirit + 60 % Movement slow Lightning Scroll 6,400 Spirit + 80 % Movement slow + 30 % Movement slow Mystic Reverb 6,400 Spirit + 40 % Movement slow Vortex Web 6,400 Spirit + 35 % Movement slow",
         "Dash Slow Resist": "Enduring Speed also protects about Dash slows.",
         "Dash Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Dash Slow Notes Bebop Hyper Beam 40% — Celeste Shining Wonder 25% T1 upgrade increases dash slow by 15% (total 40%). Haze Sleep Dagger 50% (T3) — Kelvin Arctic Beam 20% — McGinnis Heavy Barrage 30% (T1) Gives 35% dash slow for the caster. Mo & Krill Sand Blast 25% (T2) — Rem Naptime 25% — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 30% —",
@@ -5684,9 +5684,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "35s",
+            "description": "Teleport to an enemy target and pull them to the ground. Dealing damage , Move speed reduction and Disarm .",
             "stats": [
               {
                 "value": "Disarm",
@@ -5754,9 +5754,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Gain a chance to either deflect incoming bullets, preventing all weapon damage or prevent all on-hit effects from bullets.",
             "stats": [
               {
                 "value": "30%",
@@ -5811,9 +5811,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "1.2s",
+            "description": "Your bullets temporarily steal Max HP from enemies. Enemies regain their stolen health when the debuff expires.",
             "stats": [
               {
                 "value": "2.5%",
@@ -5866,9 +5866,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "9s",
+            "description": "The next instance of high spirit damage you take is significantly reduced.",
             "stats": [
               {
                 "value": "65%",
@@ -5919,9 +5919,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "60s",
+            "description": "Temporarily suppress negative status effects and become immune to Stun, Silence, Sleep, Root, and Disarm . Cannot be used while Stunned or Slept .",
             "stats": [
               {
                 "value": "5.5s",
@@ -5971,9 +5971,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Grants Lifesteal , Fire Rate , and Ammo . This added Ammo is not limited by your max magazine size.",
             "stats": [
               {
                 "value": "70%",
@@ -6035,9 +6035,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "1s",
+            "description": "Taking heavy hits of spirit damage from an enemy reduces a random ability cooldown .",
             "stats": [
               {
                 "value": "4s",
@@ -6083,9 +6083,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Applies an extremely powerful cleanse that replenishes your allies globally.",
             "stats": [
               {
                 "value": "60%",
@@ -6142,9 +6142,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "12s",
+            "description": "Block the next debuff that would apply movement lock, Stun, Chained, Immobilize, or Sleep and become Unstoppable . Also gain a Barrier and bonus move speed",
             "stats": [
               {
                 "value": "500",
@@ -6199,9 +6199,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "0.3s",
+            "description": "When sliding, evade bullets, gain fire rate and deal damage to enemies around you. Cooldown is per target.",
             "stats": [
               {
                 "value": "100",
@@ -6253,9 +6253,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "165s",
+            "description": "Periodically gain a random permanent stat buff.",
             "stats": [
               {
                 "value": "2s",
@@ -6266,9 +6266,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "165s",
+            "description": "Reduces your next death's respawn timer.",
             "stats": [
               {
                 "value": "-70%",
@@ -6304,9 +6304,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "18s",
+            "description": "Removes any positive buffs and prevents stamina usage and healing effects on enemies.",
             "stats": [
               {
                 "value": "7s",
@@ -6361,9 +6361,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When Airborne, You deal more damage and take reduced damage. Allows unlimited Air Dash and Jumping.",
             "stats": [
               {
                 "value": "+40%",
@@ -6412,9 +6412,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
+            "header": "Active",
             "cooldown": null,
-            "description": null,
+            "description": "Go Invisible on Stamina use with no detection range. Doing a melee attack while invisible will cause you to steal bullet and spirit resistance from them and deal damage over time .",
             "stats": [
               {
                 "value": "125",
@@ -6477,7 +6477,7 @@
         "components": []
       },
       "sections": {
-        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case, Extra Charge will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Notes Billy Bashdown 1 +1 charge on T2 upgrade. Celeste Radiant Daggers 1 +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 +1 charge on T1 upgrade. Graves Jar of Dead 4 Has a conditional charge.; Charges by being near when anything dies. Grey Talon Charged Shot 1 +1 charge on T1 upgrade. Haze Smoke Bomb — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 +2 charges on T3 upgrade. Holliday Bounce Pad 1 — Infernus Napalm 1 +1 charge on T1 upgrade. Infernus Flame Dash — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 +1 charge on T1 upgrade. Kelvin Frost Grenade 2 — Lady Geist Life Drain — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 +1 charge on T3 upgrade. McGinnis Mini Turret 1 +2 charges on T2 upgrade. Mirage Fire Scarabs 2 +2 charges on T2 upgrade. Paige Bookwyrm 1 +1 charge on T3 upgrade. Paradox Time Wall — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 +1 charge on T3 upgrade. Seven Lightning Ball 1 +1 charge on T1 upgrade. Shiv Serrated Knives 2 +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 — The Doorman Call Bell 1 +1 charge on T1 upgrade. Venator Consecrating Grenade — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 +1 charge on T3 upgrade. Victor Jumpstart 1 +1 charge on T3 upgrade. Vindicta Assassinate 2 — Viscous Puddle Punch 1 +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 +1 charge on T1 upgrade. Wraith Card Trick 2 +2 charges on T1 upgrade. Has a conditional charge. Yamato Flying Slash — Becomes charged on T3 upgrade with 3 charg",
+        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case, Extra Charge will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Notes Billy Bashdown 1 +1 charge on T2 upgrade. Celeste Radiant Daggers 1 +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 +1 charge on T1 upgrade. Graves Jar of Dead 4 Has a conditional charge. Charges by being near when anything dies. Grey Talon Charged Shot 1 +1 charge on T1 upgrade. Haze Smoke Bomb — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 +2 charges on T3 upgrade. Holliday Bounce Pad 1 — Infernus Napalm 1 +1 charge on T1 upgrade. Infernus Flame Dash — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 +1 charge on T1 upgrade. Kelvin Frost Grenade 2 — Lady Geist Life Drain — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 +1 charge on T3 upgrade. McGinnis Mini Turret 1 +2 charges on T2 upgrade. Mirage Fire Scarabs 2 +2 charges on T2 upgrade. Paige Bookwyrm 1 +1 charge on T3 upgrade. Paradox Time Wall — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 +1 charge on T3 upgrade. Seven Lightning Ball 1 +1 charge on T1 upgrade. Shiv Serrated Knives 2 +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 — The Doorman Call Bell 1 +1 charge on T1 upgrade. Venator Consecrating Grenade — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 +1 charge on T3 upgrade. Victor Jumpstart 1 +1 charge on T3 upgrade. Vindicta Assassinate 2 — Viscous Puddle Punch 1 +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 +1 charge on T1 upgrade. Wraith Card Trick 2 +2 charges on T1 upgrade Has a conditional charge. Yamato Flying Slash — Becomes charged on T3 upgrade with 3 charges",
         "Notable interactions": "If Sinclair copies Vindicta 's Assassinate with Extra Charge, they will start with 2 charges. After using Assassinate once, they can keep the copy indefinitely as long as they have one or more charges left."
       },
       "changelog": [
@@ -6544,9 +6544,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
+            "header": "Active",
             "cooldown": null,
-            "description": null,
+            "description": "Hatch the egg, gaining souls and permanent buffs . The value of the egg grows the longer you hold onto it. Gain a permanent buff per 80 Souls accrued when hatched.",
             "stats": [
               {
                 "value": "90",
@@ -6590,9 +6590,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Charges up over time with bonus spirit damage , causing abilities dealing more than 80 damage to deal additional damage.",
             "stats": [
               {
                 "value": "40",
@@ -6635,9 +6635,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Imbue an ability to increase its range and effect radius .",
             "stats": [
               {
                 "value": "+20%",
@@ -6682,9 +6682,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Dealing spirit damage to enemy Heroes grants you Bonus regeneration . Stacks when dealing damage to different heroes.",
             "stats": [
               {
                 "value": "4",
@@ -6733,9 +6733,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "16s",
+            "description": "Target an enemy to reduce their Fire Rate and Bullet Resistance .",
             "stats": [
               {
                 "value": "-32%",
@@ -6793,9 +6793,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "8s",
+            "description": "When you perform a Light or Heavy Melee attack against a hero, deal extra spirit damage with the attack and reduce the target's Spirit Resist . Cooldown is 2x longer for Light Melee hits.",
             "stats": [
               {
                 "value": "40",
@@ -6852,9 +6852,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "After you Dash-Jump , the next ability you use within ArcaneSurgeWindows will have bonus Range, Duration, and Spirit Power .",
             "stats": [
               {
                 "value": "+12%",
@@ -6915,9 +6915,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces Bullet Resist on enemies when you deal spirit damage .",
             "stats": [
               {
                 "value": "-10%",
@@ -6967,9 +6967,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "25s",
+            "description": "Release an expanding ice blast that deals spirit damage and Slows targets it hits.",
             "stats": [
               {
                 "value": "95",
@@ -7030,9 +7030,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Imbue an ability to reduce its Cooldown .",
             "stats": [
               {
                 "value": "+18%",
@@ -7076,9 +7076,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Imbue an ability to increase its Duration .",
             "stats": [
               {
                 "value": "+22%",
@@ -7154,9 +7154,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When the target takes spirit damage , they have their Move Speed reduced.",
             "stats": [
               {
                 "value": "-30%",
@@ -7209,9 +7209,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When an enemy takes spirit damage , they have their spirit resist reduced.",
             "stats": [
               {
                 "value": "-8%",
@@ -7259,9 +7259,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your imbued ability charges up over time with bonus spirit damage , bonus fire rate , and reloads bullets on use.",
             "stats": [
               {
                 "value": "44",
@@ -7320,9 +7320,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "27s",
+            "description": "Slows movement of enemy target. Also Silences their movement-based items and abilities . Increases the target's gravity. Does not affect target's stamina usage.",
             "stats": [
               {
                 "value": "-20%",
@@ -7384,9 +7384,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "18s",
+            "description": "Target an enemy to reduce their Spirit Resist and Spirit Power .",
             "stats": [
               {
                 "value": "-9%",
@@ -7445,9 +7445,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "When you deal spirit damage to enemies, you also reduce their Fire Rate .",
             "stats": [
               {
                 "value": "-28%",
@@ -7496,9 +7496,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Inflict damage over time to a target, dealing damage based on their current health. Decay's damage is non-lethal and does not apply item procs.",
             "stats": [
               {
                 "value": "2.6",
@@ -7566,9 +7566,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "16s",
+            "description": "Disarms enemy target and reduces their Bullet Resist .",
             "stats": [
               {
                 "value": "Disarm",
@@ -7626,9 +7626,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Increases the range and effect radius of your abilities and items.",
             "stats": [
               {
                 "value": "+30%",
@@ -7674,9 +7674,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "35s",
+            "description": "Apply a Stun after 2s . Stun duration is increased against airborne targets. Increases the target's gravity for the duration of the stun.",
             "stats": [
               {
                 "value": "Stun",
@@ -7732,9 +7732,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6s",
+            "description": "Dealing spirit damage to enemy Heroes grants you Bonus regeneration . Stacks when dealing damage to different heroes.",
             "stats": [
               {
                 "value": "4",
@@ -7750,9 +7750,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6s",
+            "description": "Heal and gain bonus Movement Speed for a short duration when you cast an ability.",
             "stats": [
               {
                 "value": "70",
@@ -7808,7 +7808,7 @@
         "components": []
       },
       "sections": {
-        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case, Rapid Recharge will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Time Between Charges Notes Billy Bashdown 1 8s +1 charge on T2 upgrade. Celeste Radiant Daggers 1 2s +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 5s +1 charge on T1 upgrade. Graves Jar of Dead 4 13s Has a conditional charge.; Charges by being near when anything dies. Grey Talon Charged Shot 1 4s +1 charge on T1 upgrade. Haze Smoke Bomb — — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 3.5s +2 charges on T3 upgrade. Holliday Bounce Pad 1 3.5s — Infernus Napalm 1 6s +1 charge on T1 upgrade. Infernus Flame Dash — — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 5s +1 charge on T1 upgrade. Kelvin Frost Grenade 2 7s — Lady Geist Life Drain — — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 2s +1 charge on T3 upgrade. McGinnis Mini Turret 1 3s +2 charges on T2 upgrade. Mirage Fire Scarabs 2 1s +2 charges on T2 upgrade. Paige Bookwyrm 1 7s +1 charge on T3 upgrade. Paradox Time Wall — — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 8s +1 charge on T3 upgrade. Seven Lightning Ball 1 7s +1 charge on T1 upgrade. Shiv Serrated Knives 2 2s +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 3s — The Doorman Call Bell 1 6s +1 charge on T1 upgrade. Venator Consecrating Grenade — — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 8s +1 charge on T3 upgrade. Victor Jumpstart 1 8s +1 charge on T3 upgrade. Vindicta Assassinate 2 2.5s — Viscous Puddle Punch 1 1.7s +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 4s +1 charge on T1 upgrade. Wraith Card Trick 2 — ",
+        "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case, Rapid Recharge will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Time Between Charges Notes Billy Bashdown 1 8s +1 charge on T2 upgrade. Celeste Radiant Daggers 1 2s +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 5s +1 charge on T1 upgrade. Graves Jar of Dead 4 13s Has a conditional charge. Charges by being near when anything dies. Grey Talon Charged Shot 1 4s +1 charge on T1 upgrade. Haze Smoke Bomb — — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 3.5s +2 charges on T3 upgrade. Holliday Bounce Pad 1 3.5s — Infernus Napalm 1 6s +1 charge on T1 upgrade. Infernus Flame Dash — — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 5s +1 charge on T1 upgrade. Kelvin Frost Grenade 2 7s — Lady Geist Life Drain — — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 2s +1 charge on T3 upgrade. McGinnis Mini Turret 1 3s +2 charges on T2 upgrade. Mirage Fire Scarabs 2 1s +2 charges on T2 upgrade. Paige Bookwyrm 1 7s +1 charge on T3 upgrade. Paradox Time Wall — — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 8s +1 charge on T3 upgrade. Seven Lightning Ball 1 7s +1 charge on T1 upgrade. Shiv Serrated Knives 2 2s +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 3s — The Doorman Call Bell 1 6s +1 charge on T1 upgrade. Venator Consecrating Grenade — — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 8s +1 charge on T3 upgrade. Victor Jumpstart 1 8s +1 charge on T3 upgrade. Vindicta Assassinate 2 2.5s — Viscous Puddle Punch 1 1.7s +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 4s +1 charge on T1 upgrade. Wraith Card Trick 2 — +",
         "Notable interactions": "If Sinclair copies Vindicta 's Assassinate with Rapid Recharge, they will start with 3 charges. After using Assassinate once, they can keep the copy indefinitely as long as they have one or more charges left."
       },
       "changelog": [
@@ -7842,9 +7842,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "42s",
+            "description": "Launch an expanding projectile which Silences enemies for a short duration and deals impact damage. Silence does not interrupt channeling abilities.",
             "stats": [
               {
                 "value": "Silenced",
@@ -7908,9 +7908,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6s",
+            "description": "When you perform a Light or Heavy Melee attack against a hero, the attack deals extra spirit damage and steals Spirit Resist and Spirit Power . Effects are reduced by 30% for Light Melee hits.",
             "stats": [
               {
                 "value": "50",
@@ -7940,7 +7940,7 @@
         ]
       },
       "sections": {
-        "Affected Abilities": "Some abilities scale with melee damage and are affected by Spirit Snatch's increase to Melee Damage . Abilities that deal Melee Damage will also trigger the passive effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage.; Can be parried. Yamato Flying Slash ×1 —",
+        "Affected Abilities": "Some abilities scale with melee damage and are affected by Spirit Snatch's increase to Melee Damage . Abilities that deal Melee Damage will also trigger the passive effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
         "Notes": "Hitting multiple heroes in one swing will steal from all struck heroes. When a marked target dies, the buffs are instantly lost."
       },
       "changelog": [
@@ -7974,9 +7974,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces the Cooldown of your abilities.",
             "stats": [
               {
                 "value": "+20%",
@@ -8021,9 +8021,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Increases the duration of your abilities and items.",
             "stats": [
               {
                 "value": "+28%",
@@ -8066,9 +8066,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "14s",
+            "description": "Imbue an ability with permanent Spirit Power . When that ability is used, gain bonus Move Speed and maintain full speed while attacking.",
             "stats": [
               {
                 "value": "+28",
@@ -8128,9 +8128,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Charges up over time with bonus spirit damage , causing abilities dealing more than 165 damage to deal additional damage. Ignores Spirit Resistance.",
             "stats": [
               {
                 "value": "40",
@@ -8182,9 +8182,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "1.4s",
+            "description": "Periodically deals spirit damage to the closest two enemies nearby.",
             "stats": [
               {
                 "value": "25",
@@ -8239,9 +8239,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "24s",
+            "description": "Release an expanding ice blast that deals spirit damage , Freezing and then Slowing targets it hits. Slowed targets have their stamina regen frozen",
             "stats": [
               {
                 "value": "175",
@@ -8333,9 +8333,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "55s",
+            "description": "Curses an enemy - interrupting, Silencing, Disarming , and preventing item usage . Removes all non-ultimate buffs .",
             "stats": [
               {
                 "value": "Silenced",
@@ -8433,9 +8433,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "0.7s",
+            "description": "Dealing spirit damage applies a stacking Spirit Amp that increases your spirit damage to the target.",
             "stats": [
               {
                 "value": "+4.5%",
@@ -8488,9 +8488,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "35s",
+            "description": "You enter a void state and become untargetable and invincible for a short duration, during which you float slowly and cannot perform actions. Afterwards you gain Spirit Power, Move Speed, and Spirit Resist . Can be canceled early. Activation cancels any active ability.",
             "stats": [
               {
                 "value": "4s",
@@ -8561,9 +8561,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "45s",
+            "description": "Target an enemy to Silence them. A portion of all damage dealt during the silence gets applied to the target when the silence wears off.",
             "stats": [
               {
                 "value": "4.5s",
@@ -8635,9 +8635,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Damage from your ultimate applies a stun and deals bonus spirit damage after a short delay.",
             "stats": [
               {
                 "value": "Stun",
@@ -8701,9 +8701,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "32s",
+            "description": "Summon a Magic Carpet that will fly you away. While flying you are immune to slows and doing any action will dismiss the carpet. Cannot use abilities while the carpet is being summoned.",
             "stats": [
               {
                 "value": "12s",
@@ -8759,9 +8759,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Your imbued ability charges up over time with bonus spirit damage , bonus fire rate , and reloads bullets on use. Until your next reload, your bullets deal bonus spirit damage based on your Spirit Power.",
             "stats": [
               {
                 "value": "+25",
@@ -8827,9 +8827,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "6.25s",
+            "description": "Imbue an ability with Lifesteal and to apply slow on a hit target and deal an additional percentage of the damage dealt to enemies around the target after a short delay.",
             "stats": [
               {
                 "value": "50%",
@@ -8926,9 +8926,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "35s",
+            "description": "Apply Spirit Resist and an aura on a friendly target that deals damage to enemies proportional to their max health. Can be self cast.",
             "stats": [
               {
                 "value": "3.5%",
@@ -8991,9 +8991,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "20s",
+            "description": "Dealing significant spirit damage to an enemy within 5s causes an explosion dealing damage and a burn to nearby enemies. While burning, enemies take damage over time and receive reduced healing. Deals half-damage and has half-cooldown on non-heroes.",
             "stats": [
               {
                 "value": "500",
@@ -9066,9 +9066,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Reduces the Cooldown of your abilities and items.",
             "stats": [
               {
                 "value": "+25%",
@@ -9115,9 +9115,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "42s",
+            "description": "Throw a vacuum grenade, pulling all enemies into a small area and applying Slowing Hex . Alt Cast to Target Unit Directly.",
             "stats": [
               {
                 "value": "12m",
@@ -9176,9 +9176,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "10s",
+            "description": "Imbued ability has its Cooldown reduced and gains Spirit Power . When the ability deals damage, freeze the target and apply bonus damage . Cooldown is per target.",
             "stats": [
               {
                 "value": "+50%",
@@ -9226,9 +9226,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "25s",
+            "description": "Provides yourself and allies with a powerful spirit focused aura. Has reduced values on allies.",
             "stats": [
               {
                 "value": "+40%",
@@ -9254,9 +9254,9 @@
           },
           {
             "kind": "passive",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Passive",
+            "cooldown": "25s",
+            "description": "Dealing significant Damage to an enemy Hero within 5s causes you to heal yourself and nearby allies.",
             "stats": [
               {
                 "value": "700",
@@ -9299,9 +9299,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "23s",
+            "description": "After a short delay, enemies in the target area will be stunned and have their stamina depleted. After the stun they will be temporarily dazed.",
             "stats": [
               {
                 "value": "Stun",
@@ -9364,9 +9364,9 @@
         "components": [
           {
             "kind": "passive",
-            "header": null,
+            "header": "Passive",
             "cooldown": null,
-            "description": null,
+            "description": "Imbue any active non-ultimate ability with Bonus Ability Charges . Already charged abilities receive more bonus charges.",
             "stats": [
               {
                 "value": "+4",
@@ -9406,9 +9406,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "40s",
+            "description": "You enter a void state and become untargetable and invincible for a short duration, during which lasers blast out and rotate around you.",
             "stats": [
               {
                 "value": "270",
@@ -9455,9 +9455,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "30s",
+            "description": "Reduces Model Size and grants Move Speed to the target. Allows usage of tunnels in this mode. Can be self-cast.",
             "stats": [
               {
                 "value": "-50%",
@@ -9516,9 +9516,9 @@
         "components": [
           {
             "kind": "active",
-            "header": null,
-            "cooldown": null,
-            "description": null,
+            "header": "Active",
+            "cooldown": "25s",
+            "description": "Consume a concoction that grants you Unstoppable and increased speed, health, spirit and weapon damage . After a short duration you die and explode , stunning nearby enemies and dealing damage based on your maximum health. Dying this way reduces your respawn time by 50% .",
             "stats": [
               {
                 "value": "30%",
@@ -9579,6 +9579,102 @@
         {
           "date": "January 30, 2026",
           "change": "Enhanced Unstable Concoction : Now increases Bonus Health, Weapon Damage, Spirit Power and Stun Duration Enhanced Unstable Concoction : No longer increases duration or cooldown."
+        }
+      ]
+    },
+    {
+      "name": "Grit",
+      "normalized_name": "grit",
+      "category": "Vitality",
+      "cost_souls": 800,
+      "tier": 1,
+      "wiki_url": "https://deadlock.wiki/Grit",
+      "codename": "upgrade_grit",
+      "has_enhanced_variant": true,
+      "base": {
+        "passives": [
+          "+1 Out of Combat Regen"
+        ],
+        "components": [
+          {
+            "kind": "active",
+            "header": "Active",
+            "cooldown": "60s",
+            "description": "Gain a Barrier for a short duration.",
+            "stats": [
+              {
+                "value": "200",
+                "label": "Barrier Conditional",
+                "text": "200 Barrier Conditional"
+              },
+              {
+                "value": "4s",
+                "label": "Barrier Duration",
+                "text": "4s Barrier Duration"
+              }
+            ]
+          }
+        ]
+      },
+      "sections": {},
+      "changelog": [
+        {
+          "date": "May 22, 2026",
+          "change": "Added to the game."
+        }
+      ]
+    },
+    {
+      "name": "Indomitable",
+      "normalized_name": "indomitable",
+      "category": "Vitality",
+      "cost_souls": 6400,
+      "tier": 4,
+      "wiki_url": "https://deadlock.wiki/Indomitable",
+      "codename": "upgrade_auto_cleanse",
+      "has_enhanced_variant": true,
+      "base": {
+        "passives": [
+          "+10% Bullet Resist",
+          "+10% Spirit Resist",
+          "+2 Out of Combat Regen"
+        ],
+        "components": [
+          {
+            "kind": "passive",
+            "header": "Passive",
+            "cooldown": "55s",
+            "description": "The next Stun, Chain, Immobilize, Sleep or Silence is automatically cleansed. When this happens, you gain a barrier and all your ability cooldowns get reduced by 20%.",
+            "stats": [
+              {
+                "value": "325",
+                "label": "Barrier Conditional",
+                "text": "325 Barrier Conditional",
+                "scaling": 2.0,
+                "scales_with": "Spirit Power",
+                "raw": "325 base + 2.0 x Spirit Power"
+              },
+              {
+                "value": "10s",
+                "label": "Duration",
+                "text": "10s Duration"
+              }
+            ]
+          }
+        ]
+      },
+      "sections": {
+        "Abilities and items that trigger Indomitable": "Abrams - Shoulder Charge and Seismic Impact Apollo - Riposte Bebop - Grapple Arm Billy - Chain Gang and Bashdown (when dragging mid-air enemies to the ground) Celeste - Dazzling Trick The Doorman - Luggage Cart and Hotel Guest Drifter - Rend with T3 upgrade Lady Geist - Soul Exchange with T2 upgrade Graves - Grasping Hands Grey Talon - Spirit Snare and Guided Owl Haze - Sleep Dagger Holliday - Spirit Lasso Infernus - Concussive Combustion Ivy - Stone Form , Air Drop with T3 upgrade and Entangling Thorns with T3 upgrade Lash - Death Slam and Ground Strike (when dragging mid-air enemies to the ground) Mina - Nox Nostra Mirage - Tornado and Djinn's Mark with T3 upgrade Mo & Krill - Combo Paige - Captivating Read and Rallying Charge Paradox - Paradoxical Swap and Time Wall with T2 upgrade Rem - Naptime Seven - Static Charge Sinclair - Rabbit Hex Silver - Boot Kick Venator - Gutshot and Hex-Lined Snap Trap Victor - Shocking Reanimation Vindicta - Stake Viscous - Goo Ball Vyper - Petrifying Bola Warden - Binding Word Wraith - Telekinesis Knockdown Silence Wave Crushing Fists Silencer Cursed Relic Focus Lens Arctic Blast Lightning Scroll Vortex Web (prevents the pull but not the slow)",
+        "Notable Interactions": "Indomitable will prevent the player from being teleported to The Baroness if hit with The Doorman 's Hotel Guest . Indomitable will not be triggered by Dynamo 's Singularity . Indomitable is currently not triggered by Apollo 's Itani Lo Sahn . Indomitable will trigger if the player is dragged down by Lash 's Ground Strike and Billy 's Bashdown , but will not detach the player from their immobilize & pull effects, which continue until they reach the floor. While performing a similar effect, Phantom Strike 's pull does not trigger Indomitable. Indomitable will prevent players from being stunned after being parried. Indomitable will prevent players from being stunned after getting hit by bullets while on a zipline. They will still fall off the zipline. Players still receive health damage that gets applied before the barrier comes up from the following abilities and items: Graves - Grasping Hands Grey Talon - Guided Owl Haze - Sleep Dagger Holliday - Spirit Lasso Infernus - Concussive Combustion Ivy - Stone Form , Air Drop with T3 upgrade and Entangling Thorns with T3 upgrade Mirage - Tornado and Djinn's Mark with T3 upgrade Paige - Captivating Read Seven - Static Charge Venator - Hex-Lined Snap Trap Victor - Shocking Reanimation Viscous - Goo Ball Vyper - Petrifying Bola Warden - Binding Word Silence Wave Arctic Blast"
+      },
+      "changelog": [
+        {
+          "date": "May 22, 2026",
+          "change": "Barrier scaling increased from 1.8 to 2.0. Now has +2 Out of Combat Regen (from components). Bullet Resist increased from 8% to 10%. Spirit Resist increased from 8% to 10%."
+        },
+        {
+          "date": "April 30, 2026",
+          "change": "Added to the game."
         }
       ]
     }

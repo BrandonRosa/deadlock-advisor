@@ -1,0 +1,272 @@
+{
+  "headshot_booster": {
+    "name": "Headshot Booster",
+    "tier": 1,
+    "notes": "The bonus headshot damage does not apply to enemy Troopers , or any other NPC in possession of a headshot hitbox. The bonus headshot damage is affected by your Hero's Damage Falloff variables.",
+    "interactions": ""
+  },
+  "monster_rounds": {
+    "name": "Monster Rounds",
+    "tier": 1,
+    "notes": "Monster Rounds applies additional damage to Non-Player Characters. This includes Troopers , lane structures like Guardians , Walkers , neutral entities such as Denizen , and the Patron . It does apply additional damage against Graves ' Ghouls , but not against McGinnis ' Mini Turrets .",
+    "interactions": ""
+  },
+  "restorative_shot": {
+    "name": "Restorative Shot",
+    "tier": 1,
+    "notes": "Restorative Shot goes on cooldown regardless if the bullet hits a target.",
+    "interactions": ""
+  },
+  "active_reload": {
+    "name": "Active Reload",
+    "tier": 2,
+    "notes": "If the player presses the reload button while outside the highlighted section, the item will fail to reload. The item only goes into cooldown once the effect is activated. The duration of the Active Reload activation window is always 0.3s. The highlighted section changes size proportionately to the hero's Reload Time .",
+    "interactions": "Vyper benefits from this item to have the smallest downtime to use her ammo sliding synergy. McGinnis can use this item to offset her long reload time."
+  },
+  "mystic_shot": {
+    "name": "Mystic Shot",
+    "tier": 2,
+    "notes": "The item provides a passive effect that creates an additional bullet when the hero shoots their weapon, and the additional bullet will mimic the bullets created by the current weapon. The Mystic Shot bullet appears as a glowing purple version of the hero's regular bullets. For most weapons, the Mystic bullet can follow the trajectory of any bullet, which can make it fly off-center for weapons with significant spread over time, such as McGinnis '. The exception are spreadshot weapons such as Abrams ' and Shiv 's, in which the Mystic pellet is always fired at the center of the crosshair. For explosive alternate fire weapons such as Viscous ' and Yamato 's, the Mystic bullet will appear the same but cannot deal damage in an area. Instead, it only deals the Spirit damage to the closest enemy to impact. The Mystic bullet hits before regular bullets. So for example, Bullet Resist Shredder 's effect is applied first and amplifies the weapon damage, but Crippling Headshot 's Spirit Resist reduction is applied after and does not amplify Mystic Shot's spirit damage. The additional Mystic bullet cannot deal critical (headshot) damage and is not affect by Ricochet . A Mystic bullet is immune to evasion .",
+    "interactions": ""
+  },
+  "spirit_shredder_bullets": {
+    "name": "Spirit Shredder Bullets",
+    "tier": 2,
+    "notes": "The Spirit Lifesteal from the debuff is independent of the diminishing returns from other sources of spirit lifesteal. It will always grant the player a flat +10% spirit lifesteal. The debuff can be applied with melee attacks, as well as abilities that are considered melee attacks.",
+    "interactions": ""
+  },
+  "split_shot": {
+    "name": "Split Shot",
+    "tier": 2,
+    "notes": "Multishots can hit units as well, but they do not grant stacks. Each shot is separated by approximately 5°, leading to a total of approximately 20° spread between the furthest two shots.",
+    "interactions": ""
+  },
+  "stalker": {
+    "name": "Stalker",
+    "tier": 2,
+    "notes": "Stalker's damage triggers any \"on spirit damage\" effects like Mystic Slow or Bullet Resist Shredder Stalker procs off any ability that deals physical damage if the player was close enough. List of relevant abilities: This is an automatic list. Click here to add notes or correct the contents. Hero Ability Venator Consecrating Grenade Venator Gutshot Venator Ira Domini Stalker procs off melee damage and any ability that deals melee damage if the player was close enough. List of relevant abilities: This is an automatic list. Click here to add notes or correct the contents. Hero Ability Bebop Exploding Uppercut Bebop Grapple Arm Billy Bashdown Calico Leaping Slash Drifter Rend Silver Boot Kick Silver (Transformed) Go For The Throat Silver (Transformed) Mauling Leap Viscous Puddle Punch Yamato Flying Slash",
+    "interactions": ""
+  },
+  "alchemical_fire": {
+    "name": "Alchemical Fire",
+    "tier": 3,
+    "notes": "With no other items, Alchemical Fire (with its default +8 Spirit Power) deals a total of 384 Spirit Damage. Alchemical Fire deals damage instantly on contact, and then every 0.5 seconds thereafter, for a total of 10 damage instances. With no duration extenders, Alchemical Fire finishes dealing damage at 4.5 seconds in (the final 0.5 seconds applies the weapon damage effect only). Alchemical Fire ramps up its damage gradually, starting at 50% of the max dps at the start, and dealing max dps (100%) from 3.0 seconds and onward. With duration extenders, Alchemical Fire will continue dealing damage in further 0.5 sec intervals, e.g. at 5.0 sec, 5.5 sec, 6.0 sec, etc. These damage instances will keep using the max dps values.",
+    "interactions": ""
+  },
+  "berserker": {
+    "name": "Berserker",
+    "tier": 3,
+    "notes": "Gaining new berserker stacks refreshes the duration of all already-existing berserker stacks. It is possible to maintain max stacks by continuing to take damage. Stacks are calculated before damage resistance effects such as Bullet Resist and Spirit Resist, but not Invulnerability. For example, this means that it is still possible to gain stacks even with Metal Skin active. For example, this means that it is NOT possible to gain stacks with Ethereal Shift active.",
+    "interactions": ""
+  },
+  "blood_tribute": {
+    "name": "Blood Tribute",
+    "tier": 3,
+    "notes": "Unlike most active items , Blood Tribute has no cooldown or duration limit and instead can be toggled on and off indefinitely. The health drain cannot kill its user.",
+    "interactions": ""
+  },
+  "cultist_sacrifice": {
+    "name": "Cultist Sacrifice",
+    "tier": 3,
+    "notes": "Using Cultist Sacrifice on an NPC gives the player the full soul bounty plus 180% (270% total). The original bounty and the bonus are displayed as two separate values when activated. The buff persists through death. Cultist Sacrifice applies additional damage to Non-Player Characters. This includes Troopers , lane structures like Guardians , Walkers , neutral entities such as Denizens , and the Patron . It does apply additional damage against Graves ' Ghouls , but not against McGinnis ' Mini Turrets . However, both of them can be consumed for the buff and bonus souls. Cultist Sacrifice's active counts as Spirit Damage . This means it can activate on-hit spirit damage procs such as Spirit Burn . When Cultist Sacrifice comes off cooldown, a whispering voice can be heard demanding a sacrifice.",
+    "interactions": ""
+  },
+  "escalating_resilience": {
+    "name": "Escalating Resilience",
+    "tier": 3,
+    "notes": "Passive Bullet Resist Stacks can only be gained once per shot, meaning spread fire weapons like Abrams , Pocket , and characters using Split Shot can't gain several stacks in one shot. This also includes characters like Viscous and Yamato , who have alt-fire modes on their weapons that cause explosive damage.",
+    "interactions": ""
+  },
+  "express_shot": {
+    "name": "Express Shot",
+    "tier": 3,
+    "notes": "",
+    "interactions": "The following weapons/abilities use the \"Secondary Fire Weapon damage\": Shiv 's alternative fire Viscous ' alternative fire Yamato 's alternative fire Paradox 's Kinetic Carbine"
+  },
+  "heroic_aura": {
+    "name": "Heroic Aura",
+    "tier": 3,
+    "notes": "",
+    "interactions": "The active effect is applied to hero summons such as McGinnis ' Mini Turrets and Graves ' Deadheads and Ghouls . For Deadheads, it increases their attack rate."
+  },
+  "hunters_aura": {
+    "name": "Hunters Aura",
+    "tier": 3,
+    "notes": "Passive Radius is affected by Ability Range.",
+    "interactions": ""
+  },
+  "spirit_rend": {
+    "name": "Spirit Rend",
+    "tier": 3,
+    "notes": "All stacks are refreshed with each new stack. Spirit Rend's second passive's resist reduction stacks additively with each stack, however, the final sum stacks multiplicatively with the base resist reduction from the first passive. Getting a headshot with Ricochet will not apply stacks to the secondary targets, but will still apply the non-stacking debuff. As with Spirit Shredder Bullets , the primary passive debuffs can be applied by melee attacks and abilities that deal melee damage.",
+    "interactions": ""
+  },
+  "tesla_bullets": {
+    "name": "Tesla Bullets",
+    "tier": 3,
+    "notes": "Tesla Bullets have an internal cooldown of 0.25 seconds, which is lowered by item cooldown reduction. Shock Damage is considered Spirit Damage and is reduced by Spirit Resist .",
+    "interactions": ""
+  },
+  "toxic_bullets": {
+    "name": "Toxic Bullets",
+    "tier": 3,
+    "notes": "Bleed damage can kill. The bleed effect is indicated by puddles of blood dropping from the player. Bleed damage applies or \"ticks\" every half-second, dealing slightly over 1.2% max health spirit damage per tick. This means that, by default, bleed applies damage six times every time it is successfully built up for 7.5% max health spirit damage. Bleed Damage is considered Spirit Damage and is reduced by Spirit Resist . The duration of the bleed is affected by the Ability Duration stat, such as from Superior Duration . The extra damage is applied proportionally. For instance, since Superior Duration adds .84 seconds to the bleed effect, the bleed will deal 2.1% extra spirit damage for a total of 9.6% max health spirit damage. Headshots do not affect the Build-Up per shot. Does not build-up with melee hits, unlike other weapon build-up items ( Slowing Bullets etc.) Bleed does not build on any structures, such as Guardians and Walkers . Mid-boss is also immune to bleed. Bleed does build on Troopers and Denizens , but deals 50% damage. The healing reduction only applies while the target is bleeding. The healing reduction stacks with other sources of healing reduction. For instance, Healbane and Toxic Bullets will apply a healing reduction effect of 55%. The buildup per shot is also affected by weapon falloff, requiring more shots for the bleed to occur at further distances. Once applied, the bleed damage itself is unaffected by distance. For heroes with spreadshot weapons ( Abrams , Calico , Yamato , etc.), the listed bleed buildup applies on a shot where every pellet hits its target. The buildup is divided evenly between each pellet and missing one pellet will proportionally decrease buildup. For characters with burst-fire weapons ( Lash , Seven , etc.), the listed bleed buildup applies for each bullet rather than each burst. Landing a full burst as Lash, for instance, will build 45.9% of bleed on a target. For characters with splash damage alternate fire weapons ( Visco",
+    "interactions": ""
+  },
+  "healing_rite": {
+    "name": "Healing Rite",
+    "tier": 1,
+    "notes": "The heal gets dispelled even if the damage was absorbed by a barrier.",
+    "interactions": ""
+  },
+  "melee_lifesteal": {
+    "name": "Melee Lifesteal",
+    "tier": 1,
+    "notes": "Striking multiple targets with one attack will not increase healing gained.",
+    "interactions": ""
+  },
+  "healing_booster": {
+    "name": "Healing Booster",
+    "tier": 2,
+    "notes": "Healing booster affects Bullet Lifesteal and Spirit Lifesteal Healing booster affects Health Regen only if it's a temporary effect (e.g. Frozen Shelter ). It does not affect constant regen acquired from most items and rare abilities. Healing Booster increases the effect of healing applied to allies as well as the caster, but owning Healing Booster does not increase the healing received from an ally.",
+    "interactions": ""
+  },
+  "restorative_locket": {
+    "name": "Restorative Locket",
+    "tier": 2,
+    "notes": "Non-Active Abilities and Items do not trigger this passive effect.",
+    "interactions": ""
+  },
+  "return_fire": {
+    "name": "Return Fire",
+    "tier": 2,
+    "notes": "Damage Reflection Mechanics Returns the attacker's pre-mitigation damage (original damage before your resistances apply) Example: If an enemy deals 100 Bullet Damage while you have 30% Bullet Resist , you reflect 65 damage, and you take 70. Works even with 100% damage immunity (e.g., Metal Skin reflects full damage while preventing damage to the user). Does not apply build-up or stacking effects against the attacker.",
+    "interactions": ""
+  },
+  "counterspell": {
+    "name": "Counterspell",
+    "tier": 3,
+    "notes": "Counterspell is visually indicated by a purple bubble VFX replacing the default parry effect. Counterspell only goes on cooldown on a successful spell parry. The player can parry multiple abilities during the Counterspell parry window. The heal and buffs are only applied for the first parry.",
+    "interactions": ""
+  },
+  "metal_skin": {
+    "name": "Metal Skin",
+    "tier": 3,
+    "notes": "Metal Skin does not provide Bullet Evasion . It blocks Weapon Damage , but on-bullet-hit effects and Build-Ups such as Haze 's Fixation , Mirage 's Djinn's Mark or Slowing Bullets are still applied. Metal Skin does not block Paradox 's Kinetic Carbine , since it deals Spirit Damage .",
+    "interactions": ""
+  },
+  "rescue_beam": {
+    "name": "Rescue Beam",
+    "tier": 3,
+    "notes": "If self-cast, the item holder cannot pull themselves, and only one of two heals will be received. Rescue Beam is a channel, and can be cancelled by Stun and Interrupt if used on the caster, ending the heal and preventing the use of the pull. Targets already being pulled will continue to be pulled. Silence does not interrupt Rescue Beam, as it has no effect on items or channels. Allies will be moved to the current location of the item holder over the duration of the pull, not where the pull was activated.",
+    "interactions": ""
+  },
+  "veil_walker": {
+    "name": "Veil Walker",
+    "tier": 3,
+    "notes": "Veil Walker's detection range has a radius of 20m.",
+    "interactions": ""
+  },
+  "golden_goose_egg": {
+    "name": "Golden Goose Egg",
+    "tier": 1,
+    "notes": "The soul value starts at 400 . These initial souls do not count towards the buffs gained. It takes 4m 27s for its value to match its cost ( 800 ). The buffs received follow the scaling of Golden Statue buffs at the time the egg is hatched. The buffs increase in value after 10 minutes of match duration, and then again after 30 minutes. It does not provide buffs in testing modes.",
+    "interactions": ""
+  },
+  "mystic_burst": {
+    "name": "Mystic Burst",
+    "tier": 1,
+    "notes": "Mystic Burst uses Charge-Up Heroes with Spirit Lifesteal will heal from Mystic Burst's passive effect triggering. A small lightning shock visual is applied to the enemy hero when it is hit by Mystic Burst's passive effect. When the target is hit with spirit damage , the damage value which is compared against the triggering threshold is the base damage value prior to any increases or decreases from damage amp, damage reduction, spirit resistance, and spirit resistance reduction. Damage amp and spirit resist reduction will not help you in achieving the damage threshold to trigger the passive. Damage reduction and the target's spirit resistance will not prevent the passive from triggering when it otherwise would. While the tooltip only specifies 'Abilities', only Spirit Damage will activate Mystic Burst. Abilities dealing weapon damage - such as Venator 's Consecrating Grenade or Viscous ' Puddle Punch - will not activate Mystic Burst. The additional damage, and the ability which triggered the additional damage, are applied to the target as separate instances of damage. The additional damage from Mystic Burst is dealt after the original spell damage.",
+    "interactions": ""
+  },
+  "arcane_surge": {
+    "name": "Arcane Surge",
+    "tier": 2,
+    "notes": "Items and passive abilities cannot benefit from the conditional buff - they will not gain additional spirit power, duration, or range. The buff which provides the player with the conditional ability range, ability duration, and spirit power lasts for 7 seconds. The first ability cast after gaining the buff will consume the buff. The conditional ability range and ability duration are snapshot on ability use. The conditional spirit power is tied to the 7 second timer of the conditional buff. The +20 spirit power will only be available for 7 seconds after the player initially gains the conditional buff. Examples: 6 seconds after gaining the conditional buff, Vindicta uses Assassinate . This consumes the buff, and applies +20 spirit power to Assassinate 's damage. 6 seconds after gaining the conditional buff, Seven uses Lightning Ball . The buff is consumed. The Lightning Ball gains +15% ability duration and +12% ability range. The Lightning Ball gains +20 spirit power for 1 second only. For the rest of its duration, it does not benefit from +20 spirit power. 6 seconds after gaining the conditional buff, Seven uses Power Surge . The buff is consumed. Power Surge gains +15% ability duration and +12% ability range. Power Surge 's damage benefits from +20 spirit power for 1 second only. For the rest of its duration, the damage does not benefit from +20 spirit power. Power Surge 's total duration scales natively with spirit power at time of cast. The additional duration due to the +20 spirit power is snapshot on cast, and is not lost when the 7s conditional buff is consumed.",
+    "interactions": ""
+  },
+  "bullet_resist_shredder": {
+    "name": "Bullet Resist Shredder",
+    "tier": 2,
+    "notes": "This is not a stacking effect, repeated applications will refresh the duration of the debuff. The debuff can be utilized by other players. Teammates can benefit from this debuff.",
+    "interactions": ""
+  },
+  "cold_front": {
+    "name": "Cold Front",
+    "tier": 2,
+    "notes": "The wave expands out from the hero, reaching the maximum radius after about a second. The damage and effect is applied to enemies when the wave hits them, making it possible to be avoided if the hero is fast enough.",
+    "interactions": ""
+  },
+  "compress_cooldown": {
+    "name": "Compress Cooldown",
+    "tier": 2,
+    "notes": "If Compress Cooldown is imbued on Sinclair 's Audience Participation , it does not reduce the cooldown of copied ultimates, only the default cooldown of the ability.",
+    "interactions": ""
+  },
+  "mystic_vulnerability": {
+    "name": "Mystic Vulnerability",
+    "tier": 2,
+    "notes": "Unlike Escalating Exposure , Mystic Vulnerability does not cause a stacking effect. Hitting the enemy with additional spirit damage after the debuff has been applied will only refresh the duration. Escalating Exposure's debuff takes priority over the Mystic Vulnerability debuff, so if two players have each of these items they will not stack together on the same target.",
+    "interactions": ""
+  },
+  "quicksilver_reload": {
+    "name": "Quicksilver Reload",
+    "tier": 2,
+    "notes": "Quicksilver Reload uses Charge-Up . Quicksilver Reload's bonus Spirit Damage will only trigger when the imbued ability first deals Weapon Damage or Spirit Damage to the target. If the initial damage is reduced to 0 (rounded down) or only deals Pure Damage (i.e. Lady Geist 's Soul Exchange ), Quicksilver Reload's bonus Spirit Damage is not applied. Abilities that do not deal damage still trigger the instant reload and bonus Fire Rate effects. The passive buff has a fixed duration of 12 seconds and is not affected by cooldown reduction.",
+    "interactions": "Heroes with long reload times and quick-charging or multi-charge abilities can make good usage of Quicksilver: McGinnis with multiple turret charges Infernus with multiple Napalm charges Haze who benefits from maintaining Fixation stacks on targeted enemies Vindicta Crow Familiar has a short cooldown after second upgrade Mo & Krill Scorn has a short cooldown and heals a percent of damage dealt"
+  },
+  "slowing_hex": {
+    "name": "Slowing Hex",
+    "tier": 2,
+    "notes": "Slowing Hex sets a player's gravity to 120% (makes them heavier), regardless of their base gravity. This especially affects Celeste and Ivy , who have innate gravity reduction. Slowing Hex does not disable passive effects such as Vyper 's Slither (though it appears visually as though it was disabled). The Doorman 's Doorway and Mo & Krill 's Burrow are not affected by Slowing Hex.",
+    "interactions": ""
+  },
+  "decay": {
+    "name": "Decay",
+    "tier": 3,
+    "notes": "Decay cannot proc item effects such as Escalating Exposure , Suppressor , Mystic Slow , and others.",
+    "interactions": ""
+  },
+  "knockdown": {
+    "name": "Knockdown",
+    "tier": 3,
+    "notes": "The bonus stun duration scales based on the target's height when hit, reaching its maximum +1.5s duration against targets 30m or higher in the air.",
+    "interactions": "Knockdown is a strong counter to the following: Flying Heroes Vindicta Grey Talon Channeled Abilities Bebop — Hyper Beam Dynamo — Singularity Haze — Bullet Dance Ivy — Air Drop McGinnis — Heavy Barrage Seven — Storm Cloud"
+  },
+  "spirit_snatch": {
+    "name": "Spirit Snatch",
+    "tier": 3,
+    "notes": "Hitting multiple heroes in one swing will steal from all struck heroes. When a marked target dies, the buffs are instantly lost.",
+    "interactions": ""
+  },
+  "superior_cooldown": {
+    "name": "Superior Cooldown",
+    "tier": 3,
+    "notes": "When bought, Cooldown Reduction is applied retroactively to abilities already on cooldown. When sold, the cooldowns of abilities are proportionally increased. Because the cooldown refund when sold is based on the current cooldown, buying then selling this item in shop allows the player to accelerate their cooldowns proportional to the amount of time before it was refunded.",
+    "interactions": ""
+  },
+  "superior_duration": {
+    "name": "Superior Duration",
+    "tier": 3,
+    "notes": "Ability Duration affects your ability, item, buff, and debuff durations, with some exceptions: Healing items such as Healing Rite , Healing Nova and Rescue Beam cannot be increased, as they heal for a fixed value instead of per second.",
+    "interactions": ""
+  },
+  "surge_of_power": {
+    "name": "Surge of Power",
+    "tier": 3,
+    "notes": "Despite the in-game tooltip specifically referring to Move Speed, the duration also applies to the Fire Rate bonus.",
+    "interactions": ""
+  },
+  "tankbuster": {
+    "name": "Tankbuster",
+    "tier": 3,
+    "notes": "Tankbuster is a Charge-Up item, so it's not affected by Cooldown Reduction . Tankbuster only goes on cooldown when it affects enemy heroes. It will not go on cooldown when you hit an NPC . Some forms of Spirit Amp applied by items count as separate damage instances and thus don't contribute to the single hit such as Escalating Exposure . When the target is hit with spirit damage, the damage value which is compared against the triggering threshold is the base damage value prior to any increases or decreases from damage amp, damage reduction, spirit resistance, and spirit resistance reduction. Damage amp and spirit resist reduction will not help you in achieving the damage threshold to trigger the passive. Damage reduction and the target's spirit resistance will not prevent the passive from triggering when it otherwise would. Interaction with spirit shields: The triggering of the additional damage is entirely unaffected by the target's barriers (or lack thereof). The additional damage, and the ability which triggered the additional damage, are applied to the target as separate instances of damage. The additional damage from Tankbuster is dealt after the original spell damage.",
+    "interactions": ""
+  },
+  "torment_pulse": {
+    "name": "Torment Pulse",
+    "tier": 3,
+    "notes": "Torment Pulse can be useful for constantly activating ability and item effects that depend on dealing spirit damage, such as Bullet Resist Shredder and Escalating Exposure .",
+    "interactions": ""
+  }
+}

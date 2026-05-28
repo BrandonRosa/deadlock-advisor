@@ -88,7 +88,7 @@
       "spirit_continuous_damage": 0.6,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 1.5,
+      "spirit_damage": 1.0,
       "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,

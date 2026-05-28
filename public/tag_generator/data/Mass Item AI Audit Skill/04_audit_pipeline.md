@@ -32,23 +32,28 @@ The audit ALWAYS re-runs the interpretations from a fresh scrape unless explicit
 
 Critical: Pass 1 + Pass 2 must be complete and saved before the audit runs. The audit script only reads.
 
-## The blending convention
+## The blending convention (Round 10+)
 
-JSONs carry a single number per tag that conceptually blends both modes. To compare apples-to-apples:
+JSONs carry a single number per tag. The merge of `adds` and `relies` modes now happens **before normalization**, inside `_normalize.py` — so each (item, tag) pair has exactly one Normalized value.
 
 ```
-AI_blended[tag] = sum(normalized for rows where mode=adds and tag matches)
-              + 0.25 × sum(normalized for rows where mode=relies and tag matches)
+effective_raw[item, tag] = Σ adds.raw + 0.5 × Σ relies.raw      (pre-normalize)
+Normalized[item, tag]    = normalize(effective_raw, anchors)    (per-tag anchor set)
 ```
 
-`adds` dominates. `relies` is a small synergy bonus. Multiple rows of the same mode for the same tag are summed before blending.
+The audit then reads `Normalized` directly — no further blending at audit time.
 
-Concrete example for **Extra Spirit** after Round 7:
-- Calc tags table has rows: `spirit_damage 1.5 adds`, `spirit_burst_damage 0.6 adds`, `spirit_continuous_damage 0.6 adds`, `multi_ability_focus 0.5 adds`, `single_ability_focus -0.2 adds`.
-- Blended:
-  - `spirit_damage` = 1.5 + 0.25 × 0 = **1.5**
-  - `spirit_burst_damage` = 0.6 + 0.25 × 0 = **0.6**
-  - `single_ability_focus` = -0.2
+**Table cosmetics**: the single Normalized is written into the *first `adds` row* for that tag. Any subsequent `adds` row OR any `relies` row for the same tag shows `—` in the Normalized column. Their contribution is folded into the adds-row's blended effective raw.
+
+Concrete example for **Extra Spirit** under the new pipeline:
+- Calc tags table rows: `spirit_damage 17 adds` (flat +SP), `multi_ability_focus 0.5 adds`, `single_ability_focus -0.2 adds`.
+- No `relies` row → effective_raw equals the single adds raw for each tag.
+- After normalize: `Normalized[spirit_damage]` = whatever the per-tag anchor gives → audit compares directly.
+
+Concrete example with a `relies` row — **Close Quarters**:
+- Rows: `bullet_damage 16 adds` (uptime-discounted close-range value), `bullet_damage 20 relies` (range-gate scaling benefit).
+- `effective_raw[bullet_damage] = 16 + 0.5 × 20 = 26` (pre-normalize).
+- `_normalize.py` normalizes 26 against the per-tag anchor; writes the Normalized into the `adds` row and `—` into the `relies` row.
 
 ## The audit pipeline → `_run_audit.py` (hand-table driven)
 

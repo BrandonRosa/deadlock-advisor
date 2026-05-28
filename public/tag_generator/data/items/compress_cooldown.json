@@ -10,7 +10,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "ability_spam": 1.0,
+      "ability_spam": 1.15,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -70,7 +70,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 0.3,
+      "multi_ability_focus": 1.6,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -97,7 +97,7 @@
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": null,
+      "ult_focused": 0.8,
       "vertical_mobility": null
     }
   },

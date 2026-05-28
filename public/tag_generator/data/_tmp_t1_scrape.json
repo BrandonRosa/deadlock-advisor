@@ -1,0 +1,744 @@
+{
+  "close_quarters": {
+    "name": "Close Quarters",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Close_Quarters",
+    "codename": "upgrade_close_range",
+    "base": {
+      "passives": [
+        "+20% Melee Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Weapon Damage Conditional",
+              "text": "+20% Weapon Damage Conditional"
+            },
+            {
+              "value": "15m",
+              "label": "Close Range",
+              "text": "15m Close Range"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 19, 2025",
+        "change": "Melee Resist increased from 15% to 20%."
+      },
+      {
+        "date": "May 8, 2025",
+        "change": "Price increased from 500 to 800 Souls. Weapon Damage reduced from 22% to 20%. No longer grants Bullet Resist. Now grants +15% Melee Resist."
+      }
+    ]
+  },
+  "extended_magazine": {
+    "name": "Extended Magazine",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extended_Magazine",
+    "codename": "upgrade_clip_size",
+    "base": {
+      "passives": [
+        "+30% Max Ammo",
+        "+8% Weapon Damage"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "March 6, 2026",
+        "change": "Weapon Damage increased from +6% to +8%"
+      },
+      {
+        "date": "May 19, 2025",
+        "change": "Max Ammo increased from 25% to 30%"
+      }
+    ]
+  },
+  "headshot_booster": {
+    "name": "Headshot Booster",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Headshot_Booster",
+    "codename": "upgrade_headshot_booster",
+    "base": {
+      "passives": [
+        "+30 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+45",
+              "label": "Head Shot Bonus Damage",
+              "text": "+45 Head Shot Bonus Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "November 21, 2025",
+        "change": "Cooldown increased from 8 to 9."
+      },
+      {
+        "date": "October 2, 2025",
+        "change": "Damage reduced from 50 to 45."
+      }
+    ]
+  },
+  "high_velocity_rounds": {
+    "name": "High-Velocity Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds",
+    "codename": "upgrade_high_velocity_mag",
+    "base": {
+      "passives": [
+        "+60% Bullet Velocity",
+        "+8% Weapon Damage"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "April 30, 2026",
+        "change": "Now upgrades to Opening Rounds ."
+      },
+      {
+        "date": "March 6, 2026",
+        "change": "No longer grants +5% Fire Rate Now grants +8% Weapon Damage Bullet Velocity increased from +50% to +60% (these changes affect upgrades)"
+      }
+    ]
+  },
+  "monster_rounds": {
+    "name": "Monster Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Monster_Rounds",
+    "codename": "upgrade_non_player_bonus",
+    "base": {
+      "passives": [
+        "+25% Weapon Damage vs. NPCs",
+        "+25% Bullet Resist vs. NPCs",
+        "+1 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "March 21, 2026",
+        "change": "Improved Enhanced version."
+      },
+      {
+        "date": "May 19, 2025",
+        "change": "Out of Combat regen reduced from 1.5 to 1"
+      }
+    ]
+  },
+  "rapid_rounds": {
+    "name": "Rapid Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Rapid_Rounds",
+    "codename": "upgrade_rapid_rounds",
+    "base": {
+      "passives": [
+        "+9% Fire Rate"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "January 30, 2026",
+        "change": "Fire Rate reduced from 10% to 9%."
+      },
+      {
+        "date": "May 8, 2025",
+        "change": "Price increased from 500 to 800 Souls. No longer grants +1 Sprint Speed. Now upgrades to Swift Striker and Burst Fire ."
+      }
+    ]
+  },
+  "restorative_shot": {
+    "name": "Restorative Shot",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Restorative_Shot",
+    "codename": "upgrade_medic_bullets",
+    "base": {
+      "passives": [
+        "+6% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "50",
+              "label": "Healing From Heroes",
+              "text": "50 Healing From Heroes"
+            },
+            {
+              "value": "20",
+              "label": "Healing From NPCs / Orbs",
+              "text": "20 Healing From NPCs / Orbs"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "NPC Healing increased from 15 to 20."
+      },
+      {
+        "date": "July 29, 2025",
+        "change": "Heal from NPC reduced from 20 to 15. Weapon damage reduced from 8% to 6%."
+      }
+    ]
+  },
+  "extra_health": {
+    "name": "Extra Health",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extra_Health",
+    "codename": "upgrade_health",
+    "base": {
+      "passives": [
+        "+210 Bonus Health"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "March 6, 2026",
+        "change": "Increased from 185 to 210"
+      },
+      {
+        "date": "October 2, 2025",
+        "change": "Bonus Health increased from 175 to 185."
+      }
+    ]
+  },
+  "extra_regen": {
+    "name": "Extra Regen",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extra_Regen",
+    "codename": "upgrade_endurance",
+    "base": {
+      "passives": [
+        "+2.5 Health Regen",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Regen reduced from 3 to 2.5. Out of Combat regen increased from 1 to 1.5."
+      },
+      {
+        "date": "January 30, 2026",
+        "change": "Now provides +1 Out of Combat Regen."
+      }
+    ]
+  },
+  "extra_stamina": {
+    "name": "Extra Stamina",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extra_Stamina",
+    "codename": "upgrade_improved_stamina",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "May 8, 2025",
+        "change": "Cost increased from 500 to 800. (Global item change) No longer grants +35 Bonus Health. Stamina recovery reduced from +16% to +12%. Now also upgrades into Kinetic Dash and Arcane Surge ."
+      },
+      {
+        "date": "February 11, 2025",
+        "change": "No longer grants +4% Fire Rate"
+      }
+    ]
+  },
+  "healing_rite": {
+    "name": "Healing Rite",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Healing_Rite",
+    "codename": "upgrade_health_stimpak",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "300",
+              "label": "Total HP Regen",
+              "text": "300 Total HP Regen"
+            },
+            {
+              "value": "+2m",
+              "label": "Sprint Speed Conditional",
+              "text": "+2m Sprint Speed Conditional"
+            },
+            {
+              "value": "20s",
+              "label": "Regen Duration",
+              "text": "20s Regen Duration"
+            },
+            {
+              "value": "30m",
+              "label": "Cast Range",
+              "text": "30m Cast Range"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Spirit scaling increased from 0.93 to 1.1."
+      },
+      {
+        "date": "March 21, 2026",
+        "change": "Improved Enhanced version."
+      }
+    ]
+  },
+  "melee_lifesteal": {
+    "name": "Melee Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Melee_Lifesteal",
+    "codename": "upgrade_lifestrike_gauntlets",
+    "base": {
+      "passives": [
+        "+12% Melee Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "100",
+              "label": "Heal on Melee Hit",
+              "text": "100 Heal on Melee Hit"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "January 30, 2026",
+        "change": "Light Melee cooldown penalty reduced from 2x to 1.5x."
+      },
+      {
+        "date": "July 4, 2025",
+        "change": "Now has double cooldown when triggered via light melee."
+      }
+    ]
+  },
+  "rebuttal": {
+    "name": "Rebuttal",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Rebuttal",
+    "codename": "upgrade_melee_rebuttal",
+    "base": {
+      "passives": [
+        "-1.75s Parry Cooldown",
+        "+18% Melee Resist",
+        "+75 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+30%",
+              "label": "Bonus Damage Conditional",
+              "text": "+30% Bonus Damage Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Parry cooldown reduced from -2s to -1.75s."
+      },
+      {
+        "date": "March 21, 2026",
+        "change": "Improved Enhanced version."
+      }
+    ]
+  },
+  "sprint_boots": {
+    "name": "Sprint Boots",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Sprint_Boots",
+    "codename": "upgrade_sprint_booster",
+    "base": {
+      "passives": [
+        "+2m Sprint Speed",
+        "+2 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "April 30, 2026",
+        "change": "Now upgrades to Veil Walker ."
+      },
+      {
+        "date": "December 16, 2025",
+        "change": "Sprint reduced from 2.2 to 2.0."
+      }
+    ]
+  },
+  "extra_charge": {
+    "name": "Extra Charge",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extra_Charge",
+    "codename": "upgrade_extra_charge",
+    "base": {
+      "passives": [
+        "+1 Bonus Ability Charges",
+        "+7 Bonus Spirit Power for Charged Abilities"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "May 19, 2025",
+        "change": "Charged Spirit Power increased from +5 to +7"
+      },
+      {
+        "date": "May 8, 2025",
+        "change": "Cost increased from 500 to 800. No longer grants +10% Cooldown Reduction for Charged Abilities. Now grants +5 Bonus Spirit Power for Charged Abilities. No longer grants +6% Weapon Damage."
+      }
+    ]
+  },
+  "extra_spirit": {
+    "name": "Extra Spirit",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Extra_Spirit",
+    "codename": "upgrade_improved_spirit",
+    "base": {
+      "passives": [
+        "+10 Spirit Power"
+      ],
+      "components": []
+    },
+    "changelog": [
+      {
+        "date": "May 8, 2025",
+        "change": "Price increased from 500 to 800 (Global item change). No longer grants +1 Health Regen. No longer grants +35 Bonus Health. Is now a component of Surge of Power ."
+      },
+      {
+        "date": "October 10, 2024",
+        "change": "Spirit Power increased from 9 to 10."
+      }
+    ]
+  },
+  "golden_goose_egg": {
+    "name": "Golden Goose Egg",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Golden_Goose_Egg",
+    "codename": "upgrade_goose_egg",
+    "base": {
+      "passives": [
+        "-10% Damage Penalty",
+        "+1m Sprint Speed",
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "90",
+              "label": "Soul Value per Minute",
+              "text": "90 Soul Value per Minute"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Permanent buff changed from every 100 souls to every 80."
+      },
+      {
+        "date": "April 10, 2026",
+        "change": "Souls required for permanent buff reduced from 150 to 100. Now only gives permanent buffs for actual accrued souls, not counting the initial 400 sellback amount (so it no longer instantly sells for permanent buffs)."
+      }
+    ]
+  },
+  "mystic_burst": {
+    "name": "Mystic Burst",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Mystic_Burst",
+    "codename": "upgrade_magic_burst",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "40",
+              "label": "Bonus Damage",
+              "text": "40 Bonus Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "October 2, 2025",
+        "change": "Cooldown increased from 12s to 14s."
+      },
+      {
+        "date": "May 19, 2025",
+        "change": "Chargeup time reduced from 14s to 12s"
+      }
+    ]
+  },
+  "mystic_expansion": {
+    "name": "Mystic Expansion",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Mystic_Expansion",
+    "codename": "upgrade_magic_reach",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Ability Range",
+              "text": "+20% Ability Range"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "April 30, 2026",
+        "change": "Street Brawl : Radius bonus reduced from +20% to +16%."
+      },
+      {
+        "date": "May 8, 2025",
+        "change": "Mystic Reach renamed to Mystic Expansion Price increased from 500 to 800 No longer grants +7% bullet resist Is now an imbued item (no longer increases range of all abilities) Ability Range increased from +15% to +20%"
+      }
+    ]
+  },
+  "mystic_regeneration": {
+    "name": "Mystic Regeneration",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Mystic_Regeneration",
+    "codename": "upgrade_mystic_regeneration",
+    "base": {
+      "passives": [
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "4",
+              "label": "HP/s Regeneration",
+              "text": "4 HP/s Regeneration"
+            },
+            {
+              "value": "7s",
+              "label": "Regeneration Duration",
+              "text": "7s Regeneration Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Regen duration increased from 6s to 7s."
+      },
+      {
+        "date": "March 6, 2026",
+        "change": "Health bonus increased from +40 to +50 Duration increased from 5s to 6s"
+      }
+    ]
+  },
+  "rusted_barrel": {
+    "name": "Rusted Barrel",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Rusted_Barrel",
+    "codename": "upgrade_withering_whip",
+    "base": {
+      "passives": [
+        "+60 Bonus Health",
+        "+0.5m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-32%",
+              "label": "Fire Rate Conditional",
+              "text": "-32% Fire Rate Conditional"
+            },
+            {
+              "value": "-8%",
+              "label": "Bullet Resist Conditional",
+              "text": "-8% Bullet Resist Conditional"
+            },
+            {
+              "value": "32m",
+              "label": "Cast Range",
+              "text": "32m Cast Range"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "May 22, 2026",
+        "change": "Bonus health increased from 50 to 60."
+      },
+      {
+        "date": "March 21, 2026",
+        "change": "Improved Enhanced version."
+      }
+    ]
+  },
+  "spirit_strike": {
+    "name": "Spirit Strike",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "wiki_url": "https://deadlock.wiki/Spirit_Strike",
+    "codename": "upgrade_acolytes_glove",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "40",
+              "label": "Spirit Damage",
+              "text": "40 Spirit Damage",
+              "scaling": 0.37,
+              "scales_with": "Spirit Power",
+              "raw": "40 base + 0.37 x Spirit Power"
+            },
+            {
+              "value": "-6%",
+              "label": "Spirit Resist Conditional",
+              "text": "-6% Spirit Resist Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Duration",
+              "text": "6s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "changelog": [
+      {
+        "date": "July 4, 2025",
+        "change": "Now has double cooldown when triggered via light melee."
+      },
+      {
+        "date": "May 8, 2025",
+        "change": "Cost increased from 500 to 800. Cooldown reduced from 8.5s to 8s. No longer grants +80 Spirit Shield Health. No longer grants +12% Melee Damage. Spirit damage reduced from 50 to 40. Spirit Resist Reduction reduced from -8% to -6% Debuff duration reduced from 11s to 6s."
+      }
+    ]
+  }
+}

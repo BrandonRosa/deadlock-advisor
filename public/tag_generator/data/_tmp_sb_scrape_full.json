@@ -1,0 +1,836 @@
+{
+  "haunting_shot": {
+    "name": "Haunting Shot",
+    "category": "Weapon",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Haunting_Shot",
+    "codename": "upgrade_eldritch_shot",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "2.5s",
+          "description": "Your next bullet applies a powerful debuff reducing the enemy's damage output, healing and movement speed. It also deals bonus spirit damage based on the targets current Health. The bullet is larger and penetrates through targets.",
+          "stats": [
+            {
+              "value": "10%",
+              "label": "Current Health Damage",
+              "text": "10% Current Health Damage"
+            },
+            {
+              "value": "-40%",
+              "label": "Damage Penalty Conditional",
+              "text": "-40% Damage Penalty Conditional"
+            },
+            {
+              "value": "-40%",
+              "label": "Healing Reduction Conditional",
+              "text": "-40% Healing Reduction Conditional"
+            },
+            {
+              "value": "1.5m",
+              "label": "Bullet Radius",
+              "text": "1.5m Bullet Radius"
+            },
+            {
+              "value": "4s",
+              "label": "Debuff Duration",
+              "text": "4s Debuff Duration"
+            },
+            {
+              "value": "-40%",
+              "label": "Move Speed",
+              "text": "-40% Move Speed"
+            },
+            {
+              "value": "-40%",
+              "label": "Dash Distance",
+              "text": "-40% Dash Distance"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Your next bullet applies a powerful debuff reducing the enemy's damage output, healing and movement speed. It also deals bonus spirit damage based on the targets current Health. The bullet is larger and penetrates through targets."
+    ],
+    "sections": {
+      "Affected healing": "Following abilities and items get their healing reduced by Haunting Shot."
+    }
+  },
+  "infinite_rounds": {
+    "name": "Infinite Rounds",
+    "category": "Weapon",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Infinite_Rounds",
+    "codename": "upgrade_infinite_rounds",
+    "base": {
+      "passives": [
+        "+200% Bullet Velocity",
+        "+35% Fire Rate"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your Bullets have a chance to become unavoidable, piercing through enemies and ignoring their Bullet Resistance .",
+          "stats": [
+            {
+              "value": "65%",
+              "label": "Proc Chance",
+              "text": "65% Proc Chance"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Your Bullets have a chance to become unavoidable, piercing through enemies and ignoring their Bullet Resistance ."
+    ],
+    "sections": {
+      "Notes": "While the magazine is infinite, you may still reload with this item letting you take advantage of, or be punished by items that interact with reloads."
+    }
+  },
+  "runed_gauntlets": {
+    "name": "Runed Gauntlets",
+    "category": "Weapon",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Runed_Gauntlets",
+    "codename": "upgrade_runed_gauntlets",
+    "base": {
+      "passives": [
+        "+150% Heavy Melee Distance",
+        "+50% Melee Resist",
+        "+30% Melee Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "10s",
+          "description": "Everytime you land a heavy melee, your existing cooldowns get reduced.",
+          "stats": [
+            {
+              "value": "16%",
+              "label": "Cooldown Reduction on Hit",
+              "text": "16% Cooldown Reduction on Hit"
+            },
+            {
+              "value": "4s",
+              "label": "Min Reduction",
+              "text": "4s Min Reduction"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Everytime you land a heavy melee, your existing cooldowns get reduced."
+    ],
+    "sections": {
+      "Affected Abilities": "Some abilities scale with melee damage and are affected by Runed Gauntlets' increase to Melee Damage . Since all these abilities are considered to deal melee damage Runed Gauntlets also provides a hefty 50% resist against these abilities. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
+      "Notes": "The parry-piercing passive will go into cooldown only after a parry has been pierced. Viscous ' Puddle Punch can still be parried even when Runed Gauntlets are equipped."
+    }
+  },
+  "celestial_blessing": {
+    "name": "Celestial Blessing",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Celestial_Blessing",
+    "codename": "upgrade_celestial_guidance",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "30s",
+          "description": "Applies an extremely powerful cleanse that replenishes your allies globally.",
+          "stats": [
+            {
+              "value": "60%",
+              "label": "Heal Amount",
+              "text": "60% Heal Amount"
+            },
+            {
+              "value": "+100%",
+              "label": "Stamina Recovery Conditional",
+              "text": "+100% Stamina Recovery Conditional"
+            },
+            {
+              "value": "+5m",
+              "label": "Move Speed Conditional",
+              "text": "+5m Move Speed Conditional"
+            },
+            {
+              "value": "400",
+              "label": "Min. Heal",
+              "text": "400 Min. Heal"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Applies an extremely powerful cleanse that replenishes your allies globally."
+    ],
+    "sections": {}
+  },
+  "cloak_of_opportunity": {
+    "name": "Cloak of Opportunity",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Cloak_of_Opportunity",
+    "codename": "upgrade_cloak_of_opportunity",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "12s",
+          "description": "Block the next debuff that would apply movement lock, Stun, Chained, Immobilize, or Sleep and become Unstoppable . Also gain a Barrier and bonus move speed",
+          "stats": [
+            {
+              "value": "500",
+              "label": "Barrier Conditional",
+              "text": "500 Barrier Conditional"
+            },
+            {
+              "value": "+3m",
+              "label": "Move Speed Conditional",
+              "text": "+3m Move Speed Conditional"
+            },
+            {
+              "value": "4s",
+              "label": "Unstoppable Duration",
+              "text": "4s Unstoppable Duration"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Block the next debuff that would apply movement lock, Stun, Chained, Immobilize, or Sleep and become Unstoppable . Also gain a Barrier and bonus move speed"
+    ],
+    "sections": {}
+  },
+  "electric_slippers": {
+    "name": "Electric Slippers",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Electric_Slippers",
+    "codename": "upgrade_electric_slippers",
+    "base": {
+      "passives": [
+        "+2 Stamina",
+        "+80% Slide Distance"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "0.3s",
+          "description": "When sliding, evade bullets, gain fire rate and deal damage to enemies around you. Cooldown is per target.",
+          "stats": [
+            {
+              "value": "100",
+              "label": "Damage",
+              "text": "100 Damage"
+            },
+            {
+              "value": "60",
+              "label": "Evasion While Sliding Conditional",
+              "text": "60 Evasion While Sliding Conditional"
+            },
+            {
+              "value": "60%",
+              "label": "Fire Rate While Sliding Conditional",
+              "text": "60% Fire Rate While Sliding Conditional"
+            },
+            {
+              "value": "12m",
+              "label": "Radius",
+              "text": "12m Radius"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "When sliding, evade bullets, gain fire rate and deal damage to enemies around you. Cooldown is per target."
+    ],
+    "sections": {}
+  },
+  "eternal_gift": {
+    "name": "Eternal Gift",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Eternal_Gift",
+    "codename": "upgrade_eternal_gift",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "165s",
+          "description": "Periodically gain a random permanent stat buff.",
+          "stats": [
+            {
+              "value": "2s",
+              "label": "Buff Frequency",
+              "text": "2s Buff Frequency"
+            }
+          ]
+        },
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "165s",
+          "description": "Reduces your next death's respawn timer.",
+          "stats": [
+            {
+              "value": "-70%",
+              "label": "Respawn Time Conditional",
+              "text": "-70% Respawn Time Conditional"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Periodically gain a random permanent stat buff.",
+      "Reduces your next death's respawn timer."
+    ],
+    "sections": {}
+  },
+  "nullification_burst": {
+    "name": "Nullification Burst",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Nullification_Burst",
+    "codename": "upgrade_nullification_aura",
+    "base": {
+      "passives": [
+        "+40% Debuff Resist",
+        "+300 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "18s",
+          "description": "Removes any positive buffs and prevents stamina usage and healing effects on enemies.",
+          "stats": [
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            },
+            {
+              "value": "250",
+              "label": "Damage",
+              "text": "250 Damage",
+              "scaling": 0.47,
+              "scales_with": "Spirit Power",
+              "raw": "250 base + 0.47 x Spirit Power"
+            },
+            {
+              "value": "20m",
+              "label": "End Radius",
+              "text": "20m End Radius"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Removes any positive buffs and prevents stamina usage and healing effects on enemies."
+    ],
+    "sections": {}
+  },
+  "seraphim_wings": {
+    "name": "Seraphim Wings",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Seraphim_Wings",
+    "codename": "upgrade_icarus_wings",
+    "base": {
+      "passives": [
+        "+120% Stamina Recovery",
+        "-70% Gravity Scale",
+        "+100% Air Control",
+        "+50% Air Acceleration"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "When Airborne, You deal more damage and take reduced damage. Allows unlimited Air Dash and Jumping.",
+          "stats": [
+            {
+              "value": "+40%",
+              "label": "In Air Damage",
+              "text": "+40% In Air Damage"
+            },
+            {
+              "value": "-40%",
+              "label": "In Air Damage Received",
+              "text": "-40% In Air Damage Received"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "When Airborne, You deal more damage and take reduced damage. Allows unlimited Air Dash and Jumping."
+    ],
+    "sections": {}
+  },
+  "shadow_strike": {
+    "name": "Shadow Strike",
+    "category": "Vitality",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Shadow_Strike",
+    "codename": "upgrade_shadow_strike",
+    "base": {
+      "passives": [
+        "+3 Stamina",
+        "+350 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": null,
+          "description": "Go Invisible on Stamina use with no detection range. Doing a melee attack while invisible will cause you to steal bullet and spirit resistance from them and deal damage over time .",
+          "stats": [
+            {
+              "value": "125",
+              "label": "Damage Per Second",
+              "text": "125 Damage Per Second",
+              "scaling": 0.4,
+              "scales_with": "Spirit Power",
+              "raw": "125 base + 0.4 x Spirit Power"
+            },
+            {
+              "value": "3s",
+              "label": "Invisibility Duration",
+              "text": "3s Invisibility Duration"
+            },
+            {
+              "value": "6s",
+              "label": "Steal Duration",
+              "text": "6s Steal Duration"
+            },
+            {
+              "value": "40%",
+              "label": "Resist Stolen",
+              "text": "40% Resist Stolen"
+            },
+            {
+              "value": "0.2s",
+              "label": "Fade Time",
+              "text": "0.2s Fade Time"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Go Invisible on Stamina use with no detection range. Doing a melee attack while invisible will cause you to steal bullet and spirit resistance from them and deal damage over time ."
+    ],
+    "sections": {}
+  },
+  "frostbite_charm": {
+    "name": "Frostbite Charm",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Frostbite_Charm",
+    "codename": "upgrade_shivas_bracelet",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "10s",
+          "description": "Imbued ability has its Cooldown reduced and gains Spirit Power . When the ability deals damage, freeze the target and apply bonus damage . Cooldown is per target.",
+          "stats": [
+            {
+              "value": "+50%",
+              "label": "Imbued Ability Cooldown Reduction",
+              "text": "+50% Imbued Ability Cooldown Reduction"
+            },
+            {
+              "value": "+70",
+              "label": "Imbued Ability Spirit Power",
+              "text": "+70 Imbued Ability Spirit Power"
+            },
+            {
+              "value": "200",
+              "label": "Damage",
+              "text": "200 Damage"
+            },
+            {
+              "value": "1s",
+              "label": "Freeze Duration",
+              "text": "1s Freeze Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Imbued ability has its Cooldown reduced and gains Spirit Power . When the ability deals damage, freeze the target and apply bonus damage . Cooldown is per target."
+    ],
+    "sections": {}
+  },
+  "mystic_conduit": {
+    "name": "Mystic Conduit",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Mystic_Conduit",
+    "codename": "upgrade_patrons_blessing",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "25s",
+          "description": "Provides yourself and allies with a powerful spirit focused aura. Has reduced values on allies.",
+          "stats": [
+            {
+              "value": "+40%",
+              "label": "Ability Range",
+              "text": "+40% Ability Range"
+            },
+            {
+              "value": "+40%",
+              "label": "Ability Cooldown Reduction",
+              "text": "+40% Ability Cooldown Reduction"
+            },
+            {
+              "value": "+50%",
+              "label": "Ally Percentage",
+              "text": "+50% Ally Percentage"
+            },
+            {
+              "value": "25m",
+              "label": "Radius",
+              "text": "25m Radius"
+            }
+          ]
+        },
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "25s",
+          "description": "Dealing significant Damage to an enemy Hero within 5s causes you to heal yourself and nearby allies.",
+          "stats": [
+            {
+              "value": "700",
+              "label": "Heal Amount",
+              "text": "700 Heal Amount"
+            },
+            {
+              "value": "35m",
+              "label": "Heal Radius",
+              "text": "35m Heal Radius"
+            },
+            {
+              "value": "300",
+              "label": "Damage Threshold",
+              "text": "300 Damage Threshold"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Provides yourself and allies with a powerful spirit focused aura. Has reduced values on allies.",
+      "Dealing significant Damage to an enemy Hero within 5s causes you to heal yourself and nearby allies."
+    ],
+    "sections": {}
+  },
+  "mystical_piano": {
+    "name": "Mystical Piano",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Mystical_Piano",
+    "codename": "upgrade_mystical_piano",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "23s",
+          "description": "After a short delay, enemies in the target area will be stunned and have their stamina depleted. After the stun they will be temporarily dazed.",
+          "stats": [
+            {
+              "value": "Stun",
+              "label": "Status Effect",
+              "text": "Stun Status Effect"
+            },
+            {
+              "value": "2s",
+              "label": "Stun Duration",
+              "text": "2s Stun Duration"
+            },
+            {
+              "value": "2s",
+              "label": "Daze Duration",
+              "text": "2s Daze Duration"
+            },
+            {
+              "value": "1.7s",
+              "label": "Stun Delay",
+              "text": "1.7s Stun Delay"
+            },
+            {
+              "value": "12m",
+              "label": "Radius",
+              "text": "12m Radius"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "After a short delay, enemies in the target area will be stunned and have their stamina depleted. After the stun they will be temporarily dazed."
+    ],
+    "sections": {
+      "Notes": "Dazed enemies are slowed, disarmed, silenced, and cannot use active items."
+    }
+  },
+  "omnicharge_signet": {
+    "name": "Omnicharge Signet",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Omnicharge_Signet",
+    "codename": "upgrade_omnicharge_pendant",
+    "base": {
+      "passives": [
+        "+70% Faster Time Between Charges",
+        "+30% Cooldown Reduction For Charged Abilities",
+        "+50 Bonus Spirit Power for Charged Abilities"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Imbue any active non-ultimate ability with Bonus Ability Charges . Already charged abilities receive more bonus charges.",
+          "stats": [
+            {
+              "value": "+4",
+              "label": "Charged Ability",
+              "text": "+4 Charged Ability"
+            },
+            {
+              "value": "+2",
+              "label": "Non Charged Ability",
+              "text": "+2 Non Charged Ability"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Imbue any active non-ultimate ability with Bonus Ability Charges . Already charged abilities receive more bonus charges."
+    ],
+    "sections": {
+      "Known Bugs": "If imbued on Victor 's Pain Battery , the player cannot use the ability. Omnicharge Signet treats Infernus ' Flame Dash as an uncharged ability, even if imbued after Tier 3 unlocked."
+    }
+  },
+  "prism_blast": {
+    "name": "Prism Blast",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Prism_Blast",
+    "codename": "upgrade_prism_blast",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "40s",
+          "description": "You enter a void state and become untargetable and invincible for a short duration, during which lasers blast out and rotate around you.",
+          "stats": [
+            {
+              "value": "270",
+              "label": "Damage Per Second",
+              "text": "270 Damage Per Second",
+              "scaling": 1.8,
+              "scales_with": "Spirit Power",
+              "raw": "270 base + 1.8 x Spirit Power"
+            },
+            {
+              "value": "6s",
+              "label": "Duration",
+              "text": "6s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "You enter a void state and become untargetable and invincible for a short duration, during which lasers blast out and rotate around you."
+    ],
+    "sections": {
+      "Trivia": "Prism Blast previously used Bebop 's Hyper Beam VFX."
+    }
+  },
+  "shrink_ray": {
+    "name": "Shrink Ray",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Shrink_Ray",
+    "codename": "upgrade_shrink_ray",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "30s",
+          "description": "Reduces Model Size and grants Move Speed to the target. Allows usage of tunnels in this mode. Can be self-cast.",
+          "stats": [
+            {
+              "value": "-50%",
+              "label": "Model Scale",
+              "text": "-50% Model Scale"
+            },
+            {
+              "value": "+5m",
+              "label": "Move Speed",
+              "text": "+5m Move Speed"
+            },
+            {
+              "value": "+20%",
+              "label": "Fire Rate",
+              "text": "+20% Fire Rate"
+            },
+            {
+              "value": "60s",
+              "label": "Shrink Duration",
+              "text": "60s Shrink Duration"
+            },
+            {
+              "value": "40m",
+              "label": "Cast Range",
+              "text": "40m Cast Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Reduces Model Size and grants Move Speed to the target. Allows usage of tunnels in this mode. Can be self-cast."
+    ],
+    "sections": {
+      "Notes": "When used on an ally, Shrink Ray also alters the target's voice, causing it to sound higher-pitched."
+    }
+  },
+  "unstable_concoction": {
+    "name": "Unstable Concoction",
+    "category": "Spirit",
+    "cost_souls": 9999,
+    "tier": "?",
+    "wiki_url": "https://deadlock.wiki/Unstable_Concoction",
+    "codename": "upgrade_unstable_concoction",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "25s",
+          "description": "Consume a concoction that grants you Unstoppable and increased speed, health, spirit and weapon damage . After a short duration you die and explode , stunning nearby enemies and dealing damage based on your maximum health. Dying this way reduces your respawn time by 50% .",
+          "stats": [
+            {
+              "value": "30%",
+              "label": "Max Health Damage",
+              "text": "30% Max Health Damage"
+            },
+            {
+              "value": "3s",
+              "label": "Stun Duration",
+              "text": "3s Stun Duration"
+            },
+            {
+              "value": "+10m",
+              "label": "Move Speed Conditional",
+              "text": "+10m Move Speed Conditional"
+            },
+            {
+              "value": "+3000",
+              "label": "Bonus Health Conditional",
+              "text": "+3000 Bonus Health Conditional"
+            },
+            {
+              "value": "4s",
+              "label": "Duration",
+              "text": "4s Duration"
+            },
+            {
+              "value": "+150%",
+              "label": "Weapon Damage",
+              "text": "+150% Weapon Damage"
+            },
+            {
+              "value": "22m",
+              "label": "Radius",
+              "text": "22m Radius"
+            },
+            {
+              "value": "+150",
+              "label": "Spirit Power",
+              "text": "+150 Spirit Power"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [
+      "Consume a concoction that grants you Unstoppable and increased speed, health, spirit and weapon damage . After a short duration you die and explode , stunning nearby enemies and dealing damage based on your maximum health. Dying this way reduces your respawn time by 50% ."
+    ],
+    "sections": {
+      "Notes": "Some abilities and items that bypass lethal damage can allow the player to survive Unstable Concotion, such as Cheat Death and Shiv 's Bloodletting ."
+    }
+  }
+}

@@ -33,7 +33,7 @@
       "continuous_resistance": 0.75,
       "cooldown_reduction": 0.05,
       "counter_importance": 1.2,
-      "damage_sponge": 1.12,
+      "damage_sponge": 1.5,
       "debuff": null,
       "debuff_resistance": null,
       "disarm": 0.05,
