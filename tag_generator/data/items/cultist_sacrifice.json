@@ -45,7 +45,7 @@
       "duration_dependant": null,
       "engage": null,
       "escape": null,
-      "farmer": 1.5,
+      "farmer": 1.8,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -58,7 +58,7 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.33,
+      "high_max_hp": 0.5,
       "horizontal_mobility": null,
       "hybrid_damage_usage": 0.15,
       "interrupt": null,
@@ -99,7 +99,7 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "lane_pusher": null
+      "lane_pusher": 1.0
     }
   },
   "wiki_url": "https://deadlock.wiki/Cultist_Sacrifice",

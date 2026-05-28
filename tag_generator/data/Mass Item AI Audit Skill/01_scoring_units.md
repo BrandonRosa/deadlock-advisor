@@ -73,14 +73,30 @@ Procs are scored by a dimensionless index, not a raw stat. **ProcImportance%** r
   - *Mystic Burst*: instant effect (~0.1s) triggered by instant damage (~0.1s window) → `100% × (0.1/0.1) = 1.0`.
   - *Spirit Burst*: effect lasts 8s, must be triggered within a 5s window → `100% × (8/5) = 1.6`.
 - **Continuous proc** (`spirit_continuous_proc` / `gun_continuous_proc`):
-  `raw = ProcImportance% / (RefreshWindow × EffectDuration)`
-  This is the **Effective Raw** value — it gets normalized across all continuous-proc items afterward ([03_normalization.md](03_normalization.md)), so only the *relative ranking* matters, not the magnitude. **Smaller RefreshWindow and smaller EffectDuration → higher score** (frequent procs of short-lived effects demand the most constant re-application = most "continuous").
+  `raw = ProcImportance% × PotentialEffectiveEnemiesAffected / (RefreshWindow × EffectDuration)`
+  This is the **Effective Raw** value — it gets normalized across all continuous-proc items afterward ([03_normalization.md](03_normalization.md)), so only the *relative ranking* matters, not the magnitude. **Smaller RefreshWindow and smaller EffectDuration → higher score; more enemies affected → higher score.** Frequent procs of short-lived effects across many enemies demand the most constant re-application and have the broadest impact.
   - **RefreshWindow** = the time for ONE full re-application. If the proc has an internal cooldown, use it. **If it has no internal cooldown (damage-threshold / buildup procs), use `10s / DamageWindow`** (DamageWindow = the time allowed to accumulate the trigger), so threshold procs are computable.
+  - **PotentialEffectiveEnemiesAffected (PEE)** — how many enemies a single proc reapplication can hit at once:
+    - `PEE = 1` — single-target proc (on-hit bullet procs, per-target spirit DoTs)
+    - `PEE = 3` — typical AoE proc (small aura, 10m AoE)
+    - `PEE = 5` — wide aura / team-wide proc
   - Worked (raw, pre-normalize):
-    - *Escalating Exposure*: internal cd 0.7s, effect 12s → `100% / (0.7×12) = 0.119`
-    - *Siphon Bullets*: internal cd 1.2s, effect 17s → `100% / (1.2×17) = 0.049`
-    - *Spirit Burn*: no internal cd, 500-dmg/5s window → R = 10/5 = 2; burn 8s → `100% / (2×8) = 0.063` ("some, not a lot")
-    - *Toxic Bullets*: no internal cd, 5s buildup → R = 10/5 = 2; DoT 4s → `100% / (2×4) = 0.125`
+    - *Escalating Exposure*: internal cd 0.7s, effect 12s, single-target → `100% × 1 / (0.7×12) = 0.119`
+    - *Siphon Bullets*: internal cd 1.2s, effect 17s, single-target → `100% × 1 / (1.2×17) = 0.049`
+    - *Spirit Burn*: no internal cd, 500-dmg/5s window → R = 10/5 = 2; burn 8s, single-target → `100% × 1 / (2×8) = 0.063`
+    - *Toxic Bullets*: no internal cd, 5s buildup → R = 10/5 = 2; DoT 4s, single-target → `100% × 1 / (2×4) = 0.125`
+    - *Hypothetical AoE 5s/8s proc* (10m AoE, PEE=3): `100% × 3 / (2×8) = 0.188` — three times the single-target equivalent.
+
+## Blend formula — `(adds + 0.5 × relies) BEFORE normalization`
+
+The `adds` and `relies` modes encode different *kinds* of contribution: `adds` is what the item provides directly; `relies` is the scaling/conditional benefit on top. To produce one Normalized per (item, tag), the normalizer first merges the modes into a single effective raw, then normalizes:
+
+```
+effective_raw[item, tag] = Σ adds.raw + 0.5 × Σ relies.raw     (pre-normalize)
+Normalized[item, tag]    = normalize(effective_raw, anchors)   (per-tag anchor set)
+```
+
+There is **no further blending at audit time** — the audit reads the single Normalized per (item, tag) directly. In the markdown tables, the merged Normalized is written into the *first `adds` row* for that tag; any `relies` row (and additional adds rows for the same tag) shows `—` in the Normalized column. This is mechanical — done by `_normalize.py`. Authoring is unchanged: write one row per (tag, mode) with a clean comparative raw; the script does the merge.
 
 ## spirit_damage adds row — combines flat SP AND proc damage
 
@@ -93,6 +109,23 @@ spirit_damage adds raw = flat_SP + (proc_base_damage + proc_scaling × assumed_S
 Example (Mystic Shot): +7 SP flat + proc 40+1.2×SP → at assumed SP=20: adds raw = 7 + (40 + 24)/5 = 7 + 12.8 = 19.8 ≈ 20.
 
 A separate `spirit_damage relies` row then captures the SCALING benefit (the extra SP-equiv gained as SP stacks).
+
+## Implicit category baseline per tier — add to `bullet_damage` / `high_max_hp` / `spirit_damage` raws
+
+Every item carries an **implicit** category bonus that the wiki shows on the "Item Type Bonuses by Souls" table at [deadlock.wiki/Items](https://deadlock.wiki/Items) — i.e. spending souls on Weapon items grants a kit-wide bonus on top of each item's listed stats. When you compute the comparative raw for `bullet_damage` on a Weapon item, `high_max_hp` (or `spirit_damage`) on a Vitality / Spirit item, **add the implicit per-tier baseline to the item's explicit stat**. Two T1 Weapon items both list "+0 weapon damage" still differ from a T1 Spirit item — they both grant the T1 Weapon baseline silently.
+
+**Derivation (per-tier baseline)**: `tier_cost_in_souls × 12 → round DOWN to the nearest row on the wiki totals table → divide that row's bonus by 12`.
+
+| Tier | Cost | Total souls (× 12) | Wiki row used | Implicit baseline (÷ 12) |
+|---|---|---|---|---|
+| T1 | 800 | 9,600 | 8,000 | **+5.2% weapon · +3.8% bonus HP · +4.3 SP** |
+| T2 | 1,600 | 19,200 | 16,000 | **+7.2% weapon · +4.5% bonus HP · +5.5 SP** |
+| T3 | 3,200 | 38,400 | 28,800 | **+9.6% weapon · +5.8% bonus HP · +8.3 SP** |
+| T4 | 6,400 | 76,800 | 28,800 (cap) | **+9.6% weapon · +5.8% bonus HP · +8.3 SP** |
+
+Weapon and HP are percentages; Spirit Power is flat. The HP baseline is *bonus HP %* of the hero's base HP (typical hero base ≈ 500 HP, so T2 +4.5% ≈ +22.5 flat HP equivalent). When converting to the flat-HP raw used by `high_max_hp`, multiply by an assumed base HP.
+
+**Authoring rule**: ALWAYS add the per-tier baseline to a Weapon item's `bullet_damage` raw, a Vitality item's `high_max_hp` raw, and a Spirit item's `spirit_damage` raw — even if the wiki box shows zero of that stat. Two T2 Weapon items with no explicit weapon-damage stat still both carry +7.2% baseline, which is what their `bullet_damage` raw should reflect (before further adjustments).
 
 ## Indirect defensive effects count toward resistance
 
@@ -148,6 +181,17 @@ If the hero relies on damage type X AND has shred for X, give allies **POSITIVE*
 | Fire-rate slow | bullet_resistance | proportional to slow % |
 | Bullet resist | melee_resistance | ~0.5x (bullet → melee yes, melee → bullet no) |
 | Shield-on-spirit-damage | spirit_resistance | ~0.6x |
+
+## Resist shred can drive resists negative — diminishing returns past 0%
+
+Resistance shred (`bullet_resist_shred`, `spirit_resist_shred`) can push an enemy's effective resist BELOW 0%, which scales the damage multiplier *above* 1.0× (e.g. -20% effective resist → enemy takes 1.20× damage). This is the resist axis going inverted, not a hard floor.
+
+But the marginal value of additional shred *diminishes* once the target is already below 0%:
+1. The expected damage uplift curve flattens (each further -5% adds less than the previous -5% in real fights because of HP/burst pacing).
+2. Allies may be wasting shred on an already-shredded target (overkill on a shared debuff).
+3. Hero design: most encounter targets start around 0-15% resist, so the FIRST -15% of shred is the highest-value chunk; everything past that is mop-up.
+
+**Authoring rule**: score the shred raw at face value up to the first -15% (one team-typical enemy starting resist). Past that, apply a **×0.7 discount** for each additional -10% chunk. Example: an item providing -20% shred → first -15% counts at 100%, the next -5% counts at 70% → effective raw ≈ 15 + 0.7 × 5 = 18.5 (vs naive 20).
 
 ## "Add" beats "rely-on" — duration / range / cooldown
 

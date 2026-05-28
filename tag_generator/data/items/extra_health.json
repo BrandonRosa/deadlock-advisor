@@ -74,7 +74,7 @@
       "gun_burst_resistance": null,
       "gun_continuous_damage": null,
       "gun_continuous_resistance": null,
-      "damage_sponge": 0.5,
+      "damage_sponge": 1.0,
       "anti_air": null,
       "trap_block_obstruct": null,
       "displace": null,

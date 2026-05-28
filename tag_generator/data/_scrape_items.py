@@ -118,12 +118,41 @@ def parse_stat_chip(st):
 
 
 def _nearest(cont, sel):
-    """Look for `sel` inside the container, else in its enclosing infobox-row block."""
+    """Look for `sel` inside the container, else in its enclosing rows.
+
+    Wiki infoboxes put `.active-description` / `.passive-description` in a SEPARATE
+    `<tr>` immediately preceding the matching `*-stat-container` row, so we walk:
+    inside container → preceding sibling rows → parent table. The previous version
+    only checked the parent tr (which never contained the description) and silently
+    returned '', causing every component's `description` to be null."""
     hit = cont.select_one(sel)
     if hit:
         return txt(hit)
-    block = cont.find_parent('tr') or cont.find_parent('table')
-    return txt(block.select_one(sel)) if block else ''
+    parent_tr = cont.find_parent('tr')
+    if parent_tr:
+        # Look in the parent tr first
+        hit = parent_tr.select_one(sel)
+        if hit:
+            return txt(hit)
+        # Walk preceding sibling rows backward until we cross another stat-container
+        # boundary (so we don't steal a description that belongs to a previous block)
+        for prev in parent_tr.find_previous_siblings('tr'):
+            # Stop at another stat-container row (boundary between component blocks)
+            if prev.select_one('.active-stat-container, .passive-stat-container'):
+                break
+            hit = prev.select_one(sel)
+            if hit:
+                return txt(hit)
+            # Stop at header row of next block (active-header / passive-header)
+            if prev.select_one('.active-header, .passive-header'):
+                # check the header row itself for the selector, then break
+                break
+    table = cont.find_parent('table')
+    if table:
+        hit = table.select_one(sel)
+        if hit:
+            return txt(hit)
+    return ''
 
 
 def parse_block(cont, kind):

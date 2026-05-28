@@ -38,7 +38,7 @@
       "dot": null,
       "duration_dependant": null,
       "farmer": null,
-      "fire_rate": 1.25,
+      "fire_rate": 0.9,
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": 0.2,

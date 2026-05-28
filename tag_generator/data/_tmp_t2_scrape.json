@@ -1,0 +1,1404 @@
+{
+  "active_reload": {
+    "name": "Active Reload",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Active_Reload",
+    "codename": "upgrade_active_reload",
+    "base": {
+      "passives": [
+        "+20% Max Ammo"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Fire Rate Conditional",
+              "text": "+25% Fire Rate Conditional"
+            },
+            {
+              "value": "+16%",
+              "label": "Bullet Lifesteal Conditional",
+              "text": "+16% Bullet Lifesteal Conditional"
+            },
+            {
+              "value": "+0.75m",
+              "label": "Move Speed",
+              "text": "+0.75m Move Speed"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "fleetfoot": {
+    "name": "Fleetfoot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Fleetfoot",
+    "codename": "upgrade_fleetfoot_boots",
+    "base": {
+      "passives": [
+        "+6% Weapon Damage",
+        "+35% Slide Distance",
+        "+6% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+3m",
+              "label": "Move Speed Conditional",
+              "text": "+3m Move Speed Conditional"
+            },
+            {
+              "value": "+40%",
+              "label": "Slow Resist",
+              "text": "+40% Slow Resist"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "intensifying_magazine": {
+    "name": "Intensifying Magazine",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Intensifying_Magazine",
+    "codename": "upgrade_intensifying_clip",
+    "base": {
+      "passives": [
+        "+20% Max Ammo"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "45%",
+              "label": "Max Weapon Damage Conditional",
+              "text": "45% Max Weapon Damage Conditional"
+            },
+            {
+              "value": "2.5s",
+              "label": "Time for Max Damage",
+              "text": "2.5s Time for Max Damage"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "kinetic_dash": {
+    "name": "Kinetic Dash",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Kinetic_Dash",
+    "codename": "upgrade_kinetic_sash",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Fire Rate Conditional",
+              "text": "+25% Fire Rate Conditional"
+            },
+            {
+              "value": "+6",
+              "label": "Temporary Ammo Conditional",
+              "text": "+6 Temporary Ammo Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "long_range": {
+    "name": "Long Range",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Long_Range",
+    "codename": "upgrade_long_range",
+    "base": {
+      "passives": [
+        "+8% Weapon Fall-off Range",
+        "+0.75m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+40%",
+              "label": "Weapon Damage Conditional",
+              "text": "+40% Weapon Damage Conditional"
+            },
+            {
+              "value": "15m",
+              "label": "Min. Distance",
+              "text": "15m Min. Distance"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "melee_charge": {
+    "name": "Melee Charge",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Melee_Charge",
+    "codename": "upgrade_melee_charge",
+    "base": {
+      "passives": [
+        "+50% Heavy Melee Distance",
+        "+10% Melee Damage",
+        "+6% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Bonus Heavy Damage",
+              "text": "+25% Bonus Heavy Damage"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mystic_shot": {
+    "name": "Mystic Shot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Mystic_Shot",
+    "codename": "upgrade_crackshot",
+    "base": {
+      "passives": [
+        "+7 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+40",
+              "label": "Spirit Damage",
+              "text": "+40 Spirit Damage",
+              "scaling": 1.2,
+              "scales_with": "Spirit Power",
+              "raw": "+40 base + 1.2 x Spirit Power"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "opening_rounds": {
+    "name": "Opening Rounds",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Opening_Rounds",
+    "codename": "upgrade_pristine_emblem",
+    "base": {
+      "passives": [
+        "+60% Bullet Velocity",
+        "+8% Weapon Damage",
+        "+4 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+30%",
+              "label": "Weapon Damage Conditional",
+              "text": "+30% Weapon Damage Conditional"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "recharging_rush": {
+    "name": "Recharging Rush",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Recharging_Rush",
+    "codename": "upgrade_rechargingbullets",
+    "base": {
+      "passives": [
+        "+20% Max Ammo",
+        "+10% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "200",
+              "label": "Damage Threshold",
+              "text": "200 Damage Threshold"
+            },
+            {
+              "value": "3.5s",
+              "label": "Time Frame",
+              "text": "3.5s Time Frame"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "slowing_bullets": {
+    "name": "Slowing Bullets",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Slowing_Bullets",
+    "codename": "upgrade_slowing_bullets",
+    "base": {
+      "passives": [
+        "+15% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-30%",
+              "label": "Move Speed Conditional",
+              "text": "-30% Move Speed Conditional"
+            },
+            {
+              "value": "-22%",
+              "label": "Dash Distance",
+              "text": "-22% Dash Distance"
+            },
+            {
+              "value": "3.5s",
+              "label": "Slow Duration",
+              "text": "3.5s Slow Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "spirit_shredder_bullets": {
+    "name": "Spirit Shredder Bullets",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Spirit_Shredder_Bullets",
+    "codename": "upgrade_tech_defense_shredders",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-8%",
+              "label": "Spirit Resist Conditional",
+              "text": "-8% Spirit Resist Conditional"
+            },
+            {
+              "value": "+10%",
+              "label": "Spirit Lifesteal Conditional",
+              "text": "+10% Spirit Lifesteal Conditional"
+            },
+            {
+              "value": "8s",
+              "label": "Debuff Duration",
+              "text": "8s Debuff Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "split_shot": {
+    "name": "Split Shot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Split_Shot",
+    "codename": "upgrade_split_shot",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "5",
+              "label": "Weapon Multishot Conditional",
+              "text": "5 Weapon Multishot Conditional"
+            },
+            {
+              "value": "+8%",
+              "label": "Weapon Damage per Stack",
+              "text": "+8% Weapon Damage per Stack"
+            },
+            {
+              "value": "5s",
+              "label": "Buff Duration",
+              "text": "5s Buff Duration"
+            },
+            {
+              "value": "5",
+              "label": "Max Stacks",
+              "text": "5 Max Stacks"
+            },
+            {
+              "value": "12s",
+              "label": "Stack Duration",
+              "text": "12s Stack Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "stalker": {
+    "name": "Stalker",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Stalker",
+    "codename": "upgrade_weapon_backstabber",
+    "base": {
+      "passives": [
+        "-50% Footstep Sound Distance",
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "17",
+              "label": "Damage Per Second",
+              "text": "17 Damage Per Second"
+            },
+            {
+              "value": "-6%",
+              "label": "Bullet Resist Conditional",
+              "text": "-6% Bullet Resist Conditional"
+            },
+            {
+              "value": "+1.5m",
+              "label": "Move Speed Conditional",
+              "text": "+1.5m Move Speed Conditional"
+            },
+            {
+              "value": "5s",
+              "label": "Debuff Duration",
+              "text": "5s Debuff Duration"
+            },
+            {
+              "value": "8m",
+              "label": "Close Range",
+              "text": "8m Close Range"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "swift_striker": {
+    "name": "Swift Striker",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Swift_Striker",
+    "codename": "upgrade_blitz_bullets",
+    "base": {
+      "passives": [
+        "+20% Fire Rate",
+        "+0.75m Sprint Speed"
+      ],
+      "components": []
+    }
+  },
+  "titanic_magazine": {
+    "name": "Titanic Magazine",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Titanic_Magazine",
+    "codename": "upgrade_titan_round",
+    "base": {
+      "passives": [
+        "+100% Max Ammo",
+        "+14% Weapon Damage"
+      ],
+      "components": []
+    }
+  },
+  "weakening_headshot": {
+    "name": "Weakening Headshot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Weakening_Headshot",
+    "codename": "upgrade_headshot_booster2",
+    "base": {
+      "passives": [
+        "+60 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-13%",
+              "label": "Bullet Resist Conditional",
+              "text": "-13% Bullet Resist Conditional"
+            },
+            {
+              "value": "12s",
+              "label": "Debuff Duration",
+              "text": "12s Debuff Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "battle_vest": {
+    "name": "Battle Vest",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Battle_Vest",
+    "codename": "upgrade_regenerating_bullet_shield",
+    "base": {
+      "passives": [
+        "+18% Bullet Resist",
+        "+3 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+18%",
+              "label": "Weapon Damage Conditional",
+              "text": "+18% Weapon Damage Conditional"
+            },
+            {
+              "value": "+7%",
+              "label": "Fire Rate Conditional",
+              "text": "+7% Fire Rate Conditional"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "bullet_lifesteal": {
+    "name": "Bullet Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Bullet_Lifesteal_(item)",
+    "codename": "upgrade_vampire",
+    "base": {
+      "passives": [
+        "+13% Bullet Lifesteal",
+        "+90 Bonus Health",
+        "+6% Weapon Damage"
+      ],
+      "components": []
+    }
+  },
+  "debuff_reducer": {
+    "name": "Debuff Reducer",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Debuff_Reducer",
+    "codename": "upgrade_debuff_reducer",
+    "base": {
+      "passives": [
+        "+90 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Debuff Resist",
+              "text": "+25% Debuff Resist"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "enchanters_emblem": {
+    "name": "Enchanters Emblem",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Enchanter's_Emblem",
+    "codename": "upgrade_magic_shield",
+    "base": {
+      "passives": [
+        "+18% Spirit Resist",
+        "+2 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+15",
+              "label": "Spirit Power",
+              "text": "+15 Spirit Power"
+            },
+            {
+              "value": "+5%",
+              "label": "Ability Cooldown Reduction",
+              "text": "+5% Ability Cooldown Reduction"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "enduring_speed": {
+    "name": "Enduring Speed",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Enduring_Speed",
+    "codename": "upgrade_cardio_calibrator",
+    "base": {
+      "passives": [
+        "+2m Move Speed",
+        "+2 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Slow Resist",
+              "text": "+25% Slow Resist"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "guardian_ward": {
+    "name": "Guardian Ward",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Guardian_Ward",
+    "codename": "upgrade_guardian_ward",
+    "base": {
+      "passives": [
+        "+8% Ability Range",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "250",
+              "label": "Barrier Conditional",
+              "text": "250 Barrier Conditional"
+            },
+            {
+              "value": "+2.75m",
+              "label": "Move Speed Conditional",
+              "text": "+2.75m Move Speed Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            },
+            {
+              "value": "40m",
+              "label": "Cast Range",
+              "text": "40m Cast Range"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "healbane": {
+    "name": "Healbane",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Healbane",
+    "codename": "upgrade_healbane",
+    "base": {
+      "passives": [
+        "+7 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-35%",
+              "label": "Healing Reduction Conditional",
+              "text": "-35% Healing Reduction Conditional"
+            },
+            {
+              "value": "275",
+              "label": "Heal On Hero Kill",
+              "text": "275 Heal On Hero Kill"
+            },
+            {
+              "value": "8s",
+              "label": "Duration",
+              "text": "8s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "healing_booster": {
+    "name": "Healing Booster",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Healing_Booster",
+    "codename": "upgrade_healing_booster",
+    "base": {
+      "passives": [
+        "+3 Health Regen",
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Healing Effectiveness",
+              "text": "+20% Healing Effectiveness"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "reactive_barrier": {
+    "name": "Reactive Barrier",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Reactive_Barrier",
+    "codename": "upgrade_vex_barrier",
+    "base": {
+      "passives": [
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "325",
+              "label": "Barrier Conditional",
+              "text": "325 Barrier Conditional",
+              "scaling": 1.8,
+              "scales_with": "Spirit Power",
+              "raw": "325 base + 1.8 x Spirit Power"
+            },
+            {
+              "value": "10s",
+              "label": "Duration",
+              "text": "10s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "restorative_locket": {
+    "name": "Restorative Locket",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Restorative_Locket",
+    "codename": "upgrade_restorative_locket",
+    "base": {
+      "passives": [
+        "+10% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "16",
+              "label": "Heal Per Stack",
+              "text": "16 Heal Per Stack"
+            },
+            {
+              "value": "25",
+              "label": "Max Stacks",
+              "text": "25 Max Stacks"
+            },
+            {
+              "value": "3",
+              "label": "Max Stamina Restore",
+              "text": "3 Max Stamina Restore"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "return_fire": {
+    "name": "Return Fire",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Return_Fire",
+    "codename": "upgrade_return_fire",
+    "base": {
+      "passives": [
+        "+10% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "65%",
+              "label": "Bullet Damage Returned",
+              "text": "65% Bullet Damage Returned"
+            },
+            {
+              "value": "25%",
+              "label": "Spirit Damage Returned",
+              "text": "25% Spirit Damage Returned"
+            },
+            {
+              "value": "6.5s",
+              "label": "Duration",
+              "text": "6.5s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "spirit_lifesteal": {
+    "name": "Spirit Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Spirit_Lifesteal_(item)",
+    "codename": "upgrade_health_stealing_magic",
+    "base": {
+      "passives": [
+        "+13% Spirit Lifesteal",
+        "+90 Bonus Health",
+        "+6 Spirit Power"
+      ],
+      "components": []
+    }
+  },
+  "spirit_shielding": {
+    "name": "Spirit Shielding",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Spirit_Shielding",
+    "codename": "upgrade_spirit_bubble",
+    "base": {
+      "passives": [
+        "+2.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "300",
+              "label": "x 5 Barrier Conditional",
+              "text": "300 x 5 Barrier Conditional"
+            },
+            {
+              "value": "+18%",
+              "label": "Spirit Resist Conditional",
+              "text": "+18% Spirit Resist Conditional"
+            },
+            {
+              "value": "225",
+              "label": "Damage Threshold",
+              "text": "225 Damage Threshold"
+            },
+            {
+              "value": "3.5s",
+              "label": "Time Frame",
+              "text": "3.5s Time Frame"
+            },
+            {
+              "value": "8s",
+              "label": "Barrier Duration",
+              "text": "8s Barrier Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "weapon_shielding": {
+    "name": "Weapon Shielding",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Weapon_Shielding",
+    "codename": "upgrade_weapon_shielding",
+    "base": {
+      "passives": [
+        "+2.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "300",
+              "label": "x 5 Barrier Conditional",
+              "text": "300 x 5 Barrier Conditional"
+            },
+            {
+              "value": "+18%",
+              "label": "Bullet Resist Conditional",
+              "text": "+18% Bullet Resist Conditional"
+            },
+            {
+              "value": "250",
+              "label": "Damage Threshold",
+              "text": "250 Damage Threshold"
+            },
+            {
+              "value": "4s",
+              "label": "Time Frame",
+              "text": "4s Time Frame"
+            },
+            {
+              "value": "8s",
+              "label": "Barrier Duration",
+              "text": "8s Barrier Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "arcane_surge": {
+    "name": "Arcane Surge",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Arcane_Surge",
+    "codename": "upgrade_arcane_surge",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+12%",
+              "label": "Ability Range Conditional",
+              "text": "+12% Ability Range Conditional"
+            },
+            {
+              "value": "+15%",
+              "label": "Ability Duration Conditional",
+              "text": "+15% Ability Duration Conditional"
+            },
+            {
+              "value": "+20",
+              "label": "Spirit Power Conditional",
+              "text": "+20 Spirit Power Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Cast Window",
+              "text": "7s Cast Window"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "bullet_resist_shredder": {
+    "name": "Bullet Resist Shredder",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Bullet_Resist_Shredder",
+    "codename": "upgrade_bullet_resist_shredder",
+    "base": {
+      "passives": [
+        "+9% Bullet Resist",
+        "+9% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-10%",
+              "label": "Bullet Resist Conditional",
+              "text": "-10% Bullet Resist Conditional"
+            },
+            {
+              "value": "8s",
+              "label": "Duration",
+              "text": "8s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "cold_front": {
+    "name": "Cold Front",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Cold_Front",
+    "codename": "upgrade_cold_front",
+    "base": {
+      "passives": [
+        "+6% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "95",
+              "label": "Damage",
+              "text": "95 Damage",
+              "scaling": 0.47,
+              "scales_with": "Spirit Power",
+              "raw": "95 base + 0.47 x Spirit Power"
+            },
+            {
+              "value": "-60%",
+              "label": "Move Speed Conditional",
+              "text": "-60% Move Speed Conditional"
+            },
+            {
+              "value": "4s",
+              "label": "Duration",
+              "text": "4s Duration"
+            },
+            {
+              "value": "10m",
+              "label": "End Radius",
+              "text": "10m End Radius"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "compress_cooldown": {
+    "name": "Compress Cooldown",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Compress_Cooldown",
+    "codename": "upgrade_magic_tempo",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+18%",
+              "label": "Ability Cooldown Reduction",
+              "text": "+18% Ability Cooldown Reduction"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "duration_extender": {
+    "name": "Duration Extender",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Duration_Extender",
+    "codename": "upgrade_arcane_extension",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "+22%",
+              "label": "Ability Duration",
+              "text": "+22% Ability Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "improved_spirit": {
+    "name": "Improved Spirit",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Improved_Spirit",
+    "codename": "upgrade_soaring_spirit",
+    "base": {
+      "passives": [
+        "+18 Spirit Power",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": []
+    }
+  },
+  "mystic_slow": {
+    "name": "Mystic Slow",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Mystic_Slow",
+    "codename": "upgrade_magic_slow",
+    "base": {
+      "passives": [
+        "+50 Bonus Health",
+        "+0.75m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-30%",
+              "label": "Move Speed Conditional",
+              "text": "-30% Move Speed Conditional"
+            },
+            {
+              "value": "-12%",
+              "label": "Dash Distance Conditional",
+              "text": "-12% Dash Distance Conditional"
+            },
+            {
+              "value": "2s",
+              "label": "Duration",
+              "text": "2s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mystic_vulnerability": {
+    "name": "Mystic Vulnerability",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Mystic_Vulnerability",
+    "codename": "upgrade_magic_vulnerability",
+    "base": {
+      "passives": [
+        "+8% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-8%",
+              "label": "Spirit Resist Conditional",
+              "text": "-8% Spirit Resist Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "quicksilver_reload": {
+    "name": "Quicksilver Reload",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Quicksilver_Reload",
+    "codename": "upgrade_quick_silver",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "44",
+              "label": "Damage",
+              "text": "44 Damage",
+              "scaling": 0.16,
+              "scales_with": "Spirit Power",
+              "raw": "44 base + 0.16 x Spirit Power"
+            },
+            {
+              "value": "+10%",
+              "label": "Fire Rate",
+              "text": "+10% Fire Rate"
+            },
+            {
+              "value": "100%",
+              "label": "Bullets Reloaded",
+              "text": "100% Bullets Reloaded"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "slowing_hex": {
+    "name": "Slowing Hex",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Slowing_Hex",
+    "codename": "upgrade_containment",
+    "base": {
+      "passives": [
+        "+0.5m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-20%",
+              "label": "Move Speed Conditional",
+              "text": "-20% Move Speed Conditional"
+            },
+            {
+              "value": "-30%",
+              "label": "Dash Distance Conditional",
+              "text": "-30% Dash Distance Conditional"
+            },
+            {
+              "value": "25m",
+              "label": "Cast Range",
+              "text": "25m Cast Range"
+            },
+            {
+              "value": "3.5s",
+              "label": "Duration",
+              "text": "3.5s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "spirit_sap": {
+    "name": "Spirit Sap",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Spirit_Sap",
+    "codename": "upgrade_spirit_sap",
+    "base": {
+      "passives": [
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-9%",
+              "label": "Spirit Resist Conditional",
+              "text": "-9% Spirit Resist Conditional"
+            },
+            {
+              "value": "-30",
+              "label": "Spirit Power",
+              "text": "-30 Spirit Power"
+            },
+            {
+              "value": "12s",
+              "label": "Duration",
+              "text": "12s Duration"
+            },
+            {
+              "value": "40m",
+              "label": "Cast Range",
+              "text": "40m Cast Range"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "suppressor": {
+    "name": "Suppressor",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "wiki_url": "https://deadlock.wiki/Suppressor",
+    "codename": "upgrade_suppressor",
+    "base": {
+      "passives": [
+        "+6 Spirit Power",
+        "+8% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": null,
+          "cooldown": null,
+          "description": null,
+          "stats": [
+            {
+              "value": "-28%",
+              "label": "Fire Rate Conditional",
+              "text": "-28% Fire Rate Conditional"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
