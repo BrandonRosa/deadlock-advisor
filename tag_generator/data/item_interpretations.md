@@ -2,7 +2,7 @@
 
 Source of truth for AI-judged item effectiveness. Each item is interpreted by hand from
 the **fresh structured scrape** (`_scrape_raw_dump.json`, BASE / non-enhanced variant) against
-the governed tag vocabulary in [tags.json](tags.json) and [tag_descriptions.md](tag_descriptions.md).
+the governed tag vocabulary in [tags.json](tags.json) and [Mass Item AI Audit Skill/tag_descriptions.md](Mass%20Item%20AI%20Audit%20Skill/tag_descriptions.md). See [Mass Item AI Audit Skill/SKILL.md](Mass%20Item%20AI%20Audit%20Skill/SKILL.md) for the full audit runbook.
 
 > **Rebuild policy:** the audit always re-runs these interpretations from a fresh scrape unless
 > explicitly told not to. After a balance patch: `python _scrape_items.py` → re-judge below →
@@ -83,10 +83,7 @@ The clean passive-ammo baseline: +30% max ammo and +8% weapon damage, always on,
 | `bullet_damage` | +8% weapon dmg | 8 (eff. gun-dmg %) | 0.6 | adds | Always-on weapon damage |
 | `gun_continuous_damage` | bigger mag, more shots/reload | 8 | 0.5 | adds | More sustained fire before reload |
 | `gun_burst_damage` | +8% per shot | 4 | 0.2 | adds | Minor burst lift |
-| `scaling_early` | cheap always-useful | 60% | 1.2 | adds | Strong early, flattens late |
-
-### Corrections
-Applies to all, be more conservative with the scaling early/scaling late items
+| `scaling_early` | cheap always-useful | 40% | 0.7 | adds | Solid early, but not a game-changer |
 
 ---
 
@@ -108,7 +105,7 @@ Pure passive +9% fire rate. Named anchor for `fire_rate` — the cleanest possib
 | `fire_rate` | +9% fire rate | 9 (eff. fire-rate %) | 0.9 | adds | Clean passive, full uptime |
 | `gun_continuous_damage` | more shots/sec | 9 | 0.6 | adds | Directly lifts sustained DPS |
 | `gun_burst_damage` | faster ramp | 5 | 0.2 | adds | Faster ramp inside the burst window |
-| `scaling_early` | cheap DPS mult | 50% | 1.0 | adds | Cheap early multiplier |
+| `scaling_early` | cheap DPS mult | 30% | 0.6 | adds | Cheap early multiplier |
 
 ---
 
@@ -133,13 +130,11 @@ Pure passive +9% fire rate. Named anchor for `fire_rate` — the cleanest possib
 | `bullet_damage` | +20% (close only) | 16 (20×0.8 uptime) | 1.2 | adds | High close-range uptime for brawlers |
 | `bullet_damage` | range-gated value | 20 | 1.5 | relies | Only pays off if built to fight close |
 | `melee_resistance` | +20% melee resist | 20 (eff. %) | 1.2 | adds | Unconditional melee defense |
-| `melee_damage` | close gun-amp | 10 | 0.3 | adds | Close gun-amp counts partially toward melee |
+| `melee_damage` | close gun-amp counts at 50% weapon→melee scale | 20 | 0.7 | adds | +20% weapon damage × 50% melee scale = effective +10% melee, but full gun value in close range counts toward melee DPS |
 | `gun_burst_damage` | per-shot amp | 8 | 0.4 | adds | Propagation (0.5×bullet_damage) |
 | `gun_continuous_damage` | per-shot amp | 5 | 0.3 | adds | Propagation (0.3×bullet_damage) |
 | `engage` | must close to use | 40% | 0.8 | adds | Forces closing distance |
 
-### Corrections
-melee damage def needs a boost here, Its straight up a gun boost to everythin in melee range. Look at https://deadlock.wiki/Melee_Damage, "Melee damage scales with Boons and Items. It also scales with the Weapon Damage stat at a rate of 50%. However, melee damage is not considered weapon damage, and thus isn't affected by items such as  Metal Skin unless noted otherwise."
 
 ---
 
@@ -159,7 +154,7 @@ melee damage def needs a boost here, Its straight up a gun boost to everythin in
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `headshot_damage` | +45/headshot | 45 (flat headshot dmg) | 1.1 | adds | Clean headshot scaler |
+| `headshot_damage` | +45/headshot | 70% (headshot importance) | 1.1 | adds | T1 anchor: substantial headshot reward — importance% since unit is skill-gated |
 | `headshot_damage` | requires landing heads | 80% | 2.0 | relies | Heavy aim/playstyle dependence |
 | `gun_burst_damage` | +45 spike on head | 45 | 2.0 | adds | Lands inside the burst window |
 | `gun_burst_proc` | proc on first headshot | 1.0 (burst index) | 1.3 | adds | 100%×(dur/window); easy single-shot trigger, big payout |
@@ -167,8 +162,6 @@ melee damage def needs a boost here, Its straight up a gun boost to everythin in
 | `long_range` | slow-fire heads at range | 40% | 0.8 | adds | Favors mid/long ranged play |
 | `high_max_hp` | +30 HP | 30 (flat HP) | 0.3 | adds | Token HP |
 
-### Corrections
-headshot damage's units shouldnt be damage, its kinda a judgement one, it should rather be kinda a % for headshot importance. Ontop of that gun gamage kinda currently has two units, % up and flat damage. This headshot damage is done before the % increases.. So youd have to do a psudo effective % up..
 ---
 
 ## High-Velocity Rounds
@@ -241,10 +234,8 @@ Pure farming item: +25% weapon damage and +25% bullet resist, both **vs NPCs onl
 | `self_heal` | 50/proc off heroes | ~120 (HP/fight eff.) | 0.8 | adds | Several procs over a sustained fight |
 | `continous_heal` | ~8 HP/s trickle | 8 (HP/s) | 0.8 | adds | Sustained out-of-1s heal |
 | `bullet_lifesteal` | bullet-gated self-heal | 6 (eff. lifesteal %) | 1.2 | adds | Functions as weak gun lifesteal |
-| `gun_continuous_proc` | per-shot, cd-gated | ProcImportance 90%/(6×?) | 2.0 | adds | Heals on a cadence as you sustain fire |
-
-### Corrections
-It should have both continous and burst proc, for continous it should either b 90%/(6x6) or 90%/(6x.1) or 90%/(6x3) you could argue the duration is either the whole cooldown, .1(instant), or (half the coldown..)
+| `gun_continuous_proc` | per-shot cd-gated heal, instant | 1.5 (90%/(6×0.1)) | 2.0 | adds | Instant heal (dur≈0.1s), 6s cd: 90%/(6×0.1)=1.5; top continuous proc |
+| `gun_burst_proc` | first bullet in fight triggers heal | 0.9 (90%×(0.1/0.1)) | 1.2 | adds | When cd is reset, first bullet delivers instant 50 HP; burst index 90%×1=0.9 |
 
 ---
 
@@ -265,7 +256,7 @@ Pure +210 HP passive. The cleanest T1 `high_max_hp` provider.
 |---|---|---|---|---|---|
 | `high_max_hp` | +210 HP | 210 (flat HP) | 2.0 | adds | Large clean HP pool |
 | `damage_sponge` | raw HP soaks dmg | 60% | 1.3 | adds | Core of soaking damage |
-| `scaling_early` | cheap survivability | 50% | 1.0 | adds | Strong early |
+| `scaling_early` | cheap survivability | 30% | 0.6 | adds | Cheap early HP |
 
 ---
 
@@ -287,7 +278,7 @@ Pure +210 HP passive. The cleanest T1 `high_max_hp` provider.
 |---|---|---|---|---|---|
 | `continous_heal` | 2.5/s + 1.5 OOC | ~3.0 (HP/s eff.) | 0.3 | adds | 2.5 always-on + 1.5×0.3 OOC |
 | `self_heal` | all self regen | ~3.0 (HP/s) | 0.0 | adds | Self-directed |
-| `scaling_early` | cheap laning sustain | 40% | 0.8 | adds | Early lane staying power |
+| `scaling_early` | cheap laning sustain | 25% | 0.5 | adds | Early lane staying power |
 
 ---
 
@@ -308,14 +299,10 @@ Pure +210 HP passive. The cleanest T1 `high_max_hp` provider.
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `vertical_mobility` | +1 stamina + 12% regen | 1.0 (stamina charge) | 0.1 | adds | One extra air-jump/dash per cycle |
-| `horizontal_mobility` | half-charge | 0.5 (stamina, m/s eq.) | 0.8 | adds | Half toward sprint/dash distance |
+| `horizontal_mobility` | dash ~6m, ~1 use per 9s cycle → 0.7 m/s eff. | 0.7 (m/s eff.) | 1.0 | adds | Dash gives burst horizontal speed; extra charge + 12% faster regen ≈ 0.7 m/s avg |
 | `escape` | panic dash | 60% | 1.2 | adds | Strong disengage |
 | `engage` | jump-on | 40% | 0.8 | adds | Also helps commit |
-| `scaling_early` | cheap, owned early | 50% | 1.0 | adds | Owned from start |
-
-
-### Corrections
-horizontal mobility's main unit is m/s we need to find a conversion for stamina to this. Verical mobility's unit is m ...
+| `scaling_early` | cheap, owned early | 30% | 0.6 | adds | Owned from start |
 
 ---
 
@@ -339,12 +326,10 @@ Active: heals 300 HP over 20s, +2m sprint while channeling, 30m cast. OOC/laning
 |---|---|---|---|---|---|
 | `self_heal` | 300 over 20s | 300 (total HP) | 2.0 | adds | Huge raw heal, OOC-gated (dispels on damage) |
 | `continous_heal` | 15 HP/s, 20s | 15 (HP/s) | 1.5 | adds | Big sustained OOC heal |
-| `horizontal_mobility` | +2m sprint while channeling | 1.0 (m/s eff.) | 1.5 | adds | 2m sprint × 0.5 weight, channel-only |
+| `horizontal_mobility` | +2m sprint while channeling | 1.0 (m/s sprint) | 0.9 | adds | 2m sprint; channel-only so ~50% real uptime during escape, effective ≈1.0 m/s discounted |
 | `escape` | heal+sprint reset | 40% | 0.8 | adds | Disengage-and-recover |
 
 
-### Corrections
-Horizontal mobility needs to look at the effective sprint speed. 
 
 ---
 
@@ -369,10 +354,7 @@ Horizontal mobility needs to look at the effective sprint speed.
 | `burst_heal` | 100/hit | 100 (HP within 1s) | 0.8 | adds | Each hit is a sub-1s spike |
 | `melee_damage` | melee-committed value | 60% | 2.0 | relies | Pays off on melee heroes |
 | `engage` | dive to heal | 50% | 1.0 | adds | Rewards committing to melee |
-| `close_range` | melee only | 50% | 1.0 | adds | Functions only up close |
-
-### Corrections
-close range should be closer to 100%
+| `close_range` | melee only | 90% | 1.8 | adds | Functions ONLY in melee range — nearly 100% importance |
 
 ---
 
@@ -395,15 +377,13 @@ close range should be closer to 100%
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `melee_resistance` | +18% melee resist | 18 (eff. %) | 1.1 | adds | Solid melee defense |
+| `melee_resistance` | +18% resist + parry cd reduction | 23 (eff. %, +5 from more-frequent parries) | 1.4 | adds | +18% passive + -1.75s parry cd allows ~29% more parries → ~5% extra effective mitigation |
 | `high_max_hp` | +75 HP | 75 (flat HP) | 0.7 | adds | Decent HP top-up |
 | `melee_damage` | +30% after parry | 30×0.4 = 12 | 1.0 | adds | Strong but parry-gated uptime |
 | `counter_importance` | punishes melee divers | 70% | 1.4 | adds | Anti-melee / parry reaction |
 | `damage_sponge` | HP + melee resist | 40% | 0.9 | adds | Soaks melee pressure |
 
 
-### Corrections
-the effective melee resistance should be higher, it lowers the parry cooldown. 
 
 
 ---
@@ -428,12 +408,10 @@ the effective melee resistance should be higher, it lowers the parry cooldown.
 | `farmer` | faster traversal | 50% | 1.0 | adds | Camp-to-camp speed |
 | `escape` | sprint disengage | 40% | 0.8 | adds | OOC speed aids retreat |
 | `engage` | close distance | 30% | 0.6 | adds | Pre-fight positioning |
-| `self_heal` | +2 OOC regen | 0.6 (HP/s eff.) | 0.0 | adds | OOC regen × 0.3 |
+| `self_heal` | +2 OOC regen | 9 (total HP, ~15s OOC × 0.3 uptime) | 0.1 | adds | 2/s × 15s OOC session × 30% between-fight uptime ≈ 9 HP total |
 | `small_hitbox` | mobility build | 40% | 1.6 | adds | Harder to track when moving |
 
 
-### Corrections
-self hel's current unit is total healing, so for OOC calculate the total health from a single OOC session, id say itl be around 10-30ish seconds?? idk. But that should make this item around 6-12 total self heal..
 
 ---
 
@@ -453,13 +431,11 @@ self hel's current unit is total healing, so for OOC calculate the total health 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `charge_dependant` | +1 charge | 1.0 (extra charge) | 0.0 | adds | Entire value is the extra charge |
+| `charge_dependant` | +1 charge | 100% | 1.5 | adds | Dimensionless importance: an extra charge is very high impact for charge-kit heroes |
 | `charge_dependant` | useless off-kit | 100% | 2.0 | relies | Pure synergy — needs charge abilities |
 | `spirit_damage` | +7 SP (charged) | 5 (eff. SP) | 0.5 | adds | Gated SP → modest effective |
 | `single_ability_focus` | one charged ability | 60% | 1.2 | adds | Value concentrates on one ability |
 
-### Corrections
-Chrge dependant is more of a judgment based one... this should be closer to 1.5
 
 ---
 
@@ -479,11 +455,7 @@ Pure +10 Spirit Power passive. The clean T1 spirit baseline; named `self_buff` a
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `spirit_damage` | +10 SP | 10 (eff. SP) | 0.9 | adds | Clean flat Spirit Power |
-| `self_buff` | generic stat-up | 80% | 1.8 | adds | Pure self stat boost |
-| `scaling_early` | cheap early SP | 50% | 1.0 | adds | Early caster pickup |
-
-### Corrections
-this is not a buff..
+| `scaling_early` | cheap early SP | 30% | 0.6 | adds | Early caster pickup |
 ---
 
 ## Golden Goose Egg
@@ -506,12 +478,7 @@ Souls-economy consumable: 90 souls/min, -10% damage penalty, +1m sprint, +1 OOC 
 |---|---|---|---|---|---|
 | `farmer` | 90 souls/min | 60% | 1.2 | adds | Economy acceleration without farming |
 | `scaling_late` | front-loaded souls | 60% | 1.7 | adds | Compounds into a stronger late build |
-| `bullet_damage` | -10% penalty | -10 | -0.8 | adds | Real self downside |
-| `spirit_damage` | -10% penalty | -10 (eff. SP eq.) | -0.9 | adds | Penalty hits abilities too |
 | `horizontal_mobility` | +1m sprint | 0.5 (m/s eff.) | 0.8 | adds | 1m sprint × 0.5 |
-
-### Corrections
-The negative damage penalty makes the farming aspect worse, scaling late aspect here is good, maybe just dont look into bullet or spirit damage sinccthe goal is to sell this item to get a boost..
 
 ---
 
@@ -544,7 +511,7 @@ Charge-up proc: 40 bonus spirit damage on trigger. Named anchor for `spirit_proc
 - **wiki**: https://deadlock.wiki/Mystic_Expansion
 
 ### Interpretation
-+20% ability range, kit-wide. Named anchor for `range_extender_dependant`/`multi_ability_focus`.
++20% ability range (per wiki: all abilities, but user correction: treat as single-ability focus — do not award kit-wide multi_ability_focus credit). Named anchor for `range_extender_dependant` at partial credit.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -554,13 +521,10 @@ Charge-up proc: 40 bonus spirit damage on trigger. Named anchor for `spirit_proc
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `range_extender_dependant` | +20% range | 20 (% range, add) | 2.0 | adds | Full-credit range up |
-| `multi_ability_focus` | kit-wide | 100% | 2.0 | adds | Affects every ability's reach |
+| `range_extender_dependant` | +20% range (single item, not kit-wide per correction) | 10 (% range, add, discounted) | 1.2 | adds | Scored as single-ability range add per user correction; half-credit from 20 |
+| `single_ability_focus` | single-ability value | 70% | 1.4 | adds | Range benefit concentrates on the primary ranged ability |
 | `self_buff` | enabler stat | 60% | 1.3 | adds | Self utility |
 | `long_range` | more poke range | 40% | 0.8 | adds | Extends ranged casters |
-
-### Corrections
-it got full credit for range extender, it shouldnt have, the tag_descriptions markdown should explicitley ssy that since it only imbues a single item it should effectvley discont that a bit. this is NOT kit wide, how did this mis interpretation even happen?
 
 ---
 
@@ -581,13 +545,11 @@ it got full credit for range extender, it shouldnt have, the tag_descriptions ma
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `continous_heal` | 28/trigger over 7s | ~4 (HP/s eff.) | 0.4 | adds | Triggered sustained regen |
-| `self_heal` | ~28/trigger | ~28 (HP) | 0.2 | adds | Self-directed |
+| `continous_heal` | 28/trigger over 7s at 75% trigger rate | 3 (HP/s eff., 75% trig.) | 0.3 | adds | 4 HP/s × 7s × 0.75 uptime = 21 HP total; 21/7 = 3 HP/s effective |
+| `self_heal` | ~21 HP/trigger after uptime | 21 (HP, 75% trig.) | 0.2 | adds | 4×7×0.75=21 HP total per triggered session |
 | `high_max_hp` | +50 HP | 50 (flat HP) | 0.5 | adds | Token HP |
 | `spirit_lifesteal` | spirit-uptime sustain | 30% | 2.0 | relies | Rewards ability uptime |
 
-### Corrections
-Total healing should be 4 HP/s*7s with an uptime of about 75% so the total healing (During combat when it matters) should be closer to (21 HP) why is the unit ~4??? especially when the self heal unit right after is 28 (closer to being right). 
 
 ---
 
@@ -611,15 +573,13 @@ Active debuff (32m cast, 5s): -32% fire rate and -8% bullet resist on the target
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate_slow` | -32% fire rate, 5s, 1 target | 32 (eff. %, positive) | 2.0 | adds | Single-target gun shutdown; full debuff value |
+| `fire_rate_slow` | -32% fire rate, 5s active, 1 target | 8 (32%×0.25 uptime×1 tgt) | 0.5 | adds | Unit: slow% × uptime × targets; 32×(5/20)×1=8; Juggernaut passive 36 is anchor |
 | `bullet_resist_shred` | -8% bullet resist, 1 target | 1.6 (8×0.2 single-target) | 0.4 | adds | Small shred on the debuff, positive |
-| `gun_continuous_resistance` | cuts enemy fire rate | 32% | 2.0 | adds | Throttling fire ≈ gun mitigation |
+| `gun_continuous_resistance` | cuts enemy fire rate | 8% | 0.5 | adds | Proportional to effective fire_rate_slow (8%) |
 | `counter_importance` | shuts a gun threat | 80% | 1.6 | adds | Bought vs gun-DPS |
 | `single_target` | one-target cast | 60% | 1.3 | adds | No AoE |
 | `high_max_hp` | +60 HP | 60 (flat HP) | 0.6 | adds | HP rider |
 
-### Corrections
-tag_descriptions litterally says the unit is effective fire rate down %xuptimexunitsHit, why is it just a %?? You pretty much ignored my units! 
 ---
 
 ## Spirit Strike
@@ -674,10 +634,6 @@ Melee-triggered: 40 (+0.37×Spirit Power) spirit damage and -6% spirit resist fo
 | `fire_rate` | +25% (7s window) | 18 (eff. %, ×~0.7 uptime) | 1.2 | adds | Strong but windowed |
 | `bullet_lifesteal` | +16% (7s) | 11 (eff. %) | 1.4 | adds | Real sustain during the buff |
 | `gun_burst_damage` | reload buff window | 20 | 0.6 | adds | Designed burst spike |
-| `ability_spam` | rewards reload timing | 40% | 0.8 | adds | Repeated active use |
-
-### Corrections
-guns dont count as an ability, so no ability spam
 
 ---
 
@@ -705,10 +661,7 @@ guns dont count as an ability, so no ability spam
 | `bullet_damage` | +6% | 6 | 0.3 | adds | Small weapon damage |
 | `cc_resist` | +40% slow resist (active) | 24 (eff. %) | 0.8 | adds | Windowed slow resistance |
 | `escape` | move+slow-resist active | 60% | 1.2 | adds | Disengage tool |
-| `small_hitbox` | mobility build | 40% | 1.6 | adds | Harder to track |
-
-### Corrections
-small hit box is a good choice, but a very high...
+| `small_hitbox` | mobility build | 40% | 0.9 | adds | Harder to track when sliding/moving; real but not as dominant as a true small-hitbox hero bonus |
 
 ---
 
@@ -731,12 +684,10 @@ small hit box is a good choice, but a very high...
 |---|---|---|---|---|---|
 | `gun_continuous_damage` | +45% at full ramp | 45 | 2.0 | adds | Defines sustained-fire DPS |
 | `bullet_damage` | ramps 0→45% | 30 (eff. avg %) | 1.5 | adds | Averaged below the 45% peak |
-| `magazine_size_dependant` | +20% ammo | 20 (eff. ammo %) | 0.4 | adds | Sustains the ramp |
+| `magazine_size_dependant` | +20% ammo | 20 (eff. ammo %) | 0.9 | adds | Titanic Magazine is a T2 outlier (100%) that would normally drag this to 0.4; scored at 0.9 to reflect T2 on-curve value |
 | `gun_burst_damage` | back-loaded | 5 | 0.1 | adds | Little early-burst value |
 | `fire_rate` | reaches peak faster | 30% | 2.0 | relies | Faster fire ramps sooner |
 
-### Corrections
-Im afraid the titanic magazine is pulling too much weight in scoring, make it so that any 2.0 items should have less weight on the general curve since its not uncommon for 2.0 items are outliers and leages ahead of others
 
 ---
 
@@ -788,14 +739,11 @@ Im afraid the titanic magazine is pulling too much weight in scoring, make it so
 |---|---|---|---|---|---|
 | `long_range` | +40% beyond 15m | 100% | 2.0 | adds | The defining 20m+ damage amp |
 | `bullet_damage` | +40% (range only) | 32 (40×0.8 uptime) | 1.6 | adds | Huge for ranged heroes |
-| `bullet_damage` | range-gated | 40 | 2.0 | relies | Only pays off at range |
 | `mid_range` | partial in 11–19m | 40% | 1.3 | adds | Some value mid-band |
 | `gun_burst_damage` | per-shot amp | 16 | 0.5 | adds | Propagation |
 | `gun_continuous_damage` | per-shot amp | 10 | 0.4 | adds | Propagation |
 | `aerial` | preserves air-shots | 40% | 0.9 | adds | Air sniping |
 
-### Corrections
-whats up with the random 40 in bullet damage relies???
 
 ---
 
@@ -817,15 +765,13 @@ whats up with the random 40 in bullet damage relies???
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `melee_damage` | +10% + 25% heavy | 30 (eff. %) | 0.7 | adds | Both light and heavy melee scaled |
+| `melee_damage` | +10% light + 25% heavy bonus | 35 (eff. %) | 1.15 | adds | Light +10%, heavy +35% combined; user-anchored at 1.15 — named anchor for melee charge |
 | `melee_damage` | melee-committed | 60% | 1.3 | relies | Pays off on melee heroes |
 | `close_range` | heavy melee tool | 80% | 1.6 | adds | Point-blank |
 | `grounded` | melee is grounded | 60% | 2.0 | adds | Implicit per `tags.json` |
 | `bullet_resistance` | +6% | 6 (eff. %) | 0.5 | adds | Small bullet resist |
 | `engage` | extended reach | 60% | 1.2 | adds | Heavy-melee gap closer |
 
-### Corrections
-HOW THE HELL IS MELEE DAMAGE ONLY .7 NROMALIZED THIS SHOULD DEF BE HIGHER, like MAYBE 1.15
 
 ---
 
@@ -845,15 +791,13 @@ HOW THE HELL IS MELEE DAMAGE ONLY .7 NROMALIZED THIS SHOULD DEF BE HIGHER, like 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_damage` | +7 SP flat | 7 (eff. SP) | 0.4 | adds | Small flat SP |
+| `spirit_damage` | +7 SP + proc equiv | 20 (eff. SP, 7+(40+1.2×20)/5) | 1.0 | adds | 7 flat SP + (40+24)/5=12.8 proc SP-equiv at 20 SP baseline = 19.8 ≈ 20 |
 | `spirit_damage` | 40 + 1.2×SP proc | 32 (eff. SP) | 2.0 | relies | 40/5 + 1.2×20 = 32 — scales hard with SP |
 | `bullet_proc` | per-shot spirit | high | 1.3 | adds | Bullet-triggered spirit proc |
 | `gun_burst_proc` | single-shot | index | 1.0 | adds | Procs off single shots |
 | `hybrid_damage_usage` | gun trigger + spirit payoff | 100% | 2.0 | adds | Iconic double-dipper |
 | `spirit_burst_damage` | 40+ spike | 40 (dmg in 1s) | 0.8 | adds | Spirit spike in 1s |
 
-### Corrections
-for spirit damage add it shouldve done the +7 flat and the actual damage all at once, more like 7+(40+1.2x20)/5
 
 ---
 
@@ -907,6 +851,7 @@ for spirit damage add it shouldve done the +7 flat and the actual damage all at 
 | `horizontal_mobility` | move on trigger | 0.7 (m/s eff.) | 0.7 | adds | Speed reward post-damage |
 | `gun_continuous_damage` | rewards sustained fire | 10 | 0.4 | adds | Hit the threshold by sustaining |
 | `gun_continuous_proc` | 200 dmg/3.5s | index | 1.0 | adds | Sustained-damage trigger |
+| `gun_burst_proc` | 200 dmg within 3.5s burst window | 0.5 (90%×(2s/3.5s)) | 0.8 | adds | Damage threshold qualifies as burst proc; effect duration ~2s (move+ammo), window 3.5s: 90%×(2/3.5)≈0.51 |
 
 ---
 
@@ -4771,7 +4716,7 @@ A self-buff/throwable: 30% max-HP AoE damage + 3s stun, with +10m move, +3000 te
 
 **Filtering**: a row appears only where |Diff| ≥ 0.15 OR one side is missing.
 
-**Apply? column** (see AUDIT_SKILL.md §10): `[x]` = apply the AI blended value · `[ ]` = skip · a **number** (e.g. `0.8`) = force that exact value. Defaults: `[x]` for Bump/Cut/Add with |diff| ≤ 0.6; `[ ]` for Drops and for |diff| > 0.6.
+**Apply? column** (see Mass Item AI Audit Skill/04_audit_pipeline.md): `[x]` = apply the AI blended value · `[ ]` = skip · a **number** (e.g. `0.8`) = force that exact value. Defaults: `[x]` for Bump/Cut/Add with |diff| ≤ 0.6; `[ ]` for Drops and for |diff| > 0.6.
 
 ## T1 (800 souls)
 
@@ -4787,7 +4732,7 @@ Path: `data/items/extended_magazine.json`
 | `gun_continuous_proc` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `magazine_size_dependant` | 1.50 | 0.90 | -0.60 | Cut JSON → 0.90 | `[x]` |
-| `scaling_early` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[ ]` |
+| `scaling_early` | (null) | 0.70 | +0.70 | Add row, set 0.70 | `[ ]` |
 
 ### Rapid Rounds (`rapid_rounds`, T1 Weapon)
 Path: `data/items/rapid_rounds.json`
@@ -4800,7 +4745,7 @@ Path: `data/items/rapid_rounds.json`
 | `fire_rate` | 1.25 | 0.90 | -0.35 | Cut JSON → 0.90 | `[x]` |
 | `gun_continuous_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `scaling_early` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[ ]` |
+| `scaling_early` | (null) | 0.60 | +0.60 | Add row, set 0.60 | `[ ]` |
 | `single_target` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Close Quarters (`close_quarters`, T1 Weapon)
@@ -4809,13 +4754,12 @@ Path: `data/items/close_quarters.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `aerial` | -0.75 | (drop) | +0.75 | Drop row (AI does not mark this tag) | `[ ]` |
-| `bullet_damage` | 1.12 | 1.57 | +0.45 | Bump JSON → 1.57 | `[x]` |
+| `bullet_damage` | 1.12 | 1.57 | +0.45 | Bump JSON → 1.57 | `[ ]` |
 | `close_range` | 1.25 | 1.60 | +0.35 | Bump JSON → 1.60 | `[x]` |
 | `engage` | 0.40 | 0.80 | +0.40 | Bump JSON → 0.80 | `[x]` |
-| `farmer` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[.1]` |
+| `farmer` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `grounded` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | -1.00 | (drop) | +1.00 | Drop row (AI does not mark this tag) | `[ ]` |
-| `melee_damage` | 0.75 | 0.30 | -0.45 | Cut JSON → 0.30 | `[ ]` |
 | `melee_resistance` | 1.50 | 1.20 | -0.30 | Cut JSON → 1.20 | `[x]` |
 | `mid_range` | -0.15 | (drop) | +0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 
@@ -4829,13 +4773,13 @@ Path: `data/items/headshot_booster.json`
 | `close_range` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.45 | 2.00 | +1.55 | Bump JSON → 2.00 | `[1.5]` |
-| `gun_burst_proc` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[ ]` |
+| `gun_burst_proc` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[x]` |
 | `gun_continuous_damage` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_proc` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `headshot_damage` | 1.25 | 1.60 | +0.35 | Bump JSON → 1.60 | `[x]` |
 | `long_range` | 0.40 | 0.80 | +0.40 | Bump JSON → 0.80 | `[x]` |
 | `scaling_early` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `single_target` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[ ]` |
+| `single_target` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[1]` |
 
 ### High-Velocity Rounds (`high_velocity_rounds`, T1 Weapon)
 Path: `data/items/high_velocity_rounds.json`
@@ -4847,8 +4791,8 @@ Path: `data/items/high_velocity_rounds.json`
 | `close_range` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.50 | 0.20 | -0.30 | Cut JSON → 0.20 | `[x]` |
 | `headshot_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
-| `long_range` | 1.62 | 0.80 | -0.82 | Cut JSON → 0.80 | `[ ]` |
-| `mid_range` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[ ]` |
+| `long_range` | 1.62 | 0.80 | -0.82 | Cut JSON → 0.80 | `[1]` |
+| `mid_range` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[.66]` |
 
 ### Monster Rounds (`monster_rounds`, T1 Weapon)
 Path: `data/items/monster_rounds.json`
@@ -4859,7 +4803,7 @@ Path: `data/items/monster_rounds.json`
 | `bullet_damage` | 0.25 | 0.00 | -0.25 | Cut JSON → 0.00 | `[x]` |
 | `continous_heal` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[x]` |
-| `lane_pusher` | 0.75 | 1.80 | +1.05 | Bump JSON → 1.80 | `[ ]` |
+| `lane_pusher` | 0.75 | 1.80 | +1.05 | Bump JSON → 1.80 | `[x]` |
 | `self_heal` | 0.20 | 0.00 | -0.20 | Cut JSON → 0.00 | `[x]` |
 
 ### Restorative Shot (`restorative_shot`, T1 Weapon)
@@ -4873,9 +4817,9 @@ Path: `data/items/restorative_shot.json`
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.35 | (drop) | -0.35 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_burst_proc` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
+| `gun_burst_proc` | 0.30 | 1.20 | +0.90 | Bump JSON → 1.20 | `[x]` |
 | `gun_continuous_damage` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_continuous_proc` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[ ]` |
+| `gun_continuous_proc` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[.66]` |
 | `scaling_early` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Extra Health (`extra_health`, T1 Vitality)
@@ -4883,9 +4827,9 @@ Path: `data/items/extra_health.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `damage_sponge` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[ ]` |
-| `high_max_hp` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[x]` |
-| `scaling_early` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[ ]` |
+| `damage_sponge` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[1]` |
+| `high_max_hp` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[ ]` |
+| `scaling_early` | (null) | 0.60 | +0.60 | Add row, set 0.60 | `[ ]` |
 
 ### Extra Regen (`extra_regen`, T1 Vitality)
 Path: `data/items/extra_regen.json`
@@ -4895,7 +4839,7 @@ Path: `data/items/extra_regen.json`
 | `continous_heal` | 1.50 | 0.30 | -1.20 | Cut JSON → 0.30 | `[ ]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `scaling_early` | (null) | 0.80 | +0.80 | Add row, set 0.80 | `[ ]` |
+| `scaling_early` | (null) | 0.50 | +0.50 | Add row, set 0.50 | `[ ]` |
 | `self_heal` | 1.50 | 0.00 | -1.50 | Cut JSON → 0.00 | `[ ]` |
 
 ### Extra Stamina (`extra_stamina`, T1 Vitality)
@@ -4905,9 +4849,10 @@ Path: `data/items/extra_stamina.json`
 |---|---|---|---|---|---|
 | `aerial` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.50 | 0.80 | +0.30 | Bump JSON → 0.80 | `[x]` |
-| `escape` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[ ]` |
+| `escape` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[x]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `scaling_early` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[ ]` |
+| `horizontal_mobility` | 0.66 | 1.00 | +0.34 | Bump JSON → 1.00 | `[x]` |
+| `scaling_early` | (null) | 0.60 | +0.60 | Add row, set 0.60 | `[ ]` |
 | `vertical_mobility` | 0.53 | 0.10 | -0.43 | Cut JSON → 0.10 | `[x]` |
 
 ### Healing Rite (`healing_rite`, T1 Vitality)
@@ -4918,15 +4863,15 @@ Path: `data/items/healing_rite.json`
 | `ally_buff` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `assist_importance` | 0.70 | (drop) | -0.70 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_heal` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `continous_heal` | 0.80 | 1.50 | +0.70 | Bump JSON → 1.50 | `[ ]` |
+| `continous_heal` | 0.80 | 1.50 | +0.70 | Bump JSON → 1.50 | `[x]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `escape` | 0.50 | 0.80 | +0.30 | Bump JSON → 0.80 | `[x]` |
 | `farmer` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `horizontal_mobility` | 0.30 | 1.50 | +1.20 | Bump JSON → 1.50 | `[ ]` |
+| `horizontal_mobility` | 0.30 | 0.90 | +0.60 | Bump JSON → 0.90 | `[ ]` |
 | `hybrid_damage_usage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `self_heal` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[ ]` |
+| `self_heal` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[1.5]` |
 | `spirit_damage` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `team_heal` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 
@@ -4935,12 +4880,13 @@ Path: `data/items/melee_lifesteal.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
+| `close_range` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[1.5]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.50 | 1.00 | +0.50 | Bump JSON → 1.00 | `[x]` |
 | `grounded` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | -0.50 | (drop) | +0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `melee_damage` | 1.25 | 0.90 | -0.35 | Cut JSON → 0.90 | `[x]` |
+| `melee_damage` | 1.25 | 0.90 | -0.35 | Cut JSON → 0.90 | `[ ]` |
 | `mid_range` | -0.10 | (drop) | +0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `self_heal` | 1.05 | 1.30 | +0.25 | Bump JSON → 1.30 | `[x]` |
 
@@ -4952,11 +4898,12 @@ Path: `data/items/rebuttal.json`
 | `burst_heal` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_range` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `counter_importance` | 1.20 | 1.40 | +0.20 | Bump JSON → 1.40 | `[x]` |
-| `damage_sponge` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[ ]` |
+| `damage_sponge` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[x]` |
 | `grounded` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.50 | 0.70 | +0.20 | Bump JSON → 0.70 | `[x]` |
 | `long_range` | -0.55 | (drop) | +0.55 | Drop row (AI does not mark this tag) | `[ ]` |
 | `melee_damage` | 0.70 | 1.00 | +0.30 | Bump JSON → 1.00 | `[x]` |
+| `melee_resistance` | 1.00 | 1.40 | +0.40 | Bump JSON → 1.40 | `[x]` |
 
 ### Sprint Boots (`sprint_boots`, T1 Vitality)
 Path: `data/items/sprint_boots.json`
@@ -4969,16 +4916,15 @@ Path: `data/items/sprint_boots.json`
 | `escape` | 0.30 | 0.80 | +0.50 | Bump JSON → 0.80 | `[x]` |
 | `farmer` | 0.50 | 1.00 | +0.50 | Bump JSON → 1.00 | `[x]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `horizontal_mobility` | 0.85 | 1.50 | +0.65 | Bump JSON → 1.50 | `[ ]` |
-| `self_heal` | 0.30 | 0.00 | -0.30 | Cut JSON → 0.00 | `[x]` |
-| `small_hitbox` | (null) | 1.60 | +1.60 | Add row, set 1.60 | `[ ]` |
+| `horizontal_mobility` | 0.85 | 1.50 | +0.65 | Bump JSON → 1.50 | `[x]` |
+| `self_heal` | 0.30 | 0.10 | -0.20 | Cut JSON → 0.10 | `[x]` |
+| `small_hitbox` | (null) | 1.60 | +1.60 | Add row, set 1.60 | `[.5]` |
 
 ### Extra Charge (`extra_charge`, T1 Spirit)
 Path: `data/items/extra_charge.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `charge_dependant` | 1.88 | 0.50 | -1.38 | Cut JSON → 0.50 | `[ ]` |
 | `cooldown_reduction` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `multi_ability_focus` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `single_ability_focus` | 0.60 | 1.20 | +0.60 | Bump JSON → 1.20 | `[x]` |
@@ -4992,12 +4938,11 @@ Path: `data/items/extra_spirit.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `multi_ability_focus` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `scaling_early` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[ ]` |
-| `self_buff` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[ ]` |
+| `scaling_early` | (null) | 0.60 | +0.60 | Add row, set 0.60 | `[ ]` |
 | `single_ability_focus` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_burst_damage` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_damage` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_damage` | 1.50 | 0.90 | -0.60 | Cut JSON → 0.90 | `[x]` |
+| `spirit_damage` | 1.50 | 0.90 | -0.60 | Cut JSON → 0.90 | `[1]` |
 | `ult_focused` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Golden Goose Egg (`golden_goose_egg`, T1 Spirit)
@@ -5006,26 +4951,26 @@ Path: `data/items/golden_goose_egg.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `away_from_team` | -0.20 | (drop) | +0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `bullet_damage` | 0.15 | -0.80 | -0.95 | Cut JSON → -0.80 | `[ ]` |
+| `bullet_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_to_team` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `farmer` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[ ]` |
+| `farmer` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[0]` |
 | `fire_rate` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_kill_count` | -0.33 | (drop) | +0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `horizontal_mobility` | 0.33 | 0.80 | +0.47 | Bump JSON → 0.80 | `[x]` |
-| `hybrid_damage_usage` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
+| `hybrid_damage_usage` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[.75]` |
 | `magazine_size_dependant` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `scaling_early` | -0.20 | (drop) | +0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `scaling_late` | 0.20 | 1.70 | +1.50 | Bump JSON → 1.70 | `[ ]` |
+| `scaling_late` | 0.20 | 1.70 | +1.50 | Bump JSON → 1.70 | `[x]` |
 | `self_heal` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_damage` | 0.20 | -0.90 | -1.10 | Cut JSON → -0.90 | `[ ]` |
+| `spirit_damage` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `vertical_mobility` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Mystic Burst (`mystic_burst`, T1 Spirit)
@@ -5040,7 +4985,7 @@ Path: `data/items/mystic_burst.json`
 | `spirit_burst_proc` | 1.25 | 1.50 | +0.25 | Bump JSON → 1.50 | `[x]` |
 | `spirit_continuous_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_proc` | -0.50 | (drop) | +0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_proc` | 0.35 | 1.30 | +0.95 | Bump JSON → 1.30 | `[ ]` |
+| `spirit_proc` | 0.35 | 1.30 | +0.95 | Bump JSON → 1.30 | `[x]` |
 
 ### Mystic Expansion (`mystic_expansion`, T1 Spirit)
 Path: `data/items/mystic_expansion.json`
@@ -5049,10 +4994,9 @@ Path: `data/items/mystic_expansion.json`
 |---|---|---|---|---|---|
 | `aoe_cluster` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | (null) | 0.80 | +0.80 | Add row, set 0.80 | `[ ]` |
-| `multi_ability_focus` | (null) | 2.00 | +2.00 | Add row, set 2.00 | `[ ]` |
-| `range_extender_dependant` | 1.75 | 2.00 | +0.25 | Bump JSON → 2.00 | `[x]` |
+| `range_extender_dependant` | 1.75 | 1.20 | -0.55 | Cut JSON → 1.20 | `[x]` |
 | `self_buff` | (null) | 1.30 | +1.30 | Add row, set 1.30 | `[ ]` |
-| `single_ability_focus` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
+| `single_ability_focus` | 1.00 | 1.40 | +0.40 | Bump JSON → 1.40 | `[x]` |
 | `spirit_damage` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Mystic Regeneration (`mystic_regeneration`, T1 Spirit)
@@ -5062,10 +5006,10 @@ Path: `data/items/mystic_regeneration.json`
 |---|---|---|---|---|---|
 | `aoe_cluster` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `continous_heal` | 1.00 | 0.40 | -0.60 | Cut JSON → 0.40 | `[x]` |
+| `continous_heal` | 1.00 | 0.30 | -0.70 | Cut JSON → 0.30 | `[.5]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `self_heal` | 1.20 | 0.20 | -1.00 | Cut JSON → 0.20 | `[ ]` |
+| `self_heal` | 1.20 | 0.20 | -1.00 | Cut JSON → 0.20 | `[.5]` |
 | `spirit_burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_burst_proc` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_damage` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5081,14 +5025,14 @@ Path: `data/items/rusted_barrel.json`
 | `assist_importance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_resist_shred` | 0.75 | 0.40 | -0.35 | Cut JSON → 0.40 | `[x]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[ ]` |
+| `counter_importance` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[x]` |
 | `disarm` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `fire_rate_slow` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[ ]` |
-| `gun_continuous_resistance` | (null) | 2.00 | +2.00 | Add row, set 2.00 | `[ ]` |
+| `fire_rate_slow` | 1.00 | 0.50 | -0.50 | Cut JSON → 0.50 | `[x]` |
+| `gun_continuous_resistance` | (null) | 0.50 | +0.50 | Add row, set 0.50 | `[x]` |
 | `high_max_hp` | 0.25 | 0.60 | +0.35 | Bump JSON → 0.60 | `[x]` |
 | `horizontal_mobility` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `single_target` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[ ]` |
+| `single_target` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[x]` |
 | `spirit_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Spirit Strike (`spirit_strike`, T1 Spirit)
@@ -5105,11 +5049,11 @@ Path: `data/items/spirit_strike.json`
 | `long_range` | -0.66 | (drop) | +0.66 | Drop row (AI does not mark this tag) | `[ ]` |
 | `melee_damage` | 0.75 | 1.30 | +0.55 | Bump JSON → 1.30 | `[x]` |
 | `mid_range` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_burst_damage` | 0.75 | 1.30 | +0.55 | Bump JSON → 1.30 | `[x]` |
+| `spirit_burst_damage` | 0.75 | 1.30 | +0.55 | Bump JSON → 1.30 | `[ ]` |
 | `spirit_burst_proc` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_damage` | 0.40 | 1.15 | +0.75 | Bump JSON → 1.15 | `[ ]` |
-| `spirit_resist_shred` | 0.50 | 1.40 | +0.90 | Bump JSON → 1.40 | `[ ]` |
+| `spirit_damage` | 0.40 | 1.15 | +0.75 | Bump JSON → 1.15 | `[.66]` |
+| `spirit_resist_shred` | 0.50 | 1.40 | +0.90 | Bump JSON → 1.40 | `[.66]` |
 
 ## T2 (1600 souls)
 
@@ -5118,7 +5062,6 @@ Path: `data/items/active_reload.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `ability_spam` | (null) | 0.80 | +0.80 | Add row, set 0.80 | `[ ]` |
 | `bullet_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_lifesteal` | 1.00 | 1.40 | +0.40 | Bump JSON → 1.40 | `[x]` |
 | `continous_heal` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5143,19 +5086,19 @@ Path: `data/items/fleetfoot.json`
 |---|---|---|---|---|---|
 | `away_from_team` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_resistance` | 0.33 | 0.50 | +0.17 | Bump JSON → 0.50 | `[x]` |
-| `cc_resist` | (null) | 0.80 | +0.80 | Add row, set 0.80 | `[ ]` |
+| `cc_resist` | (null) | 0.80 | +0.80 | Add row, set 0.80 | `[x]` |
 | `continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
-| `escape` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[ ]` |
+| `escape` | 0.50 | 1.20 | +0.70 | Bump JSON → 1.20 | `[.75]` |
 | `farmer` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `grounded` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_damage` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_proc` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `mid_range` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `small_hitbox` | (null) | 1.60 | +1.60 | Add row, set 1.60 | `[ ]` |
+| `small_hitbox` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[.45]` |
 
 ### Intensifying Magazine (`intensifying_magazine`, T2 Weapon)
 Path: `data/items/intensifying_magazine.json`
@@ -5164,12 +5107,11 @@ Path: `data/items/intensifying_magazine.json`
 |---|---|---|---|---|---|
 | `bullet_damage` | 1.15 | 1.50 | +0.35 | Bump JSON → 1.50 | `[x]` |
 | `farmer` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `fire_rate` | -0.05 | 0.50 | +0.55 | Bump JSON → 0.50 | `[x]` |
+| `fire_rate` | -0.05 | 0.50 | +0.55 | Bump JSON → 0.50 | `[ ]` |
 | `gun_burst_damage` | 0.30 | 0.10 | -0.20 | Cut JSON → 0.10 | `[x]` |
 | `gun_continuous_damage` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[x]` |
 | `gun_continuous_proc` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | -0.15 | (drop) | +0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `magazine_size_dependant` | 0.85 | 0.40 | -0.45 | Cut JSON → 0.40 | `[x]` |
 | `single_target` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Kinetic Dash (`kinetic_dash`, T2 Weapon)
@@ -5177,7 +5119,7 @@ Path: `data/items/kinetic_dash.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `aerial` | 0.70 | 1.10 | +0.40 | Bump JSON → 1.10 | `[x]` |
+| `aerial` | 0.70 | 1.10 | +0.40 | Bump JSON → 1.10 | `[ ]` |
 | `bullet_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_range` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5193,17 +5135,17 @@ Path: `data/items/kinetic_dash.json`
 | `long_range` | -0.10 | (drop) | +0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `magazine_size_dependant` | 0.40 | 0.20 | -0.20 | Cut JSON → 0.20 | `[x]` |
 | `mid_range` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `vertical_mobility` | 0.50 | 0.10 | -0.40 | Cut JSON → 0.10 | `[x]` |
+| `vertical_mobility` | 0.50 | 0.10 | -0.40 | Cut JSON → 0.10 | `[ ]` |
 
 ### Long Range (`long_range`, T2 Weapon)
 Path: `data/items/long_range.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `aerial` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[ ]` |
+| `aerial` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[x]` |
 | `anti_air` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `away_from_team` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `bullet_damage` | 1.00 | 2.10 | +1.10 | Bump JSON → 2.10 | `[ ]` |
+| `bullet_damage` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[ ]` |
 | `close_range` | -0.25 | (drop) | +0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5213,7 +5155,7 @@ Path: `data/items/long_range.json`
 | `horizontal_mobility` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | 1.75 | 2.00 | +0.25 | Bump JSON → 2.00 | `[x]` |
 | `melee_damage` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `mid_range` | 0.40 | 1.30 | +0.90 | Bump JSON → 1.30 | `[ ]` |
+| `mid_range` | 0.40 | 1.30 | +0.90 | Bump JSON → 1.30 | `[.45]` |
 
 ### Melee Charge (`melee_charge`, T2 Weapon)
 Path: `data/items/melee_charge.json`
@@ -5222,18 +5164,17 @@ Path: `data/items/melee_charge.json`
 |---|---|---|---|---|---|
 | `bullet_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_damage` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `close_range` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[ ]` |
+| `close_range` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[x]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `engage` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[ ]` |
+| `engage` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[.66]` |
 | `farmer` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `grounded` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[ ]` |
+| `grounded` | 0.40 | 2.00 | +1.60 | Bump JSON → 2.00 | `[1.5]` |
 | `gun_burst_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_resistance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_resistance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `horizontal_mobility` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | -0.25 | (drop) | +0.25 | Drop row (AI does not mark this tag) | `[ ]` |
-| `melee_damage` | 1.50 | 1.02 | -0.48 | Cut JSON → 1.02 | `[x]` |
 | `single_target` | 0.66 | (drop) | -0.66 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Mystic Shot (`mystic_shot`, T2 Weapon)
@@ -5242,7 +5183,7 @@ Path: `data/items/mystic_shot.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `bullet_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `bullet_proc` | 0.15 | 1.30 | +1.15 | Bump JSON → 1.30 | `[ ]` |
+| `bullet_proc` | 0.15 | 1.30 | +1.15 | Bump JSON → 1.30 | `[1]` |
 | `burst_damage` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5250,12 +5191,13 @@ Path: `data/items/mystic_shot.json`
 | `gun_burst_proc` | 0.50 | 1.00 | +0.50 | Bump JSON → 1.00 | `[x]` |
 | `gun_continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_proc` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `hybrid_damage_usage` | 0.15 | 2.00 | +1.85 | Bump JSON → 2.00 | `[ ]` |
+| `hybrid_damage_usage` | 0.15 | 2.00 | +1.85 | Bump JSON → 2.00 | `[1]` |
 | `long_range` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `scaling_late` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `single_target` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_burst_damage` | 0.50 | 0.80 | +0.30 | Bump JSON → 0.80 | `[x]` |
 | `spirit_burst_proc` | 0.66 | (drop) | -0.66 | Drop row (AI does not mark this tag) | `[ ]` |
+| `spirit_damage` | 1.00 | 1.50 | +0.50 | Bump JSON → 1.50 | `[1]` |
 
 ### Opening Rounds (`opening_rounds`, T2 Weapon)
 Path: `data/items/opening_rounds.json`
@@ -5273,7 +5215,7 @@ Path: `data/items/opening_rounds.json`
 | `pure_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `scaling_early` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[ ]` |
 | `self_buff` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[ ]` |
-| `spirit_damage` | 0.50 | 0.20 | -0.30 | Cut JSON → 0.20 | `[x]` |
+| `spirit_damage` | 0.50 | 0.20 | -0.30 | Cut JSON → 0.20 | `[.33]` |
 
 ### Recharging Rush (`recharging_rush`, T2 Weapon)
 Path: `data/items/recharging_rush.json`
@@ -5281,12 +5223,12 @@ Path: `data/items/recharging_rush.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `ability_spam` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `bullet_damage` | 1.00 | 0.50 | -0.50 | Cut JSON → 0.50 | `[x]` |
+| `bullet_damage` | 1.00 | 0.50 | -0.50 | Cut JSON → 0.50 | `[.75]` |
 | `charge_dependant` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_burst_proc` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_continuous_proc` | 0.33 | 1.00 | +0.67 | Bump JSON → 1.00 | `[ ]` |
+| `gun_burst_proc` | 0.50 | 0.80 | +0.30 | Bump JSON → 0.80 | `[x]` |
+| `gun_continuous_proc` | 0.33 | 1.00 | +0.67 | Bump JSON → 1.00 | `[.75]` |
 | `horizontal_mobility` | (null) | 0.70 | +0.70 | Add row, set 0.70 | `[ ]` |
 | `hybrid_damage_usage` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 | `magazine_size_dependant` | 1.07 | 0.60 | -0.47 | Cut JSON → 0.60 | `[x]` |
@@ -5301,7 +5243,7 @@ Path: `data/items/slowing_bullets.json`
 | `bullet_proc` | 0.50 | 1.30 | +0.80 | Bump JSON → 1.30 | `[ ]` |
 | `cc_resist` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_range` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[ ]` |
+| `counter_importance` | (null) | 1.20 | +1.20 | Add row, set 1.20 | `[.45]` |
 | `debuff` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | -0.10 | (drop) | +0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5309,7 +5251,7 @@ Path: `data/items/slowing_bullets.json`
 | `gun_continuous_damage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `melee_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `mid_range` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `single_target` | 0.10 | 1.10 | +1.00 | Bump JSON → 1.10 | `[ ]` |
+| `single_target` | 0.10 | 1.10 | +1.00 | Bump JSON → 1.10 | `[.66]` |
 
 ### Spirit Shredder Bullets (`spirit_shredder_bullets`, T2 Weapon)
 Path: `data/items/spirit_shredder_bullets.json`
@@ -5320,7 +5262,7 @@ Path: `data/items/spirit_shredder_bullets.json`
 | `bullet_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_proc` | 1.00 | 1.30 | +0.30 | Bump JSON → 1.30 | `[x]` |
 | `close_to_team` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 0.33 | 1.00 | +0.67 | Bump JSON → 1.00 | `[ ]` |
+| `counter_importance` | 0.33 | 1.00 | +0.67 | Bump JSON → 1.00 | `[x]` |
 | `debuff` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5331,7 +5273,7 @@ Path: `data/items/spirit_shredder_bullets.json`
 | `self_heal` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `single_target` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_lifesteal` | 0.90 | 0.30 | -0.60 | Cut JSON → 0.30 | `[ ]` |
+| `spirit_lifesteal` | 0.90 | 0.30 | -0.60 | Cut JSON → 0.30 | `[.8]` |
 | `spirit_resist_shred` | 1.00 | 1.20 | +0.20 | Bump JSON → 1.20 | `[x]` |
 
 ### Split Shot (`split_shot`, T2 Weapon)
@@ -5340,8 +5282,8 @@ Path: `data/items/split_shot.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `aerial` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `aoe_cluster` | 0.50 | 1.50 | +1.00 | Bump JSON → 1.50 | `[ ]` |
-| `bullet_damage` | 0.93 | 1.20 | +0.27 | Bump JSON → 1.20 | `[x]` |
+| `aoe_cluster` | 0.50 | 1.50 | +1.00 | Bump JSON → 1.50 | `[1]` |
+| `bullet_damage` | 0.93 | 1.20 | +0.27 | Bump JSON → 1.20 | `[ ]` |
 | `bullet_proc` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_range` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5349,17 +5291,17 @@ Path: `data/items/split_shot.json`
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
-| `farmer` | 0.10 | 1.60 | +1.50 | Bump JSON → 1.60 | `[ ]` |
+| `farmer` | 0.10 | 1.60 | +1.50 | Bump JSON → 1.60 | `[.66]` |
 | `fire_rate` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `grounded` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 1.50 | (drop) | -1.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_damage` | 0.50 | 0.90 | +0.40 | Bump JSON → 0.90 | `[x]` |
 | `headshot_damage` | -0.10 | (drop) | +0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `lane_pusher` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[ ]` |
+| `lane_pusher` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[1]` |
 | `long_range` | -0.50 | (drop) | +0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `magazine_size_dependant` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `mid_range` | 0.33 | 1.30 | +0.97 | Bump JSON → 1.30 | `[ ]` |
+| `mid_range` | 0.33 | 1.30 | +0.97 | Bump JSON → 1.30 | `[1]` |
 | `scaling_late` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Stalker (`stalker`, T2 Weapon)
@@ -5368,19 +5310,19 @@ Path: `data/items/stalker.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `assist_importance` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
-| `away_from_team` | 0.66 | 1.60 | +0.94 | Bump JSON → 1.60 | `[ ]` |
+| `away_from_team` | 0.66 | 1.60 | +0.94 | Bump JSON → 1.60 | `[x]` |
 | `bullet_damage` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_resist_shred` | 0.50 | 0.90 | +0.40 | Bump JSON → 0.90 | `[x]` |
-| `close_range` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[ ]` |
+| `close_range` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[x]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `debuff` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `dot` | 0.15 | 0.90 | +0.75 | Bump JSON → 0.90 | `[ ]` |
+| `dot` | 0.15 | 0.90 | +0.75 | Bump JSON → 0.90 | `[x]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `grounded` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_proc` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_continuous_damage` | 0.15 | 0.80 | +0.65 | Bump JSON → 0.80 | `[ ]` |
+| `gun_continuous_damage` | 0.15 | 0.80 | +0.65 | Bump JSON → 0.80 | `[x]` |
 | `high_max_hp` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `long_range` | -0.80 | (drop) | +0.80 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5418,14 +5360,14 @@ Path: `data/items/weakening_headshot.json`
 | `bullet_damage` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
 | `bullet_resist_shred` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[x]` |
 | `close_range` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 0.15 | 1.40 | +1.25 | Bump JSON → 1.40 | `[ ]` |
+| `counter_importance` | 0.15 | 1.40 | +1.25 | Bump JSON → 1.40 | `[.45]` |
 | `debuff` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_proc` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_proc` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `headshot_damage` | 0.75 | 0.25 | -0.50 | Cut JSON → 0.25 | `[x]` |
-| `single_target` | 0.40 | 1.10 | +0.70 | Bump JSON → 1.10 | `[ ]` |
+| `headshot_damage` | 0.75 | 0.25 | -0.50 | Cut JSON → 0.25 | `[ ]` |
+| `single_target` | 0.40 | 1.10 | +0.70 | Bump JSON → 1.10 | `[1]` |
 
 ### Battle Vest (`battle_vest`, T2 Vitality)
 Path: `data/items/battle_vest.json`
@@ -5435,7 +5377,7 @@ Path: `data/items/battle_vest.json`
 | `bullet_damage` | 0.80 | 0.60 | -0.20 | Cut JSON → 0.60 | `[x]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `counter_importance` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `damage_sponge` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[ ]` |
+| `damage_sponge` | (null) | 1.80 | +1.80 | Add row, set 1.80 | `[1.25]` |
 | `gun_burst_damage` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_resistance` | 0.66 | (drop) | -0.66 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_damage` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5450,12 +5392,12 @@ Path: `data/items/bullet_lifesteal.json`
 |---|---|---|---|---|---|
 | `bullet_lifesteal` | 1.50 | 1.70 | +0.20 | Bump JSON → 1.70 | `[x]` |
 | `burst_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `continous_heal` | 0.70 | 2.00 | +1.30 | Bump JSON → 2.00 | `[ ]` |
-| `damage_sponge` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[ ]` |
+| `continous_heal` | 0.70 | 2.00 | +1.30 | Bump JSON → 2.00 | `[1]` |
+| `damage_sponge` | (null) | 0.90 | +0.90 | Add row, set 0.90 | `[.45]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_continuous_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
-| `self_heal` | 0.80 | 0.00 | -0.80 | Cut JSON → 0.00 | `[ ]` |
+| `self_heal` | 0.80 | 0.00 | -0.80 | Cut JSON → 0.00 | `[.45]` |
 | `spirit_damage` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Debuff Reducer (`debuff_reducer`, T2 Vitality)
@@ -5463,9 +5405,9 @@ Path: `data/items/debuff_reducer.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `cc_resist` | 1.50 | 0.80 | -0.70 | Cut JSON → 0.80 | `[ ]` |
-| `counter_importance` | 0.80 | 1.60 | +0.80 | Bump JSON → 1.60 | `[ ]` |
-| `debuff_resistance` | 1.50 | 0.80 | -0.70 | Cut JSON → 0.80 | `[ ]` |
+| `cc_resist` | 1.50 | 0.80 | -0.70 | Cut JSON → 0.80 | `[x]` |
+| `counter_importance` | 0.80 | 1.60 | +0.80 | Bump JSON → 1.60 | `[1]` |
+| `debuff_resistance` | 1.50 | 0.80 | -0.70 | Cut JSON → 0.80 | `[1]` |
 | `high_max_hp` | 0.15 | 0.60 | +0.45 | Bump JSON → 0.60 | `[x]` |
 | `spirit_continuous_resistance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 
@@ -5483,7 +5425,7 @@ Path: `data/items/enchanters_emblem.json`
 | `spirit_burst_damage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_burst_resistance` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_damage` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_continuous_resistance` | 0.40 | 1.40 | +1.00 | Bump JSON → 1.40 | `[ ]` |
+| `spirit_continuous_resistance` | 0.40 | 1.40 | +1.00 | Bump JSON → 1.40 | `[x]` |
 | `spirit_resistance` | 1.00 | 1.20 | +0.20 | Bump JSON → 1.20 | `[x]` |
 
 ### Enduring Speed (`enduring_speed`, T2 Vitality)
@@ -5492,16 +5434,16 @@ Path: `data/items/enduring_speed.json`
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
 | `away_from_team` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `cc_resist` | 1.00 | 0.40 | -0.60 | Cut JSON → 0.40 | `[x]` |
+| `cc_resist` | 1.00 | 0.40 | -0.60 | Cut JSON → 0.40 | `[.66]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `counter_importance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `escape` | 1.00 | 1.20 | +0.20 | Bump JSON → 1.20 | `[x]` |
 | `farmer` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `horizontal_mobility` | 1.30 | 2.00 | +0.70 | Bump JSON → 2.00 | `[ ]` |
+| `horizontal_mobility` | 1.30 | 2.00 | +0.70 | Bump JSON → 2.00 | `[x]` |
 | `self_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `small_hitbox` | (null) | 2.00 | +2.00 | Add row, set 2.00 | `[ ]` |
+| `small_hitbox` | (null) | 2.00 | +2.00 | Add row, set 2.00 | `[.5]` |
 | `vertical_mobility` | 0.25 | 2.00 | +1.75 | Bump JSON → 2.00 | `[ ]` |
 
 ### Guardian Ward (`guardian_ward`, T2 Vitality)
@@ -5519,29 +5461,29 @@ Path: `data/items/guardian_ward.json`
 | `cooldown_reduction` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
-| `horizontal_mobility` | 0.25 | 1.00 | +0.75 | Bump JSON → 1.00 | `[ ]` |
+| `horizontal_mobility` | 0.25 | 1.00 | +0.75 | Bump JSON → 1.00 | `[.33]` |
 | `low_max_hp` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `multi_ability_focus` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `range_extender_dependant` | 0.10 | 0.50 | +0.40 | Bump JSON → 0.50 | `[x]` |
 | `self_heal` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `shield` | 1.25 | 0.60 | -0.65 | Cut JSON → 0.60 | `[ ]` |
-| `team_heal` | 0.70 | 1.90 | +1.20 | Bump JSON → 1.90 | `[ ]` |
+| `shield` | 1.25 | 0.60 | -0.65 | Cut JSON → 0.60 | `[1]` |
+| `team_heal` | 0.70 | 1.90 | +1.20 | Bump JSON → 1.90 | `[1]` |
 
 ### Healbane (`healbane`, T2 Vitality)
 Path: `data/items/healbane.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `anti_heal` | 1.15 | 2.00 | +0.85 | Bump JSON → 2.00 | `[ ]` |
+| `anti_heal` | 1.15 | 2.00 | +0.85 | Bump JSON → 2.00 | `[1.5]` |
 | `aoe_cluster` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `assist_importance` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `burst_heal` | 0.50 | 1.40 | +0.90 | Bump JSON → 1.40 | `[ ]` |
+| `burst_heal` | 0.50 | 1.40 | +0.90 | Bump JSON → 1.40 | `[1]` |
 | `close_to_team` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[x]` |
+| `counter_importance` | 1.50 | 2.00 | +0.50 | Bump JSON → 2.00 | `[1.5]` |
 | `debuff` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_assist_count` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `high_kill_count` | 0.33 | 1.10 | +0.77 | Bump JSON → 1.10 | `[ ]` |
+| `high_kill_count` | 0.33 | 1.10 | +0.77 | Bump JSON → 1.10 | `[.66]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `hybrid_damage_usage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `multi_ability_focus` | 0.66 | (drop) | -0.66 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5560,12 +5502,12 @@ Path: `data/items/healing_booster.json`
 | `assist_importance` | 0.50 | 1.00 | +0.50 | Bump JSON → 1.00 | `[x]` |
 | `bullet_lifesteal` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_heal` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `continous_heal` | 1.30 | 0.40 | -0.90 | Cut JSON → 0.40 | `[ ]` |
+| `continous_heal` | 1.30 | 0.40 | -0.90 | Cut JSON → 0.40 | `[.66]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `self_heal` | 1.75 | 0.20 | -1.55 | Cut JSON → 0.20 | `[ ]` |
+| `self_heal` | 1.75 | 0.20 | -1.55 | Cut JSON → 0.20 | `[.75]` |
 | `spirit_lifesteal` | 0.20 | (drop) | -0.20 | Drop row (AI does not mark this tag) | `[ ]` |
-| `team_heal` | 0.50 | 0.30 | -0.20 | Cut JSON → 0.30 | `[x]` |
+| `team_heal` | 0.50 | 0.30 | -0.20 | Cut JSON → 0.30 | `[ ]` |
 
 ### Reactive Barrier (`reactive_barrier`, T2 Vitality)
 Path: `data/items/reactive_barrier.json`
@@ -5574,12 +5516,12 @@ Path: `data/items/reactive_barrier.json`
 |---|---|---|---|---|---|
 | `away_from_team` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_heal` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
-| `burst_resistance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[ ]` |
+| `burst_resistance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[1.5]` |
 | `cc_resist` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[ ]` |
-| `damage_sponge` | 1.10 | 2.00 | +0.90 | Bump JSON → 2.00 | `[ ]` |
+| `counter_importance` | 1.00 | 1.60 | +0.60 | Bump JSON → 1.60 | `[1.25]` |
+| `damage_sponge` | 1.10 | 2.00 | +0.90 | Bump JSON → 2.00 | `[1.5]` |
 | `debuff_resistance` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `engage` | 0.40 | (drop) | -0.40 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5614,7 +5556,7 @@ Path: `data/items/restorative_locket.json`
 | `long_range` | -0.66 | (drop) | +0.66 | Drop row (AI does not mark this tag) | `[ ]` |
 | `mid_range` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `range_extender_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
-| `self_heal` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[ ]` |
+| `self_heal` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[1.5]` |
 | `spirit_burst_resistance` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_resistance` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_resistance` | 0.50 | 0.70 | +0.20 | Bump JSON → 0.70 | `[x]` |
@@ -5633,7 +5575,7 @@ Path: `data/items/return_fire.json`
 | `continuous_resistance` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `cooldown_reduction` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `counter_importance` | 1.20 | 2.00 | +0.80 | Bump JSON → 2.00 | `[ ]` |
-| `damage_sponge` | 1.12 | 2.00 | +0.88 | Bump JSON → 2.00 | `[ ]` |
+| `damage_sponge` | 1.12 | 2.00 | +0.88 | Bump JSON → 2.00 | `[1.5]` |
 | `disarm` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `duration_dependant` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `gun_burst_damage` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5663,7 +5605,7 @@ Path: `data/items/spirit_lifesteal.json`
 | `self_heal` | 0.80 | 0.00 | -0.80 | Cut JSON → 0.00 | `[ ]` |
 | `spirit_burst_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_proc` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
-| `spirit_lifesteal` | 1.50 | 0.60 | -0.90 | Cut JSON → 0.60 | `[ ]` |
+| `spirit_lifesteal` | 1.50 | 0.60 | -0.90 | Cut JSON → 0.60 | `[1.25]` |
 
 ### Spirit Shielding (`spirit_shielding`, T2 Vitality)
 Path: `data/items/spirit_shielding.json`
@@ -5675,8 +5617,8 @@ Path: `data/items/spirit_shielding.json`
 | `burst_resistance` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continuous_resistance` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[ ]` |
-| `damage_sponge` | (null) | 1.60 | +1.60 | Add row, set 1.60 | `[ ]` |
+| `counter_importance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[1.5]` |
+| `damage_sponge` | (null) | 1.60 | +1.60 | Add row, set 1.60 | `[1]` |
 | `engage` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `escape` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5685,8 +5627,8 @@ Path: `data/items/spirit_shielding.json`
 | `long_range` | -0.05 | (drop) | +0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `low_max_hp` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `self_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `shield` | 0.75 | 2.00 | +1.25 | Bump JSON → 2.00 | `[ ]` |
-| `spirit_burst_resistance` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[ ]` |
+| `shield` | 0.75 | 2.00 | +1.25 | Bump JSON → 2.00 | `[1.5]` |
+| `spirit_burst_resistance` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[1.5]` |
 | `spirit_continuous_resistance` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `vertical_mobility` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 
@@ -5701,10 +5643,10 @@ Path: `data/items/weapon_shielding.json`
 | `burst_resistance` | 1.00 | (drop) | -1.00 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continous_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
 | `continuous_resistance` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `counter_importance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[ ]` |
-| `damage_sponge` | 0.80 | 1.60 | +0.80 | Bump JSON → 1.60 | `[ ]` |
+| `counter_importance` | 1.00 | 1.80 | +0.80 | Bump JSON → 1.80 | `[1.5]` |
+| `damage_sponge` | 0.80 | 1.60 | +0.80 | Bump JSON → 1.60 | `[1]` |
 | `escape` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
-| `gun_burst_resistance` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[ ]` |
+| `gun_burst_resistance` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[1.5]` |
 | `gun_continuous_resistance` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `high_max_hp` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `horizontal_mobility` | 0.80 | (drop) | -0.80 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5712,7 +5654,7 @@ Path: `data/items/weapon_shielding.json`
 | `low_max_hp` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `melee_resistance` | 0.15 | (drop) | -0.15 | Drop row (AI does not mark this tag) | `[ ]` |
 | `self_heal` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
-| `shield` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[ ]` |
+| `shield` | 1.00 | 2.00 | +1.00 | Bump JSON → 2.00 | `[1.5]` |
 | `vertical_mobility` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 
 ### Arcane Surge (`arcane_surge`, T2 Spirit)
@@ -5720,11 +5662,11 @@ Path: `data/items/arcane_surge.json`
 
 | Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |
 |---|---|---|---|---|---|
-| `ability_spam` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[ ]` |
+| `ability_spam` | (null) | 1.00 | +1.00 | Add row, set 1.00 | `[.5]` |
 | `aerial` | 0.60 | (drop) | -0.60 | Drop row (AI does not mark this tag) | `[ ]` |
 | `burst_damage` | 0.10 | (drop) | -0.10 | Drop row (AI does not mark this tag) | `[ ]` |
 | `close_range` | 0.33 | (drop) | -0.33 | Drop row (AI does not mark this tag) | `[ ]` |
-| `duration_dependant` | 0.30 | 0.90 | +0.60 | Bump JSON → 0.90 | `[ ]` |
+| `duration_dependant` | 0.30 | 0.90 | +0.60 | Bump JSON → 0.90 | `[.75]` |
 | `engage` | 0.75 | (drop) | -0.75 | Drop row (AI does not mark this tag) | `[ ]` |
 | `escape` | 0.50 | (drop) | -0.50 | Drop row (AI does not mark this tag) | `[ ]` |
 | `farmer` | 0.30 | (drop) | -0.30 | Drop row (AI does not mark this tag) | `[ ]` |
@@ -5740,7 +5682,7 @@ Path: `data/items/arcane_surge.json`
 | `spirit_continuous_damage` | 0.25 | (drop) | -0.25 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_continuous_proc` | 0.05 | (drop) | -0.05 | Drop row (AI does not mark this tag) | `[ ]` |
 | `spirit_damage` | 0.50 | 0.90 | +0.40 | Bump JSON → 0.90 | `[x]` |
-| `vertical_mobility` | 0.50 | 0.10 | -0.40 | Cut JSON → 0.10 | `[x]` |
+| `vertical_mobility` | 0.50 | 0.10 | -0.40 | Cut JSON → 0.10 | `[.5]` |
 
 ### Bullet Resist Shredder (`bullet_resist_shredder`, T2 Spirit)
 Path: `data/items/bullet_resist_shredder.json`

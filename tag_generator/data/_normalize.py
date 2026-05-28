@@ -8,7 +8,7 @@ compares each row's COMPARATIVE RAW against the rest of the set tag-by-tag, and
 INSERTS a `Normalized` column (0–2) between Comparative raw and Mode, producing the
 6-col format `| Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |`.
 
-Normalization model (per AUDIT_SKILL.md / tag_descriptions.md):
+Normalization model (per Mass Item AI Audit Skill/03_normalization.md + tag_descriptions.md):
   • LADDERED tags (physical effective-stat units expected to grow ~1.5×/tier): we DIVIDE OUT
     the tier growth first — quality = |raw| / 1.5^tier — so tiers are comparable on an
     effect-PER-COST basis. The best quality among STANDARD (non-Street-Brawl) items = 2.0

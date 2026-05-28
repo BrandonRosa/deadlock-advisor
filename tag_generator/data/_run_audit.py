@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Item-interpretations audit (Pipeline A — hand-table driven, per AUDIT_SKILL.md §2/§9).
+Item-interpretations audit (Pipeline A — hand-table driven, per Mass Item AI Audit Skill/).
 
 Reads the hand-authored `### Calculator tags` tables in item_interpretations.md,
 blends `AI = adds + 0.25 x relies` per tag, compares against each item's current
@@ -161,7 +161,7 @@ def main():
     a('')
     a('**Filtering**: a row appears only where |Diff| ≥ %.2f OR one side is missing.' % AUDIT_THRESHOLD)
     a('')
-    a('**Apply? column** (see AUDIT_SKILL.md §10): `[x]` = apply the AI blended value · `[ ]` = skip · a **number** (e.g. `0.8`) = force that exact value. Defaults: `[x]` for Bump/Cut/Add with |diff| ≤ %.1f; `[ ]` for Drops and for |diff| > %.1f.' % (BIG_DIFF, BIG_DIFF))
+    a('**Apply? column** (see Mass Item AI Audit Skill/04_audit_pipeline.md): `[x]` = apply the AI blended value · `[ ]` = skip · a **number** (e.g. `0.8`) = force that exact value. Defaults: `[x]` for Bump/Cut/Add with |diff| ≤ %.1f; `[ ]` for Drops and for |diff| > %.1f.' % (BIG_DIFF, BIG_DIFF))
     a('')
 
     for t in order:

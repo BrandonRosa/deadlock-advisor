@@ -26,7 +26,7 @@ a flat text scrape destroys. We preserve it:
   * Changelog (Update history).
 
 Interpretation (turning this into effective-raw Calculator tags) is the JUDGMENT
-step done against AUDIT_SKILL.md units — this tool only gathers structured source.
+step done against Mass Item AI Audit Skill/01_scoring_units.md — this tool only gathers structured source.
 
 The authoritative item list (name, category, tier, wiki slug) is imported from
 public/resources/items/generate_items.py so the two never drift.
