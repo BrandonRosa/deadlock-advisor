@@ -3747,6 +3747,7 @@ function openCalcBuild(heroName, buildIdx) {
   el.appendChild(mkTagPanel(heroName, buildIdx));
   el.appendChild(mkBestWorstVsPanel(b));
   el.appendChild(mkAssistCounterBuildPanel(b, heroName, buildIdx));
+  el.appendChild(mkBuildScreenPanel(b, heroName, buildIdx));
   el.appendChild(mkBuildPathPanel(b));
   el.appendChild(mkBreakdownPanel(b));
   el.appendChild(mkItemsPanel(b, heroName));
@@ -7695,6 +7696,643 @@ function formatBpDebug(allHeroDbgList) {
     }
   }
   return lines.join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Build Screen panel (sectioned grid, Deadlock in-game build-browser style).
+// Sits ABOVE the Build Path Guide on the Calc Build Detail page. Reads the
+// same `pathData` the Build Path Guide consumes but re-arranges it into
+// Core / Optional / Counter columns per phase. See plan doc for the algorithm
+// spec.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Merged-phase definitions. The build-path algorithm uses 5 phases internally
+// (Lane / Early / Mid / Late / Extra Late). The Build Screen keeps Extra Late
+// as its own row (luxury / 6th-slot items) and merges Lane into Early since
+// the in-game build-browser typically combines them into a single "Early Game"
+// section in the reference screenshots.
+// Look up a tag's short user-facing label from tags.json (S.tags). Prefers
+// the compact `short_label` field, falls back to the full `name`, then a
+// humanized version of the code. Used for UI surfaces where space is tight
+// (tile captions, counter group headers).
+function bsTagDisplayName(code) {
+  const t = S.tags?.find(t => t.code === code);
+  return t?.short_label || t?.name || code.replace(/_/g, ' ');
+}
+
+const BS_MERGED_PHASES = [
+  { label: 'Lane',       sources: ['Lane'],       primaryTiers: [800] },
+  { label: 'Early',      sources: ['Early'],      primaryTiers: [1600] },
+  { label: 'Mid',        sources: ['Mid'],        primaryTiers: [3200] },
+  { label: 'Late',       sources: ['Late'],       primaryTiers: [6400] },
+  { label: 'Extra Late', sources: ['Extra Late'], primaryTiers: [6400] },
+];
+
+// Given a required/signature item's tier, return the phase label it most
+// naturally belongs to. Mapping derived from PHASE_TIER_MULTS peaks:
+//   T1 (800)   → Lane peaks (1.3)         → Lane
+//   T2 (1600)  → Lane/Early (~0.9)        → Early
+//   T3 (3200)  → Mid peaks (1.05)         → Mid
+//   T4 (6400+) → Late/Extra Late peaks    → Late
+function bsMergedPhaseForTier(tier) {
+  if (tier <= 800)  return 'Lane';
+  if (tier <= 1600) return 'Early';
+  if (tier <= 3200) return 'Mid';
+  return 'Late';
+}
+
+// Compute the enemy team's consensus vulnerability vector — the same shape
+// of analysis the surge algorithm uses for anti-spike anchors, but exposed
+// as a standalone helper so the Build Screen's Counter column can group
+// items by countered tag with per-tag enemy attribution.
+//
+// For each enemy hero, take their selected build's enemy_weight, find the
+// top-4 most-negative tags (= tags they're weakest to). Aggregate across
+// enemies: each tag accumulates its contributing enemies + a strength
+// score weighted by magnitude × focus multiplier.
+//
+// Returns: [{ tag, contributingEnemies: [heroKey...], strength }, ...]
+// sorted by strength descending.
+function bsConsensusVulnerability(b) {
+  const enemies = MATCH.enemies || [];
+  if (!enemies.length) return [];
+
+  // Focus comes from this build's sim state if one exists — same source the
+  // Simulator's Focus modal writes to. No sim state → no focus weighting.
+  const simKey = `${b.heroName}::${b.buildIdx}`;
+  const focused = new Set(MATCH.simStates?.[simKey]?.focused?.enemies || []);
+
+  const agg = {};  // tag → { contributingEnemies: [], strength }
+
+  enemies.forEach(enemyKey => {
+    const hero = MATCH.heroData[enemyKey];
+    if (!hero?.builds?.length) return;
+    const sel = MATCH.selectedBuilds?.[enemyKey];
+    const buildIdx = typeof sel === 'number' ? sel : 0;
+    const build = hero.builds[buildIdx] || hero.builds[0];
+    if (!build) return;
+    let resolved;
+    try { resolved = resolveBuildValues(build, hero.builds); } catch { resolved = build.values || {}; }
+    const ew = resolved.enemy_weight || {};
+    const focusMult = focused.has(enemyKey) ? 2 : 1;
+    // Top-4 most-negative weights
+    const top = Object.entries(ew)
+      .filter(([_, v]) => typeof v === 'number' && v < 0)
+      .sort((a, c) => a[1] - c[1])
+      .slice(0, 4);
+    top.forEach(([tag, val]) => {
+      if (!agg[tag]) agg[tag] = { contributingEnemies: [], strength: 0 };
+      if (!agg[tag].contributingEnemies.includes(enemyKey)) {
+        agg[tag].contributingEnemies.push(enemyKey);
+      }
+      agg[tag].strength += Math.abs(val) * focusMult;
+    });
+  });
+
+  return Object.entries(agg)
+    .map(([tag, d]) => ({ tag, ...d }))
+    .sort((a, c) => c.strength - a.strength);
+}
+
+// Single-pass global categorization of every scored item into:
+//   core / counter / assist / optional × {Lane, Early, Mid, Late, Extra Late}
+// Every item is placed at most once (no duplicates across phases or sections).
+//
+// Algorithm per user spec:
+//   1. Core    — required items + top items by .self (per phase tier, capped)
+//   2. Counter — leftover items with counter_importance >= 0.5, by .enemy
+//   3. Assist  — leftover items with assist_importance  >= 0.5, by .ally
+//   4. Optional — leftovers with .self > 0, sorted by .self + small counter/assist boost
+//
+// Late vs Extra Late split: T4 items naturally map to Late via
+// bsMergedPhaseForTier. After Core is filled, the bottom half of remaining
+// T4 candidates is moved to Extra Late so the luxury slot has content.
+function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet) {
+  const PHASES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+  const empty = () => Object.fromEntries(PHASES.map(p => [p, []]));
+  const result = {
+    core:          empty(),
+    assist:        empty(),
+    optional:      empty(),
+    // Counter is grouped by countered tag and bucketed into phase rows by the
+    // group's average item cost. Shape: { Lane: [group], Early: [group], ... }
+    // where each group = { tag, items: [itemKey], contributingEnemies: [heroKey],
+    // strength, avgCost }. Phase placement is purely visual — items themselves
+    // are still usable any time the player needs the counter.
+    counterGroups: empty(),
+  };
+  const placed = new Set();
+
+  // Bucket all non-blacklisted scored items by their natural phase
+  const candidatesByPhase = empty();
+  (b.items || []).forEach(it => {
+    if (blacklistSet.has(it.key)) return;
+    const phase = bsMergedPhaseForTier(it.tier || 0);
+    candidatesByPhase[phase].push(it);
+  });
+
+  const COUNTER_THRESH = 0.5;
+  const ASSIST_THRESH  = 0.5;
+  const COUNTER_MAX_PER_PHASE = 4;
+  const ASSIST_MAX_PER_PHASE  = 4;
+  const OPTIONAL_MAX_PER_PHASE = 5;
+  const BOOST = 0.15;
+
+  // Per-item importance tags live at values.playstyle_score.X — these aren't
+  // included in b.items aggregations, so we read them off the raw item map.
+  const counterImp = k => bpItemMap[k]?.values?.playstyle_score?.counter_importance || 0;
+  const assistImp  = k => bpItemMap[k]?.values?.playstyle_score?.assist_importance  || 0;
+  const boostedSelf = it =>
+    (it.self || 0) + BOOST * (counterImp(it.key) + assistImp(it.key));
+
+  // ── Pass 1: Core ──
+  // Required items always Core (no budget gate). Then top-self fills items
+  // until per-phase soul budget is exhausted (soft cap — the item that
+  // pushes us over the budget still gets included, but we stop after that).
+  PHASES.forEach(phase => {
+    const cands = candidatesByPhase[phase];
+    const budget = bsCorePhaseBudget(phase);
+    let spent = 0;
+    cands
+      .filter(it => requiredSet.has(it.key) && !placed.has(it.key))
+      .forEach(it => {
+        placed.add(it.key);
+        result.core[phase].push(it.key);
+        spent += it.tier || 0;
+      });
+    for (const it of cands
+      .filter(it => !placed.has(it.key))
+      .sort((a, c) => (c.self || 0) - (a.self || 0))) {
+      if (spent >= budget) break;
+      placed.add(it.key);
+      result.core[phase].push(it.key);
+      spent += it.tier || 0;
+    }
+  });
+
+  // ── T4 split: move bottom half of remaining Late T4 candidates into
+  //    Extra Late so the luxury slot has content. Items already placed in
+  //    Late Core stay there. ──
+  {
+    const lateRemaining = candidatesByPhase['Late']
+      .filter(it => !placed.has(it.key))
+      .sort((a, c) => (c.self || 0) - (a.self || 0));
+    const half = Math.ceil(lateRemaining.length / 2);
+    const lateKeep = new Set(lateRemaining.slice(0, half).map(it => it.key));
+    candidatesByPhase['Late'] = candidatesByPhase['Late']
+      .filter(it => placed.has(it.key) || lateKeep.has(it.key));
+    candidatesByPhase['Extra Late'] = [
+      ...candidatesByPhase['Extra Late'],
+      ...lateRemaining.slice(half),
+    ];
+  }
+
+  // ── Pass 2: Counter Picks — score globally, group by primary tag, bucket by avg cost ──
+  // 1. Compute the enemy team's consensus vulnerability vector.
+  // 2. Score every unplaced counter-flagged item by its weighted match against
+  //    that vector (sum of playstyle_score[vulnTag] × consensus.strength,
+  //    multiplied by the item's own counter_importance).
+  // 3. Take the global top-N — these are the most-effective counter picks
+  //    available for this enemy team, period.
+  // 4. Group each item under the single vulnerability tag it scores highest
+  //    against (its "primary countered tag").
+  // 5. For each tag-group, compute average item tier → map to a phase row
+  //    (Lane / Early / Mid / Late / Extra Late) purely as a visual hint of
+  //    when the items typically come online. Items remain usable any phase.
+  const COUNTER_TOP_N = 12;
+  const vulnTags = bsConsensusVulnerability(b);
+  const vulnMap  = Object.fromEntries(vulnTags.map(v => [v.tag, v]));
+
+  const counterScored = Object.values(candidatesByPhase).flat()
+    .filter(it => !placed.has(it.key))
+    .filter(it => counterImp(it.key) >= COUNTER_THRESH)
+    .map(it => {
+      const ps = bpItemMap[it.key]?.values?.playstyle_score || {};
+      let primaryTag = null;
+      let primaryVal = 0;
+      let totalScore = 0;
+      vulnTags.forEach(v => {
+        const psv = ps[v.tag] || 0;
+        if (psv <= 0) return;
+        const contrib = psv * v.strength;
+        totalScore += contrib;
+        if (contrib > primaryVal) {
+          primaryVal = contrib;
+          primaryTag = v.tag;
+        }
+      });
+      return {
+        key: it.key,
+        tier: it.tier || 0,
+        score: totalScore * counterImp(it.key),
+        primaryTag,
+      };
+    })
+    .filter(s => s.primaryTag && s.score > 0)
+    .sort((a, c) => c.score - a.score)
+    .slice(0, COUNTER_TOP_N);
+
+  const groupsMap = {};
+  counterScored.forEach(s => {
+    if (!groupsMap[s.primaryTag]) {
+      groupsMap[s.primaryTag] = { items: [], totalTier: 0 };
+    }
+    groupsMap[s.primaryTag].items.push(s.key);
+    groupsMap[s.primaryTag].totalTier += s.tier;
+    placed.add(s.key);
+  });
+
+  Object.entries(groupsMap).forEach(([tag, g]) => {
+    const avgCost = g.items.length ? g.totalTier / g.items.length : 0;
+    const phase = bsMergedPhaseForTier(avgCost);
+    const vuln = vulnMap[tag];
+    result.counterGroups[phase].push({
+      tag,
+      items: g.items,
+      contributingEnemies: vuln?.contributingEnemies || [],
+      strength: vuln?.strength || 0,
+      avgCost: Math.round(avgCost),
+    });
+  });
+
+  // Sort groups within each phase by strength (most-pressing vuln first)
+  Object.keys(result.counterGroups).forEach(p =>
+    result.counterGroups[p].sort((a, c) => c.strength - a.strength));
+
+  // ── Pass 3: Assist — items with assist_importance >= 0.5, by .ally ──
+  PHASES.forEach(phase => {
+    candidatesByPhase[phase]
+      .filter(it => !placed.has(it.key))
+      .filter(it => assistImp(it.key) >= ASSIST_THRESH)
+      .sort((a, c) => (c.ally || 0) - (a.ally || 0))
+      .slice(0, ASSIST_MAX_PER_PHASE)
+      .forEach(it => { placed.add(it.key); result.assist[phase].push(it.key); });
+  });
+
+  // ── Pass 4: Optional — leftovers sorted by boosted self ──
+  PHASES.forEach(phase => {
+    candidatesByPhase[phase]
+      .filter(it => !placed.has(it.key))
+      .filter(it => (it.self || 0) > 0)
+      .sort((a, c) => boostedSelf(c) - boostedSelf(a))
+      .slice(0, OPTIONAL_MAX_PER_PHASE)
+      .forEach(it => { placed.add(it.key); result.optional[phase].push(it.key); });
+  });
+
+  return result;
+}
+
+// Resolve all per-build constraint sets (required / signature / blacklist /
+// counter slots) the same way the build-path algorithms do — via
+// resolveBuildConstraints, which handles followed_build inheritance and
+// _excluded variants. Falls back to raw build fields when hero data isn't
+// loaded (matches the existing fallback in computeBuildPath).
+function bsResolveConstraints(b) {
+  const DEFAULT_COUNTER_SLOTS = [[0,1],[0,2],[1,2],[2,3],[2,4]];
+  const _hbList = MATCH.heroData[b.heroName]?.builds || null;
+  const _ownBuild = _hbList ? (_hbList[b.buildIdx] || _hbList.find(hb => hb.name === b.name)) : null;
+  if (_hbList && _ownBuild) {
+    return resolveBuildConstraints(_ownBuild, _hbList);
+  }
+  return {
+    signature_items: new Set(b.signature_items || []),
+    required_items:  new Set(b.required_items  || []),
+    blacklist_items: new Set(b.blacklist_items || []),
+    counter_phase_slots: DEFAULT_COUNTER_SLOTS,
+  };
+}
+
+// Whether a given item tier should appear in the candidate pool for a phase.
+// Late and Extra Late both pull from T4 since Extra Late is the luxury-slot
+// extension of the late game.
+function bsPhaseMatchesTier(mergedPhaseLabel, tier) {
+  if (mergedPhaseLabel === 'Late' || mergedPhaseLabel === 'Extra Late') {
+    return tier > 3200;
+  }
+  return bsMergedPhaseForTier(tier) === mergedPhaseLabel;
+}
+
+// Quantity hint for the Optional section header. Derived from Core souls
+// spent relative to the phase's souls budget.
+function bsQuantityHint(coreItems, budget) {
+  if (budget <= 0) return '';
+  const spent = coreItems.reduce((s, k) => s + (bpItemMap[k]?.tier || 0), 0);
+  const ratio = spent / budget;
+  if (ratio < 0.5)  return 'Buy 1–2 of these';
+  if (ratio < 0.85) return 'Buy 1 if you have extra';
+  return 'Get if desperate';
+}
+
+// Per-phase soul budget for Core selection. Reads BUILD_PHASES[i].addBudget
+// which the build-path algorithm uses as the per-phase souls cap. Soft cap:
+// callers fill items until this is exceeded, then stop (the item that
+// overshoots still gets included so we don't strand near the boundary).
+function bsCorePhaseBudget(phaseLabel) {
+  const def = BS_MERGED_PHASES.find(p => p.label === phaseLabel);
+  if (!def) return 3200;
+  let total = 0;
+  def.sources.forEach(srcName => {
+    const p = BUILD_PHASES.find(x => x.name === srcName);
+    if (p) total += p.addBudget || 0;
+  });
+  return total || 3200;
+}
+
+// Render one item tile. Uses the same label-glyph treatment as the existing
+// bp-summary-chip so a "spike" or "required" item looks identical in both
+// panels. `labelFor` and `LABEL_META` are passed in so the caller can reuse
+// the single computeBuildLabels result for the whole panel render.
+// Returns up to 2 short user-facing labels for an item's strongest playstyle
+// tags, e.g. ["+Speed", "+Survive"]. Used on Optional tiles so the player
+// can compare candidates at a glance.
+function bsTileCaptionTags(key, count = 2) {
+  const ps = bpItemMap[key]?.values?.playstyle_score || {};
+  return Object.entries(ps)
+    .filter(([t, v]) =>
+      typeof v === 'number' && v > 0
+      && t !== 'counter_importance' && t !== 'assist_importance')
+    .sort((a, c) => c[1] - a[1])
+    .slice(0, count)
+    .map(([t]) => bsTagDisplayName(t));
+}
+
+function bsRenderItemTile(key, labelFor, LABEL_META, opts) {
+  const it = bpItemMap[key];
+  const img = srcUrl(it?.image_path || '');
+  const label = labelFor(key);
+  const meta = label ? LABEL_META[label] : null;
+  const tier = it?.tier ?? 0;
+  const tierIdx =
+    tier <= 800  ? 1 :
+    tier <= 1600 ? 2 :
+    tier <= 3200 ? 3 :
+                   4;
+  const tierRoman = ['', 'I', 'II', 'III', 'IV'][tierIdx];
+  const cat = (it?.category || '').toLowerCase();
+  const catVar =
+    cat === 'weapon'   ? '--weapon' :
+    cat === 'vitality' ? '--vitality' :
+    cat === 'spirit'   ? '--spirit' :
+                         '--border';
+
+  const tile = document.createElement('div');
+  tile.className = 'bs-tile' +
+    ` bs-tile--cat-${cat || 'misc'}` +
+    ` bs-tile--tier-${tierIdx}` +
+    (opts?.mutedTile ? ' bs-tile--muted' : '');
+  tile.style.setProperty('--bs-cat-color', `var(${catVar})`);
+  if (meta) tile.classList.add(meta.klass);
+  tile.title = (meta ? `${meta.title} — ` : '') + (it?.name || key);
+
+  const labelHtml = meta
+    ? `<span class="bs-tile-label">${meta.text}</span>`
+    : '';
+
+  const captionTags = opts?.showCaption ? bsTileCaptionTags(key) : [];
+  const captionHtml = captionTags.length
+    ? `<div class="bs-tile-caption">${captionTags.map(t => `<span class="bs-tile-caption-chip">${t}</span>`).join('')}</div>`
+    : '';
+
+  tile.innerHTML = `
+    <div class="bs-tile-capsule">
+      <div class="bs-tile-icon-area">
+        ${labelHtml}
+        <span class="bs-tile-tier-cap">${tierRoman}</span>
+        ${img
+          ? `<img class="bs-tile-img" src="${img}" alt="${it?.name || key}">`
+          : `<span class="bs-tile-img-empty"></span>`}
+      </div>
+      <div class="bs-tile-name-band">
+        <span class="bs-tile-name">${it?.name || key}</span>
+      </div>
+    </div>
+    ${captionHtml}
+  `;
+  return tile;
+}
+
+// Counter Picks section — phase rows, each containing one-or-more tag
+// groups. A group's `FOR <tag>` header reflects what the items provide
+// (high playstyle_score on that tag) — NOT what enemies share that
+// vulnerability. Enemy mini-portraits surface which enemies on the team
+// are vulnerable to that tag, so the player knows who they're targeting.
+// Group phase placement is purely visual (average item cost → phase row).
+function bsBuildCounterSection(counterGroupsByPhase, labelFor, LABEL_META) {
+  const sec = document.createElement('div');
+  sec.className = 'bs-section bs-section--counter';
+  const header = document.createElement('div');
+  header.className = 'bs-section-header';
+  header.innerHTML = `<span class="bs-phase-name">COUNTER PICKS</span>`;
+  sec.appendChild(header);
+
+  const phases = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+  const phasesWithGroups = phases.filter(p => (counterGroupsByPhase[p] || []).length > 0);
+
+  if (phasesWithGroups.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'bs-tiles bs-placeholder-tiles';
+    empty.textContent = '— no counter picks (add enemies + calculate) —';
+    sec.appendChild(empty);
+    return sec;
+  }
+
+  const renderMini = (ek) => {
+    const hero = MATCH.heroData?.[ek] || S.heroList?.find(h => h.normalized_name === ek);
+    const miniSrc = hero?.mini_image_path || hero?.image_path || '';
+    const mini = miniSrc ? srcUrl(miniSrc) : '';
+    const name = hero?.eng_name || ek;
+    return mini
+      ? `<img class="bs-counter-mini" src="${mini}" alt="${name}" title="${name}">`
+      : `<span class="bs-counter-mini bs-counter-mini--missing" title="${name}"></span>`;
+  };
+
+  phasesWithGroups.forEach(phase => {
+    const phaseBlock = document.createElement('div');
+    phaseBlock.className = 'bs-subgroup';
+    phaseBlock.innerHTML = `<div class="bs-subgroup-header">${phase.toUpperCase()}</div>`;
+
+    counterGroupsByPhase[phase].forEach(group => {
+      const sub = document.createElement('div');
+      sub.className = 'bs-counter-group';
+      const hdr = document.createElement('div');
+      hdr.className = 'bs-counter-group-header';
+      const enemyIcons = group.contributingEnemies.slice(0, 4).map(renderMini).join('');
+      const overflow = group.contributingEnemies.length > 4
+        ? `<span class="bs-counter-mini-overflow">+${group.contributingEnemies.length - 4}</span>`
+        : '';
+      hdr.innerHTML = `
+        <span class="bs-counter-tag-label">FOR ${bsTagDisplayName(group.tag).toUpperCase()}</span>
+        <span class="bs-counter-mini-row">${enemyIcons}${overflow}</span>
+      `;
+      sub.appendChild(hdr);
+      const tiles = document.createElement('div');
+      tiles.className = 'bs-tiles';
+      group.items.forEach(key => tiles.appendChild(bsRenderItemTile(key, labelFor, LABEL_META)));
+      sub.appendChild(tiles);
+      phaseBlock.appendChild(sub);
+    });
+
+    sec.appendChild(phaseBlock);
+  });
+
+  return sec;
+}
+
+// Per-phase side section (used for Assist Picks). Same as before — vertical
+// list of phase sub-blocks, phases with no items hidden.
+function bsBuildSideSection(title, byPhase, labelFor, LABEL_META, extraClass) {
+  const sec = document.createElement('div');
+  sec.className = 'bs-section ' + (extraClass || '');
+  const header = document.createElement('div');
+  header.className = 'bs-section-header';
+  header.innerHTML = `<span class="bs-phase-name">${title}</span>`;
+  sec.appendChild(header);
+
+  const phasesWithItems = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late']
+    .filter(p => (byPhase[p] || []).length > 0);
+
+  if (phasesWithItems.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'bs-tiles bs-placeholder-tiles';
+    empty.textContent = '— none —';
+    sec.appendChild(empty);
+    return sec;
+  }
+
+  phasesWithItems.forEach(phase => {
+    const sub = document.createElement('div');
+    sub.className = 'bs-subgroup';
+    sub.innerHTML = `<div class="bs-subgroup-header">${phase.toUpperCase()}</div>`;
+    const tiles = document.createElement('div');
+    tiles.className = 'bs-tiles';
+    byPhase[phase].forEach(key => tiles.appendChild(bsRenderItemTile(key, labelFor, LABEL_META)));
+    sub.appendChild(tiles);
+    sec.appendChild(sub);
+  });
+
+  return sec;
+}
+
+function mkBuildScreenPanel(b, heroName, buildIdx) {
+  const d = document.createElement('div');
+  d.className = 'calc-panel';
+
+  const pathData = b.buildPath || computeBuildPath(b);
+  const hero = MATCH.heroData[heroName];
+
+  // Header / toolbar
+  const titleBar = document.createElement('div');
+  titleBar.className = 'bs-title-bar';
+  titleBar.innerHTML = `
+    <div class="bs-title-group">
+      <span class="calc-panel-title bs-title">Build Screen</span>
+      <span class="bs-title-sub">${(hero?.eng_name || heroName)} · ${b.name || ''}</span>
+    </div>
+    <div class="bs-toolbar">
+      <button class="btn-ghost btn-sm bs-focus-btn" title="Mark allies/enemies as significant — focused chars weight 2× in counter consensus">Focus heroes…</button>
+    </div>`;
+  d.appendChild(titleBar);
+
+  // Resolve label glyphs + constraints once.
+  const { labelFor } = computeBuildLabels(b, pathData);
+  const LABEL_META = BP_LABEL_META;
+  const constraints  = bsResolveConstraints(b);
+  const requiredSet  = constraints.required_items  || new Set();
+  const signatureSet = constraints.signature_items || new Set();
+  const blacklistSet = constraints.blacklist_items || new Set();
+
+  // Single global categorization — every item placed at most once across
+  // all phases × {core, counter, assist, optional} sections.
+  const cat = bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet);
+
+  // ── Layout: left phases column (Core + Optional per row), right side
+  //    stacked Counter + Assist (per-phase sub-blocks within each).
+  const grid = document.createElement('div');
+  grid.className = 'bs-panel';
+
+  const phasesCol = document.createElement('div');
+  phasesCol.className = 'bs-phases-col';
+
+  BS_MERGED_PHASES.forEach(({ label }) => {
+    const row = document.createElement('div');
+    row.className = 'bs-phase-row';
+
+    const coreItems     = cat.core[label]     || [];
+    const optionalItems = cat.optional[label] || [];
+    const phaseBudget = bsCorePhaseBudget(label);
+
+    // Core
+    const coreSection = document.createElement('div');
+    coreSection.className = 'bs-section bs-section--core';
+    coreSection.innerHTML = `
+      <div class="bs-section-header">
+        <span class="bs-phase-name">${label.toUpperCase()}</span>
+      </div>`;
+    const coreTilesEl = document.createElement('div');
+    coreTilesEl.className = 'bs-tiles';
+    if (coreItems.length === 0) {
+      coreTilesEl.classList.add('bs-placeholder-tiles');
+      coreTilesEl.textContent = '— no core items —';
+    } else {
+      coreItems.forEach(key => coreTilesEl.appendChild(bsRenderItemTile(key, labelFor, LABEL_META)));
+    }
+    coreSection.appendChild(coreTilesEl);
+
+    // Optional
+    const optSection = document.createElement('div');
+    optSection.className = 'bs-section bs-section--optional';
+    const hint = bsQuantityHint(coreItems, phaseBudget);
+    const header = document.createElement('div');
+    header.className = 'bs-section-header';
+    header.innerHTML = `
+      <span class="bs-phase-name">${label.toUpperCase()} OPTIONAL</span>
+      <span class="bs-optional-pill">OPTIONAL</span>
+      ${hint ? `<span class="bs-quantity-hint">· ${hint}</span>` : ''}
+    `;
+    optSection.appendChild(header);
+    const optTilesEl = document.createElement('div');
+    optTilesEl.className = 'bs-tiles';
+    if (optionalItems.length === 0) {
+      optTilesEl.classList.add('bs-placeholder-tiles');
+      optTilesEl.textContent = '— no optional picks —';
+    } else {
+      optionalItems.forEach(key =>
+        optTilesEl.appendChild(bsRenderItemTile(key, labelFor, LABEL_META, { showCaption: true })));
+    }
+    optSection.appendChild(optTilesEl);
+
+    row.appendChild(coreSection);
+    row.appendChild(optSection);
+    phasesCol.appendChild(row);
+  });
+  grid.appendChild(phasesCol);
+
+  // ── Counter Picks: tag-grouped with enemy mini-icon attribution ──
+  grid.appendChild(bsBuildCounterSection(cat.counterGroups, labelFor, LABEL_META));
+  // ── Assist Picks: per-phase sub-blocks ──
+  grid.appendChild(bsBuildSideSection('ASSIST PICKS', cat.assist, labelFor, LABEL_META, 'bs-section--assist'));
+
+  d.appendChild(grid);
+
+  // Focus button — opens the focus modal targeting the per-build sim state.
+  // Wired in the "Wire Focus button" step. For the scaffold the button is
+  // present but doesn't do anything yet.
+  titleBar.querySelector('.bs-focus-btn').addEventListener('click', () => {
+    bsOpenFocus(b, heroName, buildIdx, () => {
+      // Re-render the panel after focus changes
+      const detail = document.getElementById('calc-build-detail');
+      if (detail) openCalcBuild(heroName, buildIdx);
+    });
+  });
+
+  return d;
+}
+
+// Placeholder — real implementation in the "Wire Focus button" step. Defined
+// here so the scaffold's click handler doesn't ReferenceError.
+function bsOpenFocus(b, heroName, buildIdx, onDone) {
+  toast('Focus modal: coming in a later iteration', 'success');
+  if (onDone) onDone();
 }
 
 function mkBuildPathPanel(b) {
