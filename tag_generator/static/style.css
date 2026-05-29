@@ -1462,6 +1462,313 @@ h1, h2, .page-header h1, .display-font {
   border-radius: 0 3px 3px 0;
 }
 
+/* ── Build Screen panel (sectioned grid above Build Path Guide) ──────────
+   Mirrors the Deadlock in-game build-browser layout: three columns
+   (Core | Optional | Counter Picks) stacked per phase. Reuses tier colors,
+   label glyphs, and visual primitives from the bp-* system so an item
+   labeled "spike" or "required" looks identical in both panels. */
+.bs-title-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 12px; flex-wrap: wrap;
+}
+.bs-title-group { display: flex; align-items: baseline; gap: 8px; }
+.bs-title { margin: 0; }
+.bs-title-sub { font-size: 12px; color: var(--muted); }
+.bs-toolbar { display: flex; gap: 6px; align-items: center; }
+
+.bs-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) minmax(180px, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+@media (max-width: 1100px) {
+  .bs-panel { grid-template-columns: minmax(0, 1fr) minmax(160px, 1fr); }
+  .bs-section--assist { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .bs-panel { grid-template-columns: 1fr; }
+  .bs-section--assist { grid-column: auto; }
+}
+
+.bs-phases-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bs-phase-row {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 10px;
+}
+@media (max-width: 700px) {
+  .bs-phase-row { grid-template-columns: 1fr; }
+}
+
+.bs-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.bs-section--core     { border-color: var(--border); }
+.bs-section--optional { border-color: var(--border-soft); }
+.bs-section--counter  { border-color: rgba(199, 155, 255, .35); }
+.bs-section--assist   { border-color: rgba(83, 192, 85, .35); }
+
+.bs-right-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bs-subgroup { margin-top: 8px; }
+.bs-subgroup:first-of-type { margin-top: 0; }
+.bs-subgroup-header {
+  font-size: 9px; font-weight: 700; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase;
+  margin-bottom: 4px; padding-left: 2px;
+}
+
+/* Counter group — tag header with enemy mini-icon row + tile grid. */
+.bs-counter-group { margin-top: 10px; }
+.bs-counter-group:first-of-type { margin-top: 0; }
+.bs-counter-group-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 5px; padding-bottom: 3px;
+  border-bottom: 1px dashed rgba(199, 155, 255, .25);
+  flex-wrap: wrap;
+}
+.bs-counter-tag-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: #c79bff; text-transform: uppercase;
+}
+.bs-counter-mini-row {
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.bs-counter-mini {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(199, 155, 255, .55);
+  background: var(--panel);
+  box-shadow: 0 0 4px rgba(199, 155, 255, .25);
+}
+.bs-counter-mini--missing {
+  background: var(--card);
+  display: inline-block;
+}
+.bs-counter-mini-overflow {
+  font-size: 9px; font-weight: 700;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+/* Optional tile caption — small chips below the capsule showing the item's
+   top playstyle tags as user-friendly labels ("+Speed", "+Healing"). */
+.bs-tile-caption {
+  display: flex; flex-wrap: wrap; gap: 2px;
+  justify-content: center;
+  max-width: 64px;
+  margin-top: 1px;
+}
+.bs-tile-caption-chip {
+  font-size: 8px; font-weight: 700;
+  color: var(--cream);
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .12);
+  padding: 0 3px;
+  border-radius: 2px;
+  line-height: 1.3;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.bs-section-header {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 8px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.bs-phase-name {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  color: var(--cream); text-transform: uppercase;
+}
+.bs-souls-range {
+  font-size: 10px; color: var(--muted); font-family: var(--font-mono);
+}
+.bs-quantity-hint {
+  font-size: 10px; color: var(--muted); font-style: italic;
+}
+.bs-optional-pill {
+  font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  color: var(--info); background: rgba(98, 167, 175, .15);
+  border: 1px solid rgba(98, 167, 175, .4);
+  padding: 1px 6px; border-radius: 3px;
+}
+
+.bs-tiles {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  min-height: 60px;
+}
+.bs-counter-groups {
+  display: flex; flex-direction: column; gap: 10px;
+  min-height: 60px;
+}
+
+.bs-placeholder { opacity: .55; }
+.bs-placeholder-tiles {
+  font-size: 10px; color: var(--muted-dim); font-style: italic;
+  align-items: center; justify-content: center; padding: 8px 4px;
+}
+
+/* ── Build Screen item tile (in-game capsule style) ─────────────────────
+   Mirrors the in-game build-browser item card. Each tile is a vertical
+   stack: square capsule (item art + category-tinted background + label
+   overlay + tier numeral) over a centered name. Category color comes from
+   the --bs-cat-color inline var; tier numeral lives in the corner. */
+.bs-tile {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px;
+  width: 64px;
+  cursor: default;
+  --bs-cat-color: var(--border);
+}
+.bs-tile--muted { opacity: .55; }
+/* In-game capsule: tall rectangle, flat solid category color, no internal
+   borders. Each tier picks a tone of the category color via --bs-cat-tone:
+   T1 mixes with warm parchment gray (paler, less blinding), T2 stays close
+   to base, T3/T4 progressively deepen with black. */
+.bs-tile { --bs-cat-tone: var(--bs-cat-color); }
+.bs-tile.bs-tile--tier-1 { --bs-cat-tone: color-mix(in srgb, var(--bs-cat-color) 48%, #b0a89c); }
+.bs-tile.bs-tile--tier-2 { --bs-cat-tone: color-mix(in srgb, var(--bs-cat-color) 78%, #6a6055); }
+.bs-tile.bs-tile--tier-3 { --bs-cat-tone: color-mix(in srgb, var(--bs-cat-color) 92%, #2a221c); }
+.bs-tile.bs-tile--tier-4 { --bs-cat-tone: color-mix(in srgb, var(--bs-cat-color) 75%, #000); }
+
+.bs-tile-capsule {
+  position: relative;
+  width: 64px; height: 84px;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0,0,0,.55);
+  transition: var(--transition);
+}
+.bs-tile:hover .bs-tile-capsule {
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.7),
+    0 0 10px color-mix(in srgb, var(--bs-cat-color) 55%, transparent);
+}
+
+/* Icon area: neutral dark backdrop. Only the name band carries the
+   category color — keeps the image clean with no colored "frame" around
+   it from category-tinted padding. */
+.bs-tile-icon-area {
+  position: relative;
+  flex: 1;
+  background: #14171a;
+  overflow: hidden;
+}
+.bs-tile-img {
+  position: absolute; inset: 2px;
+  width: calc(100% - 4px); height: calc(100% - 4px);
+  object-fit: contain;
+}
+.bs-tile-img-empty {
+  position: absolute; inset: 2px;
+  width: calc(100% - 4px); height: calc(100% - 4px);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 4px, transparent 4px 8px);
+}
+
+/* Name band: tier-toned category color, white text. */
+.bs-tile-name-band {
+  height: 22px;
+  background: var(--bs-cat-tone);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1px 3px;
+}
+.bs-tile-name {
+  font-size: 8.5px; font-weight: 700;
+  color: #fff;
+  text-align: center;
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-shadow: 0 1px 1px rgba(0,0,0,.55);
+  overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+
+/* Tier corner cap — top-right triangle, darker shade of the category tone. */
+.bs-tile-tier-cap {
+  position: absolute; top: 0; right: 0;
+  width: 22px; height: 22px;
+  display: flex; align-items: flex-start; justify-content: flex-end;
+  padding: 2px 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 800;
+  color: rgba(255, 255, 255, .95);
+  text-shadow: 0 1px 1px rgba(0,0,0,.85);
+  background: color-mix(in srgb, var(--bs-cat-tone) 60%, #000);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Calculator label chip — mirror of tier cap, same size for symmetry.
+   Backdrop is a paler version of the glyph's own color (per-label rules
+   below), not a complementary color. */
+.bs-tile-label {
+  position: absolute; top: 0; left: 0;
+  width: 22px; height: 22px;
+  display: flex; align-items: flex-start; justify-content: flex-start;
+  padding: 1px 0 0 2px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  pointer-events: none;
+  z-index: 2;
+  background: rgba(15, 17, 15, .85);
+}
+.bs-tile-label .msym {
+  font-size: 11px;
+  font-variation-settings: 'FILL' 1, 'wght' 500;
+  text-shadow: 0 1px 1px rgba(0,0,0,.7);
+}
+
+/* Per-label backdrop: same hue as the glyph, mixed with dark warm base so
+   it reads as a darker pale version of the glyph color (no complementary
+   weirdness). */
+.bs-tile.bp-label-spike            .bs-tile-label,
+.bs-tile.bp-label-spike-c          .bs-tile-label { background: color-mix(in srgb, var(--danger) 38%, #1a1614); }
+.bs-tile.bp-label-required         .bs-tile-label,
+.bs-tile.bp-label-req-c            .bs-tile-label { background: color-mix(in srgb, var(--gold) 38%, #1a1614); }
+.bs-tile.bp-label-required-anti    .bs-tile-label { background: color-mix(in srgb, var(--gold) 32%, #1a1614); }
+.bs-tile.bp-label-anti             .bs-tile-label,
+.bs-tile.bp-label-anti-c           .bs-tile-label { background: color-mix(in srgb, #c79bff 38%, #1a1614); }
+.bs-tile.bp-label-signature        .bs-tile-label,
+.bs-tile.bp-label-sig-c            .bs-tile-label { background: color-mix(in srgb, var(--accent) 35%, #1a1614); }
+.bs-tile.bp-label-signature-anti   .bs-tile-label { background: color-mix(in srgb, var(--accent) 32%, #1a1614); }
+.bs-tile.bp-label-recommended      .bs-tile-label,
+.bs-tile.bp-label-rec-c            .bs-tile-label { background: color-mix(in srgb, var(--info) 38%, #1a1614); }
+
+/* Capsule glow halo — RESERVED for spike / anti-spike (power spike and
+   counter-spike anchors). Everything else (required, signature,
+   recommended) reads via its corner chip alone — no glow. */
+.bs-tile.bp-label-spike            .bs-tile-capsule { box-shadow: 0 0 0 1.5px rgba(255,176,90,.85), 0 0 12px rgba(255,176,90,.55), 0 1px 3px rgba(0,0,0,.55); }
+.bs-tile.bp-label-anti             .bs-tile-capsule { box-shadow: 0 0 0 1.5px rgba(199,155,255,.80), 0 0 10px rgba(199,155,255,.45), 0 1px 3px rgba(0,0,0,.55); }
+.bs-tile.bp-label-required-anti    .bs-tile-capsule { box-shadow: 0 0 0 1.5px rgba(199,155,255,.80), 0 0 10px rgba(199,155,255,.45), 0 1px 3px rgba(0,0,0,.55); }
+.bs-tile.bp-label-signature-anti   .bs-tile-capsule { box-shadow: 0 0 0 1.5px rgba(199,155,255,.80), 0 0 10px rgba(199,155,255,.45), 0 1px 3px rgba(0,0,0,.55); }
+
+/* Per-label glyph treatment on the corner badge. Component variants stay
+   smaller/dimmer; full-tier labels stand out. */
+.bs-tile.bp-label-spike            .bs-tile-label .msym { color: var(--danger); font-size: 15px; text-shadow: 0 0 6px rgba(185, 70, 62, .75); }
+.bs-tile.bp-label-spike-c          .bs-tile-label .msym { color: var(--danger); font-size: 12px; opacity: .85; text-shadow: 0 0 4px rgba(185, 70, 62, .4); }
+.bs-tile.bp-label-required         .bs-tile-label .msym { color: var(--gold);   font-size: 14px; text-shadow: 0 0 4px rgba(245, 200, 74, .5); }
+.bs-tile.bp-label-req-c            .bs-tile-label .msym { color: var(--gold);   font-size: 11px; opacity: .65; }
+.bs-tile.bp-label-required-anti    .bs-tile-label .msym { font-size: 12px; }
+.bs-tile.bp-label-required-anti    .bs-tile-label .msym:nth-child(1) { color: var(--gold); }
+.bs-tile.bp-label-required-anti    .bs-tile-label .msym:nth-child(2) { color: #c79bff; font-variation-settings: 'FILL' 0, 'wght' 200; }
+.bs-tile.bp-label-anti             .bs-tile-label .msym { color: #c79bff; font-size: 14px; text-shadow: 0 0 5px rgba(199, 155, 255, .55); font-variation-settings: 'FILL' 0, 'wght' 200; }
+.bs-tile.bp-label-anti-c           .bs-tile-label .msym { color: #c79bff; font-size: 11px; opacity: .65; font-variation-settings: 'FILL' 0, 'wght' 200; }
+.bs-tile.bp-label-signature        .bs-tile-label .msym { color: var(--good);   font-size: 12px; opacity: .9; }
+.bs-tile.bp-label-sig-c            .bs-tile-label .msym { color: var(--good);   font-size: 10px; opacity: .55; }
+.bs-tile.bp-label-signature-anti   .bs-tile-label .msym { font-size: 11px; }
+.bs-tile.bp-label-signature-anti   .bs-tile-label .msym:nth-child(1) { color: var(--good); }
+.bs-tile.bp-label-signature-anti   .bs-tile-label .msym:nth-child(2) { color: #c79bff; font-variation-settings: 'FILL' 0, 'wght' 200; }
+.bs-tile.bp-label-recommended      .bs-tile-label .msym { color: var(--info);   font-size: 13px; }
+.bs-tile.bp-label-rec-c            .bs-tile-label .msym { color: var(--info);   font-size: 10px; opacity: .6; }
+
 /* ── Surge spike anchors (algo-specific markers) ─────────────────────────
    Loud glyphs, but still BARE (no border around the item image — same rule
    as build-role labels). Priority is communicated via size, weight, color,
