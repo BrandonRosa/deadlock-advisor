@@ -170,7 +170,12 @@ def create_tag():
     tags = json.loads(TAGS_F.read_text())
     if any(t["code"] == d["code"] for t in tags):
         return jsonify({"error": "Code already exists"}), 400
-    tags.append({"code": d["code"], "name": d["name"], "description": d.get("description", "")})
+    tags.append({
+        "code": d["code"],
+        "name": d["name"],
+        "short_label": d.get("short_label", ""),
+        "description": d.get("description", ""),
+    })
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
     return jsonify(tags[-1]), 201
 
@@ -182,7 +187,9 @@ def update_tag(code):
     for t in tags:
         if t["code"] == code:
             t["name"]        = d.get("name", t["name"])
-            t["description"] = d.get("description", t["description"])
+            if "short_label" in d:
+                t["short_label"] = d["short_label"]
+            t["description"] = d.get("description", t.get("description", ""))
             break
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
     return jsonify({"ok": True})

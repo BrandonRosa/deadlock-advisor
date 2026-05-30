@@ -300,6 +300,7 @@ function renderTagsTable() {
       <td class="drag-cell"><span class="drag-handle" title="Drag to reorder">⠿</span></td>
       <td><span class="tag-code-chip">${tag.code}</span></td>
       <td>${tag.name}</td>
+      <td style="color:var(--cream)">${tag.short_label || ''}</td>
       <td style="color:var(--muted)">${tag.description || ''}</td>
       <td>
         <div class="row-actions">
@@ -345,6 +346,7 @@ function openTagModal(tag = null) {
   document.getElementById('mt-code').value = tag ? tag.code : '';
   document.getElementById('mt-code').disabled = !!tag;
   document.getElementById('mt-name').value = tag ? tag.name : '';
+  document.getElementById('mt-short').value = tag ? (tag.short_label || '') : '';
   document.getElementById('mt-desc').value = tag ? (tag.description || '') : '';
   document.getElementById('modal-tag').classList.remove('hidden');
   document.getElementById('mt-name').focus();
@@ -356,13 +358,14 @@ document.getElementById('mt-cancel').addEventListener('click', () => document.ge
 document.getElementById('mt-save').addEventListener('click', async () => {
   const code = document.getElementById('mt-code').value.trim();
   const name = document.getElementById('mt-name').value.trim();
+  const shortLabel = document.getElementById('mt-short').value.trim();
   const desc = document.getElementById('mt-desc').value.trim();
   if (!code || !name) { toast('Code and name required', 'error'); return; }
 
   if (S.editingTagCode) {
-    await api.put(`/api/tags/${S.editingTagCode}`, { name, description: desc });
+    await api.put(`/api/tags/${S.editingTagCode}`, { name, short_label: shortLabel, description: desc });
   } else {
-    const res = await api.post('/api/tags', { code, name, description: desc });
+    const res = await api.post('/api/tags', { code, name, short_label: shortLabel, description: desc });
     if (res.error) { toast(res.error, 'error'); return; }
   }
   document.getElementById('modal-tag').classList.add('hidden');
@@ -7754,8 +7757,14 @@ function bsMergedPhaseForTier(tier) {
 // Returns: [{ tag, contributingEnemies: [heroKey...], strength }, ...]
 // sorted by strength descending.
 function bsConsensusVulnerability(b) {
+  // Perspective-aware: the "enemies" we counter are the opposing team from
+  // this *build's hero's* point of view, not always MATCH.enemies. When we
+  // render an opponent's build, their enemies are MATCH.allies (us).
+  const allies  = MATCH.allies  || [];
   const enemies = MATCH.enemies || [];
-  if (!enemies.length) return [];
+  const isOnEnemyTeam = enemies.includes(b.heroName);
+  const opponents = isOnEnemyTeam ? allies : enemies;
+  if (!opponents.length) return [];
 
   // Focus comes from this build's sim state if one exists — same source the
   // Simulator's Focus modal writes to. No sim state → no focus weighting.
@@ -7764,7 +7773,7 @@ function bsConsensusVulnerability(b) {
 
   const agg = {};  // tag → { contributingEnemies: [], strength }
 
-  enemies.forEach(enemyKey => {
+  opponents.forEach(enemyKey => {
     const hero = MATCH.heroData[enemyKey];
     if (!hero?.builds?.length) return;
     const sel = MATCH.selectedBuilds?.[enemyKey];
@@ -7823,18 +7832,14 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet) {
   };
   const placed = new Set();
 
-  // Bucket all non-blacklisted scored items by their natural phase
-  const candidatesByPhase = empty();
-  (b.items || []).forEach(it => {
-    if (blacklistSet.has(it.key)) return;
-    const phase = bsMergedPhaseForTier(it.tier || 0);
-    candidatesByPhase[phase].push(it);
-  });
+  // Flat pool of all non-blacklisted scored items. Phase assignment is
+  // budget-driven (see below) rather than tier-bucketed, so items can land
+  // in whichever phase still has soul budget remaining.
+  const allCandidates = (b.items || []).filter(it => !blacklistSet.has(it.key));
 
   const COUNTER_THRESH = 0.5;
   const ASSIST_THRESH  = 0.5;
-  const COUNTER_MAX_PER_PHASE = 4;
-  const ASSIST_MAX_PER_PHASE  = 4;
+  const ASSIST_MAX_PER_PHASE   = 4;
   const OPTIONAL_MAX_PER_PHASE = 5;
   const BOOST = 0.15;
 
@@ -7845,47 +7850,37 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet) {
   const boostedSelf = it =>
     (it.self || 0) + BOOST * (counterImp(it.key) + assistImp(it.key));
 
-  // ── Pass 1: Core ──
-  // Required items always Core (no budget gate). Then top-self fills items
-  // until per-phase soul budget is exhausted (soft cap — the item that
-  // pushes us over the budget still gets included, but we stop after that).
-  PHASES.forEach(phase => {
-    const cands = candidatesByPhase[phase];
-    const budget = bsCorePhaseBudget(phase);
+  // ── Pass 1: Core via soul-budget walk ──
+  // Walk phases Lane→Extra Late. For each phase: place top-priority required
+  // items, then keep pulling the highest-scoring remaining item until the
+  // phase's soul budget is exceeded. Soft cap — the item that pushes us over
+  // still goes in this phase (no stranding), then we advance. Items cross
+  // tiers naturally based on what fits the remaining budget, instead of being
+  // pre-bucketed by tier.
+  const phaseBudgets = PHASES.map(p => bsCorePhaseBudget(p));
+  PHASES.forEach((phase, idx) => {
+    const budget = phaseBudgets[idx];
     let spent = 0;
-    cands
+    // Required first — high priority by score
+    allCandidates
       .filter(it => requiredSet.has(it.key) && !placed.has(it.key))
+      .sort((a, c) => boostedSelf(c) - boostedSelf(a))
       .forEach(it => {
+        if (spent >= budget) return;  // defer to next phase
         placed.add(it.key);
         result.core[phase].push(it.key);
         spent += it.tier || 0;
       });
-    for (const it of cands
-      .filter(it => !placed.has(it.key))
-      .sort((a, c) => (c.self || 0) - (a.self || 0))) {
+    // Then top-self items
+    for (const it of allCandidates
+      .filter(it => !placed.has(it.key) && (it.self || 0) > 0)
+      .sort((a, c) => boostedSelf(c) - boostedSelf(a))) {
       if (spent >= budget) break;
       placed.add(it.key);
       result.core[phase].push(it.key);
       spent += it.tier || 0;
     }
   });
-
-  // ── T4 split: move bottom half of remaining Late T4 candidates into
-  //    Extra Late so the luxury slot has content. Items already placed in
-  //    Late Core stay there. ──
-  {
-    const lateRemaining = candidatesByPhase['Late']
-      .filter(it => !placed.has(it.key))
-      .sort((a, c) => (c.self || 0) - (a.self || 0));
-    const half = Math.ceil(lateRemaining.length / 2);
-    const lateKeep = new Set(lateRemaining.slice(0, half).map(it => it.key));
-    candidatesByPhase['Late'] = candidatesByPhase['Late']
-      .filter(it => placed.has(it.key) || lateKeep.has(it.key));
-    candidatesByPhase['Extra Late'] = [
-      ...candidatesByPhase['Extra Late'],
-      ...lateRemaining.slice(half),
-    ];
-  }
 
   // ── Pass 2: Counter Picks — score globally, group by primary tag, bucket by avg cost ──
   // 1. Compute the enemy team's consensus vulnerability vector.
@@ -7903,7 +7898,7 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet) {
   const vulnTags = bsConsensusVulnerability(b);
   const vulnMap  = Object.fromEntries(vulnTags.map(v => [v.tag, v]));
 
-  const counterScored = Object.values(candidatesByPhase).flat()
+  const counterScored = allCandidates
     .filter(it => !placed.has(it.key))
     .filter(it => counterImp(it.key) >= COUNTER_THRESH)
     .map(it => {
@@ -7959,24 +7954,34 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet) {
   Object.keys(result.counterGroups).forEach(p =>
     result.counterGroups[p].sort((a, c) => c.strength - a.strength));
 
-  // ── Pass 3: Assist — items with assist_importance >= 0.5, by .ally ──
+  // ── Pass 3: Assist — items with assist_importance >= 0.5, by .ally. ──
+  // Phase placement is tier-bucketed (small side column, no soul-walk needed).
   PHASES.forEach(phase => {
-    candidatesByPhase[phase]
+    allCandidates
       .filter(it => !placed.has(it.key))
+      .filter(it => bsMergedPhaseForTier(it.tier || 0) === phase)
       .filter(it => assistImp(it.key) >= ASSIST_THRESH)
       .sort((a, c) => (c.ally || 0) - (a.ally || 0))
       .slice(0, ASSIST_MAX_PER_PHASE)
       .forEach(it => { placed.add(it.key); result.assist[phase].push(it.key); });
   });
 
-  // ── Pass 4: Optional — leftovers sorted by boosted self ──
-  PHASES.forEach(phase => {
-    candidatesByPhase[phase]
-      .filter(it => !placed.has(it.key))
-      .filter(it => (it.self || 0) > 0)
-      .sort((a, c) => boostedSelf(c) - boostedSelf(a))
-      .slice(0, OPTIONAL_MAX_PER_PHASE)
-      .forEach(it => { placed.add(it.key); result.optional[phase].push(it.key); });
+  // ── Pass 4: Optional via soul-budget walk ──
+  // Same walk pattern as Core: walk phases Lane→Extra Late, pulling top-
+  // scoring leftovers until each phase's soul budget is exceeded. Per-phase
+  // tile cap protects against one expensive phase swallowing everything.
+  PHASES.forEach((phase, idx) => {
+    const budget = phaseBudgets[idx];
+    let spent = 0;
+    for (const it of allCandidates
+      .filter(it => !placed.has(it.key) && (it.self || 0) > 0)
+      .sort((a, c) => boostedSelf(c) - boostedSelf(a))) {
+      if (spent >= budget) break;
+      if (result.optional[phase].length >= OPTIONAL_MAX_PER_PHASE) break;
+      placed.add(it.key);
+      result.optional[phase].push(it.key);
+      spent += it.tier || 0;
+    }
   });
 
   return result;
@@ -8094,9 +8099,9 @@ function bsRenderItemTile(key, labelFor, LABEL_META, opts) {
     : '';
 
   tile.innerHTML = `
+    ${labelHtml}
     <div class="bs-tile-capsule">
       <div class="bs-tile-icon-area">
-        ${labelHtml}
         <span class="bs-tile-tier-cap">${tierRoman}</span>
         ${img
           ? `<img class="bs-tile-img" src="${img}" alt="${it?.name || key}">`
@@ -8150,6 +8155,8 @@ function bsBuildCounterSection(counterGroupsByPhase, labelFor, LABEL_META) {
     const phaseBlock = document.createElement('div');
     phaseBlock.className = 'bs-subgroup';
     phaseBlock.innerHTML = `<div class="bs-subgroup-header">${phase.toUpperCase()}</div>`;
+    const groupsRow = document.createElement('div');
+    groupsRow.className = 'bs-counter-groups-row';
 
     counterGroupsByPhase[phase].forEach(group => {
       const sub = document.createElement('div');
@@ -8169,9 +8176,10 @@ function bsBuildCounterSection(counterGroupsByPhase, labelFor, LABEL_META) {
       tiles.className = 'bs-tiles';
       group.items.forEach(key => tiles.appendChild(bsRenderItemTile(key, labelFor, LABEL_META)));
       sub.appendChild(tiles);
-      phaseBlock.appendChild(sub);
+      groupsRow.appendChild(sub);
     });
 
+    phaseBlock.appendChild(groupsRow);
     sec.appendChild(phaseBlock);
   });
 

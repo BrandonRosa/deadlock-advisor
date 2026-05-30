@@ -1523,9 +1523,17 @@ h1, h2, .page-header h1, .display-font {
   margin-bottom: 4px; padding-left: 2px;
 }
 
-/* Counter group — tag header with enemy mini-icon row + tile grid. */
-.bs-counter-group { margin-top: 10px; }
-.bs-counter-group:first-of-type { margin-top: 0; }
+/* Counter groups flow side-by-side within a phase row (wraps to next line
+   when they don't fit). Keeps the Counter column shorter when multiple
+   small groups belong to the same phase bucket. */
+.bs-counter-groups-row {
+  display: flex; flex-wrap: wrap; gap: 12px 14px;
+  align-items: flex-start;
+}
+.bs-counter-group {
+  flex: 0 1 auto;
+  min-width: 0;
+}
 .bs-counter-group-header {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 5px; padding-bottom: 3px;
@@ -1707,24 +1715,27 @@ h1, h2, .page-header h1, .display-font {
   z-index: 2;
 }
 
-/* Calculator label chip — mirror of tier cap, same size for symmetry.
-   Backdrop is a paler version of the glyph's own color (per-label rules
-   below), not a complementary color. */
+/* Calculator label chip — small horizontal pill above the capsule. Backdrop
+   color is a paler version of the glyph's own color (per-label rules below).
+   The whole chip sits in-flow above the tile so it doesn't crop the item art. */
 .bs-tile-label {
-  position: absolute; top: 0; left: 0;
-  width: 22px; height: 22px;
-  display: flex; align-items: flex-start; justify-content: flex-start;
-  padding: 1px 0 0 2px;
-  clip-path: polygon(0 0, 100% 0, 0 100%);
-  pointer-events: none;
-  z-index: 2;
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 2px;
+  height: 14px; min-width: 18px;
+  padding: 0 4px;
+  border-radius: 7px;
   background: rgba(15, 17, 15, .85);
+  pointer-events: none;
+  line-height: 1;
 }
 .bs-tile-label .msym {
-  font-size: 11px;
+  font-size: 12px;
   font-variation-settings: 'FILL' 1, 'wght' 500;
   text-shadow: 0 1px 1px rgba(0,0,0,.7);
 }
+/* Reserve consistent vertical space so tiles with and without labels still
+   line up cleanly in a row. */
+.bs-tile:not(:has(.bs-tile-label)) .bs-tile-capsule { margin-top: 14px; }
 
 /* Per-label backdrop: same hue as the glyph, mixed with dark warm base so
    it reads as a darker pale version of the glyph color (no complementary
