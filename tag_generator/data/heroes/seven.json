@@ -384,14 +384,21 @@
         "rapid_recharge",
         "extra_charge",
         "compress_cooldown",
-        "mystic_expansion"
+        "mystic_expansion",
+        "golden_goose_egg"
       ],
       "signature_items": [
         "trophy_collector",
         "duration_extender",
-        "witchmail",
         "echo_shard",
-        "monster_rounds"
+        "monster_rounds",
+        "mystic_regeneration",
+        "improved_spirit",
+        "mystic_slow",
+        "mystic_vulnerability",
+        "arcane_surge",
+        "boundless_spirit",
+        "escalating_exposure"
       ],
       "values": {
         "ally_weight": {
@@ -762,7 +769,10 @@
           "ult_focused": 0.15,
           "vertical_mobility": 0.1
         }
-      }
+      },
+      "blacklist_items": [
+        "mystic_burst"
+      ]
     },
     {
       "build_description_eng": "Focuses on Seven's Stun. Great for Aerial/Diving characters. Doest deal allot of damage, but great for countering dives.",
