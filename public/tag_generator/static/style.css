@@ -1476,29 +1476,80 @@ h1, h2, .page-header h1, .display-font {
 .bs-title-sub { font-size: 12px; color: var(--muted); }
 .bs-toolbar { display: flex; gap: 6px; align-items: center; }
 
+/* Build Screen layout: stacked phase rows. Each phase row is a 4-column grid
+   (Core | Optional | Counter | Assist). Counter & Assist sit at the same
+   vertical position as their phase's Core/Optional cells so the row reads
+   left-to-right at a glance. */
 .bs-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) minmax(180px, 1fr);
-  gap: 12px;
-  align-items: stretch;
+  display: flex; flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
-@media (max-width: 1100px) {
-  .bs-panel { grid-template-columns: minmax(0, 1fr) minmax(160px, 1fr); }
-  .bs-section--assist { grid-column: 1 / -1; }
-}
-@media (max-width: 700px) {
-  .bs-panel { grid-template-columns: 1fr; }
-  .bs-section--assist { grid-column: auto; }
-}
-
-.bs-phases-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .bs-phase-row {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: var(--bs-grid-cols,
+    minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 2fr) minmax(0, 1fr));
+  grid-template-areas: var(--bs-grid-areas, "core optional counter assist");
   gap: 10px;
+  align-items: stretch;
 }
-@media (max-width: 700px) {
-  .bs-phase-row { grid-template-columns: 1fr; }
+
+/* Column toggle: hide a section + its column header when the panel has the
+   matching .bs-hide-* class. The grid-template-columns / grid-template-areas
+   variables are recomputed by JS so the hidden column collapses cleanly. */
+.bs-panel.bs-hide-optional .bs-section--optional,
+.bs-panel.bs-hide-optional .bs-col-header--optional { display: none; }
+.bs-panel.bs-hide-counter  .bs-section--counter,
+.bs-panel.bs-hide-counter  .bs-col-header--counter  { display: none; }
+.bs-panel.bs-hide-assist   .bs-section--assist,
+.bs-panel.bs-hide-assist   .bs-col-header--assist   { display: none; }
+.bs-phase-row > .bs-section--core,
+.bs-phase-row > .bs-col-header--core     { grid-area: core; }
+.bs-phase-row > .bs-section--optional,
+.bs-phase-row > .bs-col-header--optional { grid-area: optional; }
+.bs-phase-row > .bs-section--counter,
+.bs-phase-row > .bs-col-header--counter  { grid-area: counter; }
+.bs-phase-row > .bs-section--assist,
+.bs-phase-row > .bs-col-header--assist   { grid-area: assist; }
+
+/* Column-header row above the phase rows — uses the same grid so headers
+   line up with their column. */
+.bs-col-headers {
+  padding: 0 2px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+.bs-col-header {
+  font-size: 10px; font-weight: 700; letter-spacing: .14em;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 2px 4px;
+}
+.bs-col-header--counter { color: #c79bff; }
+.bs-col-header--assist  { color: rgba(83, 192, 85, .9); }
+
+/* Vertical / narrow viewports: collapse to a Core+Optional row on top of
+   a Counter+Assist row inside each phase block. Column headers hide. */
+@media (max-width: 1180px) {
+  .bs-phase-row {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    grid-template-areas:
+      "core    optional"
+      "counter counter"
+      "assist  assist";
+  }
+  .bs-col-headers { display: none; }
+}
+@media (max-width: 720px) {
+  .bs-phase-row {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "core"
+      "optional"
+      "counter"
+      "assist";
+  }
 }
 
 .bs-section {
@@ -1734,8 +1785,99 @@ h1, h2, .page-header h1, .display-font {
   text-shadow: 0 1px 1px rgba(0,0,0,.7);
 }
 /* Reserve consistent vertical space so tiles with and without labels still
-   line up cleanly in a row. */
-.bs-tile:not(:has(.bs-tile-label)) .bs-tile-capsule { margin-top: 14px; }
+   line up cleanly in a row. Every tile renders a .bs-tile-label slot; the
+   empty variant is invisible but holds the same flex line height. */
+.bs-tile-label--empty { visibility: hidden; }
+
+/* Column-toggle row in the Build Screen toolbar — checkboxes for Optional /
+   Counter / Assist so the user can collapse any column they don't want to see. */
+.bs-col-toggles {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-right: 8px;
+  padding-right: 8px;
+  border-right: 1px solid var(--border-soft);
+}
+.bs-col-toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  color: var(--muted); text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+.bs-col-toggle input { margin: 0; cursor: pointer; }
+.bs-col-toggle:has(input:checked) { color: var(--text); }
+
+/* ── Focus feature ───────────────────────────────────────────────────────── */
+/* Inline focus panel under the title bar. Two rows of mini portraits
+   (allies / enemies); click a portrait to toggle focus on that hero. */
+.bs-focus-panel {
+  margin: 4px 0 8px;
+  padding: 8px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex; flex-direction: column;
+  gap: 6px;
+}
+.bs-focus-row {
+  display: flex; align-items: center; gap: 10px;
+}
+.bs-focus-row-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase;
+  min-width: 56px;
+}
+.bs-focus-portraits {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.bs-focus-mini {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  padding: 0; border: 2px solid transparent;
+  background: var(--panel);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.bs-focus-mini img { width: 100%; height: 100%; object-fit: cover; }
+.bs-focus-mini.bs-focus-mini-ally   { border-color: rgba(83, 192, 85, .35); }
+.bs-focus-mini.bs-focus-mini-enemy  { border-color: rgba(220, 90, 90, .35); }
+.bs-focus-mini.is-focused.bs-focus-mini-ally  { border-color: rgba(83, 192, 85, 1); box-shadow: 0 0 8px rgba(83, 192, 85, .55); }
+.bs-focus-mini.is-focused.bs-focus-mini-enemy { border-color: rgba(220, 90, 90, 1); box-shadow: 0 0 8px rgba(220, 90, 90, .55); }
+.bs-focus-empty { font-size: 11px; color: var(--muted-dim); font-style: italic; }
+
+/* Top slot of a tile: holds the calc label and (optionally) focus mini-heads
+   on the SAME line so adding heads doesn't shove the capsule down. */
+.bs-tile-toprow {
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: 14px;
+}
+.bs-focus-head {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid;
+  background: var(--panel);
+}
+.bs-focus-head--ally  { border-color: rgba(83, 192, 85, .9); }
+.bs-focus-head--enemy { border-color: rgba(220, 90, 90, .9); }
+.bs-focus-head--missing { background: var(--card); display: inline-block; }
+.bs-focus-head-overflow {
+  font-size: 8px; font-weight: 700;
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+/* Focus-hit glow halo on the tile capsule — a soft pulsing-style ring
+   distinct from spike/anti glows. Uses cat-color as a base so it still
+   reads the item's category, blended toward gold for visibility. */
+.bs-tile.bs-tile--focus-hit .bs-tile-capsule {
+  box-shadow:
+    0 0 0 1.5px rgba(255, 215, 130, .80),
+    0 0 10px rgba(255, 215, 130, .45),
+    0 1px 3px rgba(0, 0, 0, .55);
+}
 
 /* Per-label backdrop: same hue as the glyph, mixed with dark warm base so
    it reads as a darker pale version of the glyph color (no complementary
