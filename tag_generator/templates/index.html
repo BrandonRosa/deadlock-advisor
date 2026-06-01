@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark" data-density="dense">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,20 +12,43 @@
 </head>
 <body>
   <!-- ── Sidebar ─────────────────────────────────────────────── -->
+  <!-- Nav items carry data-nav-group (default|advanced|developer); the
+       advanced/developer groups are hidden until their toggle is on in
+       the settings drawer. -->
   <nav id="sidebar">
-    <div class="sidebar-logo"><span class="sidebar-mark">❋</span><span class="sidebar-title">DEADLOCK</span><span class="sidebar-sub">ADVISOR</span></div>
-    <button class="nav-btn active" data-page="heroes"><span class="nav-ico">✦</span>Heroes</button>
-    <button class="nav-btn" data-page="items"><span class="nav-ico">◈</span>Items</button>
-    <button class="nav-btn" data-page="tags"><span class="nav-ico">❋</span>Tags</button>
-    <button class="nav-btn" data-page="calc"><span class="nav-ico">⊞</span>Calculator</button>
-    <button class="nav-btn" data-page="qa"><span class="nav-ico">⌬</span>QA</button>
+    <div class="sidebar-logo">
+      <span class="sidebar-mark">❋</span>
+      <span><span class="sidebar-title">DEADLOCK</span><div class="sidebar-sub">ADVISOR</div></span>
+    </div>
+
+    <button class="nav-btn active" data-page="calc" data-nav-group="default"><span class="nav-ico">⊞</span>Calculator</button>
+    <!-- Match Results: hidden by default; CODEX.refreshNavVisibility()
+         shows it after a calc has been run and MATCH.results is populated. -->
+    <button class="nav-btn" data-page="calc-summary" data-nav-group="default" style="display:none;"><span class="nav-ico">▤</span>Match Results</button>
+
+    <!-- Slot for selected-instance card (filled by JS when a hero is opened) -->
+    <div id="nav-instance-host"></div>
+
+    <div class="nav-group-lbl" data-nav-group="advanced" style="color:var(--gold);">Advanced</div>
+    <button class="nav-btn" data-page="heroes" data-nav-group="advanced"><span class="nav-ico">✦</span>Heroes</button>
+    <button class="nav-btn" data-page="items" data-nav-group="advanced"><span class="nav-ico">◈</span>Items</button>
+
+    <div class="nav-group-lbl" data-nav-group="developer" style="color:var(--spirit);">Developer</div>
+    <button class="nav-btn" data-page="tags" data-nav-group="developer"><span class="nav-ico">❋</span>Tags</button>
+    <button class="nav-btn" data-page="qa" data-nav-group="developer"><span class="nav-ico">⌬</span>QA</button>
+
+    <div class="nav-spacer"></div>
+    <div class="nav-foot">
+      <button class="nav-btn" id="btn-theme-toggle" title="Toggle dark / light theme"><span class="nav-ico" id="theme-glyph">☾</span><span id="theme-label">Dark theme</span></button>
+      <button class="nav-btn" id="btn-open-settings" title="Settings"><span class="nav-ico">⚙</span>Settings</button>
+    </div>
   </nav>
 
   <!-- ── Main ───────────────────────────────────────────────── -->
   <main id="main">
 
     <!-- HEROES LIST -->
-    <section id="page-heroes" class="page active">
+    <section id="page-heroes" class="page">
       <div class="page-header">
         <h1>Heroes</h1>
         <button class="btn-primary" id="btn-new-hero">+ New Hero</button>
@@ -386,7 +409,7 @@
     </section>
 
     <!-- CALCULATOR SETUP -->
-    <section id="page-calc" class="page">
+    <section id="page-calc" class="page active">
       <div class="page-header sticky-header">
         <h1>Match Calculator</h1>
         <div class="header-actions calc-actions">
@@ -745,8 +768,67 @@
     </div>
   </div>
 
+  <!-- ── Mobile floating top-right actions (theme + settings) ────────
+       Codex puts theme/settings buttons in the upper-right of every
+       screen. On desktop the sidebar foot handles this; on mobile the
+       sidebar is hidden, so we float these two icons in the top corner. -->
+  <div id="mobile-top-actions" class="mobile-top-actions">
+    <button class="btn-icon ghost" id="mtop-theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
+    <button class="btn-icon ghost" id="mtop-settings" title="Settings" aria-label="Open settings">⚙</button>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- ── Settings Drawer (B1) ────────────────────────────────── -->
+  <!-- Right-slide panel triggered by sidebar ⚙ button or mobile Settings
+       tab. Contains theme picker, density toggle, Advanced/Developer feature
+       toggles. State is persisted to localStorage by app.js. -->
+  <div id="drawer-scrim" class="drawer-scrim"></div>
+  <aside id="settings-drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-hd">
+      <span class="t">Settings</span>
+      <button class="btn-icon ghost" id="drawer-close" title="Close">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="set-group">
+        <div class="set-group-t">Appearance</div>
+        <div class="set-row">
+          <div class="lab"><div class="t">Theme</div><div class="d">Dark is default</div></div>
+          <div class="seg" id="seg-theme">
+            <button data-theme-val="dark">Dark</button>
+            <button data-theme-val="light">Light</button>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="lab"><div class="t">Dense layout</div><div class="d">Power-user mode — more on screen. Off = simplified.</div></div>
+          <button class="toggle" id="toggle-density"></button>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-t">Feature level</div>
+        <div class="set-row adv">
+          <div class="lab"><div class="t">Advanced features</div><div class="d">Hero &amp; item browsing, algorithm picker, reverse-engineer.</div></div>
+          <button class="toggle" id="toggle-advanced"></button>
+        </div>
+        <div class="set-row dev">
+          <div class="lab"><div class="t">Developer features</div><div class="d">Tag editor, Tag Manager, QA + sim-log harness, score formulas, debug.</div></div>
+          <button class="toggle dev" id="toggle-developer"></button>
+        </div>
+      </div>
+    </div>
+    <p class="drawer-foot-note">By default a visitor only sees the build loop. Advanced &amp; Developer surfaces stay hidden until switched on here.</p>
+  </aside>
+
+  <!-- ── Mobile Bottom Nav (B7) ──────────────────────────────── -->
+  <!-- Hidden ≥761px. The contextual Build / Live buttons appear when a
+       hero instance is selected (filled by JS). -->
+  <nav class="botnav" id="botnav">
+    <button data-page="calc" class="active"><span class="ico">⊞</span>Calc</button>
+    <span id="botnav-instance-host"></span>
+    <button id="botnav-settings"><span class="ico">⚙</span>Settings</button>
+  </nav>
 
   <script src="/static/app.js"></script>
 </body>

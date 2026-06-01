@@ -64,7 +64,7 @@
       "away_from_team": null,
       "spawn_minions": null,
       "assist_importance": null,
-      "counter_importance": 0.05,
+      "counter_importance": 0.45,
       "ult_focused": null,
       "spirit_burst_damage": 1,
       "spirit_burst_resistance": null,

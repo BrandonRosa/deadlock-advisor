@@ -1,49 +1,73 @@
 /* ── Reset & Base ──────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Theme: Deadlock — flat vector palette, exact spec hex ───────────────
-   Surface hierarchy:
-     BG (dark teal-green)  →  SURFACE (lighter olive grey, main panel)
-                           →  CONTENT (very dark olive-black for cards/inputs)
+/* ── Theme: Codex — esports-companion structure, Deadlock palette ─────
+   Surface hierarchy (DARK, default):
+     PAGE (cool charcoal #15181c) → PAGE2 (#191c21, sidebar/topbar)
+                                  → PANEL (#20242a, framed sections)
+                                  → CARD  (#22262b, lifted items)
+                                  → INSET (#1a1d22, sunken rows)
    Accents are flat solids except DEADLOCK GREEN, which uses a top→bottom
-   gradient (#5ad894 → #90f8b1) for active states.
+   gradient (#5ad894 → #90f8b1) on primary CTAs.
+   Themes via [data-theme]; density via [data-density].
    ───────────────────────────────────────────────────────────────────── */
 :root {
-  /* ── Surfaces ─────────────────────────────────────────────────────── */
-  --bg:         #121412;           /* deep matte black-olive backdrop */
-  --bg-elev:    #181a18;
-  --surface:    #121412;           /* page panel matches bg — no tan, fully flat */
-  --surface-lt: #1c1f1c;
-  --surface-dk: #0c0d0c;
-  --panel:      #1a1d1a;           /* slight lift for inner panels / sidebar zones */
-  --card:       #1c1f1c;           /* CONTENT — cards/inputs/switches lift above bg */
-  --card-warm:  #1f221d;
-  --border:     #2e3230;           /* readable on dark */
-  --border-soft: #232624;
-  --border-dark: #0a0c0a;          /* deep pencil-line edge */
-  --border-warm: #2f3530;
+  /* ── Surfaces (Codex DARK) ────────────────────────────────────────── */
+  --page:       #15181c;           /* cool charcoal — page backdrop */
+  --page2:      #191c21;           /* sidebar / topbar surface */
+  --panel:      #20242a;           /* framed section bg */
+  --panel2:     #262b31;           /* lifted panel */
+  --card:       #22262b;           /* CONTENT — cards/inputs */
+  --card-h:     #2a2f36;           /* card hover */
+  --inset:      #1a1d22;           /* sunken row / drawer body */
 
-  /* ── DEADLOCK GREEN ──────────────────────────────────────────────────
-     Primary accent. Used as a top→bottom gradient on active states. */
+  /* legacy aliases — keep so the 2.8k existing rules still resolve */
+  --bg:         var(--page);
+  --bg-elev:    var(--page2);
+  --surface:    var(--page);
+  --surface-lt: var(--card);
+  --surface-dk: #0c0d0c;
+  --card-warm:  var(--card);
+
+  /* ── Borders / dividers ───────────────────────────────────────────── */
+  --line:       #2f343b;           /* primary divider */
+  --line-soft:  #262a30;           /* row separator */
+  --border:     var(--line);       /* legacy alias */
+  --border-soft: var(--line-soft); /* legacy alias */
+  --border-dark: #0a0c0a;
+  --border-warm: var(--line);
+
+  /* ── DEADLOCK GREEN — primary accent (unchanged across redesigns) ─── */
   --accent:        #75e8a2;        /* mid value (use for solid contexts) */
   --accent-top:    #5ad894;        /* gradient top */
   --accent-bot:    #90f8b1;        /* gradient bottom */
   --accent-dk:     #3da970;
   --accent-lt:     #b5f5cc;
+  --green:         var(--accent);
+  --green-br:      var(--accent);  /* "bright" alias used by Codex rules */
+  --green-soft:    rgba(117, 232, 162, .14);
+  --green-line:    rgba(117, 232, 162, .40);
 
-  /* ── DEADLOCK TAN ─────────────────────────────────────────────────── */
-  --text:       #e4d7c1;           /* light tan — primary text */
+  /* ── INK (Codex warmer cream, replaces the tan) ───────────────────── */
+  --ink:        #e9e4d8;           /* primary text */
+  --ink-2:      #c4c0b6;           /* secondary text */
+  --text:       var(--ink);        /* legacy alias */
   --cream:      #efe2cc;
-  --muted:      #7c7468;           /* dark tan — muted/secondary text */
-  --muted-dim:  #555049;
+  --dim:        #8b8f96;           /* dimmed labels */
+  --faint:      #5e636b;           /* very dim placeholders */
+  --muted:      var(--dim);        /* legacy alias */
+  --muted-dim:  var(--faint);      /* legacy alias */
 
-  /* ── Semantic accents (flat solids) ──────────────────────────────── */
+  /* ── Semantic accents ─────────────────────────────────────────────── */
   --good:       #53c055;            /* GOOD GREEN — wins, positives */
   --success:    #53c055;
   --success-bg: rgba(83, 192, 85, .15);
 
   --danger:     #b9463e;            /* BAD RED — losses, sells */
   --danger-bg:  rgba(185, 70, 62, .15);
+  --bad:        var(--danger);     /* Codex alias */
+  --bad-soft:   rgba(185, 70, 62, .16);
+  --bad-line:   rgba(185, 70, 62, .40);
 
   --vitality:   #a5c941;            /* VITALITY GREEN — heal/health (lime-yellow) */
 
@@ -55,13 +79,17 @@
   --warm-dk:    #a88212;
   --warm-lt:    #f0c84a;
 
-  --gold:       #f5c84a;            /* GOLD HIGHLIGHT — bright shiny gold for staple/star markers */
+  --gold:       #f5c84a;            /* GOLD HIGHLIGHT — staple/star markers + self/"You" */
   --gold-lt:    #ffe294;
   --gold-dk:    #b88a25;
   --soul:       #93cdab;            /* SOUL HIGHLIGHT — pale mint (in-game souls) */
 
   --info:       #62a7af;            /* OTHER BLUE — secondary cool accent (upgrade badges) */
   --info-dk:    #3a7077;
+
+  /* "You" — the self-hero highlight on team chips, hero cards, lobby strip */
+  --you:        var(--gold);
+  --you-ink:    #0e1116;            /* ink on top of --you fills */
 
   /* Label aliases — resolved to semantic colors above */
   --orange:     var(--weapon);      /* legacy alias — was spike color */
@@ -73,16 +101,82 @@
   --tier-3:     #c44b3c;           /* T3 red-orange */
   --tier-4:     #8a2828;           /* T4 deep wine */
 
-  --sidebar-w:  168px;
+  /* ── Layout primitives ────────────────────────────────────────────── */
+  --nav-w:      228px;             /* sidebar width (was 168 — Codex widens it) */
+  --sidebar-w:  var(--nav-w);      /* legacy alias */
+  --gut:        22px;              /* page gutter */
+  --gap:        16px;              /* card gap */
+  --r:          14px;              /* large radius (panels, cards) */
+  --r-sm:       9px;               /* small radius (buttons, chips, inputs) */
+  --r-pill:     999px;             /* pill radius (tchip, instance-pill) */
 
-  --shadow-card: 0 1px 0 rgba(255,255,255,.02) inset, 0 8px 24px rgba(0,0,0,.55);
-  --shadow-soft: 0 4px 14px rgba(0,0,0,.4);
+  --shadow:      0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-sm:   0 3px 10px rgba(0, 0, 0, .35);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, .02) inset, 0 8px 24px rgba(0, 0, 0, .55);
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, .4);
 
-  /* Weathered display serif — the closest Google Fonts approximation of the
-     stenciled, lived-in DEADLOCK wordmark. IM Fell is literally a 17th-c
-     printer's typeface with intentional ink-bleed irregularities. */
+  /* Weathered display serif — IM Fell English (a 17th-c printer's typeface
+     with intentional ink-bleed) for headings and the wordmark. Inter for body. */
   --font-display: 'IM Fell English', 'IM Fell English SC', Georgia, 'Times New Roman', serif;
   --font-body:    'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --serif:        var(--font-display);
+  --sans:         var(--font-body);
+}
+
+/* ── LIGHT THEME — parchment / warm paper ─────────────────────────────
+   Lifted from the Codex prototype. Triggered by [data-theme="light"] on
+   <html>. Overrides only what changes; layout primitives carry through. */
+[data-theme="light"] {
+  --page:       #e6dcc4;
+  --page2:      #efe7d4;
+  --panel:      #f3ecdc;
+  --panel2:     #efe7d4;
+  --card:       #f6f0e2;
+  --card-h:     #fbf6ea;
+  --inset:      #e3d8bf;
+
+  --line:       #d2c5a6;
+  --line-soft:  #ddd1b5;
+
+  --ink:        #2b2a22;
+  --ink-2:      #4a4636;
+  --cream:      #2b2a22;            /* on parchment, the "cream" ink darkens */
+  --dim:        #857c63;
+  --faint:      #a99d80;
+
+  --accent:     #3a7a52;            /* deeper green on parchment */
+  --accent-top: #3a7a52;
+  --accent-bot: #3a7a52;
+  --accent-dk:  #2c5e3f;
+  --green:      var(--accent);
+  --green-br:   var(--accent);
+  --green-soft: rgba(58, 122, 82, .13);
+  --green-line: rgba(58, 122, 82, .42);
+
+  --gold:       #9c7619;
+  --gold-dk:    #74570f;
+  --soul:       #347a5a;
+
+  --good:       #3a7a52;
+  --bad:        #a4453c;
+  --danger:     #a4453c;
+  --bad-soft:   rgba(164, 69, 60, .12);
+  --bad-line:   rgba(164, 69, 60, .40);
+
+  --vitality:   #6d7d2a;
+  --weapon:     #9c7d12;
+  --spirit:     #8a4fb0;
+
+  --tier-2:     #bf7421;
+  --tier-3:     #b1463a;
+  --tier-4:     #8f2f2f;
+
+  --shadow:      0 8px 24px rgba(60, 50, 30, .13);
+  --shadow-sm:   0 2px 8px rgba(60, 50, 30, .10);
+  --shadow-card: 0 8px 24px rgba(60, 50, 30, .13);
+
+  --you:        #9c7619;
+  --you-ink:    #fbf6ea;
 }
 
 html, body {
@@ -127,79 +221,101 @@ h1, h2, .page-header h1, .display-font {
 /* ── Layout ────────────────────────────────────────────────── */
 #sidebar {
   position: fixed; top: 0; left: 0; bottom: 0;
-  width: var(--sidebar-w);
-  background: var(--bg);
-  border-right: 1px solid var(--border-soft);
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 18px 10px;
+  width: var(--nav-w);
+  background: var(--page2);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 18px 14px;
   z-index: 100;
 }
+/* Brand wordmark — sits above the nav, sticks to the top */
 .sidebar-logo {
   font-family: var(--font-display);
-  display: flex; flex-direction: column; align-items: center; gap: 0;
-  padding: 6px 8px 14px;
+  display: flex; flex-direction: row; align-items: center; gap: 11px;
+  padding: 4px 8px 18px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-  text-align: center;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
 }
+/* Brand mark — green gradient tile (replaces the chipped stencil glyph) */
 .sidebar-mark {
-  font-size: 30px; line-height: 1;
-  color: var(--cream);
-  margin-bottom: 6px;
-  /* Stenciled / chipped paint feel via layered text-shadow micro-offsets */
-  text-shadow:
-    0 1px 0 rgba(0,0,0,.6),
-    1px 0 0 rgba(10, 20, 22, .8),
-    -1px 0 0 rgba(10, 20, 22, .4);
-  opacity: .92;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--accent-top), var(--accent-bot));
+  color: #0c1f15;
+  font-size: 20px; line-height: 1;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  text-shadow: none;
+  opacity: 1;
+  margin-bottom: 0;
 }
+[data-theme="light"] .sidebar-mark { color: #fff; background: var(--accent); }
 .sidebar-title {
   font-family: var(--font-display);
-  font-size: 22px; font-weight: 400; letter-spacing: .04em;
-  color: var(--cream);
-  /* Hand-cut, lived-in feel: subtle uneven shadow + slightly chipped opacity */
-  text-shadow: 0 1px 0 rgba(0,0,0,.65), 0 0 1px rgba(10,20,22,.5);
-  opacity: .94;
-  line-height: 1;
+  font-size: 21px; font-weight: 400; letter-spacing: .01em;
+  color: var(--ink);
+  text-shadow: none;
+  opacity: 1;
+  line-height: .95;
 }
 .sidebar-sub {
   font-family: var(--font-body);
-  font-size: 9px; font-weight: 600; letter-spacing: .42em;
-  color: var(--muted);
-  margin-top: 6px;
+  font-size: 9px; font-weight: 700; letter-spacing: .34em;
+  color: var(--dim);
+  margin-top: 2px;
   text-transform: uppercase;
 }
+/* nav group label (e.g. "Advanced", "Developer") */
+.nav-group-lbl {
+  font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--faint); font-weight: 700;
+  padding: 14px 10px 6px;
+}
 .nav-btn {
-  background: none; border: 1px solid transparent; color: var(--muted);
-  padding: 9px 12px; border-radius: 2px; cursor: pointer;
-  text-align: left; font-size: 13px; font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  transition: color .12s, background .12s, border-color .12s;
+  background: none; border: 1px solid transparent; color: var(--dim);
+  padding: 10px 12px; border-radius: var(--r-sm); cursor: pointer;
+  text-align: left; font-size: 14.5px; font-weight: 600;
+  letter-spacing: .01em;
+  text-transform: none;
+  transition: color .13s, background .13s, border-color .13s;
   position: relative;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; gap: 11px;
+  width: 100%;
 }
 .nav-ico {
   display: inline-block;
-  width: 16px; text-align: center;
+  width: 20px; text-align: center;
   font-family: var(--font-body);
   font-variant-emoji: text;
-  font-size: 14px; line-height: 1;
-  color: var(--muted);
-  transition: color .12s;
+  font-size: 17px; line-height: 1;
+  color: inherit; opacity: .8;
+  transition: opacity .13s;
 }
-.nav-btn:hover { color: var(--text); }
-.nav-btn:hover .nav-ico { color: var(--accent); }
+.nav-btn:hover { color: var(--ink); background: var(--card); }
+.nav-btn:hover .nav-ico { opacity: 1; }
 
-/* Active = clean solid Deadlock Green block, dark text. No gradient/mask —
-   keeps the sidebar crisp on the dark backdrop. */
+/* Active = soft-green bg + green border + bright green text */
 .nav-btn.active {
-  color: #0a1a10;
-  background: var(--accent);
-  border-color: var(--accent-dk);
-  font-weight: 800;
+  color: var(--accent);
+  background: var(--green-soft);
+  border-color: var(--green-line);
+  font-weight: 600;
 }
-.nav-btn.active .nav-ico { color: #0a1a10; }
+[data-theme="light"] .nav-btn.active { color: var(--green); }
+.nav-btn.active .nav-ico { opacity: 1; color: var(--accent); }
+[data-theme="light"] .nav-btn.active .nav-ico { color: var(--green); }
+
+/* spacer that pushes the foot buttons to the bottom of the sidebar */
+.nav-spacer { flex: 1; }
+/* foot of the sidebar (theme/settings buttons) */
+.nav-foot {
+  display: flex; flex-direction: column; gap: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 8px;
+}
 
 #main {
   margin-left: var(--sidebar-w);
@@ -2956,6 +3072,1333 @@ h1, h2, .page-header h1, .display-font {
 .sim-override-row.bp-label-signature        { border-color: rgba(117,232,162,.40); background: rgba(117,232,162,.03); }
 .sim-override-row.bp-label-signature-anti   { border-color: rgba(199,155,255,.40); background: rgba(199,155,255,.03); }
 .sim-override-row.bp-label-recommended      { border-color: rgba(98,167,175,.45);  background: rgba(98,167,175,.03); }
+
+/* ════════════════════════════════════════════════════════════════════
+   CODEX OVERLAY — new components introduced by the Codex redesign.
+   Lives at the bottom of the file so it wins specificity-tied rules.
+   Adds: topbar / backbtn, settings drawer + toggles + seg, bottom nav,
+   selected-instance sidebar block, build-detail tabbar, mobile rules,
+   density helpers, light-theme overrides where component rules differ.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Topbar (sticky page header) ────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--page) 88%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px var(--gut);
+  margin: -18px -18px 18px;  /* extends to #main padding edges, then we add our own gap */
+}
+.topbar h1 {
+  font-family: var(--font-display);
+  font-size: 27px; font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+  flex: 1;
+  letter-spacing: .02em;
+  text-shadow: none;
+}
+.topbar .crumb {
+  font-size: 13px; color: var(--dim); font-weight: 600;
+}
+.topbar .crumb b { color: var(--ink); }
+.tb-actions {
+  display: flex; align-items: center; gap: 8px;
+  margin-left: auto;
+}
+
+/* Back-arrow square button */
+.backbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--card); color: var(--ink-2);
+  font-size: 19px; line-height: 1;
+  flex-shrink: 0;
+  transition: .13s;
+  cursor: pointer;
+}
+.backbtn:hover {
+  background: var(--card-h); color: var(--ink);
+  border-color: var(--dim);
+  transform: translateX(-2px);
+}
+
+/* Icon-only square button — used in topbar tb-actions (☾/☀ ⚙ ×) */
+.btn-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  padding: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--card); color: var(--ink-2);
+  font-size: 17px; line-height: 1;
+  cursor: pointer;
+  transition: .13s;
+}
+.btn-icon.ghost { background: transparent; border-color: transparent; }
+.btn-icon:hover {
+  background: var(--card-h); color: var(--ink); border-color: var(--dim);
+}
+
+/* Topbar action label that hides on mobile */
+.tb-actions .label-hide { display: inline-flex; }
+@media (max-width: 760px) {
+  .tb-actions .label-hide { display: none; }
+}
+
+/* ── Instance pill (topbar crumb showing currently-opened hero/build) ── */
+.instance-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--green-soft);
+  border: 1px solid var(--green-line);
+  border-radius: var(--r-pill);
+  padding: 4px 12px 4px 6px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--accent);
+}
+[data-theme="light"] .instance-pill { color: var(--green); }
+.instance-pill .ipill-port {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--inset);
+  display: inline-block;
+  background-size: cover; background-position: center;
+}
+.instance-pill .bd { color: var(--dim); font-weight: 600; }
+
+/* ── Settings drawer (right slide-in) ────────────────────────────── */
+.drawer-scrim {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .5);
+  z-index: 880;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.drawer-scrim.open { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 340px; max-width: 90vw;
+  background: var(--page2);
+  border-left: 1px solid var(--line);
+  z-index: 881;
+  transform: translateX(100%);
+  transition: transform .24s cubic-bezier(.4, 0, .2, 1);
+  display: flex; flex-direction: column;
+}
+.drawer.open { transform: none; }
+.drawer-hd {
+  display: flex; align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-hd .t {
+  font-family: var(--font-display);
+  font-size: 22px;
+  flex: 1;
+  color: var(--ink);
+}
+.drawer-body {
+  padding: 18px 20px;
+  overflow: auto;
+  flex: 1;
+}
+.set-group { margin-bottom: 22px; }
+.set-group-t {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 12px;
+}
+.set-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.set-row .lab { flex: 1; }
+.set-row .lab .t { font-size: 14px; font-weight: 600; color: var(--ink); }
+.set-row .lab .d { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.set-row.adv .lab .t { color: var(--gold); }
+.set-row.dev .lab .t { color: var(--spirit); }
+.drawer-foot-note {
+  color: var(--faint); font-size: 12px; line-height: 1.5;
+  padding: 0 20px 18px;
+}
+
+/* ── Toggle switch (drawer rows) ─────────────────────────────────── */
+.toggle {
+  width: 42px; height: 24px;
+  border-radius: 20px;
+  background: var(--inset);
+  position: relative;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+  transition: background .18s, border-color .18s;
+  cursor: pointer;
+  padding: 0;
+}
+.toggle::after {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: left .18s, background .18s;
+}
+.toggle.on {
+  background: var(--green-soft);
+  border-color: var(--green-line);
+}
+.toggle.on::after { left: 20px; background: var(--accent); }
+[data-theme="light"] .toggle.on::after { background: var(--green); }
+/* developer toggle uses purple */
+.toggle.dev.on {
+  background: rgba(178, 110, 215, .2);
+  border-color: rgba(178, 110, 215, .5);
+}
+.toggle.dev.on::after { background: var(--spirit); }
+
+/* ── Segmented control (drawer theme picker, calc filters) ─────── */
+.seg {
+  display: inline-flex;
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  gap: 3px;
+}
+.seg button {
+  border: none; background: none;
+  color: var(--dim);
+  padding: 6px 13px;
+  border-radius: 6px;
+  font-weight: 600; font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.seg button.on {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Selected-instance card in sidebar (B3) ──────────────────────── */
+.nav-instance {
+  margin: 6px 4px 2px;
+  padding: 9px 11px;
+  border-radius: var(--r-sm);
+  background: var(--green-soft);
+  border: 1px solid var(--green-line);
+}
+.nav-instance .ni-lbl {
+  font-size: 8.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700;
+  display: flex; align-items: center; gap: 5px;
+}
+[data-theme="light"] .nav-instance .ni-lbl { color: var(--green); }
+.nav-instance .ni-hero {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 7px;
+  border: none; background: none;
+  padding: 0; width: 100%; text-align: left; cursor: pointer;
+  font-family: inherit;
+}
+.nav-instance .ni-hero .ni-port {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: var(--inset);
+  background-size: cover; background-position: center;
+  flex-shrink: 0;
+}
+.nav-instance .ni-hero .nm { font-size: 14px; font-weight: 700; line-height: 1; color: var(--ink); }
+.nav-instance .ni-hero .bd { font-size: 11px; color: var(--dim); font-weight: 600; margin-top: 2px; }
+.nav-instance .ni-actions {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-top: 9px;
+}
+.nav-instance .ni-act {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; text-align: left;
+  border: none; background: transparent;
+  color: var(--ink-2); font-weight: 600; font-size: 13.5px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  transition: .1s;
+  cursor: pointer;
+  font-family: inherit;
+}
+.nav-instance .ni-act:hover {
+  background: var(--card); color: var(--ink);
+}
+.nav-instance .ni-act.active {
+  background: var(--card); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--green-line);
+}
+.nav-instance .ni-act .ico { width: 18px; text-align: center; opacity: .85; }
+.nav-instance .ni-clear {
+  font-size: 11px; color: var(--faint);
+  background: none; border: none;
+  margin-top: 4px; padding: 2px 8px;
+  cursor: pointer;
+}
+.nav-instance .ni-clear:hover { color: var(--bad); }
+
+/* ── Build-detail tab bar (B4) ───────────────────────────────────── */
+.tabbar {
+  display: flex; gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--gap);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabbar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  border: none; background: none;
+  color: var(--dim);
+  font-weight: 600; font-size: 14.5px;
+  padding: 12px 16px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  transition: color .12s, border-color .12s;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.on { color: var(--ink); border-bottom-color: var(--accent); }
+.tab-btn .tnum {
+  font-size: 10px; font-weight: 700;
+  background: var(--inset); color: var(--dim);
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+}
+.tab-btn.on .tnum { background: var(--green-soft); color: var(--accent); }
+[data-theme="light"] .tab-btn.on .tnum { color: var(--green); }
+.tab-btn .tab-star { color: var(--gold); font-size: 11px; }
+/* a panel that only shows for its matching tab; toggled by JS */
+.tab-panel { display: none; }
+.tab-panel.on { display: block; }
+
+/* ── Mobile bottom nav (B7) ──────────────────────────────────────── */
+.botnav { display: none; }
+@media (max-width: 760px) {
+  #sidebar { display: none; }
+  #main { margin-left: 0; padding-bottom: 74px; }
+  .topbar h1 { font-size: 22px; }
+  .topbar { padding: 13px 14px; margin: -14px -14px 14px; }
+  #main { padding: 14px 14px 74px; }
+
+  .botnav {
+    display: flex;
+    position: fixed; left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    background: var(--page2);
+    border-top: 1px solid var(--line);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .botnav button {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    border: none; background: none;
+    color: var(--dim);
+    padding: 7px 2px;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .botnav button .ico { font-size: 21px; }
+  .botnav button.active { color: var(--accent); }
+  [data-theme="light"] .botnav button.active { color: var(--green); }
+}
+
+/* ── Density helpers (B8) ────────────────────────────────────────── */
+[data-density="simple"] .dense-only { display: none !important; }
+.simple-only { display: none; }
+[data-density="simple"] .simple-only { display: block; }
+/* mobile is simplified by default — keep but allow override via [data-density="dense"] */
+@media (max-width: 760px) {
+  :root:not([data-density="dense"]) .dense-only { display: none !important; }
+  :root:not([data-density="dense"]) .simple-only { display: block; }
+}
+
+/* ── Light-theme component overrides ─────────────────────────────── */
+/* Page header underline accent — was a 1px green-fade; on parchment it
+   reads as a subtle pencil mark instead. */
+[data-theme="light"] .page-header::after {
+  background: linear-gradient(90deg, var(--green), transparent);
+  opacity: .5;
+}
+/* h1 ink-bleed text-shadow doesn't read on parchment — remove */
+[data-theme="light"] .page-header h1,
+[data-theme="light"] .topbar h1 { color: var(--ink); text-shadow: none; }
+/* sidebar title text-shadow looks like noise on light bg */
+[data-theme="light"] .sidebar-title { color: var(--ink); text-shadow: none; }
+/* Dirty badge — warm parchment needs darker amber */
+[data-theme="light"] .dirty-badge {
+  background: rgba(156, 118, 25, .15);
+  color: var(--gold);
+  border-color: rgba(156, 118, 25, .4);
+}
+/* Primary button on light theme uses solid green, not gradient on cream */
+[data-theme="light"] .btn-primary {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--accent-dk);
+}
+
+/* Smooth out the page-header underline accent so it doesn't double up
+   with the new topbar's border-bottom when both render in the same view. */
+.topbar + .page-header::after,
+.topbar ~ .page-header::after { display: none; }
+
+/* ── Light-theme fixes for hardcoded dark colors ─────────────────── */
+/* `.btn-ghost` uses a hardcoded navy bg — invert on parchment so it
+   reads against the cream surface. */
+[data-theme="light"] .btn-ghost {
+  background: var(--card);
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+[data-theme="light"] .btn-ghost:hover {
+  background: var(--card-h);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+/* `.hero-card.is-preset` had a hardcoded dark occult gradient. On
+   parchment, lighten it to a parchment-tinted purple wash. */
+[data-theme="light"] .hero-card.is-preset {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--spirit) 12%, var(--card)) 0%,
+    color-mix(in srgb, var(--spirit) 6%,  var(--card)) 100%);
+  border-color: color-mix(in srgb, var(--spirit) 45%, transparent);
+}
+[data-theme="light"] .hero-card.is-preset::before {
+  background: linear-gradient(90deg, transparent,
+    color-mix(in srgb, var(--spirit) 35%, transparent), transparent);
+}
+
+/* Active tag-row highlight — was hardcoded dark grey */
+[data-theme="light"] .tag-table tbody tr.row-active td.col-tag {
+  background: color-mix(in srgb, var(--accent) 12%, var(--card));
+}
+
+/* Build-screen tile icon backdrop + label pill — switch from #14171a /
+   rgba(15,17,15) to surface-tinted on parchment. */
+[data-theme="light"] .bs-tile-icon-area {
+  background: var(--inset);
+}
+[data-theme="light"] .bs-tile-label {
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* Modal overlay — was rgba(0,0,0,.6) which is too heavy on parchment.
+   Soften to a tan haze. */
+[data-theme="light"] .modal-overlay {
+  background: rgba(60, 50, 30, .35);
+}
+
+/* Item card hover shadows use semi-transparent semantic colors — these
+   work in both themes but the deep T4 wine band on parchment can look
+   off. Soften the hard outline ring. */
+[data-theme="light"] .item-card.cat-Weapon:hover,
+[data-theme="light"] .item-card.cat-Vitality:hover,
+[data-theme="light"] .item-card.cat-Spirit:hover {
+  box-shadow: 0 4px 14px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+/* Pages where btn-warm renders (alchemy/fire flavor) — its gradient is
+   warm by default so it already reads on parchment. No override needed. */
+
+/* Light theme: dirty badge — Atelier dark uses warm amber on dark; on
+   parchment the warm-lt is illegible. Switch to deeper gold ink. */
+[data-theme="light"] .dirty-badge {
+  background: color-mix(in srgb, var(--gold) 22%, var(--card));
+  color: var(--gold-dk);
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CODEX POLISH — Match Results page (#page-calc-summary)
+   The existing class structure (.summary-card / .sc-* / .summary-section)
+   is preserved; these rules push visual rhythm closer to the Codex
+   prototype's .hcard / .hgrid / .team-label / .profiles family without
+   restructuring makeSummaryCard.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Team section label — restyle to Codex .team-label (small caps, accent
+   color, with a horizontal rule trailing) */
+.summary-section {
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  margin: 6px 0 12px;
+  padding: 0;
+  border-bottom: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.summary-section.ally-section  { color: var(--good); }
+.summary-section.enemy-section { color: var(--bad); }
+.summary-section::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Summary grid → Codex .hgrid rhythm — wider cards, more breathing room */
+#summary-grid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  gap: var(--gap);
+}
+
+/* Summary card → Codex .hcard — larger radius, subtle shadow, transition */
+.summary-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .13s, transform .13s, box-shadow .13s;
+}
+.summary-card:hover {
+  border-color: var(--dim);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.summary-card.sc-self  { border-color: var(--you); }
+.summary-card.sc-ally  { border-color: var(--line); }
+.summary-card.sc-enemy { border-color: var(--line); }
+.summary-card.sc-self:hover  { border-color: var(--you); box-shadow: 0 0 0 1px var(--you), var(--shadow); }
+.summary-card.sc-ally:hover  { border-color: var(--good); }
+.summary-card.sc-enemy:hover { border-color: var(--bad); }
+
+/* Card header — portrait + name + role pill + score pill rhythm */
+.sc-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--line);
+}
+.sc-img, .sc-no-img {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--inset);
+  flex-shrink: 0;
+}
+.sc-info { flex: 1; min-width: 0; }
+.sc-name {
+  font-family: var(--font-display);
+  font-size: 21px; font-weight: 400; letter-spacing: .01em;
+  color: var(--ink);
+  line-height: 1;
+  text-shadow: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Role text → pill — uppercase, padded, color-coded */
+.sc-role {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: var(--green-soft);
+  color: var(--accent);
+}
+[data-theme="light"] .sc-role { color: var(--green); }
+.summary-card.sc-self  .sc-role { background: var(--you); color: var(--you-ink); }
+.summary-card.sc-enemy .sc-role { background: var(--bad-soft); color: var(--bad); }
+
+/* Body padding to match Codex .hc-body */
+.summary-card .sc-builds,
+.summary-card .sc-items,
+.summary-card .sc-tags,
+.summary-card .sc-assist-counter,
+.summary-card .sc-matchups { padding: 0 14px; }
+.summary-card .sc-builds   { padding-top: 14px; }
+.summary-card .sc-matchups { padding-bottom: 14px; }
+
+/* Build rows → Codex .hc-build. Each row is independently clickable —
+   tapping it jumps straight to that build's detail (bypasses hero view). */
+.sc-build-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--inset);
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  margin-bottom: 7px;
+  border: 1px solid transparent;
+  transition: border-color .1s, background .1s;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.sc-build-row:last-child { margin-bottom: 0; }
+.sc-build-row:hover {
+  border-color: var(--green-line);
+  background: var(--card-h);
+}
+.sc-build-arrow {
+  color: var(--faint);
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color .1s, transform .1s;
+}
+.sc-build-row:hover .sc-build-arrow {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+[data-theme="light"] .sc-build-row:hover .sc-build-arrow { color: var(--green); }
+.sc-bname  { flex: 1; color: var(--ink); font-weight: 600; }
+.sc-bscore {
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+.sc-build-pct {
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 2px 7px; border-radius: var(--r-sm);
+  font-size: 11.5px;
+}
+.sc-build-pct.pct-pos { color: var(--good); background: var(--green-soft); }
+.sc-build-pct.pct-neg { color: var(--bad);  background: var(--bad-soft); }
+
+/* Top items section → Codex .hc-items-lbl + .hc-items grid */
+.sc-items { padding-bottom: 14px; }
+.sc-items-lbl {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--faint);
+  margin: 14px 0 8px;
+}
+.sc-item-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+}
+.sc-item-row:last-child { border-bottom: none; }
+.sc-item-img {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--inset);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.sc-item-name  { flex: 1; font-weight: 600; color: var(--ink); }
+.sc-item-score { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+[data-theme="light"] .sc-item-score { color: var(--green); }
+
+/* Top profile panels (ally / enemy team tag profile) → Codex .profiles */
+.ta-profile-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+.ta-team-panel,
+#summary-tag-panel .calc-panel {
+  background: var(--panel) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--r) !important;
+  padding: 16px 18px !important;
+}
+.calc-panel-title {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+/* Matchup band — best/worst matchups grid */
+.matchup-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap);
+}
+.matchup-col-lbl {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.matchup-col.best-col  .matchup-col-lbl { color: var(--good); }
+.matchup-col.worst-col .matchup-col-lbl { color: var(--bad); }
+.matchup-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.matchup-row:last-child { border-bottom: none; }
+.matchup-img {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--inset);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.matchup-img.no-img {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.matchup-name  { flex: 1; font-weight: 600; color: var(--ink); }
+.matchup-score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.matchup-col.best-col  .matchup-score { color: var(--good); }
+.matchup-col.worst-col .matchup-score { color: var(--bad); }
+
+/* Strengths / counters chip strip inside summary card */
+.sc-tags {
+  padding: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* Items to Assist / Items to Counter mini-cols inside summary card */
+.sc-assist-counter {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+.sc-ac-lbl {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+.sc-ac-col.sc-ac-assist  .sc-ac-lbl { color: var(--good); }
+.sc-ac-col.sc-ac-counter .sc-ac-lbl { color: var(--bad); }
+.sc-ac-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.sc-ac-img {
+  width: 22px; height: 22px;
+  border-radius: 5px;
+  background: var(--inset);
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Matchups section in card */
+.sc-matchups {
+  padding: 14px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 12.5px;
+}
+.sc-mu-section { margin-bottom: 6px; }
+.sc-mu-lbl {
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim);
+  margin-right: 8px;
+}
+.sc-mu-section.mu-best   .sc-mu-lbl { color: var(--good); }
+.sc-mu-section.mu-worst  .sc-mu-lbl { color: var(--bad); }
+.sc-mu-section.mu-target .sc-mu-lbl { color: var(--gold); }
+.sc-mu-hero {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--inset);
+  border-radius: var(--r-pill);
+  padding: 3px 10px 3px 4px;
+  font-weight: 600;
+  margin-right: 6px;
+}
+.sc-mu-img {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--inset);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Codex polish — Hero Detail page (#page-calc-hero)
+   The hero-detail render fills #calc-hero-detail dynamically. Push
+   the existing structure (hero-card-like sections + build rows)
+   toward Codex .hero-hd / .hbuild rhythm via existing selectors.
+   ──────────────────────────────────────────────────────────────── */
+/* Style for the calc-hero header band when JS adds one */
+#page-calc-hero .page-header h1 { font-size: 32px; }
+#calc-hero-detail .build-row,
+#calc-hero-detail .calc-build-row {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin-bottom: 11px;
+  transition: border-color .13s, transform .13s, box-shadow .13s;
+  box-shadow: var(--shadow-sm);
+}
+#calc-hero-detail .build-row:hover,
+#calc-hero-detail .calc-build-row:hover {
+  border-color: var(--dim);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Codex polish — Build Detail (#page-calc-build) score / panels
+   ──────────────────────────────────────────────────────────────── */
+.calc-build-desc { color: var(--dim); font-weight: 600; margin-top: 4px; font-size: 13px; }
+#calc-build-detail .score-strip,
+#calc-build-detail .calc-score-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: var(--gap);
+}
+#calc-build-detail .score-cell,
+#calc-build-detail .calc-score-cell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 14px 10px;
+  text-align: center;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Codex layout primitives — usable by ANY render function that
+   wants to opt into the prototype's grid system. Defined here as
+   reference utilities; not yet wired into the existing renders.
+   ──────────────────────────────────────────────────────────────── */
+.hgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--gap);
+  margin-bottom: calc(var(--gap) + 8px);
+}
+.team-label {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  margin: 6px 0 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.team-label.ally  { color: var(--good); }
+.team-label.enemy { color: var(--bad); }
+.team-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--line);
+}
+.profiles {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px 18px;
+}
+.panel-t {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+/* Codex .hcard — for future opt-in by render functions */
+.hcard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: .13s;
+  box-shadow: var(--shadow-sm);
+}
+.hcard:hover { border-color: var(--dim); transform: translateY(-2px); box-shadow: var(--shadow); }
+.hcard.self  { border-color: var(--you); }
+
+@media (max-width: 1080px) {
+  .ta-profile-row,
+  .matchup-grid,
+  .sc-assist-counter,
+  .profiles {
+    grid-template-columns: 1fr;
+  }
+  #summary-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  }
+}
+@media (max-width: 760px) {
+  #summary-grid { grid-template-columns: 1fr !important; }
+  .hgrid { grid-template-columns: 1fr; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CODEX POLISH — Hero Detail page (#page-calc-hero)
+   Maps existing .ch-* classes onto Codex .hero-hd / .hbuild rhythm.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Hero banner — big portrait + serif name + tag-style meta strip */
+.ch-hero-banner {
+  display: flex; align-items: center; gap: 18px;
+  padding: 0 0 var(--gap);
+  border-bottom: none;
+  margin-bottom: var(--gap);
+  flex-wrap: wrap;
+}
+.ch-hero-img {
+  width: 84px; height: 84px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: var(--inset);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.ch-hero-banner-name {
+  font-family: var(--font-display);
+  font-size: 38px; font-weight: 400; letter-spacing: .01em;
+  color: var(--ink);
+  line-height: 1;
+  text-shadow: none;
+}
+
+/* Column header row — small caps label band */
+.ch-header-row {
+  display: grid;
+  grid-template-columns: 1fr 78px 78px 120px;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--faint);
+}
+.ch-header-row.v2 { grid-template-columns: 1fr repeat(4, 78px) 120px; }
+
+/* Per-build row → Codex .hbuild — lifted card, hover lift */
+.ch-build-row {
+  display: grid;
+  grid-template-columns: 1fr 78px 78px 120px;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 11px;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color .13s, transform .13s, box-shadow .13s;
+  box-shadow: var(--shadow-sm);
+}
+.ch-build-row.v2 { grid-template-columns: 1fr repeat(4, 78px) 120px; }
+.ch-build-row:hover {
+  border-color: var(--green-line);
+  background: var(--card);  /* override the old --bg-elev hover */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.ch-build-row:last-child { border-radius: var(--r); }
+.ch-build-row.is-general {
+  border-color: var(--line);
+}
+.ch-build-row.is-general .ch-bname {
+  color: var(--ink-2);
+  font-style: normal;
+}
+.ch-bname {
+  font-family: var(--font-display);
+  font-size: 21px;
+  color: var(--ink);
+  letter-spacing: .01em;
+  line-height: 1.05;
+}
+.ch-score {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+.ch-score-dim { color: var(--dim); font-size: 12px; }
+.ch-pct {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+}
+.ch-pct.pct-pos { color: var(--good); background: var(--green-soft); }
+.ch-pct.pct-neg { color: var(--bad);  background: var(--bad-soft); }
+.ch-total-wrap {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Per-row top items grid — 3 col by category, becomes a body section
+   beneath the header columns */
+.ch-items-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 12px 0 4px;
+  margin-top: 8px;
+  border-top: 1px solid var(--line-soft);
+}
+.ch-items-col {
+  min-width: 0;
+}
+.ch-items-col .it-cat-hdr {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.it-cat-hdr.it-cat-weapon   { color: var(--weapon); }
+.it-cat-hdr.it-cat-vitality { color: var(--vitality); }
+.it-cat-hdr.it-cat-spirit   { color: var(--spirit); }
+.ch-item-mini {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 12.5px;
+}
+.ch-item-mini:last-child { border-bottom: none; }
+.ch-item-img {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: var(--inset);
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.ch-item-img.no-img { display: none; }
+.ch-item-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ch-item-score {
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .ch-item-score { color: var(--green); }
+
+/* Per-build strengths/weaknesses + matchups span full row */
+.ch-ta-row {
+  grid-column: 1 / -1;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+}
+.ch-mu-row {
+  grid-column: 1 / -1;
+  padding-top: 6px;
+  margin-top: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* Mobile: stack score columns under the build name */
+@media (max-width: 760px) {
+  .ch-header-row { display: none; }
+  .ch-build-row,
+  .ch-build-row.v2 {
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+  }
+  .ch-items-row { grid-template-columns: 1fr; }
+}
+
+/* Dense-only sections on hero detail: items grid + per-build matchups */
+[data-density="simple"] .ch-items-row,
+[data-density="simple"] .ch-mu-row,
+[data-density="simple"] .ch-ta-row { display: none; }
+
+/* ════════════════════════════════════════════════════════════════════
+   CODEX MOBILE — comprehensive ≤760px overrides
+   The first mobile pass only handled the Codex-native components. The
+   tag_generator's existing pages still rendered desktop-style controls on
+   phones (jammed header, multi-row bottom nav, etc.). These rules clean
+   that up by stacking page-headers, simplifying control rows, and forcing
+   the bottom nav to a true 4-up flex layout.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Bottom nav: the #botnav-instance-host wrapper needs display:contents
+   so its child buttons become direct flex children of .botnav and pick
+   up the same flex:1 distribution as Calc/Settings. Without this fix
+   the wrapper takes its content width and overflow forces a 2nd row. */
+#botnav-instance-host { display: contents; }
+.botnav {
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+.botnav button {
+  min-width: 0;          /* allow shrink so 4 buttons fit on narrow phones */
+  flex: 1 1 0 !important;
+  padding: 7px 0 !important;
+  font-size: 9.5px !important;
+}
+.botnav button .ico { font-size: 19px !important; }
+
+@media (max-width: 760px) {
+  /* ── Page header — stack vertically, smaller h1 ── */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+  }
+  .page-header h1 {
+    font-size: 24px;
+    line-height: 1.1;
+    width: 100%;
+  }
+  .page-header::after { width: 50px; }
+
+  /* Back button slot — keep button compact + give it its own row above h1 */
+  .page-header .btn-back {
+    width: auto;
+    padding: 6px 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+  /* When back button + title coexist, lay them out in a row above the
+     actions block instead of stacking */
+  .page-header:has(.btn-back) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'back  title'
+      'acts  acts';
+    align-items: center;
+    gap: 10px 12px;
+  }
+  .page-header .btn-back { grid-area: back; }
+  .page-header > h1, .page-header > div:first-of-type:has(h1) { grid-area: title; min-width: 0; }
+  .page-header > h1 { font-size: 20px; }
+  .page-header .header-actions { grid-area: acts; width: 100%; flex-wrap: wrap; }
+
+  /* Action cluster — wrap freely, full-width buttons */
+  .header-actions { flex-wrap: wrap; gap: 8px; width: 100%; }
+  .header-actions > * { flex-shrink: 0; }
+  .header-actions .btn-primary { flex: 1; padding: 10px 14px; font-size: 12px; }
+
+  /* ── Calculator header — collapse heavy control rows ── */
+  /* The Calculator page packs ~14 controls into the header. On phones
+     that's unusable. We stack the rows, shrink fonts, and hide the most
+     advanced controls behind the Dense Layout toggle. */
+  .calc-actions { gap: 8px; width: 100%; }
+  .calc-ctrl-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+  }
+  .calc-ctrl-row .toggle-label,
+  .calc-ctrl-row .mult-group,
+  .calc-ctrl-row .mult-item {
+    font-size: 11px;
+  }
+  .calc-ctrl-row .mult-input { font-size: 11px; padding: 3px 6px; }
+  .calc-ctrl-row .btn-primary {
+    width: 100%;
+    margin-top: 4px;
+    padding: 11px;
+    font-size: 13px;
+    order: 99;
+  }
+
+  /* Multi-mode / Uncap / Include 9999 / Simulator / multipliers / V2
+     multipliers / Auto-regen — hide these "power user" controls on
+     phones unless Dense Layout is on. Calculate button stays. */
+  :root:not([data-density="dense"]) .calc-ctrl-row .toggle-label,
+  :root:not([data-density="dense"]) .calc-ctrl-row .mult-group {
+    display: none;
+  }
+
+  /* ── Team panels — stack to single column ── */
+  .calc-teams-bar {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  /* ── Filter bar — wrap on phones (text+chips+clear) ── */
+  .calc-filter-bar {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .calc-text-filter {
+    flex: 1 1 100%;
+    order: 0;
+  }
+  .calc-color-filter { order: 1; flex: 1 1 auto; }
+  #calc-clear-filter, #calc-clear-teams { order: 2; flex: 1; }
+  .calc-filter-hint { order: 3; flex: 1 1 100%; }
+
+  /* ── Roster card grid — tighter min cell, smaller cards ── */
+  .card-grid,
+  #calc-roster {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 10px;
+  }
+  .hero-card .hero-card-name,
+  .item-card .item-card-name { font-size: 12.5px; }
+
+  /* ── Build Detail header — title gets full row, description shrinks ── */
+  #page-calc-build .page-header {
+    align-items: stretch;
+  }
+  #calc-build-name {
+    font-size: 22px !important;
+    line-height: 1.15;
+    word-break: break-word;
+  }
+  .calc-build-desc {
+    font-size: 12px;
+    line-height: 1.4;
+    max-height: 3.6em;       /* ~3 lines */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin-top: 6px;
+    font-style: normal;
+    color: var(--dim);
+  }
+
+  /* ── Build Detail tab bar — make the tab buttons compact ── */
+  .tabbar { gap: 0; }
+  .tab-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .tab-btn .tab-star { font-size: 9px; }
+
+  /* ── Hero detail banner — smaller portrait + name ── */
+  .ch-hero-banner { gap: 14px; }
+  .ch-hero-img { width: 64px; height: 64px; border-radius: 14px; }
+  .ch-hero-banner-name { font-size: 28px; }
+
+  /* ── Settings drawer — wider on tiny phones, edge-to-edge ── */
+  .drawer { width: 320px; }
+
+  /* ── Sim / Live page header — sticky title can collide with botnav ── */
+  .sim-header-bar { flex-wrap: wrap; }
+
+}
+
+/* Very narrow phones — drop to 1-column roster, smaller font */
+@media (max-width: 420px) {
+  .card-grid,
+  #calc-roster {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+  }
+  .ch-hero-banner-name { font-size: 24px; }
+  #calc-build-name { font-size: 19px !important; }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Mobile floating top-right actions (theme + settings) — hidden on
+   desktop (sidebar foot covers it), visible on mobile so users can
+   still reach Settings + Theme when the sidebar is collapsed.
+   ──────────────────────────────────────────────────────────────── */
+.mobile-top-actions {
+  display: none;
+  position: fixed;
+  top: 12px; right: 12px;
+  z-index: 50;
+  gap: 6px;
+}
+.mobile-top-actions .btn-icon {
+  background: color-mix(in srgb, var(--page2) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-color: var(--line);
+  width: 36px; height: 36px;
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 760px) {
+  .mobile-top-actions { display: flex; }
+  /* Push page-header h1 right so it doesn't collide with the floating
+     cluster on narrow screens. */
+  .page-header h1 { padding-right: 88px; }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Mobile — team panels (Calculator). The current .calc-team uses
+   left-border indicator + chip lists. Codex uses .team with inset
+   left rail + .tchip pills. Push existing classes closer visually.
+   ──────────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .calc-team {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 12px 14px;
+  }
+  .calc-team-hdr {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .calc-team-hdr.ally-hdr  { color: var(--good); }
+  .calc-team-hdr.enemy-hdr { color: var(--bad); }
+  /* Left-rail accent like Codex .team.ally / .team.enemy */
+  .calc-team#ally-drop   { box-shadow: inset 3px 0 0 var(--good); }
+  .calc-team#enemy-drop  { box-shadow: inset 3px 0 0 var(--bad); }
+  .count-badge {
+    margin-left: auto;
+    background: var(--inset);
+    border-radius: var(--r-pill);
+    padding: 2px 9px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0;
+    text-transform: none;
+    font-weight: 600;
+  }
+  /* Chip pills — rounded like Codex .tchip */
+  .team-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    min-height: 32px;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Calculator-page hero card action row — make the +/★/− affordance
+   read clearly. The current app uses ←/★/→ (left arrow = ally, star =
+   self, right arrow = enemy). The styling here just pumps up size +
+   contrast so the buttons are reachable as tap targets on mobile.
+   ──────────────────────────────────────────────────────────────── */
+.hero-card-action-row,
+.hero-card .calc-card-btn-row {
+  display: flex;
+  border-top: 1px solid var(--line-soft);
+}
+.hero-card-action-row > *,
+.hero-card .calc-card-btn-row > * {
+  flex: 1;
+  padding: 9px 2px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--faint);
+  transition: background .1s, color .1s;
+}
+.hero-card-action-row > *:hover,
+.hero-card .calc-card-btn-row > *:hover {
+  background: var(--inset);
+  color: var(--ink);
+}
+
 .sim-sell-row.is-most-rec { border-color: var(--accent); }
 
 .sim-save-form { display: flex; flex-direction: column; gap: 12px; }

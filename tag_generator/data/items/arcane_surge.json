@@ -15,7 +15,7 @@
   "values": {
     "playstyle_score": {
       "ability_spam": 0.5,
-      "aerial": 0.6,
+      "aerial": 0.9,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
@@ -47,8 +47,8 @@
       "displace": null,
       "dot": null,
       "duration_dependant": 0.75,
-      "engage": 0.75,
-      "escape": 0.5,
+      "engage": 1.2,
+      "escape": 0.8,
       "farmer": 0.3,
       "fire_rate": null,
       "fire_rate_slow": null,
@@ -63,7 +63,7 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": null,
-      "horizontal_mobility": 0.5,
+      "horizontal_mobility": 0.7,
       "hybrid_damage_usage": -0.15,
       "interrupt": null,
       "large_hitbox": null,
@@ -87,13 +87,13 @@
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 1.0,
+      "spirit_burst_damage": 0.1,
       "spirit_burst_proc": 0.05,
       "spirit_burst_resistance": null,
-      "spirit_continuous_damage": 0.25,
+      "spirit_continuous_damage": 0.1,
       "spirit_continuous_proc": 0.05,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 0.9,
+      "spirit_damage": 0.5,
       "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,
@@ -102,7 +102,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.5
+      "vertical_mobility": 0.2
     }
   },
   "wiki_url": "https://deadlock.wiki/Arcane_Surge"

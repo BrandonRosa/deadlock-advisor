@@ -32,25 +32,260 @@ function toast(msg, type = 'success') {
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
+// Pages that DON'T involve a selected hero/build instance — surfacing these
+// should clear the Codex "Selected instance" sidebar block (B3). Match
+// Results is a fleet overview — selecting a hero or build sets the instance.
+const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'calc', 'qa', 'calc-summary']);
+
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${id}`).classList.add('active');
+  const target = document.getElementById(`page-${id}`);
+  if (target) target.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.page === id);
   });
+  if (NON_INSTANCE_PAGES.has(id)) {
+    window.CODEX?.setNavInstance(null);
+  }
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const page = btn.dataset.page;
+    if (!page) return;  // theme / settings buttons in nav-foot have no data-page
     if (page === 'heroes') loadHeroes();
     else if (page === 'items') loadItems();
     else if (page === 'tags') loadTags();
     else if (page === 'calc') loadCalc();
     else if (page === 'qa') loadQA();
+    else if (page === 'calc-summary') {
+      // Match Results — only renderable if a calc was already run. If no
+      // results exist yet, send the user to the Calculator setup instead.
+      if (typeof MATCH !== 'undefined' && (MATCH?.summary || MATCH?.results)) {
+        // Existing render functions populate calc-summary on demand.
+      } else {
+        loadCalc();
+        showPage('calc');
+        toast('Run a calculation first to see Match Results', 'info');
+        return;
+      }
+    }
     showPage(page);
   });
 });
+
+/* ════════════════════════════════════════════════════════════════════
+   CODEX SETTINGS MODULE — theme / density / advanced / developer toggles,
+   settings drawer, sidebar group visibility, selected-instance API,
+   localStorage persistence.
+   Wires up B1, B2, B3, B6, B7, B8 from the Codex redesign plan.
+   ════════════════════════════════════════════════════════════════════ */
+const CODEX = (() => {
+  const LS_KEY = 'codex_settings_v1';
+  const DEFAULTS = { theme: 'dark', density: 'dense', advanced: false, developer: false };
+
+  function load() {
+    try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(LS_KEY) || '{}') }; }
+    catch (e) { return { ...DEFAULTS }; }
+  }
+  let state = load();
+
+  function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  /* Apply all state to the DOM (attributes + visible group toggles) */
+  function apply() {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', state.theme);
+    html.setAttribute('data-density', state.density);
+
+    // Sidebar group visibility
+    document.querySelectorAll('[data-nav-group="advanced"]').forEach(el => {
+      el.style.display = state.advanced ? '' : 'none';
+    });
+    document.querySelectorAll('[data-nav-group="developer"]').forEach(el => {
+      el.style.display = state.developer ? '' : 'none';
+    });
+
+    // Match Results nav-button: only show once a calculation has produced
+    // results (per Brandon's request — don't surface an empty results page).
+    refreshNavVisibility();
+
+    // Drawer toggle states
+    setToggleVisual('#toggle-density',   state.density === 'dense');
+    setToggleVisual('#toggle-advanced',  state.advanced);
+    setToggleVisual('#toggle-developer', state.developer);
+    // Theme seg
+    document.querySelectorAll('#seg-theme button').forEach(b => {
+      b.classList.toggle('on', b.dataset.themeVal === state.theme);
+    });
+    // Theme glyph + label in sidebar foot
+    const glyph = document.getElementById('theme-glyph');
+    const label = document.getElementById('theme-label');
+    if (glyph) glyph.textContent = state.theme === 'dark' ? '☾' : '☀';
+    if (label) label.textContent = state.theme === 'dark' ? 'Dark theme' : 'Light theme';
+    // Mobile floating theme glyph
+    const mtopT = document.getElementById('mtop-theme');
+    if (mtopT) mtopT.textContent = state.theme === 'dark' ? '☾' : '☀';
+  }
+
+  /* Hide "Match Results" sidebar button + bottom-nav stub until MATCH.results
+     is populated. Called by apply() and exposed for explicit refreshes
+     after runCalculation / clearTeams. */
+  function refreshNavVisibility() {
+    const hasResults = (typeof MATCH !== 'undefined') && Array.isArray(MATCH?.results) && MATCH.results.length > 0;
+    document.querySelectorAll('[data-page="calc-summary"]').forEach(el => {
+      el.style.display = hasResults ? '' : 'none';
+    });
+  }
+
+  function setToggleVisual(sel, on) {
+    const el = document.querySelector(sel);
+    if (el) el.classList.toggle('on', !!on);
+  }
+  function set(patch) {
+    state = { ...state, ...patch };
+    save();
+    apply();
+    // If a toggle just hid the page the user is on, redirect to Calculator
+    // (the always-visible default landing). Catches the "stuck on heroes
+    // after turning off Advanced" case.
+    const activeSection = document.querySelector('.page.active');
+    if (activeSection) {
+      const activeId = activeSection.id.replace(/^page-/, '');
+      const visibleNavBtn = document.querySelector(`.nav-btn[data-page="${activeId}"]`);
+      const hiddenByToggle = visibleNavBtn
+        && (visibleNavBtn.style.display === 'none' || getComputedStyle(visibleNavBtn).display === 'none');
+      if (hiddenByToggle && activeId !== 'calc') {
+        if (typeof loadCalc === 'function') { try { loadCalc(); } catch {} }
+        showPage('calc');
+      }
+    }
+  }
+
+  /* ── Drawer ─────────────────────────────────────────────────────── */
+  function openDrawer() {
+    document.getElementById('drawer-scrim').classList.add('open');
+    document.getElementById('settings-drawer').classList.add('open');
+    document.getElementById('settings-drawer').setAttribute('aria-hidden', 'false');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer-scrim').classList.remove('open');
+    document.getElementById('settings-drawer').classList.remove('open');
+    document.getElementById('settings-drawer').setAttribute('aria-hidden', 'true');
+  }
+
+  /* ── Selected-instance sidebar block (B3) ──────────────────────── */
+  /* spec: { key, name, build, portraitUrl, onBuild, onLive }
+     Pass null to clear. */
+  function setNavInstance(spec) {
+    const host = document.getElementById('nav-instance-host');
+    const botHost = document.getElementById('botnav-instance-host');
+    if (!host) return;
+    if (!spec) {
+      host.innerHTML = '';
+      if (botHost) botHost.innerHTML = '';
+      return;
+    }
+    const portStyle = spec.portraitUrl ? `background-image:url('${spec.portraitUrl}');` : '';
+    host.innerHTML = `
+      <div class="nav-instance">
+        <div class="ni-lbl">◈ Selected instance</div>
+        <button class="ni-hero" type="button" data-action="open-hero">
+          <span class="ni-port" style="${portStyle}"></span>
+          <div><div class="nm">${escapeHtml(spec.name || '')}</div>${spec.build ? `<div class="bd">${escapeHtml(spec.build)}</div>` : ''}</div>
+        </button>
+        <div class="ni-actions">
+          <button class="ni-act" type="button" data-action="build"><span class="ico">✦</span>Build Screen</button>
+          <button class="ni-act" type="button" data-action="live"><span class="ico">◉</span>Live Match</button>
+        </div>
+        <button class="ni-clear" type="button" data-action="clear">× clear selection</button>
+      </div>`;
+    host.querySelector('[data-action="open-hero"]')?.addEventListener('click', () => spec.onOpen?.(spec));
+    host.querySelector('[data-action="build"]')   ?.addEventListener('click', () => spec.onBuild?.(spec));
+    host.querySelector('[data-action="live"]')    ?.addEventListener('click', () => spec.onLive?.(spec));
+    host.querySelector('[data-action="clear"]')   ?.addEventListener('click', () => setNavInstance(null));
+
+    if (botHost) {
+      botHost.innerHTML = `
+        <button data-action="build" type="button"><span class="ico">✦</span>Build</button>
+        <button data-action="live"  type="button"><span class="ico">◉</span>Live</button>`;
+      botHost.querySelector('[data-action="build"]')?.addEventListener('click', () => spec.onBuild?.(spec));
+      botHost.querySelector('[data-action="live"]') ?.addEventListener('click', () => spec.onLive?.(spec));
+    }
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  /* ── Bind once on DOM ready ─────────────────────────────────────── */
+  function bind() {
+    // Sidebar foot buttons
+    document.getElementById('btn-open-settings')?.addEventListener('click', openDrawer);
+    document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
+      set({ theme: state.theme === 'dark' ? 'light' : 'dark' });
+    });
+
+    // Mobile floating top-right action cluster (theme + settings) — same
+    // handlers as the sidebar foot, but visible on phones where the
+    // sidebar is hidden.
+    document.getElementById('mtop-settings')?.addEventListener('click', openDrawer);
+    document.getElementById('mtop-theme')?.addEventListener('click', () => {
+      set({ theme: state.theme === 'dark' ? 'light' : 'dark' });
+    });
+
+    // Drawer chrome
+    document.getElementById('drawer-close')?.addEventListener('click', closeDrawer);
+    document.getElementById('drawer-scrim')?.addEventListener('click', closeDrawer);
+
+    // Theme seg
+    document.querySelectorAll('#seg-theme button').forEach(b => {
+      b.addEventListener('click', () => set({ theme: b.dataset.themeVal }));
+    });
+    // Density toggle (acts as Dense ↔ Simple)
+    document.getElementById('toggle-density')?.addEventListener('click', () => {
+      set({ density: state.density === 'dense' ? 'simple' : 'dense' });
+    });
+    // Advanced / Developer toggles
+    document.getElementById('toggle-advanced')?.addEventListener('click', () => {
+      set({ advanced: !state.advanced });
+    });
+    document.getElementById('toggle-developer')?.addEventListener('click', () => {
+      set({ developer: !state.developer });
+    });
+
+    // Mobile bottom nav: Calc + Settings (instance host filled by setNavInstance)
+    document.querySelectorAll('#botnav button[data-page]').forEach(b => {
+      b.addEventListener('click', () => {
+        const p = b.dataset.page;
+        if (p === 'calc') { loadCalc(); showPage('calc'); }
+        document.querySelectorAll('#botnav button').forEach(x => x.classList.toggle('active', x === b));
+      });
+    });
+    document.getElementById('botnav-settings')?.addEventListener('click', openDrawer);
+
+    apply();
+
+    // Calculator is the new default landing page (per Codex IA). Kick off its
+    // initial data load if available — falls through silently if loadCalc
+    // isn't defined yet.
+    if (typeof loadCalc === 'function') {
+      try { loadCalc(); } catch (e) { /* let calc populate lazily on click */ }
+    }
+  }
+
+  // Run bind() now if DOM is already parsed, else on DOMContentLoaded.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+
+  return {
+    get state() { return { ...state }; },
+    set, openDrawer, closeDrawer, setNavInstance, refreshNavVisibility,
+  };
+})();
+window.CODEX = CODEX;
 
 // ── Image helpers ─────────────────────────────────────────────────────────────
 function srcUrl(path) {
@@ -461,6 +696,21 @@ async function openHeroEdit(name) {
 
   renderHeroEditPage();
   showPage('hero-edit');
+
+  // Codex B3 — surface the opened hero in the sidebar's "Selected instance"
+  // block, with action buttons that jump to Simulator and Calculator's Build
+  // detail. Build name = current selected build's name when available.
+  const buildName = S.currentHero.builds?.[S.currentBuildIdx]?.name || '';
+  const portraitUrl = S.currentHero.image_path ? `/src/${String(S.currentHero.image_path).replace(/^\//, '')}` : '';
+  window.CODEX?.setNavInstance({
+    key: S.currentHero.normalized_name,
+    name: S.currentHero.eng_name || S.currentHero.normalized_name,
+    build: buildName,
+    portraitUrl,
+    onOpen:  () => showPage('hero-edit'),
+    onBuild: () => showPage('hero-edit'),  // "Build Screen" maps to the in-app hero-edit build tabs
+    onLive:  () => { if (typeof showPage === 'function') showPage('sim'); },
+  });
 }
 
 function renderHeroEditPage() {
@@ -3013,6 +3263,7 @@ async function runCalculation() {
   MATCH.results = computeResults();
   if (MATCH.autoRegen) autoRegenPromote();
   renderCalcSummary();
+  window.CODEX?.refreshNavVisibility();  // results now exist → reveal Match Results nav
   showPage('calc-summary');
 }
 
@@ -3414,7 +3665,9 @@ function renderCalcSummary() {
 
     if (sorted.length) {
       const mp = document.createElement('div');
-      mp.className = 'calc-panel ta-team-panel';
+      // Top-of-page Best/Worst Matchup band is dense-only — Simple Layout
+      // skips the matchup band and shows just the team tag profiles.
+      mp.className = 'calc-panel ta-team-panel dense-only';
       mp.innerHTML = '<div class="calc-panel-title">Matchups</div>';
       const grid = document.createElement('div');
       grid.className = 'matchup-grid';
@@ -3489,10 +3742,13 @@ function makeSummaryCard(r) {
       const pcls = pct >= 0 ? 'pct-pos' : 'pct-neg';
       pctHtml = `<span class="sc-build-pct ${pcls}">${sign}${pct.toFixed(0)}%</span>`;
     }
-    return `<div class="sc-build-row">
+    // data-build-idx makes the row directly clickable — bypasses the card-level
+    // openCalcHero and jumps straight to that build's detail.
+    return `<div class="sc-build-row" data-build-idx="${b.buildIdx}" role="button" tabindex="0">
       <span class="sc-bname">${b.name}</span>
       ${pctHtml}
       <span class="sc-bscore">${fmtScore(b.total)}</span>
+      <span class="sc-build-arrow" aria-hidden="true">›</span>
     </div>`;
   }
 
@@ -3510,7 +3766,7 @@ function makeSummaryCard(r) {
     <div class="sc-builds">
       ${r.topBuilds.map(b => scBuildRow(b)).join('')}
     </div>
-    ${topItems.length ? `<div class="sc-items">
+    ${topItems.length ? `<div class="sc-items dense-only">
       <div class="sc-items-lbl">Top Items (${topBuild.name}):</div>
       ${topItems.map(it => `
         <div class="sc-item-row">
@@ -3533,10 +3789,11 @@ function makeSummaryCard(r) {
     }
   }
 
-  // Items to Assist / Items to Counter (from top build)
+  // Items to Assist / Items to Counter (from top build) — dense-only: this
+  // extra detail is hidden in Simple Layout per Codex.
   if (topBuild && (topBuild.assistItems?.length || topBuild.counterItems?.length)) {
     const acEl = document.createElement('div');
-    acEl.className = 'sc-assist-counter';
+    acEl.className = 'sc-assist-counter dense-only';
 
     const mkAcCol = (label, cls, items) => {
       const col = document.createElement('div');
@@ -3566,7 +3823,8 @@ function makeSummaryCard(r) {
     const best     = sorted.slice(0, 2);
     const worst    = Object.entries(topBuild.vsBreakdown || {}).filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]).slice(0, 2);
     const muEl     = document.createElement('div');
-    muEl.className = 'sc-matchups';
+    // Per-hero matchups are dense-only — Simple Layout strips this extra row.
+    muEl.className = 'sc-matchups dense-only';
 
     const mkMuRow = (names, label, cls) => {
       if (!names.length) return;
@@ -3594,6 +3852,16 @@ function makeSummaryCard(r) {
     card.appendChild(muEl);
   }
 
+  // Build-row clicks → jump straight to that build's detail (stop bubbling
+   // so the card-level openCalcHero doesn't also fire).
+  card.querySelectorAll('.sc-build-row[data-build-idx]').forEach(rowEl => {
+    rowEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(rowEl.dataset.buildIdx, 10);
+      if (!isNaN(idx)) openCalcBuild(r.name, idx);
+    });
+  });
+  // Card body (outside build rows) → open the hero's per-build overview.
   card.addEventListener('click', () => openCalcHero(r.name));
   return card;
 }
@@ -3728,6 +3996,20 @@ function openCalcHero(name) {
     el.appendChild(row);
   });
   showPage('calc-hero');
+
+  // Codex B3 — refresh sidebar Selected Instance card for this hero (no
+  // build yet; topBuilds[0] is the most-likely build to open next).
+  const topBld = r.topBuilds[0];
+  const portraitUrl = heroData?.image_path ? srcUrl(heroData.image_path) : '';
+  window.CODEX?.setNavInstance({
+    key:  name,
+    name: r.engName,
+    build: topBld ? topBld.name : '',
+    portraitUrl,
+    onOpen:  () => openCalcHero(name),
+    onBuild: () => topBld && openCalcBuild(name, topBld.buildIdx),
+    onLive:  () => { if (typeof simStart === 'function' && topBld) { try { simStart(name, topBld.buildIdx); } catch {} } showPage('sim'); },
+  });
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -3735,6 +4017,7 @@ function openCalcHero(name) {
 // ════════════════════════════════════════════════════════════════════════════
 
 function openCalcBuild(heroName, buildIdx) {
+  MATCH.viewHeroName = heroName;
   MATCH.viewBuildIdx = buildIdx;
   const r = MATCH.results.find(x => x.name === heroName);
   const b = r?.builds[buildIdx];
@@ -3744,17 +4027,80 @@ function openCalcBuild(heroName, buildIdx) {
   const descEl = document.getElementById('calc-build-desc');
   descEl.textContent = desc;
   descEl.classList.toggle('hidden', !desc);
+
   const el = document.getElementById('calc-build-detail');
   el.innerHTML = '';
-  el.appendChild(mkScorePanel(b));
-  el.appendChild(mkTagPanel(heroName, buildIdx));
-  el.appendChild(mkBestWorstVsPanel(b));
-  el.appendChild(mkAssistCounterBuildPanel(b, heroName, buildIdx));
-  el.appendChild(mkBuildScreenPanel(b, heroName, buildIdx));
-  el.appendChild(mkBuildPathPanel(b));
-  el.appendChild(mkBreakdownPanel(b));
-  el.appendChild(mkItemsPanel(b, heroName));
+
+  // ── Codex B4 — group the existing panels into 4 tabs ───────────────
+  //   Summary   = Score + Tag Profile + Best/Worst Vs
+  //   Build Path = Build Screen + Build Path Guide
+  //   Items     = Items to Assist/Counter + Item Recommendations table
+  //   Breakdown = Score Sources (per-hero contributions)
+  const tabs = [
+    { id: 'summary',   label: 'Summary',     star: true,
+      build: panel => { panel.appendChild(mkScorePanel(b));
+                        panel.appendChild(mkTagPanel(heroName, buildIdx));
+                        panel.appendChild(mkBestWorstVsPanel(b)); } },
+    { id: 'path',      label: 'Build Path',
+      build: panel => { panel.appendChild(mkBuildScreenPanel(b, heroName, buildIdx));
+                        panel.appendChild(mkBuildPathPanel(b)); } },
+    { id: 'items',     label: 'Items',
+      build: panel => { panel.appendChild(mkAssistCounterBuildPanel(b, heroName, buildIdx));
+                        panel.appendChild(mkItemsPanel(b, heroName)); } },
+    { id: 'breakdown', label: 'Breakdown',
+      build: panel => { panel.appendChild(mkBreakdownPanel(b)); } },
+  ];
+
+  const tabbar = document.createElement('div');
+  tabbar.className = 'tabbar';
+  el.appendChild(tabbar);
+
+  const panels = {};
+  tabs.forEach((t, i) => {
+    // tab button
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tab-btn' + (i === 0 ? ' on' : '');
+    btn.dataset.tab = t.id;
+    btn.innerHTML = (t.star ? '<span class="tab-star">★</span>' : '') + t.label;
+    btn.addEventListener('click', () => activateTab(t.id));
+    tabbar.appendChild(btn);
+
+    // tab panel (content lazily built on first activation to save work
+    // when the user only opens Summary)
+    const panel = document.createElement('div');
+    panel.className = 'tab-panel' + (i === 0 ? ' on' : '');
+    panel.dataset.tab = t.id;
+    if (i === 0) { t.build(panel); panel.dataset.built = '1'; }
+    el.appendChild(panel);
+    panels[t.id] = { btn, panel, build: t.build };
+  });
+
+  function activateTab(id) {
+    Object.entries(panels).forEach(([k, { btn, panel, build }]) => {
+      const on = (k === id);
+      btn.classList.toggle('on', on);
+      panel.classList.toggle('on', on);
+      if (on && !panel.dataset.built) { build(panel); panel.dataset.built = '1'; }
+    });
+  }
+
   showPage('calc-build');
+
+  // Codex B3 — update the sidebar's Selected Instance card to reflect the
+  // current hero + build context, with action buttons that jump to nearby
+  // related views.
+  const heroData = MATCH.heroData[heroName];
+  const portraitUrl = heroData?.image_path ? srcUrl(heroData.image_path) : '';
+  window.CODEX?.setNavInstance({
+    key:  heroName,
+    name: r.engName,
+    build: b.name,
+    portraitUrl,
+    onOpen:  () => openCalcHero(heroName),                  // ◈ row → Hero detail
+    onBuild: () => openCalcBuild(heroName, buildIdx),       // ✦ Build Screen → this build
+    onLive:  () => { if (typeof simStart === 'function') { try { simStart(heroName, buildIdx); } catch {} } showPage('sim'); },
+  });
 }
 
 function mkPanel(title, inner) {

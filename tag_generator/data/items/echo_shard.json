@@ -8,7 +8,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "ability_spam": null,
+      "ability_spam": 0.5,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -30,7 +30,7 @@
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": 0.7,
-      "counter_importance": null,
+      "counter_importance": 0.6,
       "damage_sponge": null,
       "debuff": null,
       "debuff_resistance": null,
@@ -70,7 +70,7 @@
       "self_heal": null,
       "shield": null,
       "silence": null,
-      "single_ability_focus": 2,
+      "single_ability_focus": 1.5,
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,

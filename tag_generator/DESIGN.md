@@ -4,7 +4,7 @@
 >
 > Code references use the form `app.js: functionName()` since exact line numbers drift as the file is edited.
 >
-> **Note on this document:** Originally written by an automated agent; reviewed and corrected against actual code as of 2026-05-17. Sections marked `[UNCERTAIN]` may still be inaccurate — please correct them.
+> **Note on this document:** Originally written by an automated agent; reviewed and corrected against actual code as of 2026-05-17. Re-audited and re-synced against the live code on **2026-06-01** — drift was concentrated in §4 (Sidebar/Page System), §14 (Build Detail, now tabbed), §22 (algorithm list), and various AUGMENT-tier additions for the Codex visual redesign. Sections marked `[UNCERTAIN]` may still be inaccurate — please correct them.
 
 ## Table of Contents
 
@@ -34,6 +34,7 @@
 24. [Backend (`app.py`)](#24-backend-apppy)
 25. [Data Files](#25-data-files)
 26. [Visual Design — Theme, Colors, Fonts, Icons](#26-visual-design--theme-colors-fonts-icons)
+27. [Codex Redesign Overlay (2026-06-01)](#27-codex-redesign-overlay-2026-06-01)
 
 ---
 
@@ -57,8 +58,8 @@ public/tag_generator/
 ├── app.py                    Flask backend (data CRUD + index render)
 ├── templates/index.html      Single-page app shell with every screen as a <section>
 ├── static/
-│   ├── app.js                ~10k+ lines — every screen render, every algorithm
-│   └── style.css             Theme + per-component styling
+│   ├── app.js                ~12.5k lines — every screen render, every algorithm, the CODEX IIFE
+│   └── style.css             ~3.5k lines — theme + per-component styling + Codex overlay block
 └── data/
     ├── tags.json             Master tag list (~50 tag codes)
     ├── heroes/<key>.json     One file per hero, contains builds[] with full vectors
@@ -113,23 +114,89 @@ Key fields: `S.currentHero`, `S.currentBuildIdx`, `S.currentItem`, `S.heroList`,
 ### `_bpDbg` — build-path debug capture
 **Purpose:** When the user clicks "Debug Build", this gets temporarily populated by `computeBuildPath()` with `phases`, `guide`, algorithm-specific traces (`architectTicks`, `inverseTicks`, `surgeTicks`, `surgeAnchors`, etc.). `formatBpDebug()` turns it into a clipboard-friendly text dump.
 
+### `CODEX` — settings + IA module (IIFE at the top of `app.js`)
+**Purpose:** All state introduced by the Codex visual redesign (§27) lives here. Handles theme + density + advanced + developer toggles, the settings drawer, the Selected-Instance sidebar block, and the Match-Results nav visibility gate. Persists to `localStorage` under the key `codex_settings_v1`.
+
+State shape (loaded with `DEFAULTS` then merged with whatever's in `localStorage`):
+- `theme`: `'dark' | 'light'` (default `'dark'`) — sets `data-theme` on `<html>`
+- `density`: `'dense' | 'simple'` (default `'dense'`) — sets `data-density` on `<html>`; toggles `.dense-only` visibility
+- `advanced`: boolean (default `false`) — reveals nav items with `data-nav-group="advanced"` (Heroes, Items)
+- `developer`: boolean (default `false`) — reveals nav items with `data-nav-group="developer"` (Tags, QA)
+
+Exported methods (attached to `window.CODEX`):
+- `set(patch)` — merges into state, persists, calls `apply()`, redirects to Calculator if the current page got hidden by a toggle-off
+- `openDrawer()` / `closeDrawer()` — slides `#settings-drawer` in/out
+- `setNavInstance(spec | null)` — populates `#nav-instance-host` and `#botnav-instance-host` with a hero+build card (portrait, name, build, `onOpen`/`onBuild`/`onLive` action callbacks); pass `null` to clear
+- `refreshNavVisibility()` — hides the Match Results nav button until `MATCH.results` exists
+
+**Reasoning:** Keeping all the redesign-driven IA state in one IIFE keeps it isolated from `MATCH` / `S` / `SIM` and makes it easy to find. The `localStorage` key is namespaced (`codex_*`) so it doesn't collide with future stores.
+
 **Correction:** _(your note here)_
 
 ---
 
 ## 4. Sidebar & Page System
 
-### Sidebar (`index.html` lines ~14-21)
-Five nav buttons: **Heroes**, **Items**, **Tags**, **Calculator**, **QA**.
+The IA was restructured during the **Codex visual redesign** (see §27). The sidebar is no longer a flat five-button list — it's now three groups (Default / Advanced / Developer) plus a contextual Selected-Instance card, plus a foot cluster, plus a mobile-only bottom nav and a mobile-only floating top-right cluster.
 
-**Purpose:** Top-level navigation. Clicking each one calls `showPage(id)` which hides all `<section class="page">` elements and reveals one. The matching `nav-btn` also gets `.active`.
+### 4.1 Sidebar markup (`index.html` lines ~15-45)
 
-**Reasoning:** Single-page layout means no full page reloads — calculator state, sim state, and editor state all persist across nav clicks.
+The sidebar (`<nav id="sidebar">`) contains, top to bottom:
 
-**Correction:** _(your note here)_
+1. **Brand row** (`.sidebar-logo`) — gradient ❋ tile (`.sidebar-mark`) + "DEADLOCK / ADVISOR" wordmark (`.sidebar-title` + `.sidebar-sub`).
+2. **Default nav group** (always shown, `data-nav-group="default"`):
+   - **Calculator** — `data-page="calc"`, glyph `⊞`
+   - **Match Results** — `data-page="calc-summary"`, glyph `▤`. **Hidden by default** (inline `style="display:none"`); `CODEX.refreshNavVisibility()` reveals it after `MATCH.results` is populated by `runCalculation`.
+3. **Selected Instance slot** (`<div id="nav-instance-host">`) — empty container. Populated by `CODEX.setNavInstance(spec)` when a hero or build is opened. Shows a green-bordered card with portrait + name + current build + action buttons (Build Screen / Live Match) + "× clear selection". Cleared by `showPage()` for any route in `NON_INSTANCE_PAGES`.
+4. **Advanced group** (gated by `state.advanced`, `data-nav-group="advanced"`):
+   - **Heroes** — `data-page="heroes"`
+   - **Items** — `data-page="items"`
+5. **Developer group** (gated by `state.developer`, `data-nav-group="developer"`):
+   - **Tags** — `data-page="tags"`
+   - **QA** — `data-page="qa"`
+6. **Spacer** (`.nav-spacer`) pushes the foot down.
+7. **Foot cluster** (`.nav-foot`): **Theme toggle** (`#btn-theme-toggle`, ☾/☀) and **Settings** (`#btn-open-settings`, ⚙ — opens the drawer).
 
-### `showPage(id)` (`app.js: showPage()`)
-**Purpose:** Hides every `.page`, reveals the requested one, and syncs the sidebar `.nav-btn` `.active` class based on a `data-page` match.
+**Purpose:** Default landing collapses to a single core loop (Calculator → Match Results → Build → optional Sim). Heavy-machinery surfaces (Hero editor, Item editor, Tag manager, QA harness) stay hidden until the Advanced or Developer toggle is flipped on in the Settings drawer. A first-time visitor never meets a tag-weight table.
+
+**Reasoning:** The original five-button flat nav exposed authoring tools to consumers and made the surface feel like a dev console. Grouping by audience (default / advanced / developer) keeps the powerful editors a single click away while letting visitors see only the build advisor.
+
+### 4.2 Settings drawer (`#settings-drawer`)
+
+Right-slide panel (`templates/index.html`) opened by the ⚙ button in the sidebar foot or by the **Settings** tab on the mobile bottom nav. Contains:
+
+- **Appearance** group:
+  - **Theme** — segmented control (`#seg-theme`) with two buttons: Dark / Light
+  - **Dense layout** — toggle (`#toggle-density`). When off, density flips to `simple`, which hides every element marked `.dense-only` and shows every `.simple-only` element.
+- **Feature level** group:
+  - **Advanced features** — toggle (`#toggle-advanced`) controlling the Heroes + Items nav group visibility
+  - **Developer features** — toggle (`#toggle-developer`, purple-tinted) controlling the Tags + QA nav group visibility
+
+Scrim element (`#drawer-scrim`) absorbs background clicks to close. State persists via `CODEX.set()` → `localStorage.codex_settings_v1` on every change.
+
+### 4.3 Mobile bottom nav (`#botnav`)
+
+Hidden on desktop; visible at `≤760px` via media query. Markup:
+
+```
+Calc | <span id="botnav-instance-host">…filled by setNavInstance…</span> | Settings
+```
+
+The instance-host span uses **`display: contents`** so its child buttons (Build, Live, when an instance is selected) become direct flex children of `.botnav` and share the same `flex: 1` distribution as the static Calc and Settings buttons. Without that trick, Build + Live would overflow the wrapper and force a second row.
+
+### 4.4 Mobile floating top-right cluster (`.mobile-top-actions`)
+
+Fixed-position pair of icon buttons (`#mtop-theme`, `#mtop-settings`) anchored to the top-right corner on `≤760px`. Same handlers as the sidebar foot — needed because the sidebar (and its theme/settings buttons) is hidden on mobile. Backdrop-blurred so it reads against any page content scrolling underneath.
+
+### 4.5 `showPage(id)` (`app.js: showPage()`)
+
+**Purpose:** Hides every `<section class="page">`, reveals the section with matching `id="page-<id>"`, and syncs the sidebar `.nav-btn.active` class via `data-page` match.
+
+**New behavior:** If `id ∈ NON_INSTANCE_PAGES` (`heroes`, `items`, `tags`, `calc`, `qa`, `calc-summary`), `showPage` also calls `CODEX.setNavInstance(null)` to clear the sidebar instance card. Pages like `hero-edit`, `calc-hero`, `calc-build`, and `sim` do NOT clear it — they're considered "instance" routes and rely on the opener (`openHeroEdit` / `openCalcHero` / `openCalcBuild`) to re-set the card themselves.
+
+The nav-button click handler (`document.querySelectorAll('.nav-btn').forEach`) also routes through showPage, with a special branch for `data-page="calc-summary"`: if `MATCH.results` doesn't yet exist, the handler toasts and redirects to `calc` instead of showing an empty results page.
+
+**Reasoning:** Single-page layout means no full reloads — calculator state, sim state, and editor state all persist across nav clicks. The instance-clearing logic ensures the sidebar's contextual card doesn't lie about what the user is currently looking at.
 
 **Correction:** _(your note here)_
 
@@ -164,6 +231,8 @@ Image, English name, build count badge, color chips, search-term chips. Clicking
 - **Save** — `saveHero()` PUTs `S.currentHero` to `/api/heroes/<key>` and clears dirty state
 
 **Purpose / Reasoning:** Editor follows a "dirty-and-save" pattern — changes stay client-side until you press Save, so you can abandon them by navigating away.
+
+**Sidebar instance card (Codex):** `openHeroEdit(name)` now also calls `window.CODEX.setNavInstance({...})` to populate the sidebar Selected Instance card (§4.1) with this hero's portrait + name + current build's name, and wires the Build Screen / Live Match action buttons to jump back to the hero-edit and sim screens. The card is cleared when the user navigates to a `NON_INSTANCE_PAGES` route.
 
 ### 6.2 Hero info panel (left column)
 Two preview images (portrait + mini icon) + a fields column with **English Name**, **Hero Key (normalized)**, **Description**, **Portrait Path**, **Mini Icon Path**, **Wiki URL**, **Default Build** (dropdown), **Filter Colors** (clickable swatch grid), **Search Terms** (chip input).
@@ -387,7 +456,19 @@ Two columns: **Ally Builds** / **Enemy Builds**. Each row is a hero name + a dro
 **Correction:** _(your note here)_
 
 ### Hero summary card (`app.js: makeSummaryCard()`)
-Portrait + name + side (ALLY/ENEMY badge). Each build listed with `.total` score broken into `ally` + `enemy` components. Click a build → opens Calc Build Detail.
+Portrait + name + role pill (`★ YOU` / `ALLY` / `ENEMY`) + score pill (+/- %). Each build listed in its own row with `.total` score; the row is **independently clickable** and jumps straight to `openCalcBuild(heroName, buildIdx)`. Clicks on the card body (outside any build row) open `openCalcHero` instead — implemented via `e.stopPropagation()` on the row handler so the two click targets don't collide.
+
+After the build rows: a chip strip with this build's Strengths (good chips) + Counters (bad chips). Then a "Top Items" mini-list (3 items with portraits + score). Then an Items-to-Assist / Items-to-Counter dual column. Then a Targeting / Best-vs / Worst-vs matchup row.
+
+**Codex visual rhythm:** Cards adopt the `.hcard` pattern — 14px radius, soft shadow, lift on hover, role pill in `--green-soft` (ally) / gold (self) / `--bad-soft` (enemy), score pill in matching color. Build rows render as inset-bg pills with a `›` arrow that turns green on hover.
+
+**Dense-only sections** (stripped in Simple Layout via `[data-density="simple"] .dense-only { display: none }`):
+- Top-of-page Best/Worst Matchup band
+- Per-card Top Items mini-list
+- Per-card Items-to-Assist / Items-to-Counter dual column
+- Per-card matchup row
+
+**Reasoning:** Build rows being directly clickable saves a hop — power users no longer have to open the hero detail just to drill into a specific build. The dense/simple split lets a phone or glance-view collapse a card to just header + build rows + chip strip without losing the rich data on desktop.
 
 **Correction:** _(your note here)_
 
@@ -399,6 +480,8 @@ Portrait + name + side (ALLY/ENEMY badge). Each build listed with `.total` score
 
 **Purpose:** Per-hero detail view listing all their builds with full scoring breakdowns (ally contributions, enemy contributions, vs-breakdown by individual enemy).
 
+**Sidebar instance card (Codex):** `openCalcHero(name)` calls `window.CODEX.setNavInstance({...})` after rendering — populates the sidebar Selected Instance card (§4.1) with the hero's portrait + name + top-scoring build's name. The card's action buttons jump to: ◈ row → reopens this page; ✦ Build Screen → opens the top build's `openCalcBuild`; ◉ Live Match → starts a sim session with `simStart(name, topBuildIdx)`.
+
 **Correction:** _(your note here)_
 
 ---
@@ -407,12 +490,37 @@ Portrait + name + side (ALLY/ENEMY badge). Each build listed with `.total` score
 
 **Section:** `#page-calc-build`
 
-**Purpose:** Deep-dive view for a single build. Shows:
-- Build name + description
-- Score breakdown (ally / enemy contributions, vsBreakdown per enemy)
-- Items table — every item sorted by `.total`, with attribution columns (ally / self / enemy / total)
-- Assist Items + Counter Items (top 3 of each)
-- The **Build Path Guide** panel (see §15)
+**Purpose:** Deep-dive view for a single build. The page is **tabbed** (Codex B4) — `openCalcBuild(heroName, buildIdx)` builds a `.tabbar` plus four `.tab-panel` divs inside `#calc-build-detail`.
+
+### 14.1 Tab structure
+
+Four tabs (left to right). The first is open by default:
+
+| Tab            | Star | Content (builders, all in `app.js`)                            |
+|----------------|------|----------------------------------------------------------------|
+| **Summary**    | ★    | `mkScorePanel(b)` + `mkTagPanel(heroName, buildIdx)` + `mkBestWorstVsPanel(b)` |
+| **Build Path** |      | `mkBuildScreenPanel(b, heroName, buildIdx)` + `mkBuildPathPanel(b)` (see §15) |
+| **Items**      |      | `mkAssistCounterBuildPanel(b, heroName, buildIdx)` + `mkItemsPanel(b, heroName)` |
+| **Breakdown**  |      | `mkBreakdownPanel(b)` (ally / +ally / enemy / +enemy contributions per hero) |
+
+### 14.2 Lazy build
+
+Only the Summary tab is built eagerly on `openCalcBuild`. The other three tabs' content is built on first activation via `activateTab(id)` — the panel checks `panel.dataset.built === '1'` and runs the builder if not. This keeps the initial open fast on a heavy build.
+
+### 14.3 State tracking
+
+`openCalcBuild` sets BOTH `MATCH.viewHeroName` (new) AND `MATCH.viewBuildIdx`. The viewHeroName field is used by `back-from-sim` and other deep-link handlers to figure out where to return to. The viewBuildIdx is used by the regen panel and various scoring re-renders.
+
+### 14.4 Sidebar instance card (Codex)
+
+After `showPage('calc-build')`, `openCalcBuild` calls `window.CODEX.setNavInstance({...})` with the current hero + specific build name + portrait. Action buttons:
+- ◈ row → reopens `openCalcHero(heroName)`
+- ✦ Build Screen → reopens this same `openCalcBuild(heroName, buildIdx)` (acts as a return-here shortcut)
+- ◉ Live Match → starts a sim session with `simStart(heroName, buildIdx)` then jumps to `#page-sim`
+
+**Reasoning:** The original flat-panel layout grew unwieldy as the page accumulated 8 mkX panels. Tabbing groups them by purpose (Summary = the headline; Build Path = the order-of-purchases story; Items = the full table; Breakdown = the math). Lazy build means a user who just wants the Summary doesn't pay for rendering the 200-row Items table.
+
+**Historical:** Before 2026-06-01 the page rendered all eight panels in a single flat sequence. The flat layout shipped from the doc's previous review (§14 originally said "Bottom panel of Calc Build Detail" for the Build Path Guide — that's no longer accurate; Build Path is now a peer tab).
 
 **Correction:** _(your note here)_
 
@@ -420,7 +528,7 @@ Portrait + name + side (ALLY/ENEMY badge). Each build listed with `.total` score
 
 ## 15. Build Path Guide Panel
 
-Bottom panel of Calc Build Detail.
+Content of the **Build Path** tab on Calc Build Detail (§14.1). Was a "bottom panel" of a flat layout until the 2026-06-01 tab restructure; now it's a peer tab (lazy-built on first activation alongside the Build Screen Panel).
 
 ### 15.1 Title bar
 - **Build Path Guide** label
@@ -471,9 +579,11 @@ When `c.runnerUp` exists and hasn't been bought, a `bp-alt-panel` appears with "
 
 ## 16. Simulator Page
 
-**Section:** `#page-sim` (`app.js: openSimulation()`, `renderSim()`)
+**Section:** `#page-sim` (`app.js: openSimulation(heroName, buildIdx, b, mode)`, `renderSim()`)
 
 **Purpose:** Tick-based playthrough — you "play" the game by clicking through 35 simulated ticks. Each tick you receive simulated income; the app recommends 3 items (one per column) and you pick / skip / sell / unlock-slot.
+
+**Mode parameter:** `openSimulation(..., mode)` accepts `'tick'` (the default — described here in §16) or `'live'` (Live Match, see §17). The Live Match mode is **not a separate page** — it's the same `#page-sim` with `state.mode = 'live'`, swapping the tick-advance loop for a user-typed souls input. The Codex prototype had a separate clean buy-advisor "Live Match" layout; the current Flask app reuses the simulator chrome for both modes.
 
 ### 16.1 Header bar
 - **← Build** — back to Calc Build Detail
@@ -690,6 +800,8 @@ Adds two reverse-direction terms: how much MY items help allies, how much enemie
 ### V3 — Target Focus (default)
 Same shape as V2 but enemy/ally axis weighting tilts toward `v3Targets` — specific heroes flagged as the worst matchup. Rewards builds that specifically beat THEM rather than the average enemy.
 
+**`v3Targets` display:** When `MATCH.scoreFormula === 'v3'`, each build's `v3Targets` array (heroes this build is optimized to counter) is rendered as a "Targeting" row on both the Hero Detail per-build sections (§13) and the Build Detail Summary tab (§14). The row reads `Targeting <Hero1>, <Hero2>` and is colored gold to distinguish it from the regular Best/Worst Vs chips.
+
 **Correction:** _(your note here)_
 
 ### Multipliers (default values verified)
@@ -708,7 +820,9 @@ Same shape as V2 but enemy/ally axis weighting tilts toward `v3Targets` — spec
 
 The dropdown lives in calc setup row 2. Stored in `MATCH.bpAlgo`. All dispatch through `app.js: computeBuildPath(b, algo)`.
 
-**All of the following are currently in the `BP_ALGO_OPTIONS` dropdown** (none are disabled at the code level as of 2026-05-17, though quality varies):
+**Currently in the `BP_ALGO_OPTIONS` dropdown** (`app.js: BP_ALGO_OPTIONS` at the top of the QA TAB block, ~line 9736). 11 algorithms total — see §22.1 through §22.11 below.
+
+**Legacy algorithms removed from the dropdown** (per the inline code comment dated 2026-05-13): `assassin`, `lookahead`, `oracle`. Their runner functions remain inside `computeBuildPath` so old saved QA scenarios still resolve correctly, but they aren't surfaced to the user or to the sim-log harness. Reasons (from the comment): `assassin` worst affinity 23.25, over-buys + over-sells; `lookahead` had an ends-early bug + T4 deficit; `oracle` was mediocre across every metric with no differentiator.
 
 ### 22.1 `greedy-phase` — Greedy (Phase)
 **Algo:** Per phase, fills slots with the highest-`.total` affordable items respecting phase slot budgets. Wrapped by `applyConstraintsFixup()` to force required-item inclusion.
@@ -778,7 +892,14 @@ The dropdown lives in calc setup row 2. Stored in `MATCH.bpAlgo`. All dispatch t
 
 **Correction:** _(your note here)_
 
-### 22.11 Algorithm constants reference
+### 22.11 `fullsurvey` — FullSurvey (CPU KILLER)
+**Algo:** Exhaustive (or near-exhaustive) search across the candidate space — explores far more branches than `beam`. The dropdown label literally says "CPU KILLER" because it's expensive enough to lock the browser on a full roster.
+**Code:** `app.js: runFullSurvey()` (or whichever runner `computeBuildPath` dispatches `'fullsurvey'` to)
+**Purpose:** Brute-force baseline for QA — useful when you want to know "what's the best a search algorithm could find for this build given infinite time?" Compare other algos against it.
+**Weakness:** Wall-clock cost. Don't use it inside a QA scenario with more than a couple heroes.
+**Correction:** _(your note here)_
+
+### 22.12 Algorithm constants reference
 
 **`PHASE_TIER_MULTS`** (verified against code):
 ```
@@ -817,6 +938,12 @@ English name + normalized key.
 
 ### 23.4 `#toast` — bottom-right notification
 `toast(msg, type?)` helper. `type = 'error'` → red styling. Auto-dismisses after a few seconds.
+
+### 23.5 `#sim-modal-host` — dynamic simulator modal container
+Empty `<div id="sim-modal-host"></div>` in `templates/index.html` used by the simulator (§16) to dynamically render its **Override**, **Sell Item**, **Focus**, **Blocked**, and **Save Log** panels. The `simShowModal(title, builder)` helper writes a `.modal-overlay > .modal.sim-modal` skeleton into the host and lets the caller populate the body. `simCloseModal()` clears the host.
+
+### 23.6 `#settings-drawer` / `#drawer-scrim` — Codex settings drawer
+Right-slide panel introduced by the Codex visual redesign — see §4.2 for the full spec. Lives at body level and is opened/closed by `window.CODEX.openDrawer()` / `closeDrawer()`.
 
 **Correction:** _(your note here)_
 
@@ -1108,6 +1235,118 @@ Bottom-right `#toast`. `toast(msg, type?)`. Default: mint-tinted border. `'error
 14. **Soul-tier fit in sim column scoring:** Quadratic multiplier `0.55 + 0.65 * (tier/remaining)²` added to all three column scorers. At 4400 souls: T2→×0.63, T3→×0.90. Ensures higher-tier items naturally surface as you accumulate souls.
 
 **Correction / additional history:** _(your note here)_
+
+---
+
+## 27. Codex Redesign Overlay (2026-06-01)
+
+A second visual direction landed on top of the original "Atelier" theme: the **Codex** direction, sourced from an Anthropic Claude Design handoff (`Deadlock Advisor-handoff.zip`). Codex is an esports-companion structure (op.gg / Mobalytics feel) skinned in Deadlock colors — rounded cards, wider sidebar, bigger tap targets, a sticky topbar, a settings drawer, a parchment light mode, and a mobile bottom nav.
+
+The original Atelier sections (§26.1–§26.15) remain accurate for legacy components — Codex layers on top via token swaps and component additions, **without renaming the existing classes the JS depends on**.
+
+### 27.1 Surface hierarchy (current)
+
+The `:root` block in `style.css` was rewritten. Old vars are kept as aliases (e.g. `--bg → var(--page)`) so the 2,800 existing rules still resolve.
+
+| Variable (new) | Hex (dark)   | Hex (light, `[data-theme="light"]`) | Where                                  |
+|----------------|--------------|--------------------------------------|----------------------------------------|
+| `--page`       | `#15181c`    | `#e6dcc4`                            | Page backdrop                          |
+| `--page2`      | `#191c21`    | `#efe7d4`                            | Sidebar / topbar surface               |
+| `--panel`      | `#20242a`    | `#f3ecdc`                            | Framed section bg                      |
+| `--card`       | `#22262b`    | `#f6f0e2`                            | Cards / inputs                         |
+| `--card-h`     | `#2a2f36`    | `#fbf6ea`                            | Card hover                             |
+| `--inset`      | `#1a1d22`    | `#e3d8bf`                            | Sunken row / drawer body               |
+| `--line`       | `#2f343b`    | `#d2c5a6`                            | Primary divider                        |
+| `--line-soft`  | `#262a30`    | `#ddd1b5`                            | Row separator                          |
+| `--ink`        | `#e9e4d8`    | `#2b2a22`                            | Primary text (replaces `--text`)       |
+| `--dim`        | `#8b8f96`    | `#857c63`                            | Secondary text                         |
+| `--faint`      | `#5e636b`    | `#a99d80`                            | Placeholder / very dim                 |
+
+### 27.2 Light theme
+
+`[data-theme="light"]` on `<html>` flips the palette to warm parchment (per the Overhaul Proposal's Direction-A swatches). The accent shifts to a deeper green (`#3a7a52`) since the bright `#75e8a2` would wash out on cream. Default = dark; persists via `localStorage.codex_settings_v1.theme`.
+
+### 27.3 Layout primitives (new)
+
+| Variable     | Value  | Where                                           |
+|--------------|--------|-------------------------------------------------|
+| `--nav-w`    | `228px`| Sidebar width (was `--sidebar-w: 168px`)        |
+| `--gut`      | `22px` | Page gutter                                     |
+| `--gap`      | `16px` | Card gap                                        |
+| `--r`        | `14px` | Large radius (panels, cards)                    |
+| `--r-sm`     | `9px`  | Small radius (buttons, chips, inputs)           |
+| `--r-pill`   | `999px`| Pill radius (chips, instance-pill)              |
+| `--shadow`   | `0 10px 30px rgba(0,0,0,.45)` | card hover shadow                |
+| `--shadow-sm`| `0 3px 10px rgba(0,0,0,.35)`  | resting shadow                   |
+| `--green-soft` | `rgba(117,232,162,.14)` | nav-item.active bg               |
+| `--green-line` | `rgba(117,232,162,.40)` | nav-item.active border           |
+| `--you`      | `var(--gold)` | "Self" hero highlight on chips/cards       |
+
+### 27.4 New IA — Default / Advanced / Developer
+
+Sidebar nav items carry `data-nav-group` and the **settings drawer** controls visibility:
+
+- **Default** (always shown): Calculator
+- **Advanced** (gated by `Advanced features` toggle): Heroes, Items
+- **Developer** (gated by `Developer features` toggle): Tags, QA
+
+The toggles persist via `CODEX.set({advanced, developer})` → `localStorage.codex_settings_v1`. First-time visitors see only the build-loop entry (Calculator) until they switch on the deeper surfaces.
+
+### 27.5 Settings drawer (B1)
+
+Right-slide panel (`#settings-drawer`) opens from the sidebar ⚙ button or the mobile bottom-nav Settings tab. Contains a theme `.seg` (Dark/Light), a Dense-layout `.toggle`, an Advanced `.toggle`, and a Developer `.toggle` (purple-tinted). State is held by the `CODEX` module at the top of `app.js`.
+
+### 27.6 Selected-instance sidebar block (B3)
+
+When the user opens a hero in Hero Edit, a green-bordered card slots into `#nav-instance-host` showing the hero portrait + name + current build, plus action buttons. The API:
+
+```js
+window.CODEX.setNavInstance({
+  key:         'seven',          // hero key
+  name:        'Seven',          // display name
+  build:       'GVS — Power Surge',
+  portraitUrl: '/src/heroes/seven.png',
+  onOpen:      () => showPage('hero-edit'),
+  onBuild:     () => showPage('hero-edit'),
+  onLive:      () => showPage('sim'),
+});
+// Clear:
+window.CODEX.setNavInstance(null);
+```
+
+`showPage` automatically clears the instance when navigating to a top-level page (heroes / items / tags / calc / qa) via the `NON_INSTANCE_PAGES` set.
+
+### 27.7 Mobile bottom nav (B7) + density toggle (B8)
+
+At `≤760px` the sidebar hides and `.botnav` appears — Calc tab + dynamic instance buttons + Settings tab. `[data-density="simple"]` hides any element marked `.dense-only` and reveals `.simple-only` — used for phone "glance-while-playing" mode on the simulator.
+
+### 27.8 Topbar / tabbar / drawer / toggle / seg — new component primitives
+
+Defined at the bottom of `style.css` under the `CODEX OVERLAY` banner. The legacy `.page-header` is **not** physically replaced — it now inherits the new tokens and gets a non-uppercase serif h1. The `.topbar` class is available for new pages but not retrofitted onto every existing page (keeps the layout-rewrite risk low). Likewise the `.tabbar` / `.tab-btn` system is ready but not yet wired into `#calc-build-detail` — that's a follow-up since the build detail is rendered dynamically by JS and would need its render function restructured.
+
+### 27.9 Sidebar restyle
+
+`#sidebar` is now 228px wide with `--page2` background and a horizontal brand row (gradient tile + serif wordmark). Nav buttons are non-uppercase, 14.5px, with the active state in green-soft/green-line instead of solid green block. Foot of the sidebar holds Theme toggle + Settings buttons separated by a thin divider.
+
+### 27.10 Deferred from this pass
+
+- **B4 — Tabbed Build Detail.** The current `#page-calc-build` is rendered dynamically by JS into a single container. CSS for `.tabbar` / `.tab-btn` / `.tab-panel` is ready, but slotting tabs in needs the render function restructured. Picked up next.
+- **B5 — Build Screen grid (phase × Core/Optional/Counter).** Out of scope per Brandon's choice.
+- **Editor structural cleanup (C).** Token swap covers the visual feel; the `.topbar` pattern is not yet applied to `.page-header` blocks page-by-page. Form/table rhythm inherits from the new tokens automatically.
+
+### 27.11 Persistence schema
+
+```jsonc
+// localStorage.codex_settings_v1
+{
+  "theme":     "dark",      // 'dark' | 'light'
+  "density":   "dense",     // 'dense' | 'simple'
+  "advanced":  false,       // hides Heroes/Items in sidebar when false
+  "developer": false        // hides Tags/QA in sidebar when false
+}
+```
+
+The `CODEX` IIFE at the top of `app.js` reads this on every load, applies `data-theme`/`data-density` to `<html>`, toggles `[data-nav-group]` element visibility, and rebinds drawer/toggle handlers.
 
 ---
 

@@ -1,0 +1,2262 @@
+{
+  "close_quarters": {
+    "name": "Close Quarters",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_close_range",
+    "wiki_url": "https://deadlock.wiki/Close_Quarters",
+    "base": {
+      "passives": [
+        "+20% Melee Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Deal additional Weapon Damage when in close range to your target.",
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Weapon Damage Conditional",
+              "text": "+20% Weapon Damage Conditional"
+            },
+            {
+              "value": "15m",
+              "label": "Close Range",
+              "text": "15m Close Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Sources of Melee Damage": "Apart from light and heavy melee attacks, some hero abilities are also considered to deal melee damage. Generally if an ability scales with melee damage than its damage is reduced by Melee Resist.",
+      "Melee damage abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Bebop Exploding Uppercut Bebop Grapple Arm Billy Bashdown Calico Leaping Slash Drifter Rend Silver Boot Kick Silver (Transformed) Go For The Throat Silver (Transformed) Mauling Leap Viscous Puddle Punch Yamato Flying Slash"
+    }
+  },
+  "extended_magazine": {
+    "name": "Extended Magazine",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_clip_size",
+    "wiki_url": "https://deadlock.wiki/Extended_Magazine",
+    "base": {
+      "passives": [
+        "+30% Max Ammo",
+        "+8% Weapon Damage"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "This item was previously named Basic Magazine . In certain locations around the Map , Extended Magazine has its own promotional poster."
+    }
+  },
+  "headshot_booster": {
+    "name": "Headshot Booster",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_headshot_booster",
+    "wiki_url": "https://deadlock.wiki/Headshot_Booster",
+    "base": {
+      "passives": [
+        "+30 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "9s",
+          "description": "Your next headshot against an enemy Hero deals bonus weapon damage .",
+          "stats": [
+            {
+              "value": "+45",
+              "label": "Head Shot Bonus Damage",
+              "text": "+45 Head Shot Bonus Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The bonus headshot damage does not apply to enemy Troopers , or any other NPC in possession of a headshot hitbox. The bonus headshot damage is affected by your Hero's Damage Falloff variables."
+    }
+  },
+  "high_velocity_rounds": {
+    "name": "High-Velocity Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_high_velocity_mag",
+    "wiki_url": "https://deadlock.wiki/High-Velocity_Rounds",
+    "base": {
+      "passives": [
+        "+60% Bullet Velocity",
+        "+8% Weapon Damage"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "This item was previously named High-Velocity Mag . This item was inspired by a forum post by user @DNADota . [ 1 ]"
+    }
+  },
+  "monster_rounds": {
+    "name": "Monster Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_non_player_bonus",
+    "wiki_url": "https://deadlock.wiki/Monster_Rounds",
+    "base": {
+      "passives": [
+        "+25% Weapon Damage vs. NPCs",
+        "+25% Bullet Resist vs. NPCs",
+        "+1 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Monster Rounds applies additional damage to Non-Player Characters. This includes Troopers , lane structures like Guardians , Walkers , neutral entities such as Denizen , and the Patron . It does apply additional damage against Graves ' Ghouls , but not against McGinnis ' Mini Turrets ."
+    }
+  },
+  "rapid_rounds": {
+    "name": "Rapid Rounds",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_rapid_rounds",
+    "wiki_url": "https://deadlock.wiki/Rapid_Rounds",
+    "base": {
+      "passives": [
+        "+9% Fire Rate"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "restorative_shot": {
+    "name": "Restorative Shot",
+    "category": "Weapon",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_medic_bullets",
+    "wiki_url": "https://deadlock.wiki/Restorative_Shot",
+    "base": {
+      "passives": [
+        "+6% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "6s",
+          "description": "Your next bullet will heal you based on what target you hit.",
+          "stats": [
+            {
+              "value": "50",
+              "label": "Healing From Heroes",
+              "text": "50 Healing From Heroes"
+            },
+            {
+              "value": "20",
+              "label": "Healing From NPCs / Orbs",
+              "text": "20 Healing From NPCs / Orbs"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Restorative Shot goes on cooldown regardless if the bullet hits a target."
+    }
+  },
+  "active_reload": {
+    "name": "Active Reload",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_active_reload",
+    "wiki_url": "https://deadlock.wiki/Active_Reload",
+    "base": {
+      "passives": [
+        "+20% Max Ammo"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "12s",
+          "description": "While reloading, pressing Reload during the highlighted portion will instantly finish your reload and grant you Fire Rate , Bullet Lifesteal and Move Speed .",
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Fire Rate Conditional",
+              "text": "+25% Fire Rate Conditional"
+            },
+            {
+              "value": "+16%",
+              "label": "Bullet Lifesteal Conditional",
+              "text": "+16% Bullet Lifesteal Conditional"
+            },
+            {
+              "value": "+0.75m",
+              "label": "Move Speed",
+              "text": "+0.75m Move Speed"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "If the player presses the reload button while outside the highlighted section, the item will fail to reload. The item only goes into cooldown once the effect is activated. The duration of the Active Reload activation window is always 0.3s. The highlighted section changes size proportionately to the hero's Reload Time .",
+      "Notable Interactions": "Vyper benefits from this item to have the smallest downtime to use her ammo sliding synergy. McGinnis can use this item to offset her long reload time."
+    }
+  },
+  "fleetfoot": {
+    "name": "Fleetfoot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_fleetfoot_boots",
+    "wiki_url": "https://deadlock.wiki/Fleetfoot",
+    "base": {
+      "passives": [
+        "+6% Weapon Damage",
+        "+35% Slide Distance",
+        "+6% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "16s",
+          "description": "Gain bonus Move Speed and Slow Resistance .",
+          "stats": [
+            {
+              "value": "+3m",
+              "label": "Move Speed Conditional",
+              "text": "+3m Move Speed Conditional"
+            },
+            {
+              "value": "+40%",
+              "label": "Slow Resist",
+              "text": "+40% Slow Resist"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "Fleetfoot's icon is similar to the demon Buer , from the grimoire Pseudomonarchia Daemonum , and is also similar to the Sicily Trinacria ."
+    }
+  },
+  "intensifying_magazine": {
+    "name": "Intensifying Magazine",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_intensifying_clip",
+    "wiki_url": "https://deadlock.wiki/Intensifying_Magazine",
+    "base": {
+      "passives": [
+        "+20% Max Ammo"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Increases Weapon Damage as you continuously fire your weapon.",
+          "stats": [
+            {
+              "value": "45%",
+              "label": "Max Weapon Damage Conditional",
+              "text": "45% Max Weapon Damage Conditional"
+            },
+            {
+              "value": "2.5s",
+              "label": "Time for Max Damage",
+              "text": "2.5s Time for Max Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Mechanics": "Intensifying Magazine ramps up the bonus weapon damage from 0% to 45% while the player holds down the Fire button and their weapon is in a firing state. Some abilities will still flag the hero as \"firing\" while the character isn't actually firing, but if the user continues to hold down their Fire button then they will continue charging up their bonus weapon damage. This can be used to charge up the bonus damage before a fight or maintain the bonus damage for longer.",
+      "Abilities that continue to allow building Intensifying Magazine damage during casting despite not shooting": "Bebop 's Exploding Uppercut Vindicta 's Assassinate (while scoped in) McGinnis ' Spectral Wall (Must be holding Fire before casting the wall) Pressing the Alt-Fire button will not increase the bonus weapon damage, but players can hold both Fire and Alt-Fire at the same time. This will cause heroes to continuously use their Alternate fire but still build bonus damage."
+    }
+  },
+  "kinetic_dash": {
+    "name": "Kinetic Dash",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_kinetic_sash",
+    "wiki_url": "https://deadlock.wiki/Kinetic_Dash",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "When you Dash-Jump you gain Fire Rate and bonus Ammo until your next reload. Lasts up to 7s.",
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Fire Rate Conditional",
+              "text": "+25% Fire Rate Conditional"
+            },
+            {
+              "value": "+6",
+              "label": "Temporary Ammo Conditional",
+              "text": "+6 Temporary Ammo Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "long_range": {
+    "name": "Long Range",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_long_range",
+    "wiki_url": "https://deadlock.wiki/Long_Range",
+    "base": {
+      "passives": [
+        "+8% Weapon Fall-off Range",
+        "+0.75m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Deal additional Weapon Damage when beyond a minimum distance from your target.",
+          "stats": [
+            {
+              "value": "+40%",
+              "label": "Weapon Damage Conditional",
+              "text": "+40% Weapon Damage Conditional"
+            },
+            {
+              "value": "15m",
+              "label": "Min. Distance",
+              "text": "15m Min. Distance"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "Long Range's icon is a reference to the movie A Trip to the Moon by Georges Méliès."
+    }
+  },
+  "melee_charge": {
+    "name": "Melee Charge",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_melee_charge",
+    "wiki_url": "https://deadlock.wiki/Melee_Charge",
+    "base": {
+      "passives": [
+        "+50% Heavy Melee Distance",
+        "+10% Melee Damage",
+        "+6% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "5s",
+          "description": "Your next Heavy Melee attack against an enemy deals increased damage .",
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Bonus Heavy Damage",
+              "text": "+25% Bonus Heavy Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Affected Abilities": "Some abilities scale with melee damage and are affected by item's increase to Melee Damage. Moreover several abilities use heavy melee scaling and will benefit from Melee Charge's unique passive effect as well. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —"
+    }
+  },
+  "mystic_shot": {
+    "name": "Mystic Shot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_crackshot",
+    "wiki_url": "https://deadlock.wiki/Mystic_Shot",
+    "base": {
+      "passives": [
+        "+7 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "8s",
+          "description": "Your next bullet deals bonus spirit damage .",
+          "stats": [
+            {
+              "value": "+40",
+              "label": "Spirit Damage",
+              "text": "+40 Spirit Damage",
+              "scaling": 1.2,
+              "scales_with": "Spirit Power",
+              "raw": "+40 base + 1.2 x Spirit Power"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The item provides a passive effect that creates an additional bullet when the hero shoots their weapon, and the additional bullet will mimic the bullets created by the current weapon. The Mystic Shot bullet appears as a glowing purple version of the hero's regular bullets. For most weapons, the Mystic bullet can follow the trajectory of any bullet, which can make it fly off-center for weapons with significant spread over time, such as McGinnis '. The exception are spreadshot weapons such as Abrams ' and Shiv 's, in which the Mystic pellet is always fired at the center of the crosshair. For explosive alternate fire weapons such as Viscous ' and Yamato 's, the Mystic bullet will appear the same but cannot deal damage in an area. Instead, it only deals the Spirit damage to the closest enemy to impact. The Mystic bullet hits before regular bullets. So for example, Bullet Resist Shredder 's effect is applied first and amplifies the weapon damage, but Crippling Headshot 's Spirit Resist reduction is applied after and does not amplify Mystic Shot's spirit damage. The additional Mystic bullet cannot deal critical (headshot) damage and is not affect by Ricochet . A Mystic bullet is immune to evasion ."
+    }
+  },
+  "opening_rounds": {
+    "name": "Opening Rounds",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_pristine_emblem",
+    "wiki_url": "https://deadlock.wiki/Opening_Rounds",
+    "base": {
+      "passives": [
+        "+60% Bullet Velocity",
+        "+8% Weapon Damage",
+        "+4 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your attacks have additional Weapon Damage against enemies above 50% health .",
+          "stats": [
+            {
+              "value": "+30%",
+              "label": "Weapon Damage Conditional",
+              "text": "+30% Weapon Damage Conditional"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "This item was previously named Pristine Emblem ."
+    }
+  },
+  "recharging_rush": {
+    "name": "Recharging Rush",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_rechargingbullets",
+    "wiki_url": "https://deadlock.wiki/Recharging_Rush",
+    "base": {
+      "passives": [
+        "+20% Max Ammo",
+        "+10% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "25s",
+          "description": "Dealing significant weapon damage replenishes a charge for each of your charged abilities .",
+          "stats": [
+            {
+              "value": "200",
+              "label": "Damage Threshold",
+              "text": "200 Damage Threshold"
+            },
+            {
+              "value": "3.5s",
+              "label": "Time Frame",
+              "text": "3.5s Time Frame"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case Recharging Rush will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Time Between Charges Notes Billy Bashdown 1 8s +1 charge on T2 upgrade. Celeste Radiant Daggers 1 2s +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 5s +1 charge on T1 upgrade. Graves Jar of Dead 4 13s Has a conditional charge. Charges by being near when anything dies. Grey Talon Charged Shot 1 4s +1 charge on T1 upgrade. Haze Smoke Bomb — — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 3.5s +2 charges on T3 upgrade. Holliday Bounce Pad 1 3.5s — Infernus Napalm 1 6s +1 charge on T1 upgrade. Infernus Flame Dash — — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 5s +1 charge on T1 upgrade. Kelvin Frost Grenade 2 7s — Lady Geist Life Drain — — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 2s +1 charge on T3 upgrade. McGinnis Mini Turret 1 3s +2 charges on T2 upgrade. Mirage Fire Scarabs 2 1s +2 charges on T2 upgrade. Paige Bookwyrm 1 7s +1 charge on T3 upgrade. Paradox Time Wall — — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 8s +1 charge on T3 upgrade. Seven Lightning Ball 1 7s +1 charge on T1 upgrade. Shiv Serrated Knives 2 2s +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 3s — The Doorman Call Bell 1 6s +1 charge on T1 upgrade. Venator Consecrating Grenade — — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 8s +1 charge on T3 upgrade. Victor Jumpstart 1 8s +1 charge on T3 upgrade. Vindicta Assassinate 2 2.5s — Viscous Puddle Punch 1 1.7s +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 4s +1 charge on T1 upgrade. Wraith Card Trick 2 — +"
+    }
+  },
+  "slowing_bullets": {
+    "name": "Slowing Bullets",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_slowing_bullets",
+    "wiki_url": "https://deadlock.wiki/Slowing_Bullets",
+    "base": {
+      "passives": [
+        "+15% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your bullets build up a Movement Slow on enemies.",
+          "stats": [
+            {
+              "value": "-30%",
+              "label": "Move Speed Conditional",
+              "text": "-30% Move Speed Conditional"
+            },
+            {
+              "value": "-22%",
+              "label": "Dash Distance",
+              "text": "-22% Dash Distance"
+            },
+            {
+              "value": "3.5s",
+              "label": "Slow Duration",
+              "text": "3.5s Slow Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Buildup Per Shot": "The item has a different buildup per shot depending on which hero purchased the item. The status only triggers once a buildup reaches 100% on an enemy player, and the buildup decays back to 0 if an enemy hasn't been shot for some time. Melee attacks count as 1 shot. Buildup Per Shot: Slowing Bullets Hero % per shot Shots to Proc Abrams 55.2 2 Apollo 39.3 3 Bebop 11.1 10 Billy 11.2 9 Calico 24.8 5 Celeste 52.4 2 The Doorman 52.4 2 Drifter 43.7 3 Dynamo 29.7 4 Graves 13.2 8 Grey Talon 52.3 2 Haze 13.6 8 Holliday 45.8 3 Infernus 13.6 8 Ivy 9.8 11 Kelvin 29.7 4 Lady Geist 45.8 3 Lash 20.9 5 McGinnis 11.1 10 Mina 28.8 4 Mirage 38.4 3 Mo & Krill 22.7 5 Paige 40.8 3 Paradox 16.7 6 Pocket 49.2 3 Rem 29.5 4 Seven 20.9 5 Shiv 50.8 2 Silver 65.6 2 Silver (Transformed) 67.7 2 Sinclair 38.4 3 Venator 16.0 7 Victor 20.9 5 Vindicta 26.8 4 Viscous 24.8 5 Vyper 9.3 11 Warden 29.7 4 Wraith 12.3 9 Yamato 42.3 3"
+    }
+  },
+  "spirit_shredder_bullets": {
+    "name": "Spirit Shredder Bullets",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_tech_defense_shredders",
+    "wiki_url": "https://deadlock.wiki/Spirit_Shredder_Bullets",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your bullets apply a debuff that reduces the Spirit Resist of the target and grants you and your allies Spirit Lifesteal against them.",
+          "stats": [
+            {
+              "value": "-8%",
+              "label": "Spirit Resist Conditional",
+              "text": "-8% Spirit Resist Conditional"
+            },
+            {
+              "value": "+10%",
+              "label": "Spirit Lifesteal Conditional",
+              "text": "+10% Spirit Lifesteal Conditional"
+            },
+            {
+              "value": "8s",
+              "label": "Debuff Duration",
+              "text": "8s Debuff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The Spirit Lifesteal from the debuff is independent of the diminishing returns from other sources of spirit lifesteal. It will always grant the player a flat +10% spirit lifesteal. The debuff can be applied with melee attacks, as well as abilities that are considered melee attacks.",
+      "Trivia": "This item was previously named Soul Shredder Bullets ."
+    }
+  },
+  "split_shot": {
+    "name": "Split Shot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_split_shot",
+    "wiki_url": "https://deadlock.wiki/Split_Shot",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "27s",
+          "description": "Make your weapon fire multishot . Hitting more than one Hero per attack will grant a stacking weapon damage bonus . Targets can only be hit once per multishot.",
+          "stats": [
+            {
+              "value": "5",
+              "label": "Weapon Multishot Conditional",
+              "text": "5 Weapon Multishot Conditional"
+            },
+            {
+              "value": "+8%",
+              "label": "Weapon Damage per Stack",
+              "text": "+8% Weapon Damage per Stack"
+            },
+            {
+              "value": "5s",
+              "label": "Buff Duration",
+              "text": "5s Buff Duration"
+            },
+            {
+              "value": "5",
+              "label": "Max Stacks",
+              "text": "5 Max Stacks"
+            },
+            {
+              "value": "12s",
+              "label": "Stack Duration",
+              "text": "12s Stack Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Multishots can hit units as well, but they do not grant stacks. Each shot is separated by approximately 5°, leading to a total of approximately 20° spread between the furthest two shots.",
+      "Notable interactions": "For Celeste , it splits into 3 shots at 70° spread. Split Shot affects Grey Talon 's Rain of Arrows , allowing him to fire 25 arrows at once. Split Shot affects Paradox 's Kinetic Carbine , allowing her to fire 5 Kinetic Carbine shots at once. However, it will only affect the first enemy hit. Paige and The Doorman can gain stacks by hitting multiple players with the same shot. Split Shot has no effect on Silver (Transformed) ."
+    }
+  },
+  "stalker": {
+    "name": "Stalker",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_weapon_backstabber",
+    "wiki_url": "https://deadlock.wiki/Stalker",
+    "base": {
+      "passives": [
+        "-50% Footstep Sound Distance",
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "6s",
+          "description": "Dealing weapon damage at close range opens a wound and grants you bonus move speed . Wounded enemies take spirit damage over time , have reduced bullet resist , and are revealed through walls .",
+          "stats": [
+            {
+              "value": "17",
+              "label": "Damage Per Second",
+              "text": "17 Damage Per Second"
+            },
+            {
+              "value": "-6%",
+              "label": "Bullet Resist Conditional",
+              "text": "-6% Bullet Resist Conditional"
+            },
+            {
+              "value": "+1.5m",
+              "label": "Move Speed Conditional",
+              "text": "+1.5m Move Speed Conditional"
+            },
+            {
+              "value": "5s",
+              "label": "Debuff Duration",
+              "text": "5s Debuff Duration"
+            },
+            {
+              "value": "8m",
+              "label": "Close Range",
+              "text": "8m Close Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Stalker's damage triggers any \"on spirit damage\" effects like Mystic Slow or Bullet Resist Shredder Stalker procs off any ability that deals physical damage if the player was close enough. List of relevant abilities: This is an automatic list. Click here to add notes or correct the contents. Hero Ability Venator Consecrating Grenade Venator Gutshot Venator Ira Domini Stalker procs off melee damage and any ability that deals melee damage if the player was close enough. List of relevant abilities: This is an automatic list. Click here to add notes or correct the contents. Hero Ability Bebop Exploding Uppercut Bebop Grapple Arm Billy Bashdown Calico Leaping Slash Drifter Rend Silver Boot Kick Silver (Transformed) Go For The Throat Silver (Transformed) Mauling Leap Viscous Puddle Punch Yamato Flying Slash",
+      "Trivia": "This item was previously named Backstabber ."
+    }
+  },
+  "swift_striker": {
+    "name": "Swift Striker",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_blitz_bullets",
+    "wiki_url": "https://deadlock.wiki/Swift_Striker",
+    "base": {
+      "passives": [
+        "+20% Fire Rate",
+        "+0.75m Sprint Speed"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "titanic_magazine": {
+    "name": "Titanic Magazine",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_titan_round",
+    "wiki_url": "https://deadlock.wiki/Titanic_Magazine",
+    "base": {
+      "passives": [
+        "+100% Max Ammo",
+        "+14% Weapon Damage"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "weakening_headshot": {
+    "name": "Weakening Headshot",
+    "category": "Weapon",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_headshot_booster2",
+    "wiki_url": "https://deadlock.wiki/Weakening_Headshot",
+    "base": {
+      "passives": [
+        "+60 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Landing a Headshot reduces their Bullet Resist .",
+          "stats": [
+            {
+              "value": "-13%",
+              "label": "Bullet Resist Conditional",
+              "text": "-13% Bullet Resist Conditional"
+            },
+            {
+              "value": "12s",
+              "label": "Debuff Duration",
+              "text": "12s Debuff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "extra_health": {
+    "name": "Extra Health",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_health",
+    "wiki_url": "https://deadlock.wiki/Extra_Health",
+    "base": {
+      "passives": [
+        "+210 Bonus Health"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "extra_regen": {
+    "name": "Extra Regen",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_endurance",
+    "wiki_url": "https://deadlock.wiki/Extra_Regen",
+    "base": {
+      "passives": [
+        "+2.5 Health Regen",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "extra_stamina": {
+    "name": "Extra Stamina",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_improved_stamina",
+    "wiki_url": "https://deadlock.wiki/Extra_Stamina",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "healing_rite": {
+    "name": "Healing Rite",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_health_stimpak",
+    "wiki_url": "https://deadlock.wiki/Healing_Rite",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "70s",
+          "description": "Grant Regen and Sprint Speed to the target. Gets dispelled if you take damage from enemy players or objectives. Can be self-cast.",
+          "stats": [
+            {
+              "value": "300",
+              "label": "Total HP Regen",
+              "text": "300 Total HP Regen"
+            },
+            {
+              "value": "+2m",
+              "label": "Sprint Speed Conditional",
+              "text": "+2m Sprint Speed Conditional"
+            },
+            {
+              "value": "20s",
+              "label": "Regen Duration",
+              "text": "20s Regen Duration"
+            },
+            {
+              "value": "30m",
+              "label": "Cast Range",
+              "text": "30m Cast Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The heal gets dispelled even if the damage was absorbed by a barrier."
+    }
+  },
+  "melee_lifesteal": {
+    "name": "Melee Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_lifestrike_gauntlets",
+    "wiki_url": "https://deadlock.wiki/Melee_Lifesteal",
+    "base": {
+      "passives": [
+        "+12% Melee Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "8s",
+          "description": "Your next Melee attack heals you . This heal is 30% effective vs non-heroes. Cooldown is 1.5x as long for Light Melee hits.",
+          "stats": [
+            {
+              "value": "100",
+              "label": "Heal on Melee Hit",
+              "text": "100 Heal on Melee Hit"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Affected Abilities": "Some abilities scale with melee damage and are affected by Melee Lifesteal's increase to Melee Damage . Abilities that deal melee damage will also trigger the lifesteal effect. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Light Melee Scaling Notes Bebop Exploding Uppercut ×1 — Bebop Grapple Arm ×0.7 — Billy Bashdown ×1.1 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Calico Leaping Slash ×0.8 — Drifter Rend ×1.2 T3 upgrade changes scaling to ×0.55 of Heavy Melee damage. Silver Boot Kick ×0.9 — Silver (Transformed) Go For The Throat ×1.5 — Silver (Transformed) Mauling Leap ×1.5 — Viscous Puddle Punch ×0.6 T3 upgrade changes scaling to ×0.6 of Heavy Melee damage. Can be parried. Yamato Flying Slash ×1 —",
+      "Notes": "Striking multiple targets with one attack will not increase healing gained.",
+      "Trivia": "Melee Lifesteal is one of several items to feature in promotional posters around the Map . Poster for Melee Lifesteal"
+    }
+  },
+  "rebuttal": {
+    "name": "Rebuttal",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_melee_rebuttal",
+    "wiki_url": "https://deadlock.wiki/Rebuttal",
+    "base": {
+      "passives": [
+        "-1.75s Parry Cooldown",
+        "+18% Melee Resist",
+        "+75 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "On a successful Parry against an enemy Hero, Heal yourself for the damage parried and returns that damage to the target, and temporarily gain increased damage.",
+          "stats": [
+            {
+              "value": "+30%",
+              "label": "Bonus Damage Conditional",
+              "text": "+30% Bonus Damage Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notable interactions": "Rebuttal procs when parrying Viscous ' Puddle Punch . Rebuttal does not proc when parrying abilities with Counterspell .",
+      "Sources of Melee Damage": "Apart from light and heavy melee attacks, some hero abilities are also considered to deal melee damage. Generally if an ability scales with melee damage, its damage is reduced by Melee Resist .",
+      "Melee damage abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Bebop Exploding Uppercut Bebop Grapple Arm Billy Bashdown Calico Leaping Slash Drifter Rend Silver Boot Kick Silver (Transformed) Go For The Throat Silver (Transformed) Mauling Leap Viscous Puddle Punch Yamato Flying Slash"
+    }
+  },
+  "sprint_boots": {
+    "name": "Sprint Boots",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_sprint_booster",
+    "wiki_url": "https://deadlock.wiki/Sprint_Boots",
+    "base": {
+      "passives": [
+        "+2m Sprint Speed",
+        "+2 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "battle_vest": {
+    "name": "Battle Vest",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_regenerating_bullet_shield",
+    "wiki_url": "https://deadlock.wiki/Battle_Vest",
+    "base": {
+      "passives": [
+        "+18% Bullet Resist",
+        "+3 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "While you are above 65% health , gain weapon damage and bonus fire rate .",
+          "stats": [
+            {
+              "value": "+18%",
+              "label": "Weapon Damage Conditional",
+              "text": "+18% Weapon Damage Conditional"
+            },
+            {
+              "value": "+7%",
+              "label": "Fire Rate Conditional",
+              "text": "+7% Fire Rate Conditional"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "This item was previously named Combat Barrier ."
+    }
+  },
+  "bullet_lifesteal": {
+    "name": "Bullet Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_vampire",
+    "wiki_url": "https://deadlock.wiki/Bullet_Lifesteal_(item)",
+    "base": {
+      "passives": [
+        "+13% Bullet Lifesteal",
+        "+90 Bonus Health",
+        "+6% Weapon Damage"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {
+      "Hero Abilities": "Abilities that deal weapon damage also provide heal from Bullet Lifesteal. Here are all of the relevant abilities. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Venator Consecrating Grenade Venator Gutshot Venator Ira Domini"
+    }
+  },
+  "debuff_reducer": {
+    "name": "Debuff Reducer",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_debuff_reducer",
+    "wiki_url": "https://deadlock.wiki/Debuff_Reducer",
+    "base": {
+      "passives": [
+        "+90 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Reduces the duration of all negative effects applied to you.",
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Debuff Resist",
+              "text": "+25% Debuff Resist"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Interactions with Crowd-Control": "Debuff Reducer reduces the duration of stuns and similar effects inflicted by the following abilities: This is an automatic list. Click here to add notes or correct the contents. Abrams : Shoulder Charge , Seismic Impact Apollo : Disengaging Sigil , Riposte Bebop : Exploding Uppercut , Grapple Arm (T1 debuff), Hyper Beam (effect is negligible) Billy : Bashdown , Blasted Celeste : Light Eater , Dazzling Trick , Shining Wonder Drifter : Rend (T3 debuff), Stalker's Mark Dynamo : Kinetic Pulse Graves : Jar of Dead , Grasping Hands , Borrowed Decree Grey Talon : Rain of Arrows , Spirit Snare , Guided Owl Haze : Sleep Dagger , Fixation Holliday : Powder Keg , Crackshot , Spirit Lasso Infernus : Napalm , Afterburn , Concussive Combustion Ivy : Entangling Thorns , Stone Form , Air Drop Kelvin : Frost Grenade Lady Geist : Life Drain , Malice , Soul Exchange (cast micro-slow + T2 silence) Lash : Ground Strike , Flog (T1 slow), Death Slam McGinnis : Mini Turret , Spectral Wall , Heavy Barrage (T1 slow + dash slow) Mina : Love Bites , Nox Nostra Mirage : Fire Scarabs , Dust Devil , Djinn's Mark Mo & Krill : Scorn (T3 debuff), Burrow , Sand Blast (T2 slow + dash slow), Combo Paige : Captivating Read , Rallying Charge Paradox : Pulse Grenade , Time Wall , Kinetic Carbine Pocket : Barrage , Enchanter's Satchel , Affliction Rem : Pillow Toss , Naptime Seven : Lightning Ball (effect is negligible), Static Charge (stun duration only), Power Surge (T3 debuff) Shiv : Serrated Knives , Slice and Dice Silver : Boot Kick (T3 debuff), Entangling Bola Silver (Transformed) : Mauling Leap , Tail Whack Sinclair : Vexing Bolt (T1 debuff), Rabbit Hex The Doorman : Call Bell , Luggage Cart (T3 stun), Hotel Guest (post-checkout Time-Slow + T2 stun) Venator : Consecrating Grenade , Gutshot , Hex-Lined Snap Trap Victor : Pain Battery (T1 slow), Aura of Suffering (T1 slow, T3 debuff; effect is negligible), Shocking Reanimation Vindicta : Stake , Crow Familiar Viscous : Puddle Punch , Goo Ball Vyper :"
+    }
+  },
+  "enchanters_emblem": {
+    "name": "Enchanters Emblem",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_magic_shield",
+    "wiki_url": "https://deadlock.wiki/Enchanter's_Emblem",
+    "base": {
+      "passives": [
+        "+18% Spirit Resist",
+        "+2 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "While you are above 65% health , gain bonus Spirit and Cooldown Reduction .",
+          "stats": [
+            {
+              "value": "+15",
+              "label": "Spirit Power",
+              "text": "+15 Spirit Power"
+            },
+            {
+              "value": "+5%",
+              "label": "Ability Cooldown Reduction",
+              "text": "+5% Ability Cooldown Reduction"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "This item was previously named Enchanter's Barrier ."
+    }
+  },
+  "enduring_speed": {
+    "name": "Enduring Speed",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_cardio_calibrator",
+    "wiki_url": "https://deadlock.wiki/Enduring_Speed",
+    "base": {
+      "passives": [
+        "+2m Move Speed",
+        "+2 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Reduces the effect of enemy Move Speed penalties.",
+          "stats": [
+            {
+              "value": "+25%",
+              "label": "Slow Resist",
+              "text": "+25% Slow Resist"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Sources of Slow": "The item makes any slow applications 25% less potent. For example an ability that applies 60% Move Slow , when affecting a hero with Enduring Speed will reduce their speed only by 45%.",
+      "Move Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Move Slow Notes Abrams Shoulder Charge 40% (T1) — Apollo Disengaging Sigil 30% — Apollo Itani Lo Sahn — — Bebop Grapple Arm 90% Applies a short strong slow when the victim reaches Bebop. Bebop Hyper Beam 25% — Celeste Shining Wonder 40% T1 upgrade increases move slow by 20% (total 60%). Drifter Stalker's Mark — — Dynamo Kinetic Pulse 30% (T2) — Graves Jar of Dead 30% (T2) — Graves Borrowed Decree 80% — Grey Talon Rain of Arrows 30% (T1) — Grey Talon Spirit Snare 30% — Haze Sleep Dagger 50% (T3) — Haze Fixation 15% (T1) — Infernus Napalm 35% — Infernus Concussive Combustion — — Ivy Entangling Thorns 35% — Ivy Air Drop 40% (T2) — Kelvin Frost Grenade 40% — Kelvin Arctic Beam 20% T1 upgrade increases move slow by 25% (total 45%); Also slows the caster for 8%. Kelvin Frozen Shelter 35% — Lady Geist Malice 15% — Lady Geist Soul Exchange 70% — Lash Ground Strike 50% (T2) — Lash Flog 35% (T1) — Lash Death Slam 50% — McGinnis Mini Turret — — McGinnis Spectral Wall 20% T3 upgrade increases move slow by 30% (total 50%). McGinnis Heavy Barrage 30% (T1) Slows McGinnis by unknown amount. Mina Love Bites 30% (T1) — Mirage Dust Devil 30% — Mirage Djinn's Mark 60% (T1) — Mo & Krill Sand Blast 25% (T2) — Paige Captivating Read 45% — Paradox Pulse Grenade 20% — Paradox Time Wall 80% — Pocket Barrage 30% — Pocket Enchanter's Satchel 40% (T3) — Seven Lightning Ball 35% (T2) — Shiv Serrated Knives 35% — Silver Entangling Bola 20% T1 upgrade increases move slow by 25% (total 45%). Silver (Transformed) Tail Whack 30% T2 upgrade increases move slow by 40% (total 70%). The Doorman Call Bell 35% — Venator Consecrating Grenade — — Victor Pain Battery 40% (T1) — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 120% — Vindicta Stake 40% — Viscous Splatter 35% — Viscous Puddle Punch 20% — Vyper Screwjab Dagger 35% — Vyper Petrifying Bola 50% — Warden Alchemical Flask 20% — Wraith Card Trick 30",
+      "Move Slow Items": "This is an automatic list. Click here to correct the contents. Name Cost Category Stat change Slowing Bullets 1,600 Weapon + 30 % Movement slow Point Blank 3,200 Weapon + 25 % Movement slow Weighted Shots 3,200 Weapon + 30 % Movement slow Haunting Shot Legendary Weapon + 40 % Movement slow Lifestrike 3,200 Vitality + 60 % Movement slow Colossus 6,400 Vitality + 30 % Movement slow Phantom Strike 6,400 Vitality + 50 % Movement slow Cold Front 1,600 Spirit + 60 % Movement slow Mystic Slow 1,600 Spirit + 30 % Movement slow Slowing Hex 1,600 Spirit + 20 % Movement slow Arctic Blast 6,400 Spirit + 60 % Movement slow Lightning Scroll 6,400 Spirit + 80 % Movement slow + 30 % Movement slow Mystic Reverb 6,400 Spirit + 40 % Movement slow Vortex Web 6,400 Spirit + 35 % Movement slow",
+      "Dash Slow Resist": "Enduring Speed also protects about Dash slows.",
+      "Dash Slow Abilities": "This is an automatic list. Click here to add notes or correct the contents. Hero Ability Dash Slow Notes Bebop Hyper Beam 40% — Celeste Shining Wonder 25% T1 upgrade increases dash slow by 15% (total 40%). Haze Sleep Dagger 50% (T3) — Kelvin Arctic Beam 20% — McGinnis Heavy Barrage 30% (T1) Gives 35% dash slow for the caster. Mo & Krill Sand Blast 25% (T2) — Rem Naptime 25% — Victor Aura of Suffering 25% (T1) — Victor Shocking Reanimation 30% —",
+      "Dash Slow Items": "This is an automatic list. Click here to correct the contents. Name Cost Category Stat change Slowing Bullets 1,600 Weapon - 22 % Dash distance Weighted Shots 3,200 Weapon - 22 % Dash distance Haunting Shot Legendary Weapon - 40 % Dash distance Metal Skin 3,200 Vitality - 20 % Dash distance Stamina Mastery 3,200 Vitality + 23 % Dash distance Colossus 6,400 Vitality - 25 % Dash distance Mystic Slow 1,600 Spirit - 12 % Dash distance Slowing Hex 1,600 Spirit - 30 % Dash distance Lightning Scroll 6,400 Spirit - 12 % Dash distance Vortex Web 6,400 Spirit - 40 % Dash distance"
+    }
+  },
+  "guardian_ward": {
+    "name": "Guardian Ward",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_guardian_ward",
+    "wiki_url": "https://deadlock.wiki/Guardian_Ward",
+    "base": {
+      "passives": [
+        "+8% Ability Range",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "60s",
+          "description": "Provide the target with a Barrier and temporary Move Speed . Can be self-cast. Cooldown is reduced by half when cast on someone else.",
+          "stats": [
+            {
+              "value": "250",
+              "label": "Barrier Conditional",
+              "text": "250 Barrier Conditional"
+            },
+            {
+              "value": "+2.75m",
+              "label": "Move Speed Conditional",
+              "text": "+2.75m Move Speed Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Buff Duration",
+              "text": "6s Buff Duration"
+            },
+            {
+              "value": "40m",
+              "label": "Cast Range",
+              "text": "40m Cast Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "healbane": {
+    "name": "Healbane",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_healbane",
+    "wiki_url": "https://deadlock.wiki/Healbane",
+    "base": {
+      "passives": [
+        "+7 Spirit Power"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your spirit damage applies Healing Reduction . If an enemy hero dies under this effect, you receive a large heal.",
+          "stats": [
+            {
+              "value": "-35%",
+              "label": "Healing Reduction Conditional",
+              "text": "-35% Healing Reduction Conditional"
+            },
+            {
+              "value": "275",
+              "label": "Heal On Hero Kill",
+              "text": "275 Heal On Hero Kill"
+            },
+            {
+              "value": "8s",
+              "label": "Duration",
+              "text": "8s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Affected healing": "Following abilities and items get their healing reduced by Healbane."
+    }
+  },
+  "healing_booster": {
+    "name": "Healing Booster",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_healing_booster",
+    "wiki_url": "https://deadlock.wiki/Healing_Booster",
+    "base": {
+      "passives": [
+        "+3 Health Regen",
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Increases the effectiveness of your healing .",
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Healing Effectiveness",
+              "text": "+20% Healing Effectiveness"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Healing booster affects Bullet Lifesteal and Spirit Lifesteal Healing booster affects Health Regen only if it's a temporary effect (e.g. Frozen Shelter ). It does not affect constant regen acquired from most items and rare abilities. Healing Booster increases the effect of healing applied to allies as well as the caster, but owning Healing Booster does not increase the healing received from an ally.",
+      "Amplified sources of healing": "Following abilities and items get their healings amplified by Healing Booster."
+    }
+  },
+  "reactive_barrier": {
+    "name": "Reactive Barrier",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_vex_barrier",
+    "wiki_url": "https://deadlock.wiki/Reactive_Barrier",
+    "base": {
+      "passives": [
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "55s",
+          "description": "Gain a Barrier when you are Stunned, Chained, Immobilized, Slept or Silenced .",
+          "stats": [
+            {
+              "value": "325",
+              "label": "Barrier Conditional",
+              "text": "325 Barrier Conditional",
+              "scaling": 1.8,
+              "scales_with": "Spirit Power",
+              "raw": "325 base + 1.8 x Spirit Power"
+            },
+            {
+              "value": "10s",
+              "label": "Duration",
+              "text": "10s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Abilities and items that trigger Reactive Barrier": "Abrams - Shoulder Charge and Seismic Impact Apollo - Riposte and Itani Lo Sahn Bebop - Grapple Arm Billy - Chain Gang Celeste - Dazzling Trick The Doorman - Luggage Cart and Hotel Guest Drifter - Rend with T3 upgrade Dynamo - Singularity Lady Geist - Soul Exchange with T2 upgrade Graves - Grasping Hands Grey Talon - Spirit Snare and Guided Owl Haze - Sleep Dagger Holliday - Spirit Lasso Infernus - Concussive Combustion Ivy - Stone Form , Air Drop with T3 upgrade and Entangling Thorns with T3 upgrade Lash - Death Slam and Ground Strike (when dragging mid-air enemies to the ground) Mina - Nox Nostra Mirage - Tornado and Djinn's Mark with T3 upgrade Mo & Krill - Combo Paige - Captivating Read and Rallying Charge Paradox - Paradoxical Swap and Time Wall with T2 upgrade Rem - Naptime Seven - Static Charge Sinclair - Rabbit Hex Silver - Boot Kick Venator - Gutshot and Hex-Lined Snap Trap Victor - Shocking Reanimation Vindicta - Stake Viscous - Goo Ball Vyper - Petrifying Bola Warden - Binding Word Wraith - Telekinesis Knockdown Silence Wave Crushing Fists Silencer Cursed Relic Focus Lens Arctic Blast Lightning Scroll Vortex Web"
+    }
+  },
+  "restorative_locket": {
+    "name": "Restorative Locket",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_restorative_locket",
+    "wiki_url": "https://deadlock.wiki/Restorative_Locket",
+    "base": {
+      "passives": [
+        "+10% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "20s",
+          "description": "When an enemy uses an ability within 35m range from you, store one Restoration Stack . Consume all stacks to heal yourself and replenish up to 3 stamina based on how many stacks you have.",
+          "stats": [
+            {
+              "value": "16",
+              "label": "Heal Per Stack",
+              "text": "16 Heal Per Stack"
+            },
+            {
+              "value": "25",
+              "label": "Max Stacks",
+              "text": "25 Max Stacks"
+            },
+            {
+              "value": "3",
+              "label": "Max Stamina Restore",
+              "text": "3 Max Stamina Restore"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Non-Active Abilities and Items do not trigger this passive effect.",
+      "Restoration Scaling": "Restoration Based on Stacks Number of Stacks Healing (Base) Healing (Max Boons) Stamina Replenish 1 16 27.2 0.12 2 32 54.4 0.24 3 48 81.6 0.36 4 64 108.8 0.48 5 80 136 0.6 6 96 163.2 0.72 7 112 190.4 0.84 8 128 217.6 0.96 9 144 244.8 1.08 10 160 272 1.2 11 176 299.2 1.32 12 192 326.4 1.44 13 208 353.6 1.56 14 224 380.8 1.68 15 240 408 1.8 16 256 435.2 1.92 17 272 462.4 2.04 18 288 489.6 2.16 19 304 516.8 2.28 20 320 544 2.4 21 336 571.2 2.52 22 352 598.4 2.64 23 368 625.6 2.76 24 384 652.8 2.88 25 400 680 3"
+    }
+  },
+  "return_fire": {
+    "name": "Return Fire",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_return_fire",
+    "wiki_url": "https://deadlock.wiki/Return_Fire",
+    "base": {
+      "passives": [
+        "+10% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "23s",
+          "description": "Automatically fire a bullet towards any attacker who damages you with their abilities or weapon.",
+          "stats": [
+            {
+              "value": "65%",
+              "label": "Bullet Damage Returned",
+              "text": "65% Bullet Damage Returned"
+            },
+            {
+              "value": "25%",
+              "label": "Spirit Damage Returned",
+              "text": "25% Spirit Damage Returned"
+            },
+            {
+              "value": "6.5s",
+              "label": "Duration",
+              "text": "6.5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Damage Reflection Mechanics Returns the attacker's pre-mitigation damage (original damage before your resistances apply) Example: If an enemy deals 100 Bullet Damage while you have 30% Bullet Resist , you reflect 65 damage, and you take 70. Works even with 100% damage immunity (e.g., Metal Skin reflects full damage while preventing damage to the user). Does not apply build-up or stacking effects against the attacker."
+    }
+  },
+  "spirit_lifesteal": {
+    "name": "Spirit Lifesteal",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_health_stealing_magic",
+    "wiki_url": "https://deadlock.wiki/Spirit_Lifesteal_(item)",
+    "base": {
+      "passives": [
+        "+13% Spirit Lifesteal",
+        "+90 Bonus Health",
+        "+6 Spirit Power"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "spirit_shielding": {
+    "name": "Spirit Shielding",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_spirit_bubble",
+    "wiki_url": "https://deadlock.wiki/Spirit_Shielding",
+    "base": {
+      "passives": [
+        "+2.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "45s",
+          "description": "Gain a Barrier whenever you take significant spirit damage from enemy Heroes in a small time frame.",
+          "stats": [
+            {
+              "value": "300",
+              "label": "x 5 Barrier Conditional",
+              "text": "300 x 5 Barrier Conditional"
+            },
+            {
+              "value": "+18%",
+              "label": "Spirit Resist Conditional",
+              "text": "+18% Spirit Resist Conditional"
+            },
+            {
+              "value": "225",
+              "label": "Damage Threshold",
+              "text": "225 Damage Threshold"
+            },
+            {
+              "value": "3.5s",
+              "label": "Time Frame",
+              "text": "3.5s Time Frame"
+            },
+            {
+              "value": "8s",
+              "label": "Barrier Duration",
+              "text": "8s Barrier Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "weapon_shielding": {
+    "name": "Weapon Shielding",
+    "category": "Vitality",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_weapon_shielding",
+    "wiki_url": "https://deadlock.wiki/Weapon_Shielding",
+    "base": {
+      "passives": [
+        "+2.5 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "35s",
+          "description": "Gain a Barrier whenever you take significant weapon damage from enemy Heroes in a small time frame.",
+          "stats": [
+            {
+              "value": "300",
+              "label": "x 5 Barrier Conditional",
+              "text": "300 x 5 Barrier Conditional"
+            },
+            {
+              "value": "+18%",
+              "label": "Bullet Resist Conditional",
+              "text": "+18% Bullet Resist Conditional"
+            },
+            {
+              "value": "250",
+              "label": "Damage Threshold",
+              "text": "250 Damage Threshold"
+            },
+            {
+              "value": "4s",
+              "label": "Time Frame",
+              "text": "4s Time Frame"
+            },
+            {
+              "value": "8s",
+              "label": "Barrier Duration",
+              "text": "8s Barrier Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "extra_charge": {
+    "name": "Extra Charge",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_extra_charge",
+    "wiki_url": "https://deadlock.wiki/Extra_Charge",
+    "base": {
+      "passives": [
+        "+1 Bonus Ability Charges",
+        "+7 Bonus Spirit Power for Charged Abilities"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {
+      "Affected Abilities": "Some of the abilities do not start out as charged but gain charges when they get a specific upgrade. In that case, Extra Charge will not affect these abilities until the upgrade is taken. This is an automatic list. Click here to add notes or correct the contents. Hero Ability Charges Notes Billy Bashdown 1 +1 charge on T2 upgrade. Celeste Radiant Daggers 1 +2 charges on T1 upgrade. Dynamo Kinetic Pulse 1 +1 charge on T1 upgrade. Graves Jar of Dead 4 Has a conditional charge. Charges by being near when anything dies. Grey Talon Charged Shot 1 +1 charge on T1 upgrade. Haze Smoke Bomb — Becomes charged on T2 upgrade with 2 charges and 7s time between charges. Holliday Powder Keg 1 +2 charges on T3 upgrade. Holliday Bounce Pad 1 — Infernus Napalm 1 +1 charge on T1 upgrade. Infernus Flame Dash — Becomes charged on T3 upgrade with 2 charges and 14s time between charges. Ivy Entangling Thorns 1 +1 charge on T1 upgrade. Kelvin Frost Grenade 2 — Lady Geist Life Drain — Becomes charged on T3 upgrade with 3 charges and 0.1s time between charges. Lash Grapple 1 +1 charge on T3 upgrade. McGinnis Mini Turret 1 +2 charges on T2 upgrade. Mirage Fire Scarabs 2 +2 charges on T2 upgrade. Paige Bookwyrm 1 +1 charge on T3 upgrade. Paradox Time Wall — Becomes charged on T3 upgrade with 3 charges and 2s time between charges. Rem Pillow Toss 1 +1 charge on T3 upgrade. Seven Lightning Ball 1 +1 charge on T1 upgrade. Shiv Serrated Knives 2 +2 charges on T2 upgrade. Sinclair Vexing Bolt 1 — The Doorman Call Bell 1 +1 charge on T1 upgrade. Venator Consecrating Grenade — Becomes charged on T3 upgrade with 1 charge and 3s time between charges. Venator Hex-Lined Snap Trap 2 +1 charge on T3 upgrade. Victor Jumpstart 1 +1 charge on T3 upgrade. Vindicta Assassinate 2 — Viscous Puddle Punch 1 +1 charge on T1 upgrade. Vyper Screwjab Dagger 2 +1 charge on T1 upgrade. Wraith Card Trick 2 +2 charges on T1 upgrade Has a conditional charge. Yamato Flying Slash — Becomes charged on T3 upgrade with 3 charges",
+      "Notable interactions": "If Sinclair copies Vindicta 's Assassinate with Extra Charge, they will start with 2 charges. After using Assassinate once, they can keep the copy indefinitely as long as they have one or more charges left."
+    }
+  },
+  "extra_spirit": {
+    "name": "Extra Spirit",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_improved_spirit",
+    "wiki_url": "https://deadlock.wiki/Extra_Spirit",
+    "base": {
+      "passives": [
+        "+10 Spirit Power"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "golden_goose_egg": {
+    "name": "Golden Goose Egg",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_goose_egg",
+    "wiki_url": "https://deadlock.wiki/Golden_Goose_Egg",
+    "base": {
+      "passives": [
+        "-10% Damage Penalty",
+        "+1m Sprint Speed",
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": null,
+          "description": "Hatch the egg, gaining souls and permanent buffs . The value of the egg grows the longer you hold onto it. Gain a permanent buff per 80 Souls accrued when hatched.",
+          "stats": [
+            {
+              "value": "90",
+              "label": "Soul Value per Minute",
+              "text": "90 Soul Value per Minute"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The soul value starts at 400 . These initial souls do not count towards the buffs gained. It takes 4m 27s for its value to match its cost ( 800 ). The buffs received follow the scaling of Golden Statue buffs at the time the egg is hatched. The buffs increase in value after 10 minutes of match duration, and then again after 30 minutes. It does not provide buffs in testing modes.",
+      "Trivia": "Golden Goose Egg is the first consumable item added to Deadlock . The item's name is a reference to the Aesop's Fable The Goose that Laid the Golden Eggs ."
+    }
+  },
+  "mystic_burst": {
+    "name": "Mystic Burst",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_magic_burst",
+    "wiki_url": "https://deadlock.wiki/Mystic_Burst",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Charges up over time with bonus spirit damage , causing abilities dealing more than 80 damage to deal additional damage.",
+          "stats": [
+            {
+              "value": "40",
+              "label": "Bonus Damage",
+              "text": "40 Bonus Damage"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Mystic Burst uses Charge-Up Heroes with Spirit Lifesteal will heal from Mystic Burst's passive effect triggering. A small lightning shock visual is applied to the enemy hero when it is hit by Mystic Burst's passive effect. When the target is hit with spirit damage , the damage value which is compared against the triggering threshold is the base damage value prior to any increases or decreases from damage amp, damage reduction, spirit resistance, and spirit resistance reduction. Damage amp and spirit resist reduction will not help you in achieving the damage threshold to trigger the passive. Damage reduction and the target's spirit resistance will not prevent the passive from triggering when it otherwise would. While the tooltip only specifies 'Abilities', only Spirit Damage will activate Mystic Burst. Abilities dealing weapon damage - such as Venator 's Consecrating Grenade or Viscous ' Puddle Punch - will not activate Mystic Burst. The additional damage, and the ability which triggered the additional damage, are applied to the target as separate instances of damage. The additional damage from Mystic Burst is dealt after the original spell damage."
+    }
+  },
+  "mystic_expansion": {
+    "name": "Mystic Expansion",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_magic_reach",
+    "wiki_url": "https://deadlock.wiki/Mystic_Expansion",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Imbue an ability to increase its range and effect radius .",
+          "stats": [
+            {
+              "value": "+20%",
+              "label": "Ability Range",
+              "text": "+20% Ability Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia and Gallery": "This item was previously named Mystic Reach . Mystic Expansion was one of several items to feature in promotional posters around the Map . Poster for Mystic Reach Comparing the Slice and Dice ability distance of a Shiv with Mystic Expansion and one without."
+    }
+  },
+  "mystic_regeneration": {
+    "name": "Mystic Regeneration",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_mystic_regeneration",
+    "wiki_url": "https://deadlock.wiki/Mystic_Regeneration",
+    "base": {
+      "passives": [
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Dealing spirit damage to enemy Heroes grants you Bonus regeneration . Stacks when dealing damage to different heroes.",
+          "stats": [
+            {
+              "value": "4",
+              "label": "HP/s Regeneration",
+              "text": "4 HP/s Regeneration"
+            },
+            {
+              "value": "7s",
+              "label": "Regeneration Duration",
+              "text": "7s Regeneration Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "rusted_barrel": {
+    "name": "Rusted Barrel",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_withering_whip",
+    "wiki_url": "https://deadlock.wiki/Rusted_Barrel",
+    "base": {
+      "passives": [
+        "+60 Bonus Health",
+        "+0.5m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "16s",
+          "description": "Target an enemy to reduce their Fire Rate and Bullet Resistance .",
+          "stats": [
+            {
+              "value": "-32%",
+              "label": "Fire Rate Conditional",
+              "text": "-32% Fire Rate Conditional"
+            },
+            {
+              "value": "-8%",
+              "label": "Bullet Resist Conditional",
+              "text": "-8% Bullet Resist Conditional"
+            },
+            {
+              "value": "32m",
+              "label": "Cast Range",
+              "text": "32m Cast Range"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Trivia": "It was previously named Withering Whip ."
+    }
+  },
+  "spirit_strike": {
+    "name": "Spirit Strike",
+    "category": "Spirit",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_acolytes_glove",
+    "wiki_url": "https://deadlock.wiki/Spirit_Strike",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": "8s",
+          "description": "When you perform a Light or Heavy Melee attack against a hero, deal extra spirit damage with the attack and reduce the target's Spirit Resist . Cooldown is 2x longer for Light Melee hits.",
+          "stats": [
+            {
+              "value": "40",
+              "label": "Spirit Damage",
+              "text": "40 Spirit Damage",
+              "scaling": 0.37,
+              "scales_with": "Spirit Power",
+              "raw": "40 base + 0.37 x Spirit Power"
+            },
+            {
+              "value": "-6%",
+              "label": "Spirit Resist Conditional",
+              "text": "-6% Spirit Resist Conditional"
+            },
+            {
+              "value": "6s",
+              "label": "Duration",
+              "text": "6s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "arcane_surge": {
+    "name": "Arcane Surge",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_arcane_surge",
+    "wiki_url": "https://deadlock.wiki/Arcane_Surge",
+    "base": {
+      "passives": [
+        "+1 Stamina",
+        "+12% Stamina Recovery"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "After you Dash-Jump , the next ability you use within ArcaneSurgeWindows will have bonus Range, Duration, and Spirit Power .",
+          "stats": [
+            {
+              "value": "+12%",
+              "label": "Ability Range Conditional",
+              "text": "+12% Ability Range Conditional"
+            },
+            {
+              "value": "+15%",
+              "label": "Ability Duration Conditional",
+              "text": "+15% Ability Duration Conditional"
+            },
+            {
+              "value": "+20",
+              "label": "Spirit Power Conditional",
+              "text": "+20 Spirit Power Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Cast Window",
+              "text": "7s Cast Window"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Items and passive abilities cannot benefit from the conditional buff - they will not gain additional spirit power, duration, or range. The buff which provides the player with the conditional ability range, ability duration, and spirit power lasts for 7 seconds. The first ability cast after gaining the buff will consume the buff. The conditional ability range and ability duration are snapshot on ability use. The conditional spirit power is tied to the 7 second timer of the conditional buff. The +20 spirit power will only be available for 7 seconds after the player initially gains the conditional buff. Examples: 6 seconds after gaining the conditional buff, Vindicta uses Assassinate . This consumes the buff, and applies +20 spirit power to Assassinate 's damage. 6 seconds after gaining the conditional buff, Seven uses Lightning Ball . The buff is consumed. The Lightning Ball gains +15% ability duration and +12% ability range. The Lightning Ball gains +20 spirit power for 1 second only. For the rest of its duration, it does not benefit from +20 spirit power. 6 seconds after gaining the conditional buff, Seven uses Power Surge . The buff is consumed. Power Surge gains +15% ability duration and +12% ability range. Power Surge 's damage benefits from +20 spirit power for 1 second only. For the rest of its duration, the damage does not benefit from +20 spirit power. Power Surge 's total duration scales natively with spirit power at time of cast. The additional duration due to the +20 spirit power is snapshot on cast, and is not lost when the 7s conditional buff is consumed."
+    }
+  },
+  "bullet_resist_shredder": {
+    "name": "Bullet Resist Shredder",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_bullet_resist_shredder",
+    "wiki_url": "https://deadlock.wiki/Bullet_Resist_Shredder",
+    "base": {
+      "passives": [
+        "+9% Bullet Resist",
+        "+9% Weapon Damage"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Reduces Bullet Resist on enemies when you deal spirit damage .",
+          "stats": [
+            {
+              "value": "-10%",
+              "label": "Bullet Resist Conditional",
+              "text": "-10% Bullet Resist Conditional"
+            },
+            {
+              "value": "8s",
+              "label": "Duration",
+              "text": "8s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "This is not a stacking effect, repeated applications will refresh the duration of the debuff. The debuff can be utilized by other players. Teammates can benefit from this debuff."
+    }
+  },
+  "cold_front": {
+    "name": "Cold Front",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_cold_front",
+    "wiki_url": "https://deadlock.wiki/Cold_Front",
+    "base": {
+      "passives": [
+        "+6% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "25s",
+          "description": "Release an expanding ice blast that deals spirit damage and Slows targets it hits.",
+          "stats": [
+            {
+              "value": "95",
+              "label": "Damage",
+              "text": "95 Damage",
+              "scaling": 0.47,
+              "scales_with": "Spirit Power",
+              "raw": "95 base + 0.47 x Spirit Power"
+            },
+            {
+              "value": "-60%",
+              "label": "Move Speed Conditional",
+              "text": "-60% Move Speed Conditional"
+            },
+            {
+              "value": "4s",
+              "label": "Duration",
+              "text": "4s Duration"
+            },
+            {
+              "value": "10m",
+              "label": "End Radius",
+              "text": "10m End Radius"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "The wave expands out from the hero, reaching the maximum radius after about a second. The damage and effect is applied to enemies when the wave hits them, making it possible to be avoided if the hero is fast enough."
+    }
+  },
+  "compress_cooldown": {
+    "name": "Compress Cooldown",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_magic_tempo",
+    "wiki_url": "https://deadlock.wiki/Compress_Cooldown",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Imbue an ability to reduce its Cooldown .",
+          "stats": [
+            {
+              "value": "+18%",
+              "label": "Ability Cooldown Reduction",
+              "text": "+18% Ability Cooldown Reduction"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "If Compress Cooldown is imbued on Sinclair 's Audience Participation , it does not reduce the cooldown of copied ultimates, only the default cooldown of the ability.",
+      "Trivia and Gallery": "This item was previously named Improved Cooldown. Compress Cooldown was one of several items to feature in promotional posters around the Map . Poster for Improved Cooldown Seven 's Storm Cloud ability cooldown after casting, one without Cooldown Reduction (top), and one with Compress Cooldown (bottom)."
+    }
+  },
+  "duration_extender": {
+    "name": "Duration Extender",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_arcane_extension",
+    "wiki_url": "https://deadlock.wiki/Duration_Extender",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Imbue an ability to increase its Duration .",
+          "stats": [
+            {
+              "value": "+22%",
+              "label": "Ability Duration",
+              "text": "+22% Ability Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "improved_spirit": {
+    "name": "Improved Spirit",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_soaring_spirit",
+    "wiki_url": "https://deadlock.wiki/Improved_Spirit",
+    "base": {
+      "passives": [
+        "+18 Spirit Power",
+        "+1.5 Out of Combat Regen"
+      ],
+      "components": []
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "mystic_slow": {
+    "name": "Mystic Slow",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_magic_slow",
+    "wiki_url": "https://deadlock.wiki/Mystic_Slow",
+    "base": {
+      "passives": [
+        "+50 Bonus Health",
+        "+0.75m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "When the target takes spirit damage , they have their Move Speed reduced.",
+          "stats": [
+            {
+              "value": "-30%",
+              "label": "Move Speed Conditional",
+              "text": "-30% Move Speed Conditional"
+            },
+            {
+              "value": "-12%",
+              "label": "Dash Distance Conditional",
+              "text": "-12% Dash Distance Conditional"
+            },
+            {
+              "value": "2s",
+              "label": "Duration",
+              "text": "2s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "mystic_vulnerability": {
+    "name": "Mystic Vulnerability",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_magic_vulnerability",
+    "wiki_url": "https://deadlock.wiki/Mystic_Vulnerability",
+    "base": {
+      "passives": [
+        "+8% Spirit Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "When an enemy takes spirit damage , they have their spirit resist reduced.",
+          "stats": [
+            {
+              "value": "-8%",
+              "label": "Spirit Resist Conditional",
+              "text": "-8% Spirit Resist Conditional"
+            },
+            {
+              "value": "7s",
+              "label": "Duration",
+              "text": "7s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Unlike Escalating Exposure , Mystic Vulnerability does not cause a stacking effect. Hitting the enemy with additional spirit damage after the debuff has been applied will only refresh the duration. Escalating Exposure's debuff takes priority over the Mystic Vulnerability debuff, so if two players have each of these items they will not stack together on the same target."
+    }
+  },
+  "quicksilver_reload": {
+    "name": "Quicksilver Reload",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_quick_silver",
+    "wiki_url": "https://deadlock.wiki/Quicksilver_Reload",
+    "base": {
+      "passives": [],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "Your imbued ability charges up over time with bonus spirit damage , bonus fire rate , and reloads bullets on use.",
+          "stats": [
+            {
+              "value": "44",
+              "label": "Damage",
+              "text": "44 Damage",
+              "scaling": 0.16,
+              "scales_with": "Spirit Power",
+              "raw": "44 base + 0.16 x Spirit Power"
+            },
+            {
+              "value": "+10%",
+              "label": "Fire Rate",
+              "text": "+10% Fire Rate"
+            },
+            {
+              "value": "100%",
+              "label": "Bullets Reloaded",
+              "text": "100% Bullets Reloaded"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Quicksilver Reload uses Charge-Up . Quicksilver Reload's bonus Spirit Damage will only trigger when the imbued ability first deals Weapon Damage or Spirit Damage to the target. If the initial damage is reduced to 0 (rounded down) or only deals Pure Damage (i.e. Lady Geist 's Soul Exchange ), Quicksilver Reload's bonus Spirit Damage is not applied. Abilities that do not deal damage still trigger the instant reload and bonus Fire Rate effects. The passive buff has a fixed duration of 12 seconds and is not affected by cooldown reduction.",
+      "Notable Interactions": "Heroes with long reload times and quick-charging or multi-charge abilities can make good usage of Quicksilver: McGinnis with multiple turret charges Infernus with multiple Napalm charges Haze who benefits from maintaining Fixation stacks on targeted enemies Vindicta Crow Familiar has a short cooldown after second upgrade Mo & Krill Scorn has a short cooldown and heals a percent of damage dealt"
+    }
+  },
+  "slowing_hex": {
+    "name": "Slowing Hex",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_containment",
+    "wiki_url": "https://deadlock.wiki/Slowing_Hex",
+    "base": {
+      "passives": [
+        "+0.5m Sprint Speed"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "27s",
+          "description": "Slows movement of enemy target. Also Silences their movement-based items and abilities . Increases the target's gravity. Does not affect target's stamina usage.",
+          "stats": [
+            {
+              "value": "-20%",
+              "label": "Move Speed Conditional",
+              "text": "-20% Move Speed Conditional"
+            },
+            {
+              "value": "-30%",
+              "label": "Dash Distance Conditional",
+              "text": "-30% Dash Distance Conditional"
+            },
+            {
+              "value": "25m",
+              "label": "Cast Range",
+              "text": "25m Cast Range"
+            },
+            {
+              "value": "3.5s",
+              "label": "Duration",
+              "text": "3.5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {
+      "Notes": "Slowing Hex sets a player's gravity to 120% (makes them heavier), regardless of their base gravity. This especially affects Celeste and Ivy , who have innate gravity reduction. Slowing Hex does not disable passive effects such as Vyper 's Slither (though it appears visually as though it was disabled). The Doorman 's Doorway and Mo & Krill 's Burrow are not affected by Slowing Hex.",
+      "Hero abilities silenced by Slowing Hex": "Abrams - Shoulder Charge and Seismic Impact Apollo - Disengaging Sigil , Flawless Advance , and Itani Lo Sahn Billy - Rising Ram Calico - Leaping Slash , Ava , and Return to Shadows Drifter - Stalker's Mark 's second activation Ambush (activating the ability isn't silenced) Dynamo - Quantum Entanglement Grey Talon - Rain of Arrows Holliday - Bounce Pad Infernus - Flame Dash Ivy - Air Drop Kelvin - Ice Path Lash - Grapple Mina - Sanguine Retreat Mirage - Dust Devil Pocket - Flying Cloak 's second activation Teleport (activating the ability isn't silenced) Rem - Tag Along Shiv - Slice and Dice and Killing Blow Silver - Boot Kick and Mauling Leap Sinclair - Spectral Assistant 's second activation Teleport (activating the ability isn't silenced) Vindicta - Flight Wraith - Project Mind Yamato - Flying Slash",
+      "Items silenced by Slowing Hex": "Imbue Warp Stone Active Imbue Majestic Leap Active Imbue Phantom Strike Active Imbue Magic Carpet Active"
+    }
+  },
+  "spirit_sap": {
+    "name": "Spirit Sap",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_spirit_sap",
+    "wiki_url": "https://deadlock.wiki/Spirit_Sap",
+    "base": {
+      "passives": [
+        "+50 Bonus Health"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "18s",
+          "description": "Target an enemy to reduce their Spirit Resist and Spirit Power .",
+          "stats": [
+            {
+              "value": "-9%",
+              "label": "Spirit Resist Conditional",
+              "text": "-9% Spirit Resist Conditional"
+            },
+            {
+              "value": "-30",
+              "label": "Spirit Power",
+              "text": "-30 Spirit Power"
+            },
+            {
+              "value": "12s",
+              "label": "Duration",
+              "text": "12s Duration"
+            },
+            {
+              "value": "40m",
+              "label": "Cast Range",
+              "text": "40m Cast Range"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "suppressor": {
+    "name": "Suppressor",
+    "category": "Spirit",
+    "cost_souls": 1600,
+    "tier": 2,
+    "codename": "upgrade_suppressor",
+    "wiki_url": "https://deadlock.wiki/Suppressor",
+    "base": {
+      "passives": [
+        "+6 Spirit Power",
+        "+8% Bullet Resist"
+      ],
+      "components": [
+        {
+          "kind": "passive",
+          "header": "Passive",
+          "cooldown": null,
+          "description": "When you deal spirit damage to enemies, you also reduce their Fire Rate .",
+          "stats": [
+            {
+              "value": "-28%",
+              "label": "Fire Rate Conditional",
+              "text": "-28% Fire Rate Conditional"
+            },
+            {
+              "value": "5s",
+              "label": "Duration",
+              "text": "5s Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  },
+  "grit": {
+    "name": "Grit",
+    "category": "Vitality",
+    "cost_souls": 800,
+    "tier": 1,
+    "codename": "upgrade_grit",
+    "wiki_url": "https://deadlock.wiki/Grit",
+    "base": {
+      "passives": [
+        "+1 Out of Combat Regen"
+      ],
+      "components": [
+        {
+          "kind": "active",
+          "header": "Active",
+          "cooldown": "60s",
+          "description": "Gain a Barrier for a short duration.",
+          "stats": [
+            {
+              "value": "200",
+              "label": "Barrier Conditional",
+              "text": "200 Barrier Conditional"
+            },
+            {
+              "value": "4s",
+              "label": "Barrier Duration",
+              "text": "4s Barrier Duration"
+            }
+          ]
+        }
+      ]
+    },
+    "descriptions": [],
+    "sections": {}
+  }
+}

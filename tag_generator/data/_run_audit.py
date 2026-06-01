@@ -26,7 +26,7 @@ ITEMS_DIR = os.path.join(DATA, 'items')
 
 AUDIT_THRESHOLD = 0.15   # only emit a row when |diff| >= this, or one side is missing
 BIG_DIFF = 0.6           # |diff| above this defaults the Apply? box to unchecked
-ROUND_LABEL = 'Round 10'
+ROUND_LABEL = 'Round 11'
 
 # ── parse ─────────────────────────────────────────────────────────────────────
 def parse_float(cell):
@@ -178,12 +178,31 @@ def main():
             a('### %s (`%s`, T%s %s)' % (it['name'], it['nname'], it['tier'], it['category']))
             a('Path: `data/items/%s.json`' % it['nname'])
             a('')
-            a('| Calc tag | JSON current | AI blended | Diff | Suggested action | Apply? |')
-            a('|---|---|---|---|---|---|')
-            for tag, js_s, ai_s, diff, action, apply in out_rows:
+            # Build columns padded to common widths so the raw markdown is readable.
+            # Markdown renderers still render fine — extra spaces are cosmetic.
+            headers = ('Calc tag', 'JSON current', 'AI blended', 'Diff', 'Suggested action', 'Apply?')
+            body_cells = []
+            for tag, js_s, ai_s, diff, action, apply_ in out_rows:
                 sgn = '+' if diff >= 0 else ''
-                a('| `%s` | %s | %s | %s%.2f | %s | `%s` |' % (
-                    tag, js_s, ai_s, sgn, diff, action, apply))
+                body_cells.append((
+                    '`%s`' % tag,
+                    js_s,
+                    ai_s,
+                    '%s%.2f' % (sgn, diff),
+                    action,
+                    '`%s`' % apply_,
+                ))
+            widths = [len(h) for h in headers]
+            for row in body_cells:
+                for i, cell in enumerate(row):
+                    if len(cell) > widths[i]:
+                        widths[i] = len(cell)
+            def fmt_row(cells):
+                return '| ' + ' | '.join(cells[i].ljust(widths[i]) for i in range(len(cells))) + ' |'
+            a(fmt_row(headers))
+            a('|' + '|'.join('-' * (w + 2) for w in widths) + '|')
+            for row in body_cells:
+                a(fmt_row(row))
             a('')
 
     # empty cross-tier checklist
