@@ -25,7 +25,7 @@
       "debuff_resistance": null,
       "bullet_proc": null,
       "bullet_evasion": null,
-      "fire_rate": null,
+      "fire_rate": 0.6,
       "fire_rate_slow": null,
       "aoe_cluster": null,
       "close_range": null,

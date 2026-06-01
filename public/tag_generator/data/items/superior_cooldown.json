@@ -9,7 +9,7 @@
   ],
   "values": {
     "playstyle_score": {
-      "ability_spam": 1.0,
+      "ability_spam": 1.3,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -62,13 +62,13 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 0.5,
+      "multi_ability_focus": 1.5,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.5,
+      "self_heal": 0.1,
       "shield": null,
       "silence": null,
       "single_ability_focus": 0.5,
@@ -90,7 +90,7 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": null,
-      "continous_heal": 0.5
+      "continous_heal": 0.1
     }
   },
   "wiki_url": "https://deadlock.wiki/Superior_Cooldown",

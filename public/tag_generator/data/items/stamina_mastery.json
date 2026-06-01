@@ -43,9 +43,9 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 0.75,
-      "escape": 1.25,
-      "farmer": 0.4,
+      "engage": 1.4,
+      "escape": 2.0,
+      "farmer": 1.0,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -81,7 +81,7 @@
       "silence": null,
       "single_ability_focus": null,
       "single_target": null,
-      "small_hitbox": null,
+      "small_hitbox": 1.0,
       "spawn_minions": null,
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
@@ -98,7 +98,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 2.25
+      "vertical_mobility": 1.5
     }
   },
   "wiki_url": "https://deadlock.wiki/Stamina_Mastery",

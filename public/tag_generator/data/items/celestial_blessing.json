@@ -7,7 +7,7 @@
   "values": {
     "playstyle_score": {
       "aerial": null,
-      "ally_buff": 0.25,
+      "ally_buff": 1.5,
       "anti_heal": null,
       "aoe_cluster": null,
       "bullet_damage": null,
@@ -17,7 +17,7 @@
       "bullet_resistance": null,
       "burst_damage": null,
       "burst_resistance": 0.1,
-      "cc_resist": null,
+      "cc_resist": 1.1,
       "close_range": null,
       "continuous_damage": null,
       "continuous_resistance": 0.15,
@@ -41,14 +41,14 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": 0.15,
-      "self_heal": 0.75,
+      "self_heal": 1.2,
       "shield": null,
       "silence": null,
       "spirit_damage": null,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
       "stun": null,
-      "team_heal": 1.15,
+      "team_heal": 1.5,
       "vertical_mobility": 0.45,
       "headshot_damage": null,
       "spirit_proc": null,
@@ -63,7 +63,7 @@
       "close_to_team": null,
       "away_from_team": null,
       "spawn_minions": null,
-      "assist_importance": 1.15,
+      "assist_importance": 1.5,
       "counter_importance": null,
       "ult_focused": null,
       "spirit_burst_damage": null,
@@ -77,7 +77,8 @@
       "damage_sponge": 0.25,
       "anti_air": null,
       "trap_block_obstruct": null,
-      "displace": null
+      "displace": null,
+      "burst_heal": 1.5
     }
   },
   "wiki_url": "https://deadlock.wiki/Celestial_Blessing"

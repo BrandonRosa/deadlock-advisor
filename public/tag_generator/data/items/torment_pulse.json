@@ -9,7 +9,7 @@
       "aerial": -0.1,
       "ally_buff": null,
       "anti_heal": null,
-      "aoe_cluster": null,
+      "aoe_cluster": 0.5,
       "bullet_damage": null,
       "bullet_evasion": null,
       "bullet_proc": null,

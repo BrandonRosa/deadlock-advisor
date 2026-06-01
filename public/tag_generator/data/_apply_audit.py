@@ -7,8 +7,9 @@ Reads the `# Audit:` section, walks each per-item table, and for every row:
   [<num>]  -> write that exact number, overriding the AI suggestion
   [ ]      -> skip
 
-Backs up data/items/ to a timestamped sibling directory before touching anything.
-Atomic per-file via temp + os.replace. Stops at a configurable cutoff item slug.
+Default = DRY RUN. Pass --write to actually modify JSON files (atomic via
+os.replace). On --write, backs up data/items/ to a timestamped sibling directory
+before touching anything.
 """
 import io, json, os, re, shutil, sys, time
 
@@ -17,7 +18,6 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 DATA = os.path.dirname(os.path.abspath(__file__))
 MD_PATH = os.path.join(DATA, 'item_interpretations.md')
 ITEMS_DIR = os.path.join(DATA, 'items')
-CUTOFF_SLUG = 'escalating_resilience'  # inclusive — process this item then stop
 
 # Cell parsing ------------------------------------------------------------------
 APPLY_RE = re.compile(r'`\[\s*(.*?)\s*\]`')
@@ -100,8 +100,6 @@ def parse_audit(md):
             'category': category,
             'rows': rows,
         }
-        if slug == CUTOFF_SLUG:
-            break
 
 # JSON write --------------------------------------------------------------------
 def write_json_atomic(path, obj):
@@ -115,7 +113,7 @@ def load_json(path):
     with io.open(path, encoding='utf-8') as f:
         return json.load(f)
 
-def apply_to_json(item):
+def apply_to_json(item, write):
     slug = item['slug']
     path = os.path.join(ITEMS_DIR, slug + '.json')
     if not os.path.exists(path):
@@ -132,7 +130,7 @@ def apply_to_json(item):
             continue
         if kind == 'accept':
             if row['action'] == 'drop':
-                if tag in ps:
+                if tag in ps and ps[tag] is not None:
                     ps[tag] = None
                     drops += 1
                 else:
@@ -144,7 +142,8 @@ def apply_to_json(item):
             ps[tag] = row['apply_num']
             overrides += 1
 
-    write_json_atomic(path, data)
+    if write and (bumps or drops or overrides):
+        write_json_atomic(path, data)
     return ('ok', bumps, drops, overrides, skipped)
 
 # Backup ------------------------------------------------------------------------
@@ -156,20 +155,25 @@ def backup_items():
 
 # Main --------------------------------------------------------------------------
 def main():
+    write = '--write' in sys.argv
     if not os.path.isdir(ITEMS_DIR):
         sys.exit('items dir not found: ' + ITEMS_DIR)
     md = io.open(MD_PATH, encoding='utf-8').read()
 
-    print('backing up items/ ...')
-    backup_dir = backup_items()
-    print('  -> ' + backup_dir)
+    if write:
+        print('backing up items/ ...')
+        backup_dir = backup_items()
+        print('  -> ' + backup_dir)
+    else:
+        backup_dir = None
+        print('DRY RUN (re-run with --write to apply)')
 
     items = list(parse_audit(md))
-    print('found %d audit items (cutoff after %s)' % (len(items), CUTOFF_SLUG))
+    print('found %d audit items' % len(items))
 
     totals = {'items': 0, 'missing': 0, 'bumps': 0, 'drops': 0, 'overrides': 0, 'skipped': 0}
     for it in items:
-        status, b, d, o, s = apply_to_json(it)
+        status, b, d, o, s = apply_to_json(it, write)
         if status == 'missing':
             print('  MISSING JSON: %s' % it['slug'])
             totals['missing'] += 1
@@ -181,7 +185,8 @@ def main():
 
     print('')
     print('done. items=%(items)d  bumps=%(bumps)d  drops=%(drops)d  overrides=%(overrides)d  skipped=%(skipped)d  missing=%(missing)d' % totals)
-    print('backup at %s — restore with: rmdir items && rename %s items' % (backup_dir, os.path.basename(backup_dir)))
+    if backup_dir:
+        print('backup at %s' % backup_dir)
 
 if __name__ == '__main__':
     main()

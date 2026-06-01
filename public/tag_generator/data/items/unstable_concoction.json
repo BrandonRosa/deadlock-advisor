@@ -8,8 +8,8 @@
   "values": {
     "playstyle_score": {
       "pure_damage": null,
-      "spirit_damage": null,
-      "bullet_damage": null,
+      "spirit_damage": 0.5,
+      "bullet_damage": 0.6,
       "melee_damage": null,
       "spirit_resistance": null,
       "bullet_resistance": null,

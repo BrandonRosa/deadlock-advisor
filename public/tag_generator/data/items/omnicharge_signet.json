@@ -50,7 +50,9 @@
       "scaling_late": null,
       "farmer": null,
       "self_buff": null,
-      "ally_buff": null
+      "ally_buff": null,
+      "spirit_burst_damage": 0.4,
+      "spirit_continuous_damage": 0.4
     }
   }
 }
