@@ -7540,7 +7540,90 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     return result;
   }
 
+  // FullSurvey: runs every active donor algorithm, then synthesizes a build
+  // whose item choice AND purchase phase reflect cross-algorithm consensus.
+  // Per item: freq = how many donors bought it; avgPhaseIdx = mean phase index
+  // they bought it in (so running soul total is approximated by phase position).
+  function runFullSurvey() {
+    const donorAlgos = (typeof BP_ALGO_OPTIONS !== 'undefined' && Array.isArray(BP_ALGO_OPTIONS))
+      ? BP_ALGO_OPTIONS.map(o => o.value).filter(a => a !== 'fullsurvey')
+      : ['greedy-phase','marginal','cosine','beam','expert','adaptive','fusion','architect','inverse','surge'];
+
+    const stats = Object.create(null);
+    let donorCount = 0;
+    for (const donorAlgo of donorAlgos) {
+      let donorResult;
+      try { donorResult = computeBuildPath(b, donorAlgo); }
+      catch (_e) { continue; }
+      if (!donorResult || !donorResult.length) continue;
+      donorCount++;
+      for (let pIdx = 0; pIdx < donorResult.length; pIdx++) {
+        const ph = donorResult[pIdx];
+        for (const ch of (ph.changes || [])) {
+          if (ch.action === 'sell' || !ch.key) continue;
+          const s = stats[ch.key] || (stats[ch.key] = { count: 0, totalPhaseIdx: 0 });
+          s.count++;
+          s.totalPhaseIdx += pIdx;
+        }
+      }
+    }
+
+    const freqMap = Object.create(null);
+    const avgPhaseIdxMap = Object.create(null);
+    if (donorCount > 0) {
+      for (const k in stats) {
+        freqMap[k] = stats[k].count / donorCount;
+        avgPhaseIdxMap[k] = stats[k].totalPhaseIdx / stats[k].count;
+      }
+    }
+
+    const surveyScorer = (k, it, phaseName) => {
+      const baseScore = bpScore(it, phaseName);
+      const freq = freqMap[k] || 0;
+      const freqMult = freq > 0 ? (1 + freq * 2.5) : 0.25;
+      let alignMult = 1.0;
+      if (donorCount > 0 && avgPhaseIdxMap[k] != null) {
+        const curIdx = BUILD_PHASES.findIndex(p => p.name === phaseName);
+        if (curIdx >= 0) {
+          const diff = Math.abs(curIdx - avgPhaseIdxMap[k]);
+          alignMult = diff < 0.5 ? 1.5 : diff < 1.5 ? 1.2 : diff < 2.5 ? 0.95 : 0.7;
+        }
+      }
+      return baseScore * freqMult * alignMult;
+    };
+
+    let owned = new Set();
+    let remainingBudget = 0;
+    const mainPhaseData = [];
+    for (let phaseIdx = 0; phaseIdx < BUILD_PHASES.length; phaseIdx++) {
+      const phase = BUILD_PHASES[phaseIdx];
+      remainingBudget += phase.addBudget;
+      const { changes, owned: newOwned, remaining: newBudget } =
+        greedyMain(owned, remainingBudget, phase.totalSlots, phase.minSlots, phase.name, phase.maxSells, surveyScorer, 2.0, phaseIdx);
+      owned = newOwned;
+      remainingBudget = newBudget;
+      mainPhaseData.push({ phase, changes });
+    }
+
+    const fullBPBlacklist = new Set();
+    mainPhaseData.forEach(({ changes }) => {
+      changes.forEach(ch => {
+        fullBPBlacklist.add(ch.key);
+        (ch.components || []).forEach(c => fullBPBlacklist.add(c));
+      });
+    });
+
+    const globalAssistUsed  = new Set();
+    const globalCounterUsed = new Set();
+    return mainPhaseData.map(({ phase, changes }) => {
+      const { changes: assistChanges  } = greedyAssist(fullBPBlacklist, globalAssistUsed,  phase.name, 'ally');
+      const { changes: counterChanges } = greedyAssist(fullBPBlacklist, globalCounterUsed, phase.name, 'enemy');
+      return { phase: phase.name, changes, assistChanges, counterChanges };
+    });
+  }
+
   // ── Phase loop ─────────────────────────────────────────────────────────────
+  if (algo === 'fullsurvey') return withAnchors(applyConstraintsFixup(runFullSurvey()));
   if (algo === 'expert')    return withAnchors(applyConstraintsFixup(runExpertGreedy()));
   if (algo === 'assassin')  return withAnchors(applyConstraintsFixup(runTargetAssassin()));
   if (algo === 'adaptive') return withAnchors(applyConstraintsFixup(runHybridRotation('adaptive')));
@@ -7816,7 +7899,7 @@ function bsConsensusVulnerability(b) {
 // Late vs Extra Late split: T4 items naturally map to Late via
 // bsMergedPhaseForTier. After Core is filled, the bottom half of remaining
 // T4 candidates is moved to Extra Late so the luxury slot has content.
-function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyOrder = [], focused = { allies: [], enemies: [] }) {
+function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyOrder = [], focused = { allies: [], enemies: [] }, labelFor = () => null) {
   const PHASES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
   const empty = () => Object.fromEntries(PHASES.map(p => [p, []]));
   const result = {
@@ -7829,6 +7912,11 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
     // strength, avgCost }. Phase placement is purely visual — items themselves
     // are still usable any time the player needs the counter.
     counterGroups: empty(),
+    // Items the Core walk pulled in but that get demoted to Optional because
+    // they're flagged as assist/counter items and the build doesn't value
+    // that role highly. Surfaced with a glow so the user knows they were
+    // intentionally relocated.
+    movedFromCore: new Set(),
   };
   const placed = new Set();
 
@@ -7864,73 +7952,188 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
   // in the phase whose CUMULATIVE budget threshold first covers the running
   // total. So Lane holds items whose cumulative cost ≤ 3200, Early holds
   // 3200–9600, Mid 9600–22400, Late 22400–42200, Extra Late 42200–80600.
-  // Items beyond the Extra Late ceiling overflow into Extra Late (capped by
-  // the padding pass below). Build Path stays the source of truth for what
-  // gets bought and in what order — the Build Screen just re-buckets by
-  // running souls so each phase row reflects what you actually have by then.
+  //
+  // Demotion + compaction: assist/counter-flagged items the build doesn't
+  // value are determined BEFORE the walk. They DON'T contribute to the
+  // running cost — so the next BP item compacts left into the slot they
+  // would've taken. Their Optional placement uses the cost they would've
+  // had, so the demoted item still appears in the row where you'd reach
+  // for it. Spike/signature items are exempt and stay in Core regardless.
   const phaseBudgets = PHASES.map(p => bsCorePhaseBudget(p));
   const cumBudgets = [];
   {
     let acc = 0;
     phaseBudgets.forEach(b => { acc += b; cumBudgets.push(acc); });
   }
-  let cumCost = 0;
+
+  // Determine demotion set up front using the build's role values + the
+  // per-item role scores + label exemptions.
+  const buildValsForRole = (() => {
+    try {
+      const hbList = MATCH.heroData?.[b.heroName]?.builds || null;
+      const own = hbList ? (hbList[b.buildIdx] || hbList.find(hb => hb.name === b.name)) : null;
+      if (hbList && own) return resolveBuildValues(own, hbList);
+    } catch {}
+    return b.values || {};
+  })();
+  const buildTagWeight = (tag) => Math.max(
+    Math.abs(buildValsForRole?.ally_weight?.[tag]  || 0),
+    Math.abs(buildValsForRole?.enemy_weight?.[tag] || 0),
+  );
+  const buildValuesRole = (role) => buildTagWeight(role) >= 0.5;
+  const itemRoleScore = (k, role) => bpItemMap[k]?.values?.playstyle_score?.[role] || 0;
+  const isExempt = (k) => {
+    const lbl = labelFor(k) || '';
+    return lbl.startsWith('spike') || lbl.startsWith('signature') || lbl.startsWith('sig-');
+  };
+  const ROLE_THRESH = 0.5;
+  const shouldDemote = (k) => {
+    if (isExempt(k)) return false;
+    if (requiredSet.has(k)) return false;  // required items never demote
+    const isCounter = itemRoleScore(k, 'counter_importance') >= ROLE_THRESH;
+    const isAssist  = itemRoleScore(k, 'assist_importance')  >= ROLE_THRESH;
+    if (isCounter && !buildValuesRole('counter_importance')) return true;
+    if (isAssist  && !buildValuesRole('assist_importance'))  return true;
+    return false;
+  };
+
+  // Two cumulative counters: cumOrig tracks the demoted item's would-have-
+  // been phase (full cost); cumCore tracks the compacted Core phase
+  // (skipping demoted items so later items shift left).
+  let cumOrig = 0;
+  let cumCore = 0;
   bpBuyOrder.forEach(({ key, cost }) => {
     if (placed.has(key) || blacklistSet.has(key)) return;
-    cumCost += cost || 0;
-    let phaseIdx = cumBudgets.findIndex(c => cumCost <= c);
-    if (phaseIdx === -1) phaseIdx = PHASES.length - 1;
+    const c = cost || 0;
+    cumOrig += c;
+    const origPhase = (() => {
+      let i = cumBudgets.findIndex(x => cumOrig <= x);
+      return i === -1 ? PHASES.length - 1 : i;
+    })();
     placed.add(key);
+    if (shouldDemote(key)) {
+      result.optional[PHASES[origPhase]].push(key);
+      result.movedFromCore.add(key);
+      return;
+    }
+    cumCore += c;
+    let phaseIdx = cumBudgets.findIndex(x => cumCore <= x);
+    if (phaseIdx === -1) phaseIdx = PHASES.length - 1;
     result.core[PHASES[phaseIdx]].push(key);
   });
 
+  // Component-phase map: for each item in Core, walk its full upgrade_from
+  // chain (recursive, so we catch T1 → T2 → T3 → T4 dependencies). Any item
+  // K in that chain CANNOT be placed past the parent's phase, because by the
+  // time you've bought the parent, K is consumed and unbuyable.
+  const fullUpgradeChain = (k, seen = new Set()) => {
+    if (seen.has(k)) return seen;
+    const item = bpItemMap[k];
+    if (!item) return seen;
+    (item.upgrades_from || []).forEach(c => {
+      if (seen.has(c)) return;
+      seen.add(c);
+      fullUpgradeChain(c, seen);
+    });
+    return seen;
+  };
+  const computeComponentOfPhase = () => {
+    const out = {};
+    PHASES.forEach((phase, idx) => {
+      result.core[phase].forEach(parentKey => {
+        const chain = fullUpgradeChain(parentKey);
+        chain.forEach(c => {
+          if (out[c] === undefined || idx < out[c]) out[c] = idx;
+        });
+      });
+    });
+    return out;
+  };
+
+  // Safety net first: required items the Build Path didn't surface get
+  // placed at their parent's phase (if they're a component of something in
+  // Core) or Extra Late as a fallback. Runs BEFORE the ceiling clamp so the
+  // clamp can fix the placement in one pass.
+  {
+    const componentOfPhase = computeComponentOfPhase();
+    allCandidates
+      .filter(it => requiredSet.has(it.key) && !placed.has(it.key))
+      .forEach(it => {
+        placed.add(it.key);
+        const parentIdx = componentOfPhase[it.key];
+        const idx = parentIdx !== undefined ? parentIdx : PHASES.length - 1;
+        result.core[PHASES[idx]].push(it.key);
+      });
+  }
+
   // Clamp required items to a phase ceiling so a hard constraint never gets
-  // pushed too far past its natural tier window. Ceilings (idx into PHASES):
+  // pushed too far past its natural tier window OR past a parent item that
+  // would consume it. Tier ceilings (idx into PHASES):
   //   T1 → Mid (2), T2 → Late (3), T3 → Extra Late (4), T4 → Extra Late (4).
+  // If the required item is in the upgrade chain of an item in Core, the
+  // parent's phase is a stricter cap.
   const requiredPhaseCeiling = (tier) => {
     if (tier <= 800)  return 2;  // T1 max Mid
     if (tier <= 1600) return 3;  // T2 max Late
     if (tier <= 3200) return 4;  // T3 max Extra Late
     return 4;                    // T4 max Extra Late
   };
-  requiredSet.forEach(reqKey => {
-    const tier = bpItemMap[reqKey]?.tier || 0;
-    const maxIdx = requiredPhaseCeiling(tier);
-    let currentIdx = -1;
-    for (let i = 0; i < PHASES.length; i++) {
-      if (result.core[PHASES[i]].includes(reqKey)) { currentIdx = i; break; }
-    }
-    if (currentIdx > maxIdx) {
-      result.core[PHASES[currentIdx]] = result.core[PHASES[currentIdx]].filter(k => k !== reqKey);
-      result.core[PHASES[maxIdx]].push(reqKey);
-    }
+  {
+    const componentOfPhase = computeComponentOfPhase();
+    requiredSet.forEach(reqKey => {
+      const tier = bpItemMap[reqKey]?.tier || 0;
+      let maxIdx = requiredPhaseCeiling(tier);
+      if (componentOfPhase[reqKey] !== undefined) {
+        maxIdx = Math.min(maxIdx, componentOfPhase[reqKey]);
+      }
+      let currentIdx = -1;
+      for (let i = 0; i < PHASES.length; i++) {
+        if (result.core[PHASES[i]].includes(reqKey)) { currentIdx = i; break; }
+      }
+      if (currentIdx === -1) return;  // not in Core (might be in Optional via demotion edge case)
+      if (currentIdx > maxIdx) {
+        result.core[PHASES[currentIdx]] = result.core[PHASES[currentIdx]].filter(k => k !== reqKey);
+        result.core[PHASES[maxIdx]].push(reqKey);
+      }
+    });
+  }
+
+  // Pad Late, then Extra Late, with highest-rated unbought T3/T4 items.
+  // Late often ends up sparse when Build Path's upgrades cost little net
+  // (most spend is already absorbed by Mid), so we fill its remaining soul
+  // budget before moving on to Extra Late's luxury slot. T1/T2 items aren't
+  // included since they don't belong in late-game rows.
+  [['Late', bsCorePhaseBudget('Late')], ['Extra Late', bsCorePhaseBudget('Extra Late')]]
+    .forEach(([phase, budget]) => {
+      let spent = result.core[phase]
+        .reduce((s, k) => s + (bpItemMap[k]?.tier || 0), 0);
+      allCandidates
+        .filter(it => !placed.has(it.key) && (it.tier || 0) > 1600 && (it.self || 0) > 0)
+        .sort((a, c) => boostedSelf(c) - boostedSelf(a))
+        .forEach(it => {
+          const cost = it.tier || 0;
+          if (spent + cost > budget) return;
+          placed.add(it.key);
+          result.core[phase].push(it.key);
+          spent += cost;
+        });
+    });
+
+  // Enforce component-before-upgrade ordering within each phase. Pass 1
+  // preserves BP order while walking, but the clamp + safety net + padding
+  // can append items out of sequence. Sorting by bpBuyOrder index restores
+  // the rule that a component (earlier in BP's buy sequence) always sits
+  // to the left of any item that upgrades from it. Items not in
+  // bpBuyOrder (padding / safety net) slot in at the end.
+  const bpOrderIdx = {};
+  bpBuyOrder.forEach(({ key }, idx) => { bpOrderIdx[key] = idx; });
+  PHASES.forEach(phase => {
+    result.core[phase].sort((a, c) => {
+      const ai = bpOrderIdx[a] ?? Infinity;
+      const ci = bpOrderIdx[c] ?? Infinity;
+      return ai - ci;
+    });
   });
-
-  // Pad Extra Late with highest-rated unbought T3/T4 items so the luxury row
-  // isn't empty when Build Path's plan finishes well under the 38400 soul cap.
-  // T1/T2 items wouldn't make sense as a luxury 6th-slot pick.
-  const extraLateBudget = bsCorePhaseBudget('Extra Late');
-  let extraLateSpent = result.core['Extra Late']
-    .reduce((s, k) => s + (bpItemMap[k]?.tier || 0), 0);
-  allCandidates
-    .filter(it => !placed.has(it.key) && (it.tier || 0) > 1600 && (it.self || 0) > 0)
-    .sort((a, c) => boostedSelf(c) - boostedSelf(a))
-    .forEach(it => {
-      const cost = it.tier || 0;
-      if (extraLateSpent + cost > extraLateBudget) return;
-      placed.add(it.key);
-      result.core['Extra Late'].push(it.key);
-      extraLateSpent += cost;
-    });
-
-  // Safety net: required items the Build Path skipped (shouldn't normally
-  // happen) — append to Extra Late so the hard constraint still shows up.
-  allCandidates
-    .filter(it => requiredSet.has(it.key) && !placed.has(it.key))
-    .forEach(it => {
-      placed.add(it.key);
-      result.core['Extra Late'].push(it.key);
-    });
 
   // Focus priority shift: items effective against a focused hero move LEFT
   // by one position within their phase (priority = earlier in the buy
@@ -8010,21 +8213,62 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
     placed.add(s.key);
   });
 
-  // Place each group in the phase of its CHEAPEST item so groups spread out
-  // across phase rows (an earliest-onset bucketing) instead of clumping by
-  // average cost. The Build Screen shows the group from the first phase you
-  // can begin investing in it.
-  Object.entries(groupsMap).forEach(([tag, g]) => {
+  // Trim by one: pick the smallest (lowest-strength) group, re-home each of
+  // its items into another group where the item still has a positive
+  // playstyle_score contribution against that group's tag. Items that can't
+  // be re-homed are dropped. Keeps the Counter column from looking too
+  // fragmented across many tiny single-item groups.
+  if (Object.keys(groupsMap).length > 1) {
+    const groupEntries = Object.entries(groupsMap);
+    const groupStrength = (tag) => vulnMap[tag]?.strength || 0;
+    groupEntries.sort((a, c) => groupStrength(c[0]) - groupStrength(a[0]));
+    const dropEntry = groupEntries[groupEntries.length - 1];
+    const dropTag = dropEntry[0];
+    const dropItems = dropEntry[1].items;
+    delete groupsMap[dropTag];
+    const remainingTags = Object.keys(groupsMap);
+    dropItems.forEach(itemKey => {
+      const ps = bpItemMap[itemKey]?.values?.playstyle_score || {};
+      let bestTag = null;
+      let bestScore = 0;
+      remainingTags.forEach(t => {
+        const v = (ps[t] || 0) * (vulnMap[t]?.strength || 0);
+        if (v > bestScore) { bestScore = v; bestTag = t; }
+      });
+      if (bestTag) {
+        const tier = bpItemMap[itemKey]?.tier || 0;
+        groupsMap[bestTag].items.push(itemKey);
+        groupsMap[bestTag].totalTier += tier;
+        groupsMap[bestTag].minTier = Math.min(groupsMap[bestTag].minTier, tier);
+      } else {
+        placed.delete(itemKey);  // item was claimed by dropped group — release
+      }
+    });
+  }
+
+  // Distribute groups evenly across the 5 phase rows by avg-cost rank: the
+  // cheapest group lands in Lane and the most expensive in Extra Late, with
+  // the rest spread between. Placement is purely visual — items remain
+  // usable any time the player wants the counter.
+  const allGroups = Object.entries(groupsMap).map(([tag, g]) => {
+    const avgCost = g.items.length ? g.totalTier / g.items.length : 0;
     const minCost = isFinite(g.minTier) ? g.minTier : 0;
-    const phase = bsMergedPhaseForTier(minCost);
     const vuln = vulnMap[tag];
-    result.counterGroups[phase].push({
+    return {
       tag,
       items: g.items,
       contributingEnemies: vuln?.contributingEnemies || [],
       strength: vuln?.strength || 0,
+      avgCost,
       minCost,
-    });
+    };
+  });
+  allGroups.sort((a, c) => a.avgCost - c.avgCost);
+  allGroups.forEach((g, idx) => {
+    const phaseIdx = allGroups.length <= 1
+      ? 0
+      : Math.round((idx * (PHASES.length - 1)) / (allGroups.length - 1));
+    result.counterGroups[PHASES[phaseIdx]].push(g);
   });
 
   // Sort groups within each phase by strength (most-pressing vuln first)
@@ -8041,6 +8285,32 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
       .sort((a, c) => (c.ally || 0) - (a.ally || 0))
       .slice(0, ASSIST_MAX_PER_PHASE)
       .forEach(it => { placed.add(it.key); result.assist[phase].push(it.key); });
+  });
+
+  // ── Pre-Pass 4: surface unplaced signature + anti-spike items in Optional ──
+  // Any item carrying a signature or anti-spike label that didn't end up in
+  // Core gets injected into its tier-natural Optional phase BEFORE the
+  // score-based Optional walk runs. No cap check here — these are
+  // higher-priority surfaces and we don't want them to lose a slot to a
+  // generic top-scored T-tier filler.
+  const isAntiLabel_ = (lbl) =>
+    lbl === 'anti' || lbl === 'anti-component'
+    || lbl === 'required-anti' || lbl === 'signature-anti';
+  const isSigLabel_ = (lbl) =>
+    lbl === 'signature' || lbl === 'sig-c' || lbl === 'signature-component';
+  const labelOptionalPriority = (k) => {
+    const lbl = labelFor(k) || '';
+    if (isAntiLabel_(lbl)) return 0;  // anti-spike first
+    if (isSigLabel_(lbl)) return 1;   // signature next
+    return 2;                         // everything else
+  };
+  allCandidates.forEach(it => {
+    if (placed.has(it.key)) return;
+    const lbl = labelFor(it.key) || '';
+    if (!isAntiLabel_(lbl) && !isSigLabel_(lbl)) return;
+    const natural = bsMergedPhaseForTier(it.tier || 0);
+    result.optional[natural].push(it.key);
+    placed.add(it.key);
   });
 
   // ── Pass 4: Optional bucketed by exact tier per phase ──
@@ -8068,6 +8338,14 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
         placed.add(it.key);
         result.optional[phase].push(it.key);
       });
+  });
+
+  // Final Optional ordering: anti-spike → signature → everything else.
+  // Stable-sort behavior on equal priority preserves the order Pass 4 / the
+  // pre-pass produced (which is score-descending for the generic items).
+  PHASES.forEach(phase => {
+    result.optional[phase].sort((a, c) =>
+      labelOptionalPriority(a) - labelOptionalPriority(c));
   });
 
   return result;
@@ -8103,15 +8381,24 @@ function bsPhaseMatchesTier(mergedPhaseLabel, tier) {
   return bsMergedPhaseForTier(tier) === mergedPhaseLabel;
 }
 
-// Quantity hint for the Optional section header. Derived from Core souls
-// spent relative to the phase's souls budget.
-function bsQuantityHint(coreItems, budget) {
+// Quantity hint for the Optional section header. Combines:
+//   • a base "extra picks" count from how much Core spent vs the phase budget
+//     (loose budget → 2, moderate → 1, tight → 0)
+//   • +1 per item demoted from Core into this Optional row, since those
+//     items still need to be picked up.
+// Output is always "Buy at least +N" when N > 0; falls back to
+// "Get if desperate" when nothing extra fits.
+function bsQuantityHint(coreItems, budget, movedCount = 0) {
   if (budget <= 0) return '';
   const spent = coreItems.reduce((s, k) => s + (bpItemMap[k]?.tier || 0), 0);
   const ratio = spent / budget;
-  if (ratio < 0.5)  return 'Buy 1–2 of these';
-  if (ratio < 0.85) return 'Buy 1 if you have extra';
-  return 'Get if desperate';
+  let base;
+  if (ratio < 0.5)       base = 2;
+  else if (ratio < 0.85) base = 1;
+  else                   base = 0;
+  const total = Math.min(3, base + movedCount);
+  if (total <= 0) return 'Get if desperate';
+  return `Buy at least ${total}`;
 }
 
 // Per-phase soul budget for Core selection. Reads BUILD_PHASES[i].addBudget
@@ -8171,12 +8458,14 @@ function bsRenderItemTile(key, labelFor, LABEL_META, opts) {
                          '--border';
 
   const focusHits = opts?.focusHitsByKey?.[key] || [];
+  const wasMovedFromCore = !!opts?.movedFromCore?.has(key);
   const tile = document.createElement('div');
   tile.className = 'bs-tile' +
     ` bs-tile--cat-${cat || 'misc'}` +
     ` bs-tile--tier-${tierIdx}` +
     (opts?.mutedTile ? ' bs-tile--muted' : '') +
-    (focusHits.length ? ' bs-tile--focus-hit' : '');
+    (focusHits.length ? ' bs-tile--focus-hit' : '') +
+    (wasMovedFromCore ? ' bs-tile--moved-from-core' : '');
   tile.style.setProperty('--bs-cat-color', `var(${catVar})`);
   if (meta) tile.classList.add(meta.klass);
   tile.title = (meta ? `${meta.title} — ` : '') + (it?.name || key);
@@ -8246,7 +8535,28 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
   const focused = bsGetFocused(heroName, buildIdx);
   const focusedCount = focused.allies.length + focused.enemies.length;
   const _focusKeyTb = `${heroName}::${buildIdx}`;
-  const hiddenColsTb = _bsHiddenCols[_focusKeyTb] || new Set();
+  // First-time default: hide Counter and/or Assist if this build doesn't
+  // value the corresponding role at ≥ 0.5 magnitude. After the user toggles
+  // a column, _bsHiddenCols[key] is set and we respect the user's choice.
+  if (!_bsHiddenCols[_focusKeyTb]) {
+    const hidden = new Set();
+    const bv = (() => {
+      try {
+        const hbList = MATCH.heroData?.[heroName]?.builds || null;
+        const own = hbList ? (hbList[buildIdx] || hbList.find(hb => hb.name === b.name)) : null;
+        if (hbList && own) return resolveBuildValues(own, hbList);
+      } catch {}
+      return b.values || {};
+    })();
+    const bvAbs = (tag) => Math.max(
+      Math.abs(bv?.ally_weight?.[tag]  || 0),
+      Math.abs(bv?.enemy_weight?.[tag] || 0),
+    );
+    if (bvAbs('counter_importance') < 0.5) hidden.add('counter');
+    if (bvAbs('assist_importance')  < 0.5) hidden.add('assist');
+    _bsHiddenCols[_focusKeyTb] = hidden;
+  }
+  const hiddenColsTb = _bsHiddenCols[_focusKeyTb];
   const colToggles = BS_COL_META.filter(c => c.hideable).map(c => `
     <label class="bs-col-toggle" title="Show / hide the ${c.label} column">
       <input type="checkbox" data-col="${c.key}" ${hiddenColsTb.has(c.key) ? '' : 'checked'}>
@@ -8302,7 +8612,7 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
 
   // Single global categorization — every item placed at most once across
   // all phases × {core, counter, assist, optional} sections.
-  const cat = bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyOrder, focused);
+  const cat = bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyOrder, focused, labelFor);
 
   // Per-item focus hit list: which focused heroes does this item meaningfully
   // counter (enemies) or support (allies)? Tiles with hits glow + show mini
@@ -8314,7 +8624,8 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
       if (hits.length) focusHitsByKey[it.key] = hits;
     });
   }
-  const tileOpts = (extra) => ({ ...(extra || {}), focusHitsByKey });
+  const movedFromCore = cat.movedFromCore || new Set();
+  const tileOpts = (extra) => ({ ...(extra || {}), focusHitsByKey, movedFromCore });
 
   // ── Layout: per-phase rows. Each row is a CSS grid of four cells
   //    (Core | Optional | Counter | Assist). On wide screens those cells sit
@@ -8374,7 +8685,8 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
     // Optional
     const optSection = document.createElement('div');
     optSection.className = 'bs-section bs-section--optional';
-    const hint = bsQuantityHint(coreItems, phaseBudget);
+    const movedCount = optionalItems.filter(k => movedFromCore.has(k)).length;
+    const hint = bsQuantityHint(coreItems, phaseBudget, movedCount);
     const optHeader = document.createElement('div');
     optHeader.className = 'bs-section-header';
     optHeader.innerHTML = `
@@ -8553,8 +8865,9 @@ function bsItemFocusHits(itemKey, focused) {
   const it = bpItemMap[itemKey];
   if (!it) return [];
   const ps = it.values?.playstyle_score || {};
-  const tagKeys = Object.keys(ps).filter(t => t !== 'assist_importance' && t !== 'counter_importance');
-  const THRESH = 0.04;
+  // Skip SKIP_TAGS the same way the rest of the calc does — assist/counter
+  // importance are scalar flags, not tag-vs-tag weight inputs.
+  const tagKeys = Object.keys(ps).filter(t => !SKIP_TAGS.has(t));
   const hits = [];
   const scoreVs = (heroKey, weightKey, sign) => {
     const hero = MATCH.heroData?.[heroKey];
@@ -8569,13 +8882,17 @@ function bsItemFocusHits(itemKey, focused) {
     tagKeys.forEach(t => { s += (ps[t] || 0) * (w[t] || 0); });
     return s * sign;
   };
+  // Match the Simulator's effectiveness thresholds: an item only counts as
+  // helping an ally if the assist score ≥ 1.0, and only counts as countering
+  // an enemy if the counter score ≥ 1.5. Anything below is "incidental" and
+  // shouldn't trigger the focus glow / mini-head overlay.
   (focused.allies || []).forEach(k => {
     const s = scoreVs(k, 'ally_weight', 1);
-    if (s > THRESH) hits.push({ key: k, side: 'ally', score: s });
+    if (s >= EFFECT_THRESH.ally.norm) hits.push({ key: k, side: 'ally', score: s });
   });
   (focused.enemies || []).forEach(k => {
     const s = scoreVs(k, 'enemy_weight', -1);
-    if (s > THRESH) hits.push({ key: k, side: 'enemy', score: s });
+    if (s >= EFFECT_THRESH.enemy.norm) hits.push({ key: k, side: 'enemy', score: s });
   });
   return hits;
 }
@@ -9081,6 +9398,7 @@ const BP_ALGO_OPTIONS = [
   { value: 'architect',    label: 'Architect (Path Planner)' },
   { value: 'inverse',      label: 'Inverse (Endgame Solver)' },
   { value: 'surge',        label: 'Surge (Power Spike)' },
+  { value: 'fullsurvey',   label: 'FullSurvey (CPU KILLER)' },
 ];
 
 const QA = {
