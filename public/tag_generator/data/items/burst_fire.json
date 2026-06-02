@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/burst_fire/burst_fire.png",
   "name": "Burst Fire",
   "normalized_name": "burst_fire",
@@ -34,7 +35,7 @@
       "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.1,
+      "cooldown_reduction": 0.15,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -42,11 +43,11 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.1,
+      "duration_dependant": 0.15,
       "engage": 0.8,
       "escape": null,
       "farmer": null,
-      "fire_rate": 1.3,
+      "fire_rate": 1.35,
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": 0.3,
@@ -62,6 +63,7 @@
       "horizontal_mobility": 0.4,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Burst_Fire",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Burst_Fire"
 }

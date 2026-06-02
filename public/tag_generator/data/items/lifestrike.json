@@ -6,6 +6,7 @@
   "image_path": "/resources/items/lifestrike/lifestrike.png",
   "name": "Lifestrike",
   "normalized_name": "lifestrike",
+  "remarks": "",
   "tier": 3200,
   "upgrades_from": [
     "melee_lifesteal"
@@ -45,12 +46,12 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 1.0,
+      "engage": 1,
       "escape": null,
       "farmer": 0.3,
       "fire_rate": null,
       "fire_rate_slow": null,
-      "grounded": 1.0,
+      "grounded": 1,
       "gun_burst_damage": null,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
@@ -60,18 +61,18 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.68,
+      "high_max_hp": 0.6,
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
-      "long_range": -1.0,
+      "long_range": -0.66,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": 1.25,
       "melee_resistance": null,
       "mid_range": -0.1,
-      "movement_slow": 1.3,
+      "movement_slow": 0.75,
       "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": null,
@@ -103,6 +104,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Lifestrike",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Lifestrike"
 }

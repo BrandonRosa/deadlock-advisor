@@ -1,5 +1,8 @@
 {
   "category": "Vitality",
+  "compare_to": [
+    "bullet_resilience"
+  ],
   "image_path": "/resources/items/warp_stone/warp_stone.png",
   "name": "Warp Stone",
   "normalized_name": "warp_stone",
@@ -8,7 +11,7 @@
   "values": {
     "playstyle_score": {
       "ability_spam": null,
-      "aerial": 0.4,
+      "aerial": 0.5,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
@@ -17,18 +20,21 @@
       "away_from_team": null,
       "bullet_damage": null,
       "bullet_evasion": null,
+      "bullet_lifesteal": null,
       "bullet_proc": null,
       "bullet_resist_shred": null,
       "bullet_resistance": 0.75,
       "burst_damage": null,
+      "burst_heal": null,
       "burst_resistance": null,
-      "cc_resist": 0.5,
+      "cc_resist": 0.66,
       "charge_dependant": null,
-      "close_range": 0.15,
+      "close_range": 0.35,
       "close_to_team": null,
+      "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.05,
+      "cooldown_reduction": 0.15,
       "counter_importance": 0.45,
       "damage_sponge": null,
       "debuff": null,
@@ -37,7 +43,7 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 1.0,
+      "engage": 1,
       "escape": 1.5,
       "farmer": null,
       "fire_rate": null,
@@ -58,15 +64,15 @@
       "interrupt": null,
       "large_hitbox": null,
       "long_range": 0.05,
-      "low_max_hp": 0.05,
+      "low_max_hp": 0.33,
       "magazine_size_dependant": null,
       "melee_damage": null,
       "melee_resistance": 0.75,
-      "mid_range": 0.1,
+      "mid_range": 0.25,
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
-      "range_extender_dependant": 0.05,
+      "range_extender_dependant": 0.15,
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
@@ -84,22 +90,16 @@
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
       "spirit_damage": null,
+      "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.05,
-      "vertical_mobility": 0.5,
-      "burst_heal": null,
-      "continous_heal": null,
-      "spirit_lifesteal": null,
-      "bullet_lifesteal": null
+      "ult_focused": 0.1,
+      "vertical_mobility": 0.75
     }
   },
-  "wiki_url": "https://deadlock.wiki/Warp_Stone",
-  "compare_to": [
-    "bullet_resilience"
-  ]
+  "wiki_url": "https://deadlock.wiki/Warp_Stone"
 }

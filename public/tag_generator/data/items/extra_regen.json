@@ -1,5 +1,6 @@
 {
   "category": "Vitality",
+  "compare_to": [],
   "image_path": "/resources/items/extra_regen/extra_regen.png",
   "name": "Extra Regen",
   "normalized_name": "extra_regen",
@@ -28,7 +29,7 @@
       "charge_dependant": null,
       "close_range": null,
       "close_to_team": null,
-      "continous_heal": 1.0,
+      "continous_heal": 1,
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": null,
@@ -73,7 +74,7 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 1.0,
+      "self_heal": 1.33,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
@@ -98,6 +99,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Extra_Regen",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Extra_Regen"
 }

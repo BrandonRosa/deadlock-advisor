@@ -64,7 +64,7 @@
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
-      "magazine_size_dependant": 0.9,
+      "magazine_size_dependant": 1,
       "melee_damage": null,
       "melee_resistance": null,
       "mid_range": null,

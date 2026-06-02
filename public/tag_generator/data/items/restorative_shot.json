@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/restorative_shot/restorative_shot.png",
   "name": "Restorative Shot",
   "normalized_name": "restorative_shot",
@@ -18,7 +19,7 @@
       "bullet_damage": 0.6,
       "bullet_evasion": null,
       "bullet_lifesteal": 0.66,
-      "bullet_proc": null,
+      "bullet_proc": 0.5,
       "bullet_resist_shred": null,
       "bullet_resistance": null,
       "burst_damage": null,
@@ -31,7 +32,7 @@
       "continous_heal": 0.4,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.05,
+      "cooldown_reduction": 0.15,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -59,6 +60,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Restorative_Shot",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Restorative_Shot"
 }

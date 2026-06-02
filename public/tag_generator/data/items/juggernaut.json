@@ -6,6 +6,7 @@
   "image_path": "/resources/items/juggernaut/juggernaut.png",
   "name": "Juggernaut",
   "normalized_name": "juggernaut",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "enduring_speed"
@@ -19,7 +20,7 @@
       "anti_heal": null,
       "aoe_cluster": null,
       "assist_importance": null,
-      "away_from_team": 0.2,
+      "away_from_team": 0.25,
       "bullet_damage": null,
       "bullet_evasion": 0.05,
       "bullet_lifesteal": null,
@@ -27,7 +28,7 @@
       "bullet_resist_shred": null,
       "bullet_resistance": 0.15,
       "burst_damage": null,
-      "burst_heal": 0.0,
+      "burst_heal": 0,
       "burst_resistance": null,
       "cc_resist": 1.2,
       "charge_dependant": null,
@@ -44,12 +45,12 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.15,
       "engage": 0.75,
       "escape": 1.1,
       "farmer": 0.6,
       "fire_rate": null,
-      "fire_rate_slow": 2.0,
+      "fire_rate_slow": 2,
       "grounded": 0.05,
       "gun_burst_damage": null,
       "gun_burst_proc": null,
@@ -60,11 +61,11 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.1,
+      "high_max_hp": 0.15,
       "horizontal_mobility": 1.1,
       "hybrid_damage_usage": null,
       "interrupt": null,
-      "large_hitbox": 0.1,
+      "large_hitbox": 0.5,
       "long_range": -0.1,
       "low_max_hp": -0.15,
       "magazine_size_dependant": null,
@@ -103,6 +104,5 @@
       "vertical_mobility": 0.15
     }
   },
-  "wiki_url": "https://deadlock.wiki/Juggernaut",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Juggernaut"
 }

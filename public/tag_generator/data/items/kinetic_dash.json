@@ -42,13 +42,13 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.15,
       "engage": 1.3,
       "escape": 0.8,
       "farmer": 0.6,
       "fire_rate": 1.1,
       "fire_rate_slow": null,
-      "grounded": 0.1,
+      "grounded": 0.25,
       "gun_burst_damage": 0.4,
       "gun_burst_proc": 0.05,
       "gun_burst_resistance": null,
@@ -68,7 +68,7 @@
       "magazine_size_dependant": 0.2,
       "melee_damage": null,
       "melee_resistance": null,
-      "mid_range": 0.33,
+      "mid_range": 0.5,
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
@@ -98,7 +98,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.2
+      "vertical_mobility": 0.66
     }
   },
   "wiki_url": "https://deadlock.wiki/Kinetic_Dash"

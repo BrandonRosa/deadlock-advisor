@@ -1,5 +1,10 @@
 {
   "category": "Vitality",
+  "compare_to": [
+    "mystic_vulnerability",
+    "toxic_bullets",
+    "improved_spirit"
+  ],
   "image_path": "/resources/items/healbane/healbane.png",
   "name": "Healbane",
   "normalized_name": "healbane",
@@ -11,9 +16,9 @@
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
-      "anti_heal": 2.0,
-      "aoe_cluster": 0.2,
-      "assist_importance": 0.6,
+      "anti_heal": 2,
+      "aoe_cluster": 0.33,
+      "assist_importance": 0.45,
       "away_from_team": null,
       "bullet_damage": null,
       "bullet_evasion": null,
@@ -27,7 +32,7 @@
       "cc_resist": null,
       "charge_dependant": null,
       "close_range": null,
-      "close_to_team": 0.1,
+      "close_to_team": 0.15,
       "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
@@ -39,7 +44,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.15,
       "engage": null,
       "escape": null,
       "farmer": null,
@@ -54,8 +59,8 @@
       "gun_continuous_resistance": null,
       "headshot_damage": null,
       "high_assist_count": 0.5,
-      "high_kill_count": 1.0,
-      "high_max_hp": 0.15,
+      "high_kill_count": 1,
+      "high_max_hp": 0.25,
       "horizontal_mobility": null,
       "hybrid_damage_usage": 0.1,
       "interrupt": null,
@@ -98,10 +103,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Healbane",
-  "compare_to": [
-    "mystic_vulnerability",
-    "toxic_bullets",
-    "improved_spirit"
-  ]
+  "wiki_url": "https://deadlock.wiki/Healbane"
 }

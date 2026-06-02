@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/hunters_aura/hunters_aura.png",
   "name": "Hunters Aura",
   "normalized_name": "hunters_aura",
@@ -27,7 +28,7 @@
       "cc_resist": null,
       "charge_dependant": null,
       "close_range": 1,
-      "close_to_team": 1.0,
+      "close_to_team": 1,
       "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
@@ -42,7 +43,7 @@
       "duration_dependant": null,
       "engage": 0.33,
       "escape": null,
-      "farmer": 0.1,
+      "farmer": 0.25,
       "fire_rate": null,
       "fire_rate_slow": 1.15,
       "grounded": null,
@@ -59,8 +60,9 @@
       "horizontal_mobility": 0.3,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
-      "long_range": -1,
+      "long_range": -0.66,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": null,
@@ -69,7 +71,7 @@
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
-      "range_extender_dependant": 0.05,
+      "range_extender_dependant": 0.15,
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Hunter%27s_Aura",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Hunter%27s_Aura"
 }

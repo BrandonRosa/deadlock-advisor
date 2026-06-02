@@ -3,13 +3,14 @@
   "image_path": "/resources/items/transcendent_cooldown/transcendent_cooldown.png",
   "name": "Transcendent Cooldown",
   "normalized_name": "transcendent_cooldown",
+  "remarks": "",
   "tier": 6400,
   "upgrades_from": [
     "superior_cooldown"
   ],
   "values": {
     "playstyle_score": {
-      "ability_spam": 2.0,
+      "ability_spam": 2,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -28,6 +29,7 @@
       "charge_dependant": null,
       "close_range": null,
       "close_to_team": null,
+      "continous_heal": 0.5,
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": 2,
@@ -66,13 +68,13 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 2.0,
+      "multi_ability_focus": 2,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.2,
+      "self_heal": 0.25,
       "shield": null,
       "silence": null,
       "single_ability_focus": 0.5,
@@ -93,10 +95,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "continous_heal": 0.5
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Transcendent_Cooldown",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Transcendent_Cooldown"
 }

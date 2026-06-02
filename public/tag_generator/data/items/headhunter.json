@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/headhunter/headhunter.png",
   "name": "Headhunter",
   "normalized_name": "headhunter",
@@ -34,7 +35,7 @@
       "continous_heal": 0.3,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.05,
+      "cooldown_reduction": 0.15,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -42,7 +43,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.1,
       "engage": 0.3,
       "escape": null,
       "farmer": null,
@@ -58,10 +59,11 @@
       "headshot_damage": 1.5,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 0.2,
+      "high_max_hp": 0.25,
       "horizontal_mobility": 0.2,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.15,
-      "lane_pusher": null
+      "vertical_mobility": 0.15
     }
   },
-  "wiki_url": "https://deadlock.wiki/Headhunter",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Headhunter"
 }

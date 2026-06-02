@@ -34,7 +34,7 @@
       "continous_heal": 0.1,
       "continuous_damage": 0.1,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.05,
+      "cooldown_reduction": 0.2,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -42,7 +42,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.15,
       "engage": null,
       "escape": null,
       "farmer": 0.05,
@@ -62,6 +62,7 @@
       "horizontal_mobility": 0.4,
       "hybrid_damage_usage": -0.2,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,8 +99,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Active_Reload"

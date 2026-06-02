@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/long_range/long_range.png",
   "name": "Long Range",
   "normalized_name": "long_range",
@@ -42,7 +43,7 @@
       "duration_dependant": null,
       "engage": null,
       "escape": null,
-      "farmer": 0.1,
+      "farmer": 0.45,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -59,13 +60,14 @@
       "horizontal_mobility": 0.33,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": 1.6,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": -0.05,
       "melee_resistance": null,
-      "mid_range": 0.45,
+      "mid_range": 0.25,
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
@@ -77,7 +79,7 @@
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
-      "single_target": 0.5,
+      "single_target": 0.4,
       "small_hitbox": null,
       "spawn_minions": null,
       "spirit_burst_damage": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Long_Range",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Long_Range"
 }

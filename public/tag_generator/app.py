@@ -369,6 +369,17 @@ def get_all_items():
     return jsonify(out)
 
 
+@app.route("/api/heroes/all")
+def get_all_heroes():
+    out = []
+    for f in sorted(HEROES_DIR.glob("*.json")):
+        try:
+            out.append(json.loads(f.read_text(encoding='utf-8')))
+        except Exception:
+            pass
+    return jsonify(out)
+
+
 @app.route("/api/baselines", methods=["GET"])
 def list_baselines():
     """List all individual baseline JSONs (one row per synthetic item).

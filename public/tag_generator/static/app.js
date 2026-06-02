@@ -533,8 +533,8 @@ function renderTagsTable() {
     tr.dataset.idx = String(idx);
     tr.innerHTML = `
       <td class="drag-cell"><span class="drag-handle" title="Drag to reorder">⠿</span></td>
-      <td><span class="tag-code-chip">${tag.code}</span></td>
-      <td>${tag.name}</td>
+      <td><span class="tag-code-chip tag-detail-link" title="View tag usage" draggable="false">${tag.code}</span></td>
+      <td><span class="tag-detail-link" title="View tag usage" draggable="false">${tag.name}</span></td>
       <td style="color:var(--cream)">${tag.short_label || ''}</td>
       <td style="color:var(--muted)">${tag.description || ''}</td>
       <td>
@@ -571,6 +571,9 @@ function renderTagsTable() {
     });
     tr.querySelector('.btn-icon.edit').addEventListener('click', () => openTagModal(tag));
     tr.querySelector('.btn-icon.del').addEventListener('click',  () => deleteTag(tag.code));
+    tr.querySelectorAll('.tag-detail-link').forEach(el => {
+      el.addEventListener('click', e => { e.stopPropagation(); openTagDetail(tag.code); });
+    });
     tbody.appendChild(tr);
   });
 }
@@ -2850,7 +2853,7 @@ const MATCH = {
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
-  bpAlgo: 'architect',     // 2026-05-13: defaulted after Architect v2 beat the field on sim-log replay
+  bpAlgo: 'spike2',        // 2026-06-02: defaulted to Spike Composer (explicit-pin unified algo)
   scoreFormula: 'v3',      // 2026-05-13: v3 (Target Focus) better matches player picks per win:good logs
   filter: { text: '', colors: [] },
   primedHero: null,  // when exactly 1 filtered result + Enter pressed → primed for 1/2/3 assignment
@@ -7886,6 +7889,827 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     return result;
   }
 
+  // ── Anchored (Candidate 1: unified algorithm) ──────────────────────────────
+  // Single-pass greedy with build-driven assist gate, soft/hard counter split,
+  // and upgrade marginal-score correction. Implementation of the plan
+  // "Anchored Greedy". See plans/check-online-for-the-wild-mochi.md.
+  //
+  //   1. Pin required items to their natural-tier phase (so spike items don't
+  //      drift). 2. Walk phases Lane→Extra Late, filling each phase's remaining
+  //      soul budget by picking the top-`scoreUnified` candidate each tick.
+  //   3. `scoreUnified` honors: assist gate (build-side `item_affinity.assist_importance`),
+  //      ally weighting only when build wants assists OR item is authored,
+  //      soft counter tailwind from enemy consensus, hard counter only when
+  //      gated by (authored || item fits || enemy strongly vulnerable), and
+  //      tier-aware upgrade marginal subtraction for owned components.
+  function runAnchored() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // ── Tuneable constants ──
+    const HARD_AFFINITY_THRESH  = 0.3;   // it.self ≥ this → item "fits the build"
+    const HARD_STRONG_CONSENSUS = 1.5;   // max(ps[t]·cons[t]) ≥ this → enemy genuinely vulnerable
+    const HARD_GATE_AUTHORED    = 1.5;
+    const HARD_GATE_FIT         = 1.0;
+    const HARD_GATE_STRONG      = 0.7;
+    const ASSIST_BOOST          = 1.25;
+    const MARGINAL_DECAY        = 2.5;   // (tierMult(comp)/tierMult(upg))^DECAY — higher = less subtraction
+    const SOFT_LIFT_SCALE       = 0.03;  // small "soft counter" tailwind on regular items
+    const HARD_LIFT_SCALE       = 0.08;  // meaningful but not dominant when gate opens
+    const COUNTER_BOOST         = 1.20;  // when build_counter ≥ 0.5
+    const MAX_BUYS_PER_PHASE    = 30;    // safety cap on the per-phase fill loop
+    // Extra Late's `addBudget` is 1,000,000 (effectively infinite) so we'd
+    // otherwise fill until MAX_BUYS_PER_PHASE. Cap to the in-game slot count.
+    const EXTRA_LATE_SLOT_CAP   = 12;    // matches BUILD_PHASES['Extra Late'].totalSlots
+
+    // ── Build assist & counter disposition (build-side gate) ──
+    // Reads the BUILD'S item_affinity for these role tags. Negative = the
+    // build actively doesn't want role-tagged items; 0..0.5 = weight down;
+    // ≥ 0.5 = boost. Required/signature items bypass both gates.
+    const buildAssist  = Number(rv?.item_affinity?.assist_importance  ?? 0);
+    const buildCounter = Number(rv?.item_affinity?.counter_importance ?? 0);
+
+    // ── Enemy consensus vulnerability vector ──
+    const vulnList = (typeof bsConsensusVulnerability === 'function')
+      ? bsConsensusVulnerability(b)
+      : [];
+
+    function softCounterLift(k) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const cap = Math.min(0.5, Math.max(0, ps.counter_importance || 0));
+      if (cap <= 0 || !vulnList.length) return 0;
+      let sum = 0;
+      for (const v of vulnList) sum += (ps[v.tag] || 0) * (v.strength || 0);
+      return sum * cap * SOFT_LIFT_SCALE;
+    }
+
+    function hardCounterLift(k, it) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const ci = ps.counter_importance || 0;
+      if (ci < COUNTER_TAG_THRESH) return 0;
+      if (!vulnList.length) return 0;
+
+      let sum = 0, maxTerm = 0;
+      for (const v of vulnList) {
+        const term = (ps[v.tag] || 0) * (v.strength || 0);
+        if (term > 0) {
+          sum += term;
+          if (term > maxTerm) maxTerm = term;
+        }
+      }
+      if (sum <= 0) return 0;
+
+      let gate;
+      if (requiredSet.has(k) || signatureSet.has(k))   gate = HARD_GATE_AUTHORED;
+      else if ((it.self || 0) >= HARD_AFFINITY_THRESH) gate = HARD_GATE_FIT;
+      else if (maxTerm >= HARD_STRONG_CONSENSUS)       gate = HARD_GATE_STRONG;
+      else return 0;   // blocked: off-topic AND enemy not strongly vulnerable
+      return sum * ci * gate * HARD_LIFT_SCALE;
+    }
+
+    // Returns -Infinity when the assist gate kills the item (build_assist < 0
+    // AND item has positive assist_importance AND item not authored).
+    // `ownedSet` enables the upgrade marginal correction; pass null on the
+    // recursive call (component scoring) to short-circuit infinite descent.
+    function scoreUnifiedInner(it, phaseName, ownedSet, depth) {
+      const k = it.key;
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const itemAssist  = ps.assist_importance  || 0;
+      const itemCounter = ps.counter_importance || 0;
+      const isAuthored = requiredSet.has(k) || signatureSet.has(k);
+
+      // Assist gate (item-tagged assist × build-side disposition)
+      let assistMult = 1.0;
+      if (itemAssist > 0 && !isAuthored) {
+        if (buildAssist < 0)   return -Infinity;
+        if (buildAssist < 0.5) assistMult = 0.5 + buildAssist;
+        else                   assistMult = ASSIST_BOOST;
+      }
+      // Counter gate (mirrors assist). If the build doesn't actively want
+      // counter items, drop or weight-down. Required/signature exempt.
+      let counterMult = 1.0;
+      if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
+        if (buildCounter < 0)   return -Infinity;
+        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;  // 0.5 .. 1.0
+        else                    counterMult = COUNTER_BOOST;
+      }
+
+      let s = it.self || 0;
+      if (isAuthored || buildAssist >= 0.5) s += 0.75 * (it.ally || 0);
+
+      s += softCounterLift(k);
+      s += hardCounterLift(k, it);
+
+      // Constraint multipliers — mirror itemBoostMult priority
+      if (requiredSet.has(k))           s *= REQ_MULT;
+      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
+      else if (signatureSet.has(k))     s *= SIG_MULT;
+      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+
+      s *= assistMult * counterMult;
+      const tier = bpItemMap[k]?.tier || 800;
+      s *= getPhaseTierMult(phaseName, tier);
+      s += confShift(k, phaseName);
+
+      // Upgrade stat-delta: subtract owned components, tier-rescaled so a
+      // T1 contributing to a T4 is debited less than a T3 contributing to T4.
+      if (ownedSet && depth < 1) {
+        const ownedComps = (bpItemMap[k]?.upgrades_from || []).filter(c => ownedSet.has(c));
+        if (ownedComps.length) {
+          const upgradeTm = tierMult(tier);
+          for (const c of ownedComps) {
+            const cIt = scoredMap[c];
+            if (!cIt) continue;
+            const compTm = tierMult(bpItemMap[c]?.tier || 800);
+            const ratio = compTm / Math.max(0.01, upgradeTm);
+            const compScore = scoreUnifiedInner(cIt, phaseName, null, depth + 1);
+            if (compScore === -Infinity) continue;
+            s -= compScore * Math.pow(ratio, MARGINAL_DECAY);
+          }
+        }
+      }
+      return s;
+    }
+    const scoreUnified = (it, phaseName, ownedSet) => scoreUnifiedInner(it, phaseName, ownedSet, 0);
+
+    // ── Walk state ──
+    let owned = new Set();
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const phaseBudgets = PHASE_NAMES.map(p => {
+      const bp = BUILD_PHASES.find(x => x.name === p);
+      return bp ? (bp.addBudget || 3200) : 3200;
+    });
+    const phaseSpent = PHASE_NAMES.map(() => 0);
+
+    function effCost(k) {
+      const tier = bpItemMap[k]?.tier || 0;
+      let cost = tier;
+      (bpItemMap[k]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+    function ownedAncestors(k) {
+      const out = new Set();
+      const stack = [...(bpItemMap[k]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+    function placeBuy(phaseName, idx, key) {
+      const cost = effCost(key);
+      const consumedComps = [...ownedAncestors(key)];
+      consumedComps.forEach(c => owned.delete(c));
+      owned.add(key);
+      phaseSpent[idx] += cost;
+      phaseChanges[phaseName].push({
+        action: consumedComps.length ? 'upgrade' : 'buy',
+        key,
+        components: consumedComps,
+        cost,
+      });
+    }
+
+    // ── Pass 1: pin required + signature items to their natural-tier phase ──
+    // Sort by TIER ASCENDING so components land before their upgrades.
+    // Otherwise an upgrade pinned first (e.g. rapid_recharge T3) makes its
+    // component (extra_charge T1) look subsumed via the upgradesTo map and
+    // get skipped. With tier-asc, the component is placed in Lane first,
+    // then the upgrade consumes it later as a proper 'upgrade' action.
+    // Score is used only as a within-tier tiebreaker.
+    //
+    // Pinning policy:
+    //   • Required items pin HARD — placed regardless of phase budget.
+    //   • Signature items pin SOFT — pushed forward to the next phase if
+    //     their natural phase is already over budget. This makes T1 sig
+    //     "stepping stone" items (e.g. extra_spirit → improved_spirit)
+    //     land in Lane for partial stats early, instead of being squeezed
+    //     out by their own higher-tier sig parent in the pass-2 walk.
+    const pinList = (pinHard, pinSoft) => b.items
+      .filter(it => (pinHard.has(it.key) || pinSoft.has(it.key)) && !blacklistSet.has(it.key))
+      .sort((a, c) => {
+        const ta = bpItemMap[a.key]?.tier || 0;
+        const tc = bpItemMap[c.key]?.tier || 0;
+        if (ta !== tc) return ta - tc;
+        // Within tier: required first, then by score
+        const ar = pinHard.has(a.key) ? 1 : 0;
+        const cr = pinHard.has(c.key) ? 1 : 0;
+        if (ar !== cr) return cr - ar;
+        return (c.total || 0) - (a.total || 0);
+      });
+
+    const naturalPhaseIdx = (tier) => {
+      const p = (typeof bsMergedPhaseForTier === 'function')
+        ? bsMergedPhaseForTier(tier)
+        : (tier <= 800 ? 'Lane' : tier <= 1600 ? 'Early' : tier <= 3200 ? 'Mid' : 'Late');
+      const i = PHASE_NAMES.indexOf(p);
+      return i < 0 ? 0 : i;
+    };
+
+    for (const it of pinList(requiredSet, signatureSet)) {
+      if (owned.has(it.key)) continue;
+      if (isSubsumed(it.key, owned)) continue;
+      const tier = bpItemMap[it.key]?.tier || 800;
+      let idx = naturalPhaseIdx(tier);
+      const isReq = requiredSet.has(it.key);
+      // Soft pin for signatures: push forward if current phase is already
+      // over budget. Required items ignore budget — they always land in
+      // their natural phase.
+      if (!isReq) {
+        while (idx < PHASE_NAMES.length - 1 && phaseSpent[idx] >= phaseBudgets[idx]) {
+          idx++;
+        }
+      }
+      placeBuy(PHASE_NAMES[idx], idx, it.key);
+    }
+
+    // ── Pass 2: walk phases sequentially, fill remaining budget by top-score ──
+    PHASE_NAMES.forEach((phase, idx) => {
+      const budget = phaseBudgets[idx];
+      // Per-phase slot cap. Extra Late has 1M budget so we MUST cap by tile-count
+      // here, otherwise the algo just recommends every remaining item.
+      const slotCap = (phase === 'Extra Late')
+        ? EXTRA_LATE_SLOT_CAP
+        : MAX_BUYS_PER_PHASE;
+      for (let i = 0; i < slotCap; i++) {
+        if (phaseChanges[phase].length >= slotCap) break;
+        if (phaseSpent[idx] >= budget) break;
+        let bestKey = null, bestScore = -Infinity, bestCost = 0;
+        for (const it of b.items) {
+          const k = it.key;
+          if (owned.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (isSubsumed(k, owned)) continue;
+          const cost = effCost(k);
+          if (cost <= 0) continue;
+          const score = scoreUnified(it, phase, owned);
+          if (score === -Infinity) continue;
+          if (score > bestScore) { bestScore = score; bestKey = k; bestCost = cost; }
+        }
+        if (!bestKey) break;
+        placeBuy(phase, idx, bestKey);
+      }
+    });
+
+    return PHASE_NAMES.map(name => ({
+      phase: name,
+      changes: phaseChanges[name],
+      assistChanges: [],
+      counterChanges: [],
+    }));
+  }
+
+  // ── Spike (Candidate 2: spike composer with explicit pin data structure) ──
+  // Extends Anchored with an explicit `phasePins` data structure for each
+  // phase that the user can inspect, and adds Surge anti-spike anchors as
+  // a third pin tier. Honors all of Anchored's gates (build-side assist /
+  // counter, soft/hard counter lifts, upgrade marginal correction).
+  //
+  // Pin tiers (highest priority first):
+  //   1. REQUIRED — pinned to natural-tier phase, HARD pin (ignores budget)
+  //   2. SIGNATURE — pinned to natural-tier phase, SOFT pin (push forward
+  //      if natural phase is already over budget after earlier pins)
+  //   3. ANCHOR — Surge spike + anti-spike anchors not already required/
+  //      signature. SOFT pin, push forward like signature.
+  //
+  // Within each pin tier, items are sorted by TIER ASCENDING (so components
+  // pin before their upgrades, matching Anchored's correctness fix).
+  function runSpike() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // Tuneable constants — kept aligned with Anchored. Tune in lock-step.
+    const HARD_AFFINITY_THRESH  = 0.3;
+    const HARD_STRONG_CONSENSUS = 1.5;
+    const HARD_GATE_AUTHORED    = 1.5;
+    const HARD_GATE_FIT         = 1.0;
+    const HARD_GATE_STRONG      = 0.7;
+    const ASSIST_BOOST          = 1.25;
+    const MARGINAL_DECAY        = 2.5;
+    const SOFT_LIFT_SCALE       = 0.03;
+    const HARD_LIFT_SCALE       = 0.08;
+    const COUNTER_BOOST         = 1.20;
+    const MAX_BUYS_PER_PHASE    = 30;
+    const EXTRA_LATE_SLOT_CAP   = 12;
+
+    const buildAssist  = Number(rv?.item_affinity?.assist_importance  ?? 0);
+    const buildCounter = Number(rv?.item_affinity?.counter_importance ?? 0);
+    const vulnList = (typeof bsConsensusVulnerability === 'function')
+      ? bsConsensusVulnerability(b) : [];
+
+    function softCounterLift(k) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const cap = Math.min(0.5, Math.max(0, ps.counter_importance || 0));
+      if (cap <= 0 || !vulnList.length) return 0;
+      let sum = 0;
+      for (const v of vulnList) sum += (ps[v.tag] || 0) * (v.strength || 0);
+      return sum * cap * SOFT_LIFT_SCALE;
+    }
+    function hardCounterLift(k, it) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const ci = ps.counter_importance || 0;
+      if (ci < COUNTER_TAG_THRESH || !vulnList.length) return 0;
+      let sum = 0, maxTerm = 0;
+      for (const v of vulnList) {
+        const term = (ps[v.tag] || 0) * (v.strength || 0);
+        if (term > 0) { sum += term; if (term > maxTerm) maxTerm = term; }
+      }
+      if (sum <= 0) return 0;
+      let gate;
+      if (requiredSet.has(k) || signatureSet.has(k))   gate = HARD_GATE_AUTHORED;
+      else if ((it.self || 0) >= HARD_AFFINITY_THRESH) gate = HARD_GATE_FIT;
+      else if (maxTerm >= HARD_STRONG_CONSENSUS)       gate = HARD_GATE_STRONG;
+      else return 0;
+      return sum * ci * gate * HARD_LIFT_SCALE;
+    }
+    function scoreInner(it, phaseName, ownedSet, depth) {
+      const k = it.key;
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const itemAssist  = ps.assist_importance  || 0;
+      const itemCounter = ps.counter_importance || 0;
+      const isAuthored = requiredSet.has(k) || signatureSet.has(k);
+
+      let assistMult = 1.0;
+      if (itemAssist > 0 && !isAuthored) {
+        if (buildAssist < 0)   return -Infinity;
+        if (buildAssist < 0.5) assistMult = 0.5 + buildAssist;
+        else                   assistMult = ASSIST_BOOST;
+      }
+      let counterMult = 1.0;
+      if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
+        if (buildCounter < 0)   return -Infinity;
+        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;
+        else                    counterMult = COUNTER_BOOST;
+      }
+
+      let s = it.self || 0;
+      if (isAuthored || buildAssist >= 0.5) s += 0.75 * (it.ally || 0);
+      s += softCounterLift(k);
+      s += hardCounterLift(k, it);
+
+      if (requiredSet.has(k))           s *= REQ_MULT;
+      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
+      else if (signatureSet.has(k))     s *= SIG_MULT;
+      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+
+      s *= assistMult * counterMult;
+      const tier = bpItemMap[k]?.tier || 800;
+      s *= getPhaseTierMult(phaseName, tier);
+      s += confShift(k, phaseName);
+
+      if (ownedSet && depth < 1) {
+        const ownedComps = (bpItemMap[k]?.upgrades_from || []).filter(c => ownedSet.has(c));
+        if (ownedComps.length) {
+          const upgradeTm = tierMult(tier);
+          for (const c of ownedComps) {
+            const cIt = scoredMap[c];
+            if (!cIt) continue;
+            const compTm = tierMult(bpItemMap[c]?.tier || 800);
+            const ratio = compTm / Math.max(0.01, upgradeTm);
+            const compScore = scoreInner(cIt, phaseName, null, depth + 1);
+            if (compScore === -Infinity) continue;
+            s -= compScore * Math.pow(ratio, MARGINAL_DECAY);
+          }
+        }
+      }
+      return s;
+    }
+    const score = (it, phaseName, ownedSet) => scoreInner(it, phaseName, ownedSet, 0);
+
+    // ── Walk state ──
+    let owned = new Set();
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const phaseBudgets = PHASE_NAMES.map(p => {
+      const bp = BUILD_PHASES.find(x => x.name === p);
+      return bp ? (bp.addBudget || 3200) : 3200;
+    });
+    const phaseSpent = PHASE_NAMES.map(() => 0);
+
+    function effCost(k) {
+      const t = bpItemMap[k]?.tier || 0;
+      let cost = t;
+      (bpItemMap[k]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+    function ownedAncestors(k) {
+      const out = new Set();
+      const stack = [...(bpItemMap[k]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+    function placeBuy(phaseName, idx, key) {
+      const cost = effCost(key);
+      const consumedComps = [...ownedAncestors(key)];
+      consumedComps.forEach(c => owned.delete(c));
+      owned.add(key);
+      phaseSpent[idx] += cost;
+      phaseChanges[phaseName].push({
+        action: consumedComps.length ? 'upgrade' : 'buy',
+        key, components: consumedComps, cost,
+      });
+    }
+    function naturalPhaseIdx(tier) {
+      const p = (typeof bsMergedPhaseForTier === 'function')
+        ? bsMergedPhaseForTier(tier)
+        : (tier <= 800 ? 'Lane' : tier <= 1600 ? 'Early' : tier <= 3200 ? 'Mid' : 'Late');
+      const i = PHASE_NAMES.indexOf(p);
+      return i < 0 ? 0 : i;
+    }
+
+    // ── Build the explicit `phasePins` data structure ──
+    // Per the user: "for each phase I would have a remaining budget and a
+    // list of items in order of priority stored in the algorithm to make
+    // sure its actually pinned". This is that list — debugged-visible,
+    // priority-ordered, never mutated during the walk.
+    const phasePins = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const _pinnedKeys = new Set();
+    const PRIORITY_ORDER = { required: 0, signature: 1, anchor: 2 };
+
+    function pinPush(phaseIdx, key, priority) {
+      if (_pinnedKeys.has(key)) return;
+      _pinnedKeys.add(key);
+      phasePins[PHASE_NAMES[phaseIdx]].push({
+        key, priority, tier: bpItemMap[key]?.tier || 0,
+      });
+    }
+
+    // Tier 1 — REQUIRED (HARD pin, ignores budget)
+    b.items
+      .filter(it => requiredSet.has(it.key) && !blacklistSet.has(it.key))
+      .sort((a, c) => (bpItemMap[a.key]?.tier || 0) - (bpItemMap[c.key]?.tier || 0))
+      .forEach(it => pinPush(naturalPhaseIdx(bpItemMap[it.key]?.tier || 800), it.key, 'required'));
+
+    // Tentative spent map for soft pins (without actually buying yet —
+    // soft-pin budget check just uses sum of currently-pinned-tier costs).
+    const _tentSpent = PHASE_NAMES.map((_, idx) =>
+      phasePins[PHASE_NAMES[idx]].reduce((s, p) => s + (p.tier || 0), 0));
+
+    function softPinAttempt(naturalIdx, key, priority) {
+      const cost = bpItemMap[key]?.tier || 0;
+      let idx = naturalIdx;
+      while (idx < PHASE_NAMES.length - 1
+        && _tentSpent[idx] + cost > (phaseBudgets[idx] * 1.2)) {
+        idx++;
+      }
+      _tentSpent[idx] += cost;
+      pinPush(idx, key, priority);
+    }
+
+    // Tier 2 — SIGNATURE (SOFT pin)
+    b.items
+      .filter(it =>
+        signatureSet.has(it.key) && !requiredSet.has(it.key) && !blacklistSet.has(it.key)
+      )
+      .sort((a, c) => {
+        const ta = bpItemMap[a.key]?.tier || 0;
+        const tc = bpItemMap[c.key]?.tier || 0;
+        if (ta !== tc) return ta - tc;
+        return (c.total || 0) - (a.total || 0);
+      })
+      .forEach(it => softPinAttempt(naturalPhaseIdx(bpItemMap[it.key]?.tier || 800), it.key, 'signature'));
+
+    // Tier 3 — SURGE ANCHORS (SOFT pin, only if not already pinned)
+    const anchorKeys = [
+      ...((preAnchors && preAnchors.spikes) || []),
+      ...((preAnchors && preAnchors.antiSpikes) || []),
+    ].filter(k => k && !_pinnedKeys.has(k) && !blacklistSet.has(k));
+    anchorKeys
+      .sort((a, c) => (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0))
+      .forEach(k => softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'anchor'));
+
+    // Within each phase, sort pins by tier asc (components before upgrades),
+    // then by priority (required > signature > anchor) as tiebreaker.
+    Object.values(phasePins).forEach(arr => {
+      arr.sort((a, c) => {
+        if (a.tier !== c.tier) return a.tier - c.tier;
+        return (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[c.priority] ?? 99);
+      });
+    });
+
+    if (_bpDbg) _bpDbg.spikePhasePins = JSON.parse(JSON.stringify(phasePins));
+
+    // ── Walk: place pinned items first per phase, then fill remaining budget ──
+    PHASE_NAMES.forEach((phase, idx) => {
+      // 1. Place pinned items first, in priority order. placeBuy handles
+      //    cost + ancestor consumption + emits buy/upgrade action.
+      for (const pin of phasePins[phase]) {
+        if (owned.has(pin.key)) continue;
+        if (isSubsumed(pin.key, owned)) continue;
+        placeBuy(phase, idx, pin.key);
+      }
+      // 2. Fill remaining budget with top-score non-pinned items.
+      const slotCap = (phase === 'Extra Late') ? EXTRA_LATE_SLOT_CAP : MAX_BUYS_PER_PHASE;
+      const budget = phaseBudgets[idx];
+      for (let i = 0; i < slotCap; i++) {
+        if (phaseChanges[phase].length >= slotCap) break;
+        if (phaseSpent[idx] >= budget) break;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (owned.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (isSubsumed(k, owned)) continue;
+          const cost = effCost(k);
+          if (cost <= 0) continue;
+          const sc = score(it, phase, owned);
+          if (sc === -Infinity) continue;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (!bestKey) break;
+        placeBuy(phase, idx, bestKey);
+      }
+    });
+
+    return PHASE_NAMES.map(name => ({
+      phase: name,
+      changes: phaseChanges[name],
+      assistChanges: [],
+      counterChanges: [],
+    }));
+  }
+
+  // ── Twin-Lane (Candidate 3: parallel Core + Counter walks, merged) ────────
+  // Walks the build twice with different scoring contexts:
+  //   • Core walk:    standard scoring with soft/hard counter lifts disabled
+  //                   (pure build-fit picks, ignoring enemy team)
+  //   • Counter walk: ONLY items with counter_importance ≥ 0.5; scored by
+  //                   enemy consensus × counter_importance (no req/sig boost)
+  //
+  // Merge rules:
+  //   • Core walk's picks land in `changes` per phase (the primary build).
+  //   • Counter walk's picks that aren't already in Core → `counterChanges`
+  //     (Build Path UI renders them in a separate column on the right).
+  //   • A counter item that's ALSO in Core is "compound utility" and stays
+  //     in Core (no double-listing) — the UI labels it via existing
+  //     spike/anti-spike glyphs if applicable.
+  function runTwinLane() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // Aligned constants with Anchored / Spike.
+    const HARD_AFFINITY_THRESH  = 0.3;
+    const HARD_STRONG_CONSENSUS = 1.5;
+    const HARD_GATE_AUTHORED    = 1.5;
+    const HARD_GATE_FIT         = 1.0;
+    const HARD_GATE_STRONG      = 0.7;
+    const ASSIST_BOOST          = 1.25;
+    const MARGINAL_DECAY        = 2.5;
+    const SOFT_LIFT_SCALE       = 0.03;
+    const HARD_LIFT_SCALE       = 0.08;
+    const COUNTER_BOOST         = 1.20;
+    const MAX_BUYS_PER_PHASE    = 30;
+    const EXTRA_LATE_SLOT_CAP   = 12;
+
+    const buildAssist  = Number(rv?.item_affinity?.assist_importance  ?? 0);
+    const buildCounter = Number(rv?.item_affinity?.counter_importance ?? 0);
+    const vulnList = (typeof bsConsensusVulnerability === 'function')
+      ? bsConsensusVulnerability(b) : [];
+
+    function softCounterLift(k) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const cap = Math.min(0.5, Math.max(0, ps.counter_importance || 0));
+      if (cap <= 0 || !vulnList.length) return 0;
+      let sum = 0;
+      for (const v of vulnList) sum += (ps[v.tag] || 0) * (v.strength || 0);
+      return sum * cap * SOFT_LIFT_SCALE;
+    }
+    function hardCounterLift(k, it) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const ci = ps.counter_importance || 0;
+      if (ci < COUNTER_TAG_THRESH || !vulnList.length) return 0;
+      let sum = 0, maxTerm = 0;
+      for (const v of vulnList) {
+        const term = (ps[v.tag] || 0) * (v.strength || 0);
+        if (term > 0) { sum += term; if (term > maxTerm) maxTerm = term; }
+      }
+      if (sum <= 0) return 0;
+      let gate;
+      if (requiredSet.has(k) || signatureSet.has(k))   gate = HARD_GATE_AUTHORED;
+      else if ((it.self || 0) >= HARD_AFFINITY_THRESH) gate = HARD_GATE_FIT;
+      else if (maxTerm >= HARD_STRONG_CONSENSUS)       gate = HARD_GATE_STRONG;
+      else return 0;
+      return sum * ci * gate * HARD_LIFT_SCALE;
+    }
+
+    // Two scoring modes — same skeleton, different lifts/boosts.
+    //   mode = 'core'    → softLift + hardLift disabled; req/sig boosts on.
+    //   mode = 'counter' → softLift + hardLift on; req/sig boosts OFF (the
+    //                      counter walk should pick PURE counters, not just
+    //                      whatever's required); restrict to counter items.
+    function scoreInner(it, phaseName, ownedSet, depth, mode) {
+      const k = it.key;
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const itemAssist  = ps.assist_importance  || 0;
+      const itemCounter = ps.counter_importance || 0;
+      const isAuthored = requiredSet.has(k) || signatureSet.has(k);
+
+      let assistMult = 1.0;
+      if (itemAssist > 0 && !isAuthored) {
+        if (buildAssist < 0)   return -Infinity;
+        if (buildAssist < 0.5) assistMult = 0.5 + buildAssist;
+        else                   assistMult = ASSIST_BOOST;
+      }
+      let counterMult = 1.0;
+      if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
+        if (buildCounter < 0)   return -Infinity;
+        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;
+        else                    counterMult = COUNTER_BOOST;
+      }
+
+      let s = it.self || 0;
+      if (isAuthored || buildAssist >= 0.5) s += 0.75 * (it.ally || 0);
+
+      if (mode !== 'core') {
+        s += softCounterLift(k);
+        s += hardCounterLift(k, it);
+      }
+
+      if (mode !== 'counter') {
+        if (requiredSet.has(k))           s *= REQ_MULT;
+        else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
+        else if (signatureSet.has(k))     s *= SIG_MULT;
+        else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+      }
+      s *= assistMult * counterMult;
+      const tier = bpItemMap[k]?.tier || 800;
+      s *= getPhaseTierMult(phaseName, tier);
+      s += confShift(k, phaseName);
+
+      if (ownedSet && depth < 1) {
+        const ownedComps = (bpItemMap[k]?.upgrades_from || []).filter(c => ownedSet.has(c));
+        if (ownedComps.length) {
+          const upgradeTm = tierMult(tier);
+          for (const c of ownedComps) {
+            const cIt = scoredMap[c];
+            if (!cIt) continue;
+            const compTm = tierMult(bpItemMap[c]?.tier || 800);
+            const ratio = compTm / Math.max(0.01, upgradeTm);
+            const compScore = scoreInner(cIt, phaseName, null, depth + 1, mode);
+            if (compScore === -Infinity) continue;
+            s -= compScore * Math.pow(ratio, MARGINAL_DECAY);
+          }
+        }
+      }
+      return s;
+    }
+
+    // ── Walk A: CORE (build-fit, no enemy/counter lifts) ──
+    // Identical structure to Anchored; only the score differs (mode='core').
+    const coreOwned = new Set();
+    const coreChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const phaseBudgets = PHASE_NAMES.map(p => {
+      const bp = BUILD_PHASES.find(x => x.name === p);
+      return bp ? (bp.addBudget || 3200) : 3200;
+    });
+    const corePhaseSpent = PHASE_NAMES.map(() => 0);
+
+    function effCostFor(ownedSet, k) {
+      const t = bpItemMap[k]?.tier || 0;
+      let cost = t;
+      (bpItemMap[k]?.upgrades_from || []).forEach(c => {
+        if (ownedSet.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+    function ownedAncestorsFor(ownedSet, k) {
+      const out = new Set();
+      const stack = [...(bpItemMap[k]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (ownedSet.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+    function placeBuyInto(ownedSet, changesMap, spentArr, phaseName, idx, key) {
+      const cost = effCostFor(ownedSet, key);
+      const consumedComps = [...ownedAncestorsFor(ownedSet, key)];
+      consumedComps.forEach(c => ownedSet.delete(c));
+      ownedSet.add(key);
+      spentArr[idx] += cost;
+      changesMap[phaseName].push({
+        action: consumedComps.length ? 'upgrade' : 'buy',
+        key, components: consumedComps, cost,
+      });
+    }
+    function isSubsumedIn(ownedSet, k) {
+      return (upgradesTo[k] || []).some(u => ownedSet.has(u));
+    }
+    function naturalPhaseIdx(tier) {
+      const p = (typeof bsMergedPhaseForTier === 'function')
+        ? bsMergedPhaseForTier(tier)
+        : (tier <= 800 ? 'Lane' : tier <= 1600 ? 'Early' : tier <= 3200 ? 'Mid' : 'Late');
+      const i = PHASE_NAMES.indexOf(p);
+      return i < 0 ? 0 : i;
+    }
+
+    // Pin pass for Core walk: required + signature, tier-ascending.
+    const pinList = b.items
+      .filter(it => (requiredSet.has(it.key) || signatureSet.has(it.key)) && !blacklistSet.has(it.key))
+      .sort((a, c) => {
+        const ta = bpItemMap[a.key]?.tier || 0;
+        const tc = bpItemMap[c.key]?.tier || 0;
+        if (ta !== tc) return ta - tc;
+        const ar = requiredSet.has(a.key) ? 1 : 0;
+        const cr = requiredSet.has(c.key) ? 1 : 0;
+        if (ar !== cr) return cr - ar;
+        return (c.total || 0) - (a.total || 0);
+      });
+    for (const it of pinList) {
+      if (coreOwned.has(it.key)) continue;
+      if (isSubsumedIn(coreOwned, it.key)) continue;
+      let idx = naturalPhaseIdx(bpItemMap[it.key]?.tier || 800);
+      const isReq = requiredSet.has(it.key);
+      if (!isReq) {
+        while (idx < PHASE_NAMES.length - 1 && corePhaseSpent[idx] >= phaseBudgets[idx]) idx++;
+      }
+      placeBuyInto(coreOwned, coreChanges, corePhaseSpent, PHASE_NAMES[idx], idx, it.key);
+    }
+    // Fill remaining budget per phase
+    PHASE_NAMES.forEach((phase, idx) => {
+      const slotCap = (phase === 'Extra Late') ? EXTRA_LATE_SLOT_CAP : MAX_BUYS_PER_PHASE;
+      const budget = phaseBudgets[idx];
+      for (let i = 0; i < slotCap; i++) {
+        if (coreChanges[phase].length >= slotCap) break;
+        if (corePhaseSpent[idx] >= budget) break;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (coreOwned.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (isSubsumedIn(coreOwned, k)) continue;
+          const cost = effCostFor(coreOwned, k);
+          if (cost <= 0) continue;
+          const sc = scoreInner(it, phase, coreOwned, 0, 'core');
+          if (sc === -Infinity) continue;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (!bestKey) break;
+        placeBuyInto(coreOwned, coreChanges, corePhaseSpent, phase, idx, bestKey);
+      }
+    });
+
+    // ── Walk B: COUNTER (top counter-tagged items by enemy match) ──
+    // Operates on counter-flagged items only. Doesn't reuse Core's owned set
+    // — these are SUGGESTIONS layered on top of Core, not a replacement
+    // build. The output goes into `counterChanges`.
+    const COUNTER_STRONG_THRESHOLD = 0.5;  // raw score gate above which counter is "worth surfacing"
+    const counterChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const coreKeys = new Set();
+    Object.values(coreChanges).forEach(arr => arr.forEach(c => coreKeys.add(c.key)));
+
+    // Score every counter-flagged item using the counter-mode scorer; the
+    // mode disables req/sig boosts so the picks reflect pure enemy match.
+    const counterCandidates = b.items
+      .filter(it => !blacklistSet.has(it.key))
+      .filter(it => !coreKeys.has(it.key))
+      .filter(it => (bpItemMap[it.key]?.values?.playstyle_score?.counter_importance || 0) >= COUNTER_TAG_THRESH)
+      .map(it => {
+        // Score against MID phase as a neutral phase (counter walk isn't
+        // phase-bound; we'll re-bucket by tier afterward).
+        const sc = scoreInner(it, 'Mid', null, 0, 'counter');
+        return { key: it.key, tier: bpItemMap[it.key]?.tier || 0, score: sc };
+      })
+      .filter(c => c.score !== -Infinity && c.score > COUNTER_STRONG_THRESHOLD)
+      .sort((a, c) => c.score - a.score);
+
+    // Bucket counters by natural-tier phase, cap a few per phase so the UI
+    // doesn't get flooded.
+    const COUNTER_PER_PHASE_CAP = 3;
+    counterCandidates.forEach(c => {
+      const phaseIdx = naturalPhaseIdx(c.tier);
+      const phase = PHASE_NAMES[phaseIdx];
+      if (counterChanges[phase].length >= COUNTER_PER_PHASE_CAP) return;
+      counterChanges[phase].push({
+        action: 'buy', key: c.key, components: [], cost: c.tier, counterScore: c.score,
+      });
+    });
+
+    if (_bpDbg) {
+      _bpDbg.twinLane = {
+        coreKeys: [...coreKeys],
+        counterCount: counterCandidates.length,
+        counterTop: counterCandidates.slice(0, 12).map(c => ({ key: c.key, score: +c.score.toFixed(3) })),
+      };
+    }
+
+    return PHASE_NAMES.map(name => ({
+      phase: name,
+      changes: coreChanges[name],
+      assistChanges: [],
+      counterChanges: counterChanges[name],
+    }));
+  }
+
   // FullSurvey: runs every active donor algorithm, then synthesizes a build
   // whose item choice AND purchase phase reflect cross-algorithm consensus.
   // Per item: freq = how many donors bought it; avgPhaseIdx = mean phase index
@@ -7969,6 +8793,9 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   }
 
   // ── Phase loop ─────────────────────────────────────────────────────────────
+  if (algo === 'anchored')  return withAnchors(applyConstraintsFixup(runAnchored()));   // unified (Candidate 1)
+  if (algo === 'spike2')    return withAnchors(applyConstraintsFixup(runSpike()));      // unified (Candidate 2: explicit-pin spike composer)
+  if (algo === 'twinlane')  return withAnchors(applyConstraintsFixup(runTwinLane()));   // unified (Candidate 3: twin walks)
   if (algo === 'fullsurvey') return withAnchors(applyConstraintsFixup(runFullSurvey()));
   if (algo === 'expert')    return withAnchors(applyConstraintsFixup(runExpertGreedy()));
   if (algo === 'assassin')  return withAnchors(applyConstraintsFixup(runTargetAssassin()));
@@ -8346,6 +9173,10 @@ function bsCategorizeAllItems(b, requiredSet, signatureSet, blacklistSet, bpBuyO
   // Two cumulative counters: cumOrig tracks the demoted item's would-have-
   // been phase (full cost); cumCore tracks the compacted Core phase
   // (skipping demoted items so later items shift left).
+  // NOTE: components that get later upgraded (e.g. extra_charge → rapid_recharge,
+  // extra_spirit → improved_spirit → boundless_spirit) ARE shown as separate
+  // Core tiles in their pre-upgrade phase — they're stepping stones that buy
+  // partial stats early. The detail view shows the upgrade chain.
   let cumOrig = 0;
   let cumCore = 0;
   bpBuyOrder.forEach(({ key, cost }) => {
@@ -9744,6 +10575,9 @@ const BP_ALGO_OPTIONS = [
   { value: 'architect',    label: 'Architect (Path Planner)' },
   { value: 'inverse',      label: 'Inverse (Endgame Solver)' },
   { value: 'surge',        label: 'Surge (Power Spike)' },
+  { value: 'anchored',     label: 'Anchored (Unified)' },
+  { value: 'spike2',       label: 'Spike Composer (Unified+Pin)' },
+  { value: 'twinlane',     label: 'Twin-Lane (Unified+Counter Col)' },
   { value: 'fullsurvey',   label: 'FullSurvey (CPU KILLER)' },
 ];
 
@@ -12495,4 +13329,481 @@ document.getElementById('back-from-sim').addEventListener('click', () => {
   } else {
     showPage('calc-summary');
   }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// TAG DETAIL PAGE — column-per-tier item editor + per-build weight editor for
+// a single tag. Reached by clicking a tag on the Tags page. Reuses the global
+// =/+/x follow-chain utils (parseWeightEntry / formatWeightEntry / applyRelation
+// / resolveBuildValues) so the build-side editor matches the hero-edit page.
+// ════════════════════════════════════════════════════════════════════════════
+const TD = {
+  tagCode:    null,
+  items:      [],   // [{normalized_name, name, tier, category, image_path, values:{playstyle_score:{...}}}, ...]
+  heroes:     [],   // full hero JSON list, with builds
+  activeTab:  'items',
+  dirtyItems: new Set(),   // normalized_name set
+  dirtyHeroes: new Set(),  // normalized_name set
+};
+
+const TD_TIERS = ['1','2','3','4','?'];
+const TD_TIER_BY_COST = { 800:'1', 1600:'2', 3200:'3', 6400:'4' };
+function tdTierLabel(t) {
+  if (t === '?') return 'Street Brawl';
+  return `T${t}`;
+}
+// `tier` in item JSONs is the SOUL COST (800/1600/3200/6400/9999), not the
+// 1/2/3/4 ordinal. Map cost → tier ordinal; anything else (9999, missing) → '?'.
+function tdItemTierKey(it) {
+  const t = it.tier;
+  if (typeof t === 'number' && TD_TIER_BY_COST[t]) return TD_TIER_BY_COST[t];
+  if (typeof t === 'string') {
+    const n = parseInt(t, 10);
+    if (TD_TIER_BY_COST[n]) return TD_TIER_BY_COST[n];
+    if (TD_TIERS.includes(t)) return t;
+  }
+  return '?';
+}
+
+function setTagDetailDirty(b) {
+  const el = document.getElementById('tag-detail-dirty');
+  if (!el) return;
+  el.classList.toggle('hidden', !b);
+}
+function tdHasDirty() {
+  return TD.dirtyItems.size > 0 || TD.dirtyHeroes.size > 0;
+}
+
+async function openTagDetail(tagCode) {
+  TD.tagCode = tagCode;
+  TD.dirtyItems = new Set();
+  TD.dirtyHeroes = new Set();
+  TD.items = [];
+  TD.heroes = [];
+  setTagDetailDirty(false);
+  const tag = (S.tags || []).find(t => t.code === tagCode);
+  document.getElementById('tag-detail-title').textContent =
+      tag ? `${tag.name}  (${tag.code})` : tagCode;
+
+  // Switch page FIRST so the user sees navigation even if the data fetches
+  // are slow or fail (e.g. server not restarted after /api/heroes/all was added).
+  TD.activeTab = 'items';
+  document.querySelectorAll('#page-tag-detail .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tagTab === 'items');
+  });
+  document.getElementById('tag-tab-items').classList.add('active');
+  document.getElementById('tag-tab-builds').classList.remove('active');
+  document.getElementById('tag-detail-items-grid').innerHTML =
+      '<div style="padding:16px;color:var(--muted)">Loading items…</div>';
+  document.getElementById('tag-detail-builds-body').innerHTML =
+      '<tr><td colspan="6" style="padding:16px;color:var(--muted)">Loading builds…</td></tr>';
+  showPage('tag-detail');
+
+  // Fetch all items + all heroes in parallel — tolerate either failing
+  // (heroes/all is a newly added endpoint; if Flask hasn't restarted, that
+  // request 404s but items should still render).
+  try {
+    const [items, heroes] = await Promise.all([
+      api.get('/api/items/all').catch(e => { console.error('items/all failed', e); return []; }),
+      api.get('/api/heroes/all').catch(e => { console.error('heroes/all failed (restart Flask?)', e); return []; }),
+    ]);
+    TD.items  = Array.isArray(items)  ? items  : [];
+    TD.heroes = Array.isArray(heroes) ? heroes : [];
+  } catch (e) {
+    console.error('openTagDetail load failed', e);
+    toast('Failed to load tag data', 'error');
+  }
+  renderTagDetailItems();
+  renderTagDetailBuilds();
+}
+
+// ── Items tab ──────────────────────────────────────────────────────────────
+function renderTagDetailItems() {
+  const grid = document.getElementById('tag-detail-items-grid');
+  grid.innerHTML = '';
+  const code = TD.tagCode;
+
+  // Bucket by tier — only items whose score for this tag is a non-zero number.
+  // Items missing the tag entirely OR scored exactly 0 are NOT shown by default,
+  // but appear in the "+" picker for that tier.
+  const buckets = {};
+  TD_TIERS.forEach(t => buckets[t] = []);
+  TD.items.forEach(it => {
+    const tk = tdItemTierKey(it);
+    const ps = (it.values && it.values.playstyle_score) || {};
+    const v  = ps[code];
+    if (v === null || v === undefined || v === 0) return;
+    if (typeof v !== 'number') return;
+    buckets[tk].push({ item: it, value: v });
+  });
+  TD_TIERS.forEach(t => buckets[t].sort((a, b) => a.value - b.value));
+
+  TD_TIERS.forEach(t => {
+    const col = document.createElement('div');
+    col.className = 'tag-tier-col';
+    col.dataset.tier = t;
+
+    const head = document.createElement('div');
+    head.className = 'tag-tier-head';
+    head.innerHTML = `<span class="tag-tier-lbl">${tdTierLabel(t)}</span><span class="tag-tier-count">${buckets[t].length}</span>`;
+    col.appendChild(head);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'tag-tier-add';
+    addBtn.textContent = '+ Add item';
+    addBtn.addEventListener('click', () => openAddItemPicker(t));
+    col.appendChild(addBtn);
+
+    const list = document.createElement('div');
+    list.className = 'tag-tier-list';
+    buckets[t].forEach(entry => list.appendChild(_makeTagItemCard(entry.item, entry.value)));
+    col.appendChild(list);
+
+    grid.appendChild(col);
+  });
+}
+
+function _makeTagItemCard(it, currentValue) {
+  const card = document.createElement('div');
+  card.className = 'tag-item-card';
+  card.dataset.itemKey = it.normalized_name;
+
+  const img = srcUrl(it.image_path);
+  card.innerHTML = `
+    ${img ? `<img class="tag-item-img" src="${img}" alt="" onerror="this.style.display='none'">` : ''}
+    <div class="tag-item-body">
+      <div class="tag-item-name" title="${it.name}">${it.name}</div>
+      <div class="tag-item-row">
+        <input type="number" step="any" class="val-input tag-item-input" value="${currentValue}" />
+        <button class="btn-icon tag-item-del" title="Remove from tag">✕</button>
+      </div>
+    </div>`;
+
+  const input = card.querySelector('.tag-item-input');
+  applyValClass(input);
+  input.addEventListener('input', () => {
+    const v = inputToVal(input);
+    if (!it.values) it.values = {};
+    if (!it.values.playstyle_score) it.values.playstyle_score = {};
+    it.values.playstyle_score[TD.tagCode] = v;
+    TD.dirtyItems.add(it.normalized_name);
+    setTagDetailDirty(true);
+    applyValClass(input);
+  });
+  card.querySelector('.tag-item-del').addEventListener('click', () => {
+    if (!it.values) it.values = {};
+    if (!it.values.playstyle_score) it.values.playstyle_score = {};
+    it.values.playstyle_score[TD.tagCode] = null;
+    TD.dirtyItems.add(it.normalized_name);
+    setTagDetailDirty(true);
+    renderTagDetailItems();   // re-bucket + re-sort
+  });
+  return card;
+}
+
+// ── Add-item picker modal ──────────────────────────────────────────────────
+let _tdAddTier = null;
+function openAddItemPicker(tier) {
+  _tdAddTier = tier;
+  document.getElementById('tdadd-search').value = '';
+  _renderAddPickerList('');
+  document.getElementById('modal-tag-detail-add').classList.remove('hidden');
+  document.getElementById('tdadd-search').focus();
+}
+function _renderAddPickerList(query) {
+  const list = document.getElementById('tdadd-list');
+  list.innerHTML = '';
+  const q = (query || '').toLowerCase().trim();
+  const code = TD.tagCode;
+  // Items in this tier that currently have no/zero score for the tag.
+  const candidates = TD.items.filter(it => {
+    if (tdItemTierKey(it) !== _tdAddTier) return false;
+    const ps = (it.values && it.values.playstyle_score) || {};
+    const v = ps[code];
+    if (v !== null && v !== undefined && v !== 0) return false;
+    if (q && !it.name.toLowerCase().includes(q) && !it.normalized_name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  candidates.sort((a, b) => a.name.localeCompare(b.name));
+  candidates.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'tdadd-row';
+    const img = srcUrl(it.image_path);
+    row.innerHTML = `
+      ${img ? `<img class="tdadd-img" src="${img}" alt="" onerror="this.style.display='none'">` : ''}
+      <span class="tdadd-name">${it.name}</span>
+      <span class="tdadd-cat">${it.category || ''}</span>`;
+    row.addEventListener('click', () => {
+      if (!it.values) it.values = {};
+      if (!it.values.playstyle_score) it.values.playstyle_score = {};
+      it.values.playstyle_score[TD.tagCode] = 0.5;  // sensible non-zero starting value
+      TD.dirtyItems.add(it.normalized_name);
+      setTagDetailDirty(true);
+      document.getElementById('modal-tag-detail-add').classList.add('hidden');
+      renderTagDetailItems();
+    });
+    list.appendChild(row);
+  });
+  if (!candidates.length) {
+    list.innerHTML = '<div class="tdadd-empty">No more items at this tier.</div>';
+  }
+}
+
+// ── Builds tab ─────────────────────────────────────────────────────────────
+// Sort + collapse state for the Builds table. Click any column header to sort
+// by that key. Re-clicking flips direction. When sorted by a value column,
+// rows where THAT column is null/0/NaN get auto-grouped into a collapsed
+// "no value" section at the bottom (expandable).
+TD.buildsSort = { key: 'playstyle_score', dir: 'desc' };
+TD.buildsCollapsed = true;
+
+const TD_NUMERIC_KEYS = new Set(['ally_weight','item_affinity','enemy_weight','playstyle_score']);
+
+function _tdIsZeroish(v) {
+  return v === null || v === undefined || v === 0 || (typeof v === 'number' && !Number.isFinite(v));
+}
+
+function _tdBuildRowsAll() {
+  const code = TD.tagCode;
+  const rows = [];
+  TD.heroes.forEach(hero => {
+    const builds = hero.builds || [];
+    builds.forEach(b => {
+      if (!b.values) b.values = { ally_weight:{}, item_affinity:{}, enemy_weight:{}, playstyle_score:{} };
+      const resolved = resolveBuildValues(b, builds, new Set());
+      rows.push({
+        hero,
+        build: b,
+        resolved: {
+          ally_weight:    (resolved.ally_weight    || {})[code] ?? null,
+          item_affinity:  (resolved.item_affinity  || {})[code] ?? null,
+          enemy_weight:   (resolved.enemy_weight   || {})[code] ?? null,
+          playstyle_score:(resolved.playstyle_score|| {})[code] ?? null,
+        },
+        parent: b.followed_build
+          ? builds.find(x => x.name === b.followed_build) || null
+          : null,
+      });
+    });
+  });
+  return rows;
+}
+
+function _tdRowSortVal(r, key) {
+  if (key === 'hero')  return (r.hero.eng_name || r.hero.normalized_name || '').toLowerCase();
+  if (key === 'build') return (r.build.name || '').toLowerCase();
+  return r.resolved[key];
+}
+
+function _tdCompareRows(a, b, key, dir) {
+  const av = _tdRowSortVal(a, key);
+  const bv = _tdRowSortVal(b, key);
+  const mul = dir === 'asc' ? 1 : -1;
+  if (TD_NUMERIC_KEYS.has(key)) {
+    // null/zero ALWAYS sort to the bottom regardless of dir
+    const an = _tdIsZeroish(av), bn = _tdIsZeroish(bv);
+    if (an && bn) return 0;
+    if (an) return 1;
+    if (bn) return -1;
+    return (av - bv) * mul;
+  }
+  // string compare
+  if (av < bv) return -1 * mul;
+  if (av > bv) return  1 * mul;
+  return 0;
+}
+
+function renderTagDetailBuilds() {
+  const tbody = document.getElementById('tag-detail-builds-body');
+  tbody.innerHTML = '';
+  const COLS = ['ally_weight','item_affinity','enemy_weight','playstyle_score'];
+
+  // Refresh sort-indicator chevrons in the header
+  document.querySelectorAll('#tag-detail-builds-table .td-sortable').forEach(th => {
+    const ind = th.querySelector('.td-sort-ind');
+    if (!ind) return;
+    if (th.dataset.sortKey === TD.buildsSort.key) {
+      ind.textContent = TD.buildsSort.dir === 'asc' ? ' ▲' : ' ▼';
+      th.classList.add('is-sorted');
+    } else {
+      ind.textContent = '';
+      th.classList.remove('is-sorted');
+    }
+  });
+
+  const all = _tdBuildRowsAll();
+  const { key, dir } = TD.buildsSort;
+
+  // Partition only when sorting by a numeric column — for hero/build name
+  // sorts, every row has a value, no collapse needed.
+  let visible, hidden;
+  if (TD_NUMERIC_KEYS.has(key)) {
+    visible = all.filter(r => !_tdIsZeroish(r.resolved[key]));
+    hidden  = all.filter(r =>  _tdIsZeroish(r.resolved[key]));
+  } else {
+    visible = all;
+    hidden  = [];
+  }
+  visible.sort((a, b) => _tdCompareRows(a, b, key, dir));
+  hidden.sort((a, b) => {
+    const an = (a.hero.eng_name || a.hero.normalized_name || '').toLowerCase();
+    const bn = (b.hero.eng_name || b.hero.normalized_name || '').toLowerCase();
+    return an < bn ? -1 : an > bn ? 1 : 0;
+  });
+
+  if (!all.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:16px;color:var(--muted);text-align:center">No hero builds loaded. Restart Flask if /api/heroes/all 404s.</td></tr>';
+    return;
+  }
+
+  visible.forEach(r => tbody.appendChild(_makeTagBuildRow(r, COLS)));
+
+  if (hidden.length) {
+    const sep = document.createElement('tr');
+    sep.className = 'td-collapse-row';
+    sep.innerHTML = `
+      <td colspan="6">
+        <button class="td-collapse-toggle">
+          ${TD.buildsCollapsed ? '▶' : '▼'} ${hidden.length} build${hidden.length === 1 ? '' : 's'} with no value for this column
+        </button>
+      </td>`;
+    sep.querySelector('.td-collapse-toggle').addEventListener('click', () => {
+      TD.buildsCollapsed = !TD.buildsCollapsed;
+      renderTagDetailBuilds();
+    });
+    tbody.appendChild(sep);
+    if (!TD.buildsCollapsed) {
+      hidden.forEach(r => {
+        const tr = _makeTagBuildRow(r, COLS);
+        tr.classList.add('td-row-empty');
+        tbody.appendChild(tr);
+      });
+    }
+  }
+}
+
+function _makeTagBuildRow(r, COLS) {
+  const tr = document.createElement('tr');
+  const heroTd = document.createElement('td');
+  const heroImg = srcUrl(r.hero.image_path);
+  heroTd.innerHTML = `
+    <div class="td-hero-cell">
+      ${heroImg ? `<img class="td-hero-img" src="${heroImg}" alt="" onerror="this.style.display='none'">` : ''}
+      <span>${r.hero.eng_name || r.hero.normalized_name}</span>
+    </div>`;
+  tr.appendChild(heroTd);
+
+  const buildTd = document.createElement('td');
+  const followsHtml = r.parent ? `<div class="td-build-follow">↳ ${r.parent.name}</div>` : '';
+  buildTd.innerHTML = `<div class="td-build-name">${r.build.name}</div>${followsHtml}`;
+  tr.appendChild(buildTd);
+
+  COLS.forEach(col => {
+    const td = document.createElement('td');
+    const rawVal = (r.build.values?.[col] || {})[TD.tagCode];
+    const { value, rel } = parseWeightEntry(rawVal !== undefined ? rawVal : null);
+    const hasParent = !!r.parent;
+    const parentResolved = hasParent
+      ? resolveBuildValues(r.parent, r.hero.builds, new Set())
+      : null;
+    const parentVal = parentResolved ? (parentResolved[col][TD.tagCode] ?? null) : null;
+
+    td.innerHTML = _buildSemiCell(value, rel, parentVal, hasParent);
+
+    const input  = td.querySelector('.val-input');
+    const relBtn = td.querySelector('.rel-toggle');
+
+    if (input) {
+      applyValClass(input);
+      input.addEventListener('input', () => {
+        if (!r.build.values[col]) r.build.values[col] = {};
+        const curRel = relBtn ? relBtn.dataset.rel : '=';
+        const v = inputToVal(input);
+        r.build.values[col][TD.tagCode] = formatWeightEntry(v, curRel);
+        applyValClass(input);
+        TD.dirtyHeroes.add(r.hero.normalized_name);
+        setTagDetailDirty(true);
+        if (relBtn) _refreshDiff(td, v, curRel, parentVal);
+      });
+    }
+    if (relBtn) {
+      relBtn.addEventListener('click', () => {
+        if (!r.build.values[col]) r.build.values[col] = {};
+        const cycle = { '=': '+', '+': 'x', 'x': '=' };
+        const newRel = cycle[relBtn.dataset.rel] || '=';
+        relBtn.dataset.rel = newRel;
+        relBtn.textContent = newRel === 'x' ? '×' : newRel;
+        const v = inputToVal(input);
+        r.build.values[col][TD.tagCode] = formatWeightEntry(v, newRel);
+        TD.dirtyHeroes.add(r.hero.normalized_name);
+        setTagDetailDirty(true);
+        _refreshDiff(td, v, newRel, parentVal);
+      });
+    }
+    tr.appendChild(td);
+  });
+  return tr;
+}
+
+// ── Tab switching, save, back ──────────────────────────────────────────────
+document.querySelectorAll('#page-tag-detail .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tagTab;
+    if (!tab) return;
+    TD.activeTab = tab;
+    document.querySelectorAll('#page-tag-detail .tab-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tagTab === tab);
+    });
+    document.getElementById('tag-tab-items').classList.toggle('active', tab === 'items');
+    document.getElementById('tag-tab-builds').classList.toggle('active', tab === 'builds');
+  });
+});
+
+document.querySelectorAll('#tag-detail-builds-table .td-sortable').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sortKey;
+    if (!key) return;
+    if (TD.buildsSort.key === key) {
+      TD.buildsSort.dir = TD.buildsSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      TD.buildsSort.key = key;
+      TD.buildsSort.dir = TD_NUMERIC_KEYS.has(key) ? 'desc' : 'asc';
+    }
+    renderTagDetailBuilds();
+  });
+});
+
+document.getElementById('back-tags').addEventListener('click', () => {
+  if (tdHasDirty() && !confirm('You have unsaved changes. Discard?')) return;
+  TD.dirtyItems = new Set();
+  TD.dirtyHeroes = new Set();
+  setTagDetailDirty(false);
+  loadTags();
+  showPage('tags');
+});
+
+document.getElementById('btn-save-tag-detail').addEventListener('click', async () => {
+  const itemKeys  = Array.from(TD.dirtyItems);
+  const heroKeys  = Array.from(TD.dirtyHeroes);
+  const itemMap   = new Map(TD.items.map(it => [it.normalized_name, it]));
+  const heroMap   = new Map(TD.heroes.map(h => [h.normalized_name, h]));
+  try {
+    await Promise.all([
+      ...itemKeys.map(k => api.put(`/api/items/${k}`, itemMap.get(k))),
+      ...heroKeys.map(k => api.put(`/api/heroes/${k}`, heroMap.get(k))),
+    ]);
+    TD.dirtyItems = new Set();
+    TD.dirtyHeroes = new Set();
+    setTagDetailDirty(false);
+    toast(`Saved (${itemKeys.length} items, ${heroKeys.length} heroes)`);
+  } catch (e) {
+    toast('Save failed', 'error');
+  }
+});
+
+document.getElementById('tdadd-search').addEventListener('input', e => {
+  _renderAddPickerList(e.target.value);
+});
+document.getElementById('tdadd-cancel').addEventListener('click', () => {
+  document.getElementById('modal-tag-detail-add').classList.add('hidden');
 });

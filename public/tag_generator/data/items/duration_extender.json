@@ -1,5 +1,8 @@
 {
   "category": "Spirit",
+  "compare_to": [
+    "compress_cooldown"
+  ],
   "image_path": "/resources/items/duration_extender/duration_extender.png",
   "name": "Duration Extender",
   "normalized_name": "duration_extender",
@@ -39,7 +42,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 1.88,
+      "duration_dependant": 1.5,
       "engage": null,
       "escape": null,
       "farmer": null,
@@ -67,7 +70,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 0.0,
+      "multi_ability_focus": 0,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -98,8 +101,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Duration_Extender",
-  "compare_to": [
-    "compress_cooldown"
-  ]
+  "wiki_url": "https://deadlock.wiki/Duration_Extender"
 }

@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/hollow_point/hollow_point.png",
   "name": "Hollow Point",
   "normalized_name": "hollow_point",
@@ -60,6 +61,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -74,7 +76,7 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": 0.15,
-      "self_heal": 0.1,
+      "self_heal": 0.15,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
@@ -96,10 +98,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Hollow_Point",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Hollow_Point"
 }

@@ -82,19 +82,17 @@ def main():
     md = io.open(MD, encoding='utf-8').read()
     items_raw = _n.collect_per_item_blends(md)
 
-    # We also need item NAMES (collect_per_item_blends doesn't capture them).
-    # Re-walk; aligned to the same parser logic (only count headings followed by
-    # a `**tier**:` line as items, matching _normalize.collect_per_item_blends).
+    # We also need item NAMES. Use the SAME rule _normalize.collect_per_item_blends
+    # uses to demarcate items: every `## ` heading that isn't `## T...` starts a new
+    # item slot. Non-item preamble headings (e.g. `## Apply? column conventions`)
+    # therefore get a name slot too — they're filtered downstream by `tier_seen`.
+    # Walk the entire file (no early break) — matches _normalize's walk so item
+    # indices stay aligned. Non-item headings (preamble + audit footer) become
+    # phantom slots that get filtered out downstream by `tier_seen`.
     names_in_order = []
-    pending = None
     for line in md.split('\n'):
-        if line.startswith('# Audit:'):
-            break
-        if line.startswith('## ') and not line.startswith('## T'):
-            pending = line[3:].strip()
-        if '**tier**:' in line and pending is not None:
-            names_in_order.append(pending)
-            pending = None
+        if line.startswith('## '):
+            names_in_order.append(line[3:].strip())
     if len(names_in_order) != len(items_raw):
         sys.stderr.write('WARN: name/item count mismatch: %d names vs %d items\n' % (
             len(names_in_order), len(items_raw)))
@@ -126,31 +124,33 @@ def main():
     a = L.append
     a('# Tag Staple Table (Round 11+)')
     a('')
-    a('Per-tier sanity-check between normalize (Step 3b) and audit (Step 5). For every tag, shows:')
+    a('Per-tag sanity-check between normalize (Step 3b) and audit (Step 5). Each tag gets one section; the section lists every tier the tag appears at (T1 → T2 → T3 → T4 → T? = Street Brawl).')
+    a('')
+    a('For each (tag, tier) row:')
     a('')
     a('1. **Effective Raw thresholds** — the comparative raw value an item would need at that tier to normalize to 0.5 / 1.0 / 1.5 / 2.0.')
     a('2. **Staple Items** — the actual items in that tier sitting closest to each normalized anchor, with their measured normalized value in parentheses.')
     a('')
-    a('If a tag\'s 2.0-staple item isn\'t the tag\'s named anchor (per [tag_descriptions.md](Mass Item AI Audit Skill/tag_descriptions.md)), something is off — re-check Pass 1/2 for that tag before approving the audit.')
+    a('If a tag\'s 2.0 staple item at a tier isn\'t the tag\'s named anchor (per [tag_descriptions.md](Mass Item AI Audit Skill/tag_descriptions.md)), something is off — re-check Pass 1/2 for that tag before approving the audit.')
+    a('')
+    a('*Street Brawl items (T?) are capped at norm=1.5, so their 2.0 column is always n/a.*')
     a('')
 
     all_tags = sorted(anchors.keys())
-    tiers_in_order = [(1, 'T1'), (2, 'T2'), (3, 'T3'), (4, 'T4'), (None, 'T? (SB)')]
+    tiers_in_order = [(1, 'T1'), (2, 'T2'), (3, 'T3'), (4, 'T4'), (None, 'T?')]
 
-    for tier_num, tier_lbl in tiers_in_order:
-        section_rows = []
-        for tag in all_tags:
-            # Threshold raws at each anchor.
+    for tag in all_tags:
+        section_rows = []  # list of (tier_lbl, raw_cell, staple_cell, all_cell)
+        for tier_num, tier_lbl in tiers_in_order:
             eff_tier = tier_num if tier_num else 4
             thresholds = []
             for anc in ANCHORS:
                 if tier_num is None and anc > 1.5:
-                    thresholds.append(None)  # SB is capped at 1.5
+                    thresholds.append(None)  # SB capped at 1.5
                     continue
                 thresholds.append(threshold_raw(tag, eff_tier, anc, anchors))
 
-            # Staple items at each anchor.
-            candidates = []
+            candidates = []  # (norm, name, raw)
             for it in by_tier.get(tier_num, []):
                 n = norm_of(it, tag)
                 if n is None:
@@ -164,8 +164,6 @@ def main():
                 if not candidates:
                     staples.append(None)
                     continue
-                # Only show items genuinely within ±0.25 of the anchor; otherwise
-                # the cell is n/a (no real staple at this anchor for this tier).
                 near = [c for c in candidates if abs(abs(c[0]) - anc) <= 0.25]
                 if not near:
                     staples.append(None)
@@ -173,21 +171,30 @@ def main():
                 best = min(near, key=lambda c: abs(abs(c[0]) - anc))
                 staples.append(best)
 
-            # Only emit a row if any staple exists OR any threshold computable.
-            if all(s is None for s in staples) and all(t is None for t in thresholds):
+            if all(s is None for s in staples) and all(t is None for t in thresholds) and not candidates:
                 continue
 
             raw_cell = '(' + '/'.join(fmt_raw(t, tag) for t in thresholds) + ')'
             staple_cell = '(' + '/'.join(
                 fmt_pair(s[1], s[0]) if s else 'n/a' for s in staples) + ')'
-            section_rows.append((tag, raw_cell, staple_cell))
+
+            # All items at this tier with this tag, sorted by normalized desc.
+            all_sorted = sorted(candidates, key=lambda c: -abs(c[0]))
+            if all_sorted:
+                all_cell = ', '.join('%s (%s/%.2f)' % (nm, fmt_raw(raw, tag), norm)
+                                     for norm, nm, raw in all_sorted)
+            else:
+                all_cell = '—'
+            section_rows.append((tier_lbl, raw_cell, staple_cell, all_cell))
 
         if not section_rows:
             continue
-        a('## %s' % tier_lbl)
+
+        a('## `%s`' % tag)
         a('')
-        headers = ('Tag', 'Effective Raw (0.5/1.0/1.5/2.0*)', 'Staple Items (0.5/1.0/1.5/2.0*)', 'Notes')
-        cells = [(('`%s`' % tag), raw_cell, staple_cell, '') for tag, raw_cell, staple_cell in section_rows]
+        headers = ('Tier', 'Effective Raw (0.5/1.0/1.5/2.0*)', 'Staple Items (0.5/1.0/1.5/2.0*)', 'All Items at Tier (Raw/Norm)')
+        cells = [(tlbl, raw_cell, staple_cell, all_cell)
+                 for tlbl, raw_cell, staple_cell, all_cell in section_rows]
         widths = [len(h) for h in headers]
         for row in cells:
             for i, c in enumerate(row):
@@ -200,9 +207,10 @@ def main():
         for row in cells:
             a(fmt_row(row))
         a('')
-        if tier_num is None:
-            a('*Street Brawl items are capped at norm=1.5; the 2.0 column is always n/a.*')
-            a('')
+        a('**Notes:**')
+        a('')
+        a('> _(leave corrections, anchor disagreements, or follow-ups for this tag here)_')
+        a('')
 
     new = '\n'.join(L) + '\n'
     tmp = OUT + '.tmp'

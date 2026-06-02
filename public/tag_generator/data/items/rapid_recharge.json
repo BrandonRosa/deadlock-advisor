@@ -10,6 +10,7 @@
   ],
   "values": {
     "playstyle_score": {
+      "ability_spam": 1.5,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -25,7 +26,7 @@
       "burst_damage": 0.05,
       "burst_resistance": null,
       "cc_resist": null,
-      "charge_dependant": 2.0,
+      "charge_dependant": 2,
       "close_range": null,
       "close_to_team": null,
       "continuous_damage": 0.05,
@@ -72,11 +73,11 @@
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 0.1,
+      "spirit_burst_damage": 0.25,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.1,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 0.4,
+      "spirit_damage": 0.66,
       "spirit_proc": 0.1,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
@@ -84,8 +85,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "ability_spam": 1.5
+      "vertical_mobility": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Rapid_Recharge"

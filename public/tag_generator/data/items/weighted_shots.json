@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/weighted_shots/weighted_shots.png",
   "name": "Weighted Shots",
   "normalized_name": "weighted_shots",
@@ -42,7 +43,7 @@
       "disarm": null,
       "displace": null,
       "dot": null,
-      "duration_dependant": 0.05,
+      "duration_dependant": 0.15,
       "engage": 0.4,
       "escape": null,
       "farmer": null,
@@ -62,6 +63,7 @@
       "horizontal_mobility": -0.3,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": -0.05,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.0,
-      "lane_pusher": null
+      "vertical_mobility": 0
     }
   },
-  "wiki_url": "https://deadlock.wiki/Weighted_Shots",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Weighted_Shots"
 }
