@@ -408,6 +408,41 @@
       </table>
     </section>
 
+    <!-- TAG DETAIL -->
+    <section id="page-tag-detail" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-tags">← Tags</button>
+        <h1 id="tag-detail-title">Tag</h1>
+        <div class="header-actions">
+          <span id="tag-detail-dirty" class="dirty-badge hidden">Unsaved</span>
+          <button class="btn-primary" id="btn-save-tag-detail">Save</button>
+        </div>
+      </div>
+      <div class="tag-detail-tabs">
+        <button class="tab-btn active" data-tag-tab="items">Items</button>
+        <button class="tab-btn" data-tag-tab="builds">Heroes / Builds</button>
+      </div>
+      <div id="tag-tab-items" class="tag-detail-tab-body active">
+        <div id="tag-detail-items-grid" class="tag-tier-grid"></div>
+      </div>
+      <div id="tag-tab-builds" class="tag-detail-tab-body">
+        <table class="data-table td-builds-table" id="tag-detail-builds-table">
+          <thead>
+            <tr>
+              <th class="td-sortable" data-sort-key="hero">Hero<span class="td-sort-ind"></span></th>
+              <th class="td-sortable" data-sort-key="build">Build<span class="td-sort-ind"></span></th>
+              <th class="td-sortable" data-sort-key="ally_weight">Ally Weight<span class="td-sort-ind"></span></th>
+              <th class="td-sortable" data-sort-key="item_affinity">Item Affinity<span class="td-sort-ind"></span></th>
+              <th class="td-sortable" data-sort-key="enemy_weight">Enemy Weight<span class="td-sort-ind"></span></th>
+              <th class="td-sortable" data-sort-key="playstyle_score">Playstyle Score<span class="td-sort-ind"></span></th>
+            </tr>
+          </thead>
+          <tbody id="tag-detail-builds-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+
     <!-- CALCULATOR SETUP -->
     <section id="page-calc" class="page active">
       <div class="page-header sticky-header">
@@ -444,9 +479,12 @@
                   <option value="adaptive">Hybrid Rotation</option>
                   <option value="fusion">Fusion (Best of All)</option>
                   <option value="cyclic">Cyclic Focus</option>
-                  <option value="architect" selected>Architect (Path Planner)</option>
+                  <option value="architect">Architect (Path Planner)</option>
                   <option value="inverse">Inverse (Endgame Solver)</option>
                   <option value="surge">Surge (Power Spike)</option>
+                  <option value="anchored">Anchored (Unified)</option>
+                  <option value="spike2" selected>Spike Composer (Unified+Pin)</option>
+                  <option value="twinlane">Twin-Lane (Unified+Counter Col)</option>
                   <option value="fullsurvey">FullSurvey (CPU KILLER)</option>
                 </select>
               </label>
@@ -724,6 +762,21 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="mt-cancel">Cancel</button>
         <button class="btn-primary" id="mt-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag Detail: pick-item-to-add Modal -->
+  <div id="modal-tag-detail-add" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Add item to this tag</h2>
+      <div class="field-row">
+        <label>Search</label>
+        <input id="tdadd-search" type="text" placeholder="Filter items..." />
+      </div>
+      <div id="tdadd-list" class="tdadd-list"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="tdadd-cancel">Cancel</button>
       </div>
     </div>
   </div>

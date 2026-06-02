@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/headshot_booster/headshot_booster.png",
   "name": "Headshot Booster",
   "normalized_name": "headshot_booster",
@@ -31,7 +32,7 @@
       "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.05,
+      "cooldown_reduction": 0.15,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -52,13 +53,14 @@
       "gun_continuous_damage": 0.05,
       "gun_continuous_proc": 0.2,
       "gun_continuous_resistance": null,
-      "headshot_damage": 2.0,
+      "headshot_damage": 2,
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": 0.3,
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": 0.8,
       "low_max_hp": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Headshot_Booster",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Headshot_Booster"
 }

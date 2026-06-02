@@ -52,7 +52,7 @@
       "farmer": 0.3,
       "fire_rate": null,
       "fire_rate_slow": null,
-      "grounded": 0.1,
+      "grounded": 0.25,
       "gun_burst_damage": null,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
@@ -72,7 +72,7 @@
       "magazine_size_dependant": null,
       "melee_damage": null,
       "melee_resistance": null,
-      "mid_range": 0.33,
+      "mid_range": 0.5,
       "movement_slow": null,
       "multi_ability_focus": 0.3,
       "pure_damage": null,
@@ -87,13 +87,13 @@
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 0.1,
+      "spirit_burst_damage": 0.33,
       "spirit_burst_proc": 0.05,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.1,
       "spirit_continuous_proc": 0.05,
       "spirit_continuous_resistance": null,
-      "spirit_damage": 0.5,
+      "spirit_damage": 0.75,
       "spirit_lifesteal": null,
       "spirit_proc": null,
       "spirit_resist_shred": null,
@@ -102,7 +102,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 0.2
+      "vertical_mobility": 0.66
     }
   },
   "wiki_url": "https://deadlock.wiki/Arcane_Surge"

@@ -3,6 +3,7 @@
   "image_path": "/resources/items/superior_cooldown/superior_cooldown.png",
   "name": "Superior Cooldown",
   "normalized_name": "superior_cooldown",
+  "remarks": "",
   "tier": 3200,
   "upgrades_from": [
     "compress_cooldown"
@@ -28,9 +29,10 @@
       "charge_dependant": 0.25,
       "close_range": null,
       "close_to_team": null,
+      "continous_heal": 0.1,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 1.5,
+      "cooldown_reduction": 2,
       "counter_importance": null,
       "damage_sponge": null,
       "debuff": null,
@@ -68,14 +70,14 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.1,
+      "self_heal": 0.15,
       "shield": null,
       "silence": null,
       "single_ability_focus": 0.5,
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 0.05,
+      "spirit_burst_damage": null,
       "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.05,
@@ -89,10 +91,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "continous_heal": 0.1
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Superior_Cooldown",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Superior_Cooldown"
 }

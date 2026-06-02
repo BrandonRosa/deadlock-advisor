@@ -47,12 +47,12 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 1.0,
+      "engage": 1,
       "escape": null,
       "farmer": null,
       "fire_rate": null,
       "fire_rate_slow": null,
-      "grounded": 1.0,
+      "grounded": 1,
       "gun_burst_damage": null,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
@@ -66,8 +66,9 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": 0.05,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
-      "long_range": -0.75,
+      "long_range": -0.5,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": 0.6,
@@ -102,8 +103,7 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
   "wiki_url": "https://deadlock.wiki/Spirit_Snatch"

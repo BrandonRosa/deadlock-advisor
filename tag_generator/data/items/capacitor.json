@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/capacitor/capacitor.png",
   "name": "Capacitor",
   "normalized_name": "capacitor",
@@ -34,7 +35,7 @@
       "continous_heal": null,
       "continuous_damage": null,
       "continuous_resistance": null,
-      "cooldown_reduction": 0.1,
+      "cooldown_reduction": 0.25,
       "counter_importance": 0.45,
       "damage_sponge": null,
       "debuff": null,
@@ -45,8 +46,8 @@
       "duration_dependant": null,
       "engage": 0.5,
       "escape": null,
-      "farmer": 0.15,
-      "fire_rate": 0.15,
+      "farmer": 0.45,
+      "fire_rate": 0.5,
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": null,
@@ -62,6 +63,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": 1.2,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Capacitor",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Capacitor"
 }

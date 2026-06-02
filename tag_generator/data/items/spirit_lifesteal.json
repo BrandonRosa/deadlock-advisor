@@ -1,8 +1,11 @@
 {
   "category": "Vitality",
+  "compare_to": [],
+  "confidence": 0.15,
   "image_path": "/resources/items/spirit_lifesteal/spirit_lifesteal.png",
   "name": "Spirit Lifesteal",
   "normalized_name": "spirit_lifesteal",
+  "remarks": "",
   "tier": 1600,
   "upgrades_from": [],
   "values": {
@@ -15,7 +18,7 @@
       "aoe_cluster": null,
       "assist_importance": null,
       "away_from_team": null,
-      "bullet_damage": -0.05,
+      "bullet_damage": null,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
       "bullet_proc": null,
@@ -59,6 +62,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -80,14 +84,14 @@
       "single_target": null,
       "small_hitbox": null,
       "spawn_minions": null,
-      "spirit_burst_damage": 0.1,
+      "spirit_burst_damage": 0.25,
       "spirit_burst_proc": 0.25,
       "spirit_burst_resistance": null,
       "spirit_continuous_damage": 0.1,
       "spirit_continuous_proc": 0.25,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.2,
-      "spirit_lifesteal": 2.0,
+      "spirit_lifesteal": 2,
       "spirit_proc": null,
       "spirit_resist_shred": null,
       "spirit_resistance": null,
@@ -95,12 +99,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Spirit_Lifesteal",
-  "compare_to": [],
-  "remarks": "",
-  "confidence": 0.15
+  "wiki_url": "https://deadlock.wiki/Spirit_Lifesteal"
 }

@@ -95,7 +95,7 @@ def collect_per_item_blends(md):
     tier_num = None
     for line in md.split('\n'):
         # Item header begins a new chunk
-        if line.startswith('## ') and not line.startswith('## T'):
+        if line.startswith('## '):
             if cur is not None:
                 items.append(cur)
             cur = {'tier_num': None, 'is_sb': False, 'per_tag_numeric': {},
@@ -199,7 +199,7 @@ def main():
     changed = 0
     in_item = False
     for line in md.split('\n'):
-        if line.startswith('## ') and not line.startswith('## T'):
+        if line.startswith('## '):
             item_idx += 1
             in_item = True
             tag_seen_for_item = {}

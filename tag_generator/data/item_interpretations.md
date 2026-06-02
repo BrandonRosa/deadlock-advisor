@@ -68,7 +68,7 @@ Each item carries two tables:
 - **wiki**: https://deadlock.wiki/Extended_Magazine
 
 ### Interpretation
-Pure passive mag-size baseline: +30% Max Ammo and +8% Weapon Damage, always-on, no conditions. The named anchor for `magazine_size_dependant` at T1 — sets the bar that fancier ammo items must beat for their tier.
+Pure ammo stick: +30% Max Ammo, +8% Weapon Damage. Sustained-fire enabler for any gun — extra magazine depth lets you push through farming and skirmishes without reloads.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -79,11 +79,12 @@ Pure passive mag-size baseline: +30% Max Ammo and +8% Weapon Damage, always-on, 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `magazine_size_dependant` | +30% Max Ammo passive | 30 (eff ammo %) | 0.9 | adds | 30% × 1.0 uptime (pure passive). Sets the T1 anchor for clean passive ammo items. |
-| `bullet_damage` | +8% Wpn Dmg + T1 weapon baseline | 13.2 (eff gun-dmg %) | 0.7 | adds | 8% explicit + 5.2% T1 implicit weapon baseline. Always-on. |
-| `gun_burst_damage` | +8% per-shot in 1s window | 8 (dmg-% within 1s) | 0.2 | adds | R2: bullet_damage lifts gun_burst — per-shot amp applies inside <1s window. |
-| `gun_continuous_damage` | +8% dmg sustained + bigger mag | 12 (dmg-% outside 1s) | 0.4 | adds | R2: bullet_damage lifts continuous; mag size adds more shots before reload break (mag lifts continuous only). |
-| `farmer` | mag size aids wave clear | 25 (% importance) | 0.5 | adds | R28: cap 50. More shots/reload helps farm cadence. |
+| `bullet_damage` | +8% direct + T1 Weapon baseline | 13 (eff gun-dmg %) | 0.7 | adds | 5.2 baseline + 8 explicit. |
+| `magazine_size_dependant` | +30% Max Ammo | 30 (eff ammo %) | 0.9 | adds | Direct passive. |
+| `gun_continuous_damage` | sustained fire + ammo depth | 30 (raw dmg outside 1s) | 0.9 | adds | R2: ammo extends continuous fire. |
+| `gun_burst_damage` | per-shot WD lift in 1s | 15 (raw dmg within 1s) | 0.5 | adds | R2: bullet_damage lifts burst lightly. |
+| `farmer` | ammo depth enables wave-clear | 50 (% importance) | 1.0 | adds | R28: T1 farmer-friendly. |
+
 
 ---
 
@@ -92,7 +93,7 @@ Pure passive mag-size baseline: +30% Max Ammo and +8% Weapon Damage, always-on, 
 - **wiki**: https://deadlock.wiki/Rapid_Rounds
 
 ### Interpretation
-Clean passive fire-rate baseline: +9% Fire Rate, no conditions. The T1 anchor for pure passive fire-rate items per R32 — caps at 1.5, since pure-axis flat-stat items don't reach the 2.0 effect-per-cost ceiling.
+Pure fire-rate stick: +9% Fire Rate. T1 burst-damage enabler that lifts every weapon's DPS within a 1s window.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -102,11 +103,11 @@ Clean passive fire-rate baseline: +9% Fire Rate, no conditions. The T1 anchor fo
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate` | +9% Fire Rate passive | 9 (eff %) | 1.3 | adds | Direct fire-rate %, full uptime. R32: cap 1.5 — pure flat-stat single-axis. |
-| `bullet_damage` | T1 weapon baseline (implicit) | 5.2 (eff gun-dmg %) | 0.3 | adds | R31: every Weapon item carries the per-tier weapon baseline even with no explicit weapon% stat. |
-| `gun_burst_damage` | +9% RPM → more shots/sec inside 1s | 9 (dmg-% within 1s) | 0.3 | adds | R2 corrected: fire_rate lifts burst MORE than continuous — burst is DPS in 1s, fire rate directly increases shots-per-second in that window. |
-| `gun_continuous_damage` | +9% RPM lifts sustained mildly | 5 (dmg-% outside 1s) | 0.2 | adds | R2 corrected: continuous is mag/ammo-gated; fire_rate only helps until you reload. |
-| `magazine_size_dependant` | faster fire drains mag faster | 3 (eff ammo %) | — | relies | Fire-rate items rely on having enough ammo to sustain. |
+| `fire_rate` | +9% direct | 9 (eff %) | 1.3 | adds | Direct. |
+| `bullet_damage` | T1 baseline + FR-derived lift | 9 (eff gun-dmg %) | 0.5 | adds | 5.2 baseline + small FR-derived per-shot DPS lift. |
+| `gun_burst_damage` | FR lifts burst HEAVILY (R2 corrected) | 40 (raw dmg within 1s) | 1.2 | adds | R2: fire_rate primarily lifts gun_burst. |
+| `gun_continuous_damage` | FR lifts continuous lightly | 10 (raw dmg outside 1s) | 0.3 | adds | R2: less impact (ammo/mag-gated). |
+
 
 ---
 
@@ -115,28 +116,26 @@ Clean passive fire-rate baseline: +9% Fire Rate, no conditions. The T1 anchor fo
 - **wiki**: https://deadlock.wiki/Close_Quarters
 
 ### Interpretation
-Conditional weapon-damage amp for fights inside 15m, plus +20% Melee Resist. The T1 close-range gun-amp template: huge in-the-pocket DPS at the cost of zero long-range value.
+Close-range bullet amp: +20% Melee Resist, +20% Weapon Damage when target is within 15m. T1 close-fight anchor — rewards brawler positioning.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Weapon Damage | +20% | Passive, conditional <15m |
 | Melee Resist | +20% | Passive |
-| Close Range | 15m | Condition trigger |
+| Weapon Damage Conditional | +20% | Passive (within 15m) |
+| Close Range | 15m | Trigger |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_damage` | +20% Wpn Dmg <15m + T1 baseline | 16 (eff gun-dmg %) | 1.5 | adds | (20% × ~0.55 close-range uptime) + 5.2% T1 baseline ≈ 11 + 5.2 = 16. |
-| `bullet_damage` | scales with close-range gun build | 20 (eff gun-dmg %) | — | relies | The full 20% only realizes within 15m — RELIES on close-range play. |
-| `close_range` | gun amp inside 15m | 90 (% importance) | 1.9 | adds | Item literally cannot deliver outside 15m. |
-| `long_range` | anti-affinity at 20m+ | -25 (% importance) | -0.6 | adds | R30: range-gated item, encode small negative for explicit anti-synergy. |
-| `melee_damage` | R18 close-range gun amp at melee dist. | 10 (eff melee-dmg %) | 0.9 | adds | R18: weapon damage in melee range counts toward melee_damage at ~50% weight (20×0.5=10). |
-| `melee_resistance` | +20% Melee Resist passive | 20 (eff %) | 1.7 | adds | Full passive uptime. |
-| `gun_burst_damage` | per-shot amp lifts burst (close) | 11 (dmg-% within 1s) | 0.3 | adds | R2 + close-range uptime applied. |
-| `gun_continuous_damage` | sustained close-fire | 11 (dmg-% outside 1s) | 0.3 | adds | R2 + uptime — bullet_damage lifts both equally. |
-| `engage` | rewards committing to close range | 60 (% importance) | 1.3 | adds | Item rewards engaging. |
-| `grounded` | close-range fighting is grounded | 40 (% importance) | 1.6 | adds | R7. |
+| `bullet_damage` | +20% × ~0.55 close uptime + T1 baseline | 16 (eff gun-dmg %) | 0.9 | adds | 5.2 baseline + 11 effective (close-gated). |
+| `close_range` | <15m gun-amp gating | 80 (% importance) | 1.7 | adds | ⚖️ Named close_range T1 anchor. |
+| `melee_resistance` | +20% direct | 20 (eff %) | 2.0 | adds | Direct passive. |
+| `engage` | close-fight commit | 50 (% importance) | 1.1 | adds | R11: close fights need engagement. |
+| `gun_burst_damage` | per-shot close amp | 20 (raw dmg within 1s) | 0.6 | adds | R2: close-range bullet amp lifts burst. |
+| `gun_continuous_damage` | sustained close fire | 20 (raw dmg outside 1s) | 0.6 | adds | R2: bullet amp on continuous. |
+| `grounded` | close-fight grounded | 35 (% importance) | 1.4 | adds | R7. |
+
 
 ---
 
@@ -145,25 +144,24 @@ Conditional weapon-damage amp for fights inside 15m, plus +20% Melee Resist. The
 - **wiki**: https://deadlock.wiki/Headshot_Booster
 
 ### Interpretation
-Flat +45 bonus damage on headshots plus +30 HP cushion. The named anchor for `headshot_damage` at T1 — the cheapest way to start scaling the headshot-importance axis.
+Headshot proc gun amp: +30 HP, +45 bonus damage on the next headshot vs enemy Heroes (9s CD). Per Notes: doesn't apply to Troopers/NPCs with headshot hitboxes; affected by Damage Falloff. T1 headshot anchor — rewards aim.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Head Shot Bonus Damage | +45 | Passive |
 | Bonus Health | +30 | Passive |
+| Head Shot Bonus Damage | +45 | Passive (next headshot, 9s CD) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `headshot_damage` | +45 bonus dmg per headshot | 60 (% importance) | 2.0 | adds | Per 01: headshot_damage is % importance, not flat damage. T1 named anchor → ~60. |
-| `bullet_damage` | T1 weapon baseline (implicit) | 5.2 (eff gun-dmg %) | 0.3 | adds | R31: per-tier weapon baseline only. |
-| `gun_burst_proc` | +45 dmg on first head — burst-flavored | 1.0 (proc index) | 1.5 | adds | Instant proc (single-shot head) with instant payout, MaxProcWindow≈0.1s → 100%×(0.1/0.1)=1.0 burst index. |
-| `gun_burst_damage` | first-head dmg in 1s | 45 (raw dmg within 1s) | 1.4 | adds | One headshot delivers 45 raw bonus damage in the 1s window. |
-| `single_target` | headshots are single-target | 60 (% importance) | 1.8 | adds | Headshot is point-and-click. |
-| `high_max_hp` | +30 HP explicit | 30 (HP) | 0.3 | adds | Weapon item — only explicit HP counts (no Vitality baseline cross-credit). |
-| `mid_range` | typical head-range bands | 40 (% importance) | 1.8 | adds | Headshots happen most at mid-range engagements. |
-| `long_range` | small head-rate at scope ranges | 30 (% importance) | 0.7 | adds | Headshots happen at long range with patience too. |
+| `headshot_damage` | 45 bonus dmg per headshot proc | 55 (% importance) | 2.0 | adds | ⚖️ T1 headshot anchor. |
+| `bullet_damage` | T1 baseline + per-headshot amp | 11 (eff gun-dmg %) | 0.6 | adds | 5.2 baseline + ~5.8 effective from 45-dmg proc. |
+| `gun_burst_proc` | proc per 9s CD on headshot | 0.20 (proc index) | 0.3 | adds | Hits within 1s window; gated by 9s CD. |
+| `single_target` | per-headshot single-target | 35 (% importance) | 1.1 | adds | One target at a time. |
+| `mid_range` | headshots reward mid-range aim | 25 (% importance) | 1.1 | adds | Mid-range identity. |
+| `high_max_hp` | +30 HP (Weapon, no Vit baseline) | 30 (HP) | 0.3 | adds | Explicit only. |
+
 
 ---
 
@@ -172,7 +170,7 @@ Flat +45 bonus damage on headshots plus +30 HP cushion. The named anchor for `he
 - **wiki**: https://deadlock.wiki/High-Velocity_Rounds
 
 ### Interpretation
-+60% Bullet Velocity and +8% Weapon Damage — faster bullets mean easier long-range tracking and better headshot landing at distance. The T1 long-range enabler; range-flat 60% bullet speed earns the same Normalized at every tier (per 03 sparse-tier rule).
+Velocity stat stick: +60% Bullet Velocity, +8% Weapon Damage. Lands ranged shots more reliably — long-range bullet supporter.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -183,13 +181,12 @@ Flat +45 bonus damage on headshots plus +30 HP cushion. The named anchor for `he
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `long_range` | faster bullets = easier hits 20m+ | 50 (% importance) | 1.1 | adds | Bullet velocity matters most at long range where projectile lead matters. |
-| `mid_range` | also helps 11–19m tracking | 30 (% importance) | 1.3 | adds | Moderate help in default band. |
-| `bullet_damage` | +8% Wpn Dmg + T1 baseline | 13.2 (eff gun-dmg %) | 0.7 | adds | 8% explicit + 5.2% T1 implicit. |
-| `gun_burst_damage` | per-shot amp | 8 (dmg-% within 1s) | 0.2 | adds | R2: bullet_damage equally lifts both. |
-| `gun_continuous_damage` | sustained DPS | 8 (dmg-% outside 1s) | 0.2 | adds | R2. |
-| `headshot_damage` | faster bullets aid headshots | 30 (% importance) | 1.0 | adds | Headshot affinity from bullet velocity. |
-| `single_target` | aimed shots are single-target | 35 (% importance) | 1.1 | adds | Long-range aim. |
+| `bullet_damage` | +8% direct + T1 baseline | 13 (eff gun-dmg %) | 0.7 | adds | 5.2 baseline + 8 explicit. |
+| `long_range` | +60% velocity lands ranged shots | 40 (% importance) | 0.9 | adds | Velocity directly benefits range. |
+| `gun_burst_damage` | per-shot WD lift in 1s | 15 (raw dmg within 1s) | 0.5 | adds | R2. |
+| `gun_continuous_damage` | per-shot WD lift sustained | 15 (raw dmg outside 1s) | 0.5 | adds | R2 symmetric. |
+| `headshot_damage` | velocity aids landing heads | 20 (% importance) | 0.7 | adds | Indirect aim assist. |
+
 
 ---
 
@@ -198,25 +195,24 @@ Flat +45 bonus damage on headshots plus +30 HP cushion. The named anchor for `he
 - **wiki**: https://deadlock.wiki/Monster_Rounds
 
 ### Interpretation
-NPC-focused farm item: +25% Weapon Damage and +25% Bullet Resist vs NPCs, plus +1 OOC Regen. The cleanest dedicated `farmer` item — NPC-only bonus does NOT inflate hero `bullet_damage` (per 03 judgment anchor rule).
+NPC-focused farm/sustain stick: +25% Weapon Damage vs NPCs, +25% Bullet Resist vs NPCs, +1 OOC Regen. Per Notes: applies vs Troopers + Guardians + Walkers + Denizen + Patron + Graves' Ghouls. T1 farm anchor for lane push.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Weapon Damage vs. NPCs | +25% | Passive (NPC-only) |
-| Bullet Resist vs. NPCs | +25% | Passive (NPC-only) |
+| Weapon Damage vs NPCs | +25% | Passive (NPC-conditional) |
+| Bullet Resist vs NPCs | +25% | Passive |
 | Out of Combat Regen | +1 | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `farmer` | +25% wpn dmg + 25% resist vs NPCs | 80 (% importance) | 1.6 | adds | Highest-purity farm item at T1. |
-| `bullet_damage` | T1 weapon baseline ONLY | 5.2 (eff gun-dmg %) | 0.3 | adds | R31: NPC-only damage does NOT count toward hero bullet_damage (per 03 anchor rule). |
-| `self_heal` | +1 OOC regen | 4.5 (HP total) | 0.0 | adds | 1 HP/s × ~15s OOC session × 0.3 between-fight uptime ≈ 4.5 HP per cycle. |
-| `continous_heal` | OOC regen outside 1s | 4.2 (HP outside 1s) | 0.0 | adds | 1 × (15−1)s × 0.3 = 4.2 HP outside the first 1s of OOC. |
-| `high_max_hp` | OOC sustain = effective HP cushion | 15 (HP) | — | relies | R8: heal-pseudo items rely on HP cushion. |
-| `gun_burst_damage` | hero damage floor only | 5 (dmg-% within 1s) | 0.2 | adds | R2 floor from baseline; NPC-only doesn't count. |
-| `gun_continuous_damage` | hero damage floor only | 5 (dmg-% outside 1s) | 0.2 | adds | R2 floor. |
+| `farmer` | NPC-only weapon damage + resist | 80 (% importance) | 1.6 | adds | ⚖️ T1 farmer anchor — NPC bonus. |
+| `bullet_damage` | T1 baseline only (NPC-only conditional excluded) | 5.2 (eff gun-dmg %) | 0.3 | adds | Baseline only — NPC damage doesn't lift hero gun-damage axis. |
+| `scaling_early` | early-game lane-push farmer | 50 (% importance) | 1.4 | adds | Early game souls advantage. |
+| `self_heal` | +1 OOC × 20s | 20 (HP total) | 0.2 | adds | Small OOC tick. |
+| `mid_range` | NPC-clear lane positioning | 25 (% importance) | 1.1 | adds | Lane skirmish range. |
+
 
 ---
 
@@ -225,27 +221,24 @@ NPC-focused farm item: +25% Weapon Damage and +25% Bullet Resist vs NPCs, plus +
 - **wiki**: https://deadlock.wiki/Restorative_Shot
 
 ### Interpretation
-Heal-on-hit Weapon: +6% Weapon Damage passive, plus 50 HP heal on hero hit / 20 HP heal on NPC-or-orb hit. The T1 lane-sustain weapon — combines gun lifesteal flavor with farming sustain.
+Bullet-on-hit heal: +6% Weapon Damage, next bullet heals 50 (hero) / 20 (NPC), 6s CD. Per Notes: goes on cooldown even on miss. T1 sustain-on-aim hybrid.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Weapon Damage | +6% | Passive |
-| Healing From Heroes | 50 | Passive (on hit) |
-| Healing From NPCs / Orbs | 20 | Passive (on hit) |
+| Heal On Hero Hit | 50 | Passive (6s CD) |
+| Heal On NPC Hit | 20 | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `self_heal` | 50 HP per hero hit + 20 per NPC hit (per-fight total) | 65 (HP total) | 0.7 | adds | Typical fight: ~1 hero proc (50 HP) + several NPC procs (~15 HP cumulative). |
-| `burst_heal` | proc fires inside 1s of trigger | 35 (HP within 1s) | 0.5 | adds | 50 × 0.7 uptime — proc is instant on the triggering hit. |
-| `continous_heal` | sustained heal-on-hit outside 1s | 28 (HP outside 1s) | 0.2 | adds | 50/5s = 10 HP/s × 4s × 0.7 uptime = 28 HP outside the first 1s window. |
-| `farmer` | NPC heals enable laning sustain | 40 (% importance) | 0.8 | adds | R28: sustain enables farming uptime. |
-| `bullet_damage` | +6% Wpn Dmg + T1 baseline | 11.2 (eff gun-dmg %) | 0.6 | adds | 6% + 5.2% T1 baseline. |
-| `gun_burst_damage` | per-shot lift | 6 (dmg-% within 1s) | 0.2 | adds | R2. |
-| `gun_continuous_damage` | sustained DPS+heal pairing | 6 (dmg-% outside 1s) | 0.2 | adds | R2. |
-| `high_max_hp` | heal scales with HP cushion | 15 (HP) | — | relies | R8. |
-| `gun_continuous_proc` | every bullet hit heals — sustained proc | 0.12 (proc index) | 0.2 | adds | R5: heal-proc on hit, no internal cd, single-target. ProcImportance≈70% / (1.0 × 6s effect amortized) = 0.12. |
+| `bullet_damage` | +6% direct + T1 baseline | 11 (eff gun-dmg %) | 0.6 | adds | 5.2 baseline + 6 explicit. |
+| `self_heal` | 50/6s × typical combat ≈ 150 HP | 150 (HP total) | 1.5 | adds | Sustained self-heal via aim. |
+| `burst_heal` | 50 HP within 1s on each proc | 50 (HP within 1s) | 0.5 | adds | Instant per-proc heal. |
+| `gun_burst_proc` | per-bullet heal proc | 0.15 (proc index) | 0.2 | adds | 6s CD throttles. |
+| `farmer` | NPC heal also triggers | 35 (% importance) | 0.7 | adds | R28: aim-while-farming. |
+
 
 ---
 
@@ -254,7 +247,7 @@ Heal-on-hit Weapon: +6% Weapon Damage passive, plus 50 HP heal on hero hit / 20 
 - **wiki**: https://deadlock.wiki/Extra_Health
 
 ### Interpretation
-Pure flat +210 Bonus Health. The T1 named anchor for `high_max_hp` — cap 1.5 per R32 (pure single-axis flat-stat items don't reach 2.0; hybrid HP-scaling items like Colossus / Fortitude do).
+Pure HP stick: +210 Bonus Health. The T1 raw-HP anchor — biggest single-stat HP buy at T1.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -264,9 +257,9 @@ Pure flat +210 Bonus Health. The T1 named anchor for `high_max_hp` — cap 1.5 p
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `high_max_hp` | +210 Bonus Health passive | 210 (HP) | 2.0 | adds | Pure flat HP. T1 anchor; cap 1.5 per R32. |
-| `damage_sponge` | bigger HP = absorb more (incidental) | 20 (% importance) | — | relies | R26: incidental, not the item's purpose — small partial. |
-| `large_hitbox` | more HP softly correlates | 10 (% importance) | — | relies | Very small partial. |
+| `high_max_hp` | T1 Vit baseline + 210 HP | 229 (HP) | 2.0 | adds | ⚖️ T1 high_max_hp anchor. |
+| `damage_sponge` | raw HP = sponge identity | 45 (% importance) | 0.9 | adds | Pure HP stat stick. |
+
 
 ---
 
@@ -275,24 +268,23 @@ Pure flat +210 Bonus Health. The T1 named anchor for `high_max_hp` — cap 1.5 p
 - **wiki**: https://deadlock.wiki/Extra_Regen
 
 ### Interpretation
-+2.5 Health Regen and +1.5 Out of Combat Regen — pure passive sustain item, no triggers. The T1 always-on regen baseline for lane sustain.
+Pure regen stick: +2.5 Health Regen, +1.5 OOC Regen. Continuous self-heal anchor for T1 — sustains lane presence between fights.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Health Regen | +2.5 | Passive (always on) |
-| Out of Combat Regen | +1.5 | Passive (OOC only) |
+| Health Regen | +2.5 | Passive |
+| Out of Combat Regen | +1.5 | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `continous_heal` | 2.5 always × ~29s post-burst + 1.5 OOC × 9s | 88.5 (HP outside 1s) | 0.6 | adds | Realistic gank/escape: 1.5×(10−1)s OOC + 2.5×30s always-on = 13.5 + 75 = 88.5 HP total outside 1s. |
-| `burst_heal` | regen within first 1s | 4 (HP within 1s) | 0.1 | adds | 2.5+1.5 ≈ 4 HP in the first 1s window. |
-| `self_heal` | total per gank/escape cycle | 92 (HP total) | 0.9 | adds | Sum of burst + continuous. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.3 | adds | R31: T1 Vitality baseline ≈ +3.8% × 500 base ≈ +19 HP equivalent. |
-| `high_max_hp` | regen scales with HP cushion | 25 (HP) | — | relies | R8/R10. |
-| `farmer` | sustain enables farm uptime | 30 (% importance) | 0.6 | adds | R28. |
-| `damage_sponge` | regen-tank synergy (incidental) | 15 (% importance) | — | relies | R26 small. |
+| `self_heal` | 2.5×30s combat + 1.5×20s OOC | 105 (HP total) | 1.0 | adds | Sustained self-regen. |
+| `continous_heal` | regen ticks outside 1s | 100 (HP outside 1s) | 0.7 | adds | ⚖️ T1 continous_heal flavor. |
+| `burst_heal` | first-1s tick | 2.5 (HP within 1s) | 0.0 | adds | Small per-second. |
+| `high_max_hp` | T1 Vit baseline | 19 (HP) | 0.2 | adds | R31. |
+| `farmer` | regen sustains lane farm | 40 (% importance) | 0.8 | adds | R28. |
+
 
 ---
 
@@ -301,25 +293,23 @@ Pure flat +210 Bonus Health. The T1 named anchor for `high_max_hp` — cap 1.5 p
 - **wiki**: https://deadlock.wiki/Extra_Stamina
 
 ### Interpretation
-+1 Stamina charge and +12% Stamina Recovery — the T1 stamina-bundle item. Per R9, stamina items get the full mobility suite: horizontal + vertical + aerial + engage + escape.
+Stamina stat stick: +1 Stamina, +12% Stamina Recovery. Mobility/jumping enabler — more dashes, more aerial options.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Stamina | +1 | Passive (extra charge) |
+| Stamina | +1 | Passive |
 | Stamina Recovery | +12% | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `vertical_mobility` | +1 stamina = extra dash/jump | 1 (units) | 0.3 | adds | R9: each stamina charge ≈ +1 vertical traverse unit. |
-| `horizontal_mobility` | +1 stamina dash = ~0.7 m/s effective | 0.7 (m/s eff) | 1.1 | adds | Per 01: 1 stamina dash ≈ 6m over ~9–10s cycle → 0.6–0.7 m/s. |
-| `aerial` | extra mid-air dash | 40 (% importance) | 0.9 | adds | R9. |
-| `engage` | extra dash to close gaps | 50 (% importance) | 1.1 | adds | R9. |
-| `escape` | extra dash to retreat | 50 (% importance) | 1.0 | adds | R9. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.2 | adds | R31. |
-| `farmer` | mobility enables jungle/lane rotations | 25 (% importance) | 0.5 | adds | R28: cap 50. |
-| `small_hitbox` | mobility = harder to hit (partial) | 25 (% importance) | 1.0 | adds | R26: incidental, not item's purpose. |
+| `vertical_mobility` | +1 stamina + faster recovery | 2.5 (units) | 2.0 | adds | Direct mobility enabler. |
+| `horizontal_mobility` | stamina-dash adds m/s | 0.65 (m/s eff) | 0.9 | adds | Stamina × 0.65 m/s effective. |
+| `high_max_hp` | T1 Vit baseline | 19 (HP) | 0.2 | adds | R31. |
+| `escape` | mobility-flavored | 35 (% importance) | 0.7 | adds | R14: mobility = escape. |
+| `farmer` | stamina enables rotations | 30 (% importance) | 0.6 | adds | R28. |
+
 
 ---
 
@@ -328,29 +318,23 @@ Pure flat +210 Bonus Health. The T1 named anchor for `high_max_hp` — cap 1.5 p
 - **wiki**: https://deadlock.wiki/Grit
 
 ### Interpretation
-T1 Vitality. +1 out-of-combat regen passive and an active that grants a 200 HP barrier for 4s on a 60s cooldown. Component for Weapon Shielding / Reactive Barrier / Guardian Ward / Spirit Shielding.
+T1 active barrier: +1 OOC regen, 200 barrier for 4s on 60s cooldown. Component for Weapon Shielding, Reactive Barrier, Guardian Ward, Spirit Shielding.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Out of Combat Regen | +1 | Passive |
-| Barrier | 200 | Active (4s, 60s CD) |
-| Barrier Duration | 4s | Active |
+| Barrier | 200 | Active (4s) |
 | Active Cooldown | 60s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 200 barrier × ~(4/60) raw uptime, but active = on-demand burst soak | 100 (shield HP) | 0.5 | adds | Active barrier provides full 200 HP soak per cast every 60s; effective ≈100. |
-| `burst_resistance` | barrier absorbs first 200 HP of burst | 25 (eff %) | 1.0 | adds | 200 HP at base ~500 HP = ~40% × on-demand → ~25%. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.2 | adds | R31. |
-| `high_max_hp` | barrier ≈ effective HP buff | 8 (HP) | — | relies | R10: shield is pseudo-HP. |
-| `damage_sponge` | barrier soaks incoming hits | 25 (% importance) | — | relies | R26: incidental — short-window. |
-| `self_buff` | self-cast active | 40 (% importance) | 1.1 | adds | Self-only barrier. |
-| `escape` | 4s panic-button barrier | 40 (% importance) | 0.8 | adds | Reactive escape cushion. |
-| `counter_importance` | reactive barrier vs burst | 25 (% importance) | 0.5 | adds | R13: small. |
-| `self_heal` | +1 OOC regen | 30 (HP total) | 0.3 | adds | 1/s × 30s typical OOC window. |
-| `farmer` | OOC regen enables farm uptime | 30 (% importance) | 0.6 | adds | R28. |
+| `shield` | 200 barrier on-demand burst soak | 100 (shield HP) | 0.6 | adds | Full 200 HP soak per cast; ~100 effective per fight. |
+| `high_max_hp` | T1 Vit baseline + barrier-as-HP | 27 (HP) | 0.2 | adds | 19 baseline + 8 effective shield HP. |
+| `self_buff` | self-cast active | 35 (% importance) | 1.0 | adds | Self-only. |
+| `escape` | reactive barrier covers retreat | 40 (% importance) | 0.8 | adds | Panic-button defense. |
+| `self_heal` | +1 OOC × 30s | 30 (HP total) | 0.3 | adds | Small OOC. |
 
 
 ---
@@ -360,7 +344,7 @@ T1 Vitality. +1 out-of-combat regen passive and an active that grants a 200 HP b
 - **wiki**: https://deadlock.wiki/Healing_Rite
 
 ### Interpretation
-Active heal cast on self or ally: 300 total HP over 20s, +2m sprint while channeling, 30m cast range. The T1 utility-heal anchor — self OR ally cast makes it `assist_importance`-relevant.
+Self-OR-ally cast heal: 300 HP regen over 20s + +2m sprint while channeling, 30m cast range, 70s CD. Per Notes: dispelled if you take damage (even through barriers). Per description: "Can be self-cast." T1 utility-heal anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -369,20 +353,20 @@ Active heal cast on self or ally: 300 total HP over 20s, +2m sprint while channe
 | Sprint Speed Conditional | +2m | Active (while channeling) |
 | Regen Duration | 20s | Active |
 | Cast Range | 30m | Active |
+| Cooldown | 70s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `self_heal` | 300 HP / 20s on self-cast (~67% self) | 200 (HP total) | 2.0 | adds | 300 × 0.67 self-uptime = 200 HP per cast on self. R32: pure utility heal — cap 1.5. |
-| `team_heal` | 300 HP / 20s on ally-cast (~33% ally) | 100 (HP total) | 0.6 | adds | 33% ally-cast share × 300 HP = 100. |
-| `burst_heal` | first-1s tick value | 15 (HP within 1s) | 0.2 | adds | 300/20s = 15 HP/s — only 15 HP within the 1s window (not a burst tool). |
-| `continous_heal` | rest of the heal outside 1s | 285 (HP outside 1s) | 2.0 | adds | 300 − 15 = 285 HP over the remaining 19s. |
-| `assist_importance` | ally-targetable heal | 70 (% importance) | 1.6 | adds | R27: clear support-flavored tool. |
-| `counter_importance` | reactive heal vs burst | 35 (% importance) | 0.7 | adds | R13. |
-| `horizontal_mobility` | +2m sprint while channeling | 1.0 (m/s eff) | 1.5 | adds | Channel-only ×0.5 discount: 2 × 0.5 = 1 m/s effective. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.3 | adds | R31. |
-| `high_max_hp` | heal scales with carrier HP | 20 (HP) | — | relies | R8/R10. |
-| `farmer` | sustain enables farm uptime | 30 (% importance) | 0.6 | adds | R28. |
+| `self_heal` | 300 HP × ~0.67 self-cast share | 200 (HP total) | 2.0 | adds | Self-cast dominant. |
+| `team_heal` | 300 HP × ~0.33 ally-cast share | 100 (HP total) | 0.6 | adds | Ally-cast option per description. |
+| `continous_heal` | 300/20s = 15 HP/s outside 1s | 285 (HP outside 1s) | 2.0 | adds | Most heal is over 19s. |
+| `burst_heal` | first-1s tick | 15 (HP within 1s) | 0.2 | adds | Small initial. |
+| `assist_importance` | ally-cast utility heal | 70 (% importance) | 1.6 | adds | R27. |
+| `horizontal_mobility` | +2m sprint × channel-only ×0.5 | 1.0 (m/s eff) | 1.4 | adds | Channel-only discount. |
+| `high_max_hp` | T1 Vit baseline | 19 (HP) | 0.2 | adds | R31. |
+| `counter_importance` | reactive heal vs poke | 35 (% importance) | 0.7 | adds | R13. |
+
 
 ---
 
@@ -391,27 +375,25 @@ Active heal cast on self or ally: 300 total HP over 20s, +2m sprint while channe
 - **wiki**: https://deadlock.wiki/Melee_Lifesteal
 
 ### Interpretation
-+12% Melee Damage and 100 HP heal on melee hit. The T1 melee-flavored sustain item — implicitly grounded, R21 makes it a close_range-only item.
+Melee-flavored sustain: +12% Melee Damage, 100 heal on melee hit (8s CD; 1.5× longer for Light Melee, 30% effective vs non-heroes). T1 melee-brawler anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Melee Damage | +12% | Passive |
-| Heal on Melee Hit | 100 | Passive (on melee strike) |
+| Heal on Melee Hit | 100 | Passive (8s CD, Heavy; 12s Light) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `melee_damage` | +12% melee dmg | 12 (eff melee-dmg %) | 1.1 | adds | Direct passive %. |
-| `self_heal` | 100 HP per melee strike (typical 1–2 procs/fight) | 120 (HP total) | 1.2 | adds | ~1.2 melee-strikes per fight × 100 HP. |
-| `burst_heal` | each melee proc lands instantly | 100 (HP within 1s) | 1.4 | adds | The 100 HP heal triggers on contact — single-tick. |
-| `close_range` | melee-only item | 90 (% importance) | 1.9 | adds | R21: melee items score close_range 80–100 (cannot function outside ~3m). |
-| `long_range` | anti-affinity | -40 (% importance) | -0.9 | adds | R30: melee-gated item gets small negative long_range. |
-| `engage` | melee strike commits a fight | 70 (% importance) | 1.6 | adds | R11. |
-| `grounded` | melee is grounded | 50 (% importance) | 2.0 | adds | R7. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.3 | adds | R31. |
-| `high_max_hp` | heal scales with HP | 15 (HP) | — | relies | R8. |
-| `damage_sponge` | melee brawler synergy (incidental) | 20 (% importance) | — | relies | R26 partial. |
+| `melee_damage` | +12% direct | 12 (eff melee-dmg %) | 1.1 | adds | Direct passive. |
+| `self_heal` | 100 HP per proc × ~1.5 procs/fight | 150 (HP total) | 1.5 | adds | Sustained melee sustain. |
+| `burst_heal` | 100 HP within 1s of proc | 100 (HP within 1s) | 1.1 | adds | Instant on contact. |
+| `close_range` | melee-gated entirely | 90 (% importance) | 1.9 | adds | R21: melee = close. |
+| `engage` | melee commits a fight | 65 (% importance) | 1.4 | adds | R11. |
+| `grounded` | melee is grounded | 45 (% importance) | 1.8 | adds | R7. |
+| `high_max_hp` | T1 Vit baseline | 19 (HP) | 0.2 | adds | R31. |
+
 
 ---
 
@@ -420,7 +402,7 @@ Active heal cast on self or ally: 300 total HP over 20s, +2m sprint while channe
 - **wiki**: https://deadlock.wiki/Rebuttal
 
 ### Interpretation
-Parry-flavored defensive: -1.75s Parry Cooldown, +18% Melee Resist, +75 Bonus Health, and a conditional +30% Bonus Damage 6s buff after parry. R19 case where `self_buff` legitimately applies (conditional-uptime buff state).
+Parry-focused reactive kit: -1.75s Parry CD, +18% Melee Resist, +75 HP. On successful Parry vs hero: heal damage parried + return that damage + +30% damage 6s. Per Notes: procs vs Viscous' Puddle Punch; does NOT proc when parrying through Counterspell.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -428,21 +410,20 @@ Parry-flavored defensive: -1.75s Parry Cooldown, +18% Melee Resist, +75 Bonus He
 | Parry Cooldown | -1.75s | Passive |
 | Melee Resist | +18% | Passive |
 | Bonus Health | +75 | Passive |
-| Bonus Damage Conditional | +30% | Conditional (post-parry buff) |
-| Buff Duration | 6s | Conditional |
+| Bonus Damage Conditional | +30% | Passive (on parry, 6s) |
+| Buff Duration | 6s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `melee_resistance` | +18% + parry-cd pseudo | 23 (eff %) | 2.0 | adds | 18% explicit + R22 parry-CD pseudo (-1.75s on ~6s base ≈ +29% more parries × ~15% base parry effect ≈ +5%). |
-| `bullet_resistance` | parry-cd small pseudo bullet | 4 (eff %) | 0.5 | adds | R22 partial. |
-| `high_max_hp` | +75 HP + T1 baseline | 94 (HP) | 0.9 | adds | 75 + 19 T1 baseline. |
-| `self_buff` | +30% bonus dmg post-parry, 6s | 30 (% importance) | 0.9 | adds | R19 legitimate: conditional-uptime buff state. |
-| `bullet_damage` | self_buff dmg lifts gun | 8 (eff gun-dmg %) | — | relies | The 30% buff lifts bullet damage when active. |
-| `counter_importance` | parry is reactive | 70 (% importance) | 1.4 | adds | R13/R27: explicit counter to melee strikes. |
-| `engage` | post-parry damage window | 30 (% importance) | 0.7 | adds | The buff rewards engaging after a parry. |
-| `grounded` | parry mechanic is grounded | 30 (% importance) | 1.2 | adds | R7. |
-| `damage_sponge` | tank-counter synergy (incidental) | 20 (% importance) | — | relies | R26. |
+| `melee_resistance` | +18% direct | 18 (eff %) | 1.8 | adds | Direct passive. |
+| `high_max_hp` | T1 Vit baseline + 75 HP | 94 (HP) | 0.8 | adds | 19 + 75. |
+| `self_heal` | parry heals = ~60 HP per typical fight | 60 (HP total) | 0.6 | adds | Reactive heal on parry. |
+| `burst_heal` | parry heal lands instantly | 60 (HP within 1s) | 0.6 | adds | Single-instance on parry. |
+| `counter_importance` | parry counter to melee/abilities | 45 (% importance) | 0.9 | adds | R13. |
+| `engage` | parry commits a melee read | 45 (% importance) | 1.0 | adds | R11: parry-read commits. |
+| `grounded` | parry is grounded | 40 (% importance) | 1.6 | adds | R7. |
+
 
 ---
 
@@ -451,26 +432,23 @@ Parry-flavored defensive: -1.75s Parry Cooldown, +18% Melee Resist, +75 Bonus He
 - **wiki**: https://deadlock.wiki/Sprint_Boots
 
 ### Interpretation
-+2m Sprint Speed and +2 Out of Combat Regen — the cheapest rotation/sustain hybrid. Sprint speed only applies while sprinting (not aiming/shooting), so ×0.5 channel-only discount applies to the mobility raw.
+Mobility stat stick: +2m Sprint Speed, +2 OOC Regen. Pure map-rotation enabler — every hero buys some flavor of mobility, and this is the T1 anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Sprint Speed | +2m | Passive (sprint only) |
-| Out of Combat Regen | +2 | Passive (OOC only) |
+| Sprint Speed | +2m | Passive |
+| Out of Combat Regen | +2 | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `horizontal_mobility` | +2m sprint-only | 1.0 (m/s eff) | 1.5 | adds | Sprint-only ×0.5: 2 × 0.5 = 1 m/s effective. |
-| `self_heal` | +2 OOC regen | 9 (HP total) | 0.1 | adds | 2 HP/s × 15s OOC × 0.3 uptime ≈ 9 HP per cycle. |
-| `continous_heal` | OOC regen outside 1s | 8.4 (HP outside 1s) | 0.1 | adds | 2 × (15−1) × 0.3 = 8.4. |
-| `burst_heal` | OOC first-1s contribution | 0.6 (HP within 1s) | 0.0 | adds | Small initial tick. |
-| `farmer` | rotation speed = farm uptime | 35 (% importance) | 0.7 | adds | R28/R14: mobility item gets farm credit. |
-| `high_max_hp` | T1 Vitality baseline | 19 (HP) | 0.2 | adds | R31. |
-| `escape` | sprint disengage | 45 (% importance) | 0.9 | adds | Sprint enables retreats. |
-| `engage` | sprint approach | 35 (% importance) | 0.8 | adds | Sprint also enables rotations into fights. |
-| `small_hitbox` | faster = harder to hit (partial) | 20 (% importance) | 0.8 | adds | R26 incidental. |
+| `horizontal_mobility` | +2m sprint direct | 1.4 (m/s eff) | 2.0 | adds | ⚖️ T1 horizontal_mobility anchor. |
+| `self_heal` | +2 OOC × 20s OOC | 40 (HP total) | 0.4 | adds | Small OOC tick. |
+| `high_max_hp` | T1 Vit baseline | 19 (HP) | 0.2 | adds | R31. |
+| `farmer` | mobility = farm rotation | 40 (% importance) | 0.8 | adds | R28: T1 mobility-farmer. |
+| `escape` | mobility = escape | 40 (% importance) | 0.8 | adds | R14. |
+
 
 ---
 
@@ -479,24 +457,22 @@ Parry-flavored defensive: -1.75s Parry Cooldown, +18% Melee Resist, +75 Bonus He
 - **wiki**: https://deadlock.wiki/Extra_Charge
 
 ### Interpretation
-+1 Bonus Ability Charge for a chosen ability, +7 Bonus Spirit Power for Charged Abilities. The T1 charge-stack item per R29 — gets `cooldown_reduction adds` credit even though it has no explicit CDR%. NOT an imbue item (R23 does NOT apply).
+Charge-stacker: +1 Bonus Ability Charge for charged abilities, +7 Bonus SP for Charged Abilities. Per Notes: only affects abilities that are already charged (or become charged via upgrades). T1 charge_dependant anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Bonus Ability Charges | +1 | Passive (single chosen ability) |
-| Bonus Spirit Power for Charged Abilities | +7 | Passive (charged abilities scope) |
+| Bonus Ability Charges | +1 | Passive (charged abilities only) |
+| Bonus Spirit Power for Charged Abilities | +7 | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `charge_dependant` | +1 charge — defining axis | 70 (% importance) | 1.5 | adds | T1 charge-economy anchor. |
-| `cooldown_reduction` | extra charge ≈ back-to-back casts | 8 (eff CDR %) | 1.1 | adds | R29: 0.3–0.5 Normalized range. ~8% effective CDR for the target ability. |
-| `spirit_damage` | +7 SP for charged abilities + T1 baseline | 8.5 (SP-equiv) | 0.4 | adds | T1 Spirit baseline 4.3 + (7 SP × ~0.6 charged-uptime) = 8.5. |
-| `spirit_burst_damage` | charge-ability burst | 5 (dmg-equiv within 1s) | 0.1 | adds | R2 propagation (SP equally lifts spirit burst/continuous). |
-| `spirit_continuous_damage` | charge-ability sustained | 5 (dmg-equiv outside 1s) | 0.1 | adds | R2. |
-| `ability_spam` | more casts possible | 35 (% importance) | 0.9 | adds | Extra charge = higher uses/s ceiling. |
-| `farmer` | charge-eco = more farm casts | 30 (% importance) | 0.6 | adds | R28/R29 — charge-stack helps farm cadence. |
+| `charge_dependant` | +1 charge on charged abilities | 70 (% importance) | 1.5 | adds | ⚖️ Named T1 charge_dependant anchor. |
+| `spirit_damage` | +7 SP on charged abilities + T1 baseline | 9 (SP-equiv) | 0.5 | adds | 4.3 baseline + ~5 conditional. |
+| `ability_spam` | +1 charge enables more casts | 35 (% importance) | 0.9 | adds | R20. |
+| `single_ability_focus` | rewards your key charged ability | 45 (% importance) | 1.1 | adds | R17: charged-ability-flavored. |
+
 
 ---
 
@@ -505,7 +481,7 @@ Parry-flavored defensive: -1.75s Parry Cooldown, +18% Melee Resist, +75 Bonus He
 - **wiki**: https://deadlock.wiki/Extra_Spirit
 
 ### Interpretation
-Pure flat +10 Spirit Power, no conditions. The cleanest T1 SP baseline — R19 explicitly says flat SP is NOT `self_buff` (already captured by `spirit_damage`).
+Pure SP stat stick: +10 Spirit Power. T1 baseline spirit-damage stick — lifts every spirit ability.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -515,11 +491,10 @@ Pure flat +10 Spirit Power, no conditions. The cleanest T1 SP baseline — R19 e
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_damage` | +10 SP flat + T1 baseline | 14.3 (SP-equiv) | 0.7 | adds | 10 + 4.3 T1 implicit. |
-| `spirit_burst_damage` | SP lifts spirit burst | 8 (dmg-equiv within 1s) | 0.1 | adds | R2. |
-| `spirit_continuous_damage` | SP lifts sustained spirit | 8 (dmg-equiv outside 1s) | 0.1 | adds | R2 (SP equally lifts both). |
-| `multi_ability_focus` | SP boosts all spirit abilities | 50 (% importance) | 1.4 | adds | R4: stat item that lifts every ability. |
-| `single_ability_focus` | offsets multi-focus | -20 (% importance) | -0.5 | adds | R4. |
+| `spirit_damage` | +10 SP direct + T1 baseline | 14 (SP-equiv) | 0.7 | adds | ⚖️ T1 spirit_damage anchor. 4.3 baseline + 10 explicit. |
+| `spirit_burst_damage` | SP lifts spirit burst | 15 (raw dmg within 1s) | 0.4 | adds | R2: SP lifts spirit burst. |
+| `spirit_continuous_damage` | SP lifts continuous | 15 (raw dmg outside 1s) | 0.3 | adds | R2 symmetric. |
+
 
 ---
 
@@ -528,25 +503,26 @@ Pure flat +10 Spirit Power, no conditions. The cleanest T1 SP baseline — R19 e
 - **wiki**: https://deadlock.wiki/Golden_Goose_Egg
 
 ### Interpretation
-Soul-farming oddity: 90 souls/min, -10% damage penalty (sold-before-it-matters per R20), +1m sprint, +1 OOC regen. The iconic `scaling_late` anchor — bought early, sold once it has generated souls for a late-game spike.
+Soul-bank consumable: -10% Damage Penalty (sold-out cost), +1m Sprint, +1 OOC Regen. Bank value grows at 90 souls/min; hatch grants a permanent buff per 80 souls accrued. Held for late-game payoff (per Notes: 4m 27s to break even on cost). ⚖️ Named scaling_late anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Soul Value per Minute | 90 | Active |
-| Damage Penalty | -10% | Passive (penalty, ignored per R20) |
-| Sprint Speed | +1m | Passive (sprint only) |
+| Damage Penalty | -10% | Passive (drawback while held — meant to be sold) |
+| Sprint Speed | +1m | Passive |
 | Out of Combat Regen | +1 | Passive |
+| Soul Value per Minute | 90 | Active (hatch on demand) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `scaling_late` | item rewards late-peaking heroes via souls | 80 (% importance) | 2.0 | adds | The defining `scaling_late` anchor — penalty now, soul-snowball later. |
-| `farmer` | direct soul/min econ | 80 (% importance) | 1.6 | adds | R28: highest-purity econ item at T1. |
-| `horizontal_mobility` | +1m sprint-only | 0.5 (m/s eff) | 0.8 | adds | Sprint-only ×0.5: 1 × 0.5 = 0.5 m/s. |
-| `self_heal` | +1 OOC regen | 4.5 (HP total) | 0.0 | adds | 1 × 15 × 0.3 ≈ 4.5 HP per OOC cycle. |
-| `spirit_damage` | T1 Spirit baseline only | 4.3 (SP-equiv) | 0.2 | adds | R31. (Damage penalty NOT scored per R20.) |
-| `escape` | sprint helps disengage | 25 (% importance) | 0.5 | adds | Mobility utility. |
+| `scaling_late` | bank souls + hatch into permanent buffs late game | 80 (% importance) | 2.0 | adds | ⚖️ Named scaling_late anchor T1 — peaks late. |
+| `farmer` | soul income | 60 (% importance) | 1.2 | adds | R28: greedy soul-economy item. |
+| `spirit_damage` | T1 Spirit baseline | 4.3 (SP-equiv) | 0.2 | adds | R31 baseline only — meant to be sold, skip negative side effects. |
+| `horizontal_mobility` | +1m sprint | 0.7 (m/s eff) | 1.0 | adds | Direct. |
+| `self_heal` | +1 OOC × 20s | 20 (HP total) | 0.2 | adds | Small OOC. |
+| `single_target` | hatch is single-cast | 25 (% importance) | 0.8 | adds | Self-affecting only. |
+
 
 ---
 
@@ -555,24 +531,23 @@ Soul-farming oddity: 90 souls/min, -10% damage penalty (sold-before-it-matters p
 - **wiki**: https://deadlock.wiki/Mystic_Burst
 
 ### Interpretation
-Spirit-damage proc: deal 40 bonus damage on next spirit hit, 14s cooldown. The named anchor for `spirit_burst_proc` (instant trigger, instant payout, 100% × 0.1/0.1 = 1.0 burst index) and the T1 paradigm for `scaling_early` per R17 — defines greedy early-spirit burst.
+Charge-Up spirit burst proc: abilities dealing >80 spirit damage trigger +40 bonus spirit damage. Per Notes: triggers off spirit damage only (NOT weapon-dmg abilities like Venator's Consecrating Grenade). T1 spirit-burst anchor for early-peak casters.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Bonus Damage | 40 | Passive (proc on spirit damage) |
-| Cooldown | 14s | Passive (between procs) |
+| Bonus Damage | 40 | Passive (Charge-Up; triggers if ability dmg > 80) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_burst_proc` | 40 dmg, instant trigger, instant payout | 1.0 (proc index) | 2.0 | adds | 100% × (0.1s effect / 0.1s window) = 1.0. The named proc-index anchor. |
-| `spirit_burst_damage` | 40 raw spirit dmg in 1s | 40 (raw dmg within 1s) | 0.6 | adds | The 40 bonus damage IS spirit damage delivered in the 1s burst window. |
-| `spirit_damage` | proc dmg as SP-equiv + T1 baseline | 12.3 (SP-equiv) | 0.6 | adds | (40 + 0×20)/5 = 8 SP-equiv (no scaling field) + 4.3 T1 baseline = 12.3. |
-| `aoe_cluster` | small AoE on proc | 25 (% importance) | 0.6 | adds | Wiki notes typically show some splash; small partial. |
-| `multi_ability_focus` | works with any spirit ability | 40 (% importance) | 1.1 | adds | R4: universal spirit proc. |
-| `scaling_early` | T1 paradigm-defining greedy early proc | 90 (% importance) | 2.0 | adds | R17: this IS the early-game greedy-spirit-caster anchor. |
-| `farmer` | proc-on-cast aids farming | 30 (% importance) | 0.6 | adds | R28. |
+| `spirit_burst_damage` | 40 bonus dmg per qualifying ability hit | 40 (raw dmg within 1s) | 1.1 | adds | ⚖️ T1 spirit burst-flavor anchor. |
+| `spirit_burst_proc` | per-ability burst proc | 0.50 (proc index) | 1.1 | adds | R6: per-ability instant trigger, gated by 80-dmg threshold. |
+| `spirit_damage` | T1 baseline + proc-equiv | 7 (SP-equiv) | 0.4 | adds | 4.3 baseline + ~2.5 proc-equiv. |
+| `scaling_early` | greedy early-game spirit caster | 65 (% importance) | 1.9 | adds | ⚖️ Named scaling_early anchor — peaks early. |
+| `charge_dependant` | Charge-Up mechanic per Notes | 50 (% importance) | 1.1 | adds | Charge-up flavor. |
+| `single_ability_focus` | best when one big ability triggers it | 35 (% importance) | 0.9 | adds | R17: per-cast trigger. |
+
 
 ---
 
@@ -581,19 +556,20 @@ Spirit-damage proc: deal 40 bonus damage on next spirit hit, 14s cooldown. The n
 - **wiki**: https://deadlock.wiki/Mystic_Expansion
 
 ### Interpretation
-+20% Ability Range as an IMBUED item (binds to one ability slot per R23). The T1 anchor for `range_extender_dependant adds` — score larger as an "adds" item than as a "relies" item per general rule 7.
+Imbued range extender: +20% Ability Range and effect radius on one imbued ability. T1 range-extender anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Ability Range | +20% | Passive (imbued — single ability) |
+| Ability Range | +20% | Passive (imbued, single ability) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `range_extender_dependant` | +20% Ability Range | 20 (eff %) | 2.0 | adds | The named anchor for ADD-mode range extension at T1. |
-| `single_ability_focus` | imbue → one ability | 75 (% importance) | 1.9 | adds | R23: imbue items are single-ability by codename + mechanic. |
-| `spirit_damage` | T1 Spirit baseline only | 4.3 (SP-equiv) | 0.2 | adds | R31. |
+| `range_extender_dependant` | +20% direct | 20 (eff %) | 2.0 | adds | ⚖️ Named T1 range-extender anchor. |
+| `spirit_damage` | T1 baseline | 4.3 (SP-equiv) | 0.2 | adds | R31. |
+| `single_ability_focus` | imbues exactly one ability | 60 (% importance) | 1.5 | adds | R17: imbue is single-ability. |
+
 
 ---
 
@@ -602,26 +578,26 @@ Spirit-damage proc: deal 40 bonus damage on next spirit hit, 14s cooldown. The n
 - **wiki**: https://deadlock.wiki/Mystic_Regeneration
 
 ### Interpretation
-Triggered self-regen: +50 Bonus Health and 4 HP/s for 7s on trigger. Per the 04 judgment-fact table: `self_heal raw = rate × duration × uptime`; `continous_heal raw = rate × (duration−1s) × uptime` for total HP outside 1s.
+Spirit-damage-triggered regen: +50 HP. Dealing spirit damage to enemy heroes grants 4 HP/s regen for 7s (stacks per distinct enemy hit). T1 sustained-poke healer.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bonus Health | +50 | Passive |
-| HP/s Regeneration | 4 | Triggered (post-damage) |
-| Regeneration Duration | 7s | Triggered |
+| Regen | 4 HP/s | Passive (on spirit damage to hero) |
+| Regen Duration | 7s | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `self_heal` | 4 HP/s × 7s × 0.75 trigger uptime | 21 (HP total) | 0.2 | adds | Per 04: rate × duration × uptime = 4 × 7 × 0.75. |
-| `continous_heal` | rest of heal outside 1s | 18 (HP outside 1s) | 0.1 | adds | 4 × (7−1) × 0.75 = 18 HP outside the 1s window. |
-| `burst_heal` | first 1s tick | 3 (HP within 1s) | 0.0 | adds | 4 × 1 × 0.75 = 3 HP inside the 1s window. |
-| `high_max_hp` | +50 HP explicit (Spirit item, no Vitality baseline) | 50 (HP) | 0.5 | adds | 50 explicit. Spirit category — no cross-baseline credit. |
-| `high_max_hp` | heal scales with HP | 15 (HP) | — | relies | R8/R10. |
-| `damage_sponge` | regen triggers on damage (small) | 30 (% importance) | — | relies | R26 partial — trigger IS on damage, but item's purpose is sustain. |
-| `spirit_damage` | T1 Spirit baseline | 4.3 (SP-equiv) | 0.2 | adds | R31. |
-| `farmer` | sustain → farm uptime | 30 (% importance) | 0.6 | adds | R28. |
+| `self_heal` | 4 HP/s × 7s × ~2 stacks avg | 56 (HP total) | 0.6 | adds | Spirit-poke sustain. |
+| `continous_heal` | regen outside 1s | 24 (HP outside 1s) | 0.2 | adds | 4 × 6s × 0.75 uptime. |
+| `burst_heal` | first-1s tick | 4 (HP within 1s) | 0.0 | adds | One tick. |
+| `spirit_damage` | T1 baseline | 4.3 (SP-equiv) | 0.2 | adds | R31. |
+| `high_max_hp` | +50 HP (Spirit, no Vit baseline) | 50 (HP) | 0.4 | adds | Explicit. |
+| `farmer` | sustained spirit-poke farmer | 45 (% importance) | 0.9 | adds | R28. |
+| `mid_range` | spirit-poke range typical | 25 (% importance) | 1.1 | adds | Caster-range identity. |
+
 
 ---
 
@@ -630,33 +606,30 @@ Triggered self-regen: +50 Bonus Health and 4 HP/s for 7s on trigger. Per the 04 
 - **wiki**: https://deadlock.wiki/Rusted_Barrel
 
 ### Interpretation
-Single-target active debuff: -32% Fire Rate and -8% Bullet Resist (shred) on enemy, 5s/20s cycle, 32m cast range. Per 01: fire_rate_slow = slow% × uptime × targets → 32 × (5/20) × 1 = 8 effective (not the raw 32%).
+Targeted anti-gun debuff: +60 HP, +0.5m Sprint. Active (16s CD): -32% Fire Rate, -8% Bullet Resist on target for 5s, 32m cast range. T1 anti-DPS counter tool.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bonus Health | +60 | Passive |
-| Sprint Speed | +0.5m | Passive (sprint only) |
-| Fire Rate Conditional | -32% | Active (enemy debuff) |
-| Bullet Resist Conditional | -8% | Active (enemy debuff) |
+| Sprint Speed | +0.5m | Passive |
+| Fire Rate Conditional | -32% | Active (5s on target) |
+| Bullet Resist Conditional | -8% | Active (5s on target) |
 | Cast Range | 32m | Active |
 | Duration | 5s | Active |
+| Cooldown | 16s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate_slow` | -32% × 5/20 × 1 target | 8 (eff slow %) | 1.1 | adds | Per 01 formula: 32×0.25×1=8 effective slow. |
-| `bullet_resist_shred` | -8% × 5/20 active | 2 (eff shred %) | 0.5 | adds | Active uptime ×0.25 single-target: 8×0.25=2. |
-| `bullet_resistance` | fire-rate-slow pseudo-credit | 5 (eff %) | 0.6 | adds | Per 01 pseudo: fire-rate slow proportional toward bullet_resistance. |
-| `gun_continuous_resistance` | sustained-fire denial | 5 (eff %) | 0.6 | adds | Same pseudo. |
-| `high_max_hp` | +60 HP explicit (Spirit item) | 60 (HP) | 0.6 | adds | Direct. |
-| `horizontal_mobility` | +0.5m sprint-only | 0.25 (m/s eff) | 0.4 | adds | Sprint-only ×0.5. |
-| `single_target` | single-target active | 60 (% importance) | 1.8 | adds | Per 01: importance × uptime. |
-| `mid_range` | 32m cast | 30 (% importance) | 1.3 | adds | Cast range straddles mid/long. |
-| `long_range` | 32m cast also covers long | 25 (% importance) | 0.6 | adds | Lower weight at 20m+. |
-| `counter_importance` | reactive fire-rate denial | 50 (% importance) | 1.0 | adds | R13. |
-| `debuff` | enemy debuff (low cleanse priority) | 15 (% importance) | 0.4 | adds | Low priority. |
-| `spirit_damage` | T1 Spirit baseline | 4.3 (SP-equiv) | 0.2 | adds | R31. |
+| `fire_rate_slow` | -32% × 5s × 1 target × (5/16) uptime | 15 (eff slow %) | 1.5 | adds | ⚖️ T1 fire_rate_slow anchor. |
+| `bullet_resist_shred` | -8% × (5/16) uptime | 2.5 (eff shred %) | 0.6 | adds | Active uptime. |
+| `counter_importance` | dedicated anti-gun debuff | 55 (% importance) | 1.1 | adds | R13. |
+| `single_target` | per-target debuff | 50 (% importance) | 1.5 | adds | Cast on one enemy. |
+| `spirit_damage` | T1 baseline | 4.3 (SP-equiv) | 0.2 | adds | R31. |
+| `high_max_hp` | +60 HP (Spirit, no Vit baseline) | 60 (HP) | 0.5 | adds | Explicit. |
+| `horizontal_mobility` | +0.5m sprint | 0.35 (m/s eff) | 0.5 | adds | Direct. |
+
 
 ---
 
@@ -665,28 +638,27 @@ Single-target active debuff: -32% Fire Rate and -8% Bullet Resist (shred) on ene
 - **wiki**: https://deadlock.wiki/Spirit_Strike
 
 ### Interpretation
-Melee-proc spirit damage: 40 + 0.37×Spirit Power on melee hit, applies -6% Spirit Resist (shred) for 6s. The T1 melee-spirit hybrid — grounded close-range proc.
+Melee-triggered spirit proc: on Light/Heavy melee vs hero, +40+0.37×SP spirit damage + -6% Spirit Resist 6s. CD = 8s (Heavy), 16s (Light). T1 melee-spirit hybrid.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Spirit Damage | 40 base + 0.37 × Spirit Power | Passive (melee-hit proc) |
-| Spirit Resist Conditional | -6% | Passive (debuff on melee) |
-| Duration | 6s | Passive |
+| Spirit Damage | 40 + 0.37×SP | Passive (on melee vs hero) |
+| Spirit Resist Conditional | -6% | Passive (6s debuff) |
+| Duration | 6s | — |
+| Cooldown | 8s (Heavy), 16s (Light) | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_damage` | 40 + 0.37×SP proc + T1 baseline | 13.8 (SP-equiv) | 0.9 | adds | (40 + 0.37×20)/5 + 4.3 baseline = 9.5 + 4.3. |
-| `spirit_damage` | scales with SP stacking | 7 (SP-equiv) | — | relies | The 0.37×SP scaling. |
-| `spirit_burst_damage` | proc dmg in 1s window | 47 (raw dmg within 1s) | 0.7 | adds | 40 + 0.37×20 = 47.4 raw spirit dmg per melee hit. |
-| `spirit_burst_proc` | proc on melee impact | 0.8 (proc index) | 1.6 | adds | Burst-flavored (melee = instant trigger), 6s effect duration with ~0.5s trigger window. |
-| `spirit_resist_shred` | -6% × melee-uptime | 3 (eff shred %) | 0.6 | adds | 6% × ~0.5 melee uptime. |
-| `melee_damage` | melee-triggered spirit | 8 (eff melee-dmg %) | 0.7 | adds | R12: melee counts; proc lives on melee triggers. |
-| `close_range` | melee-trigger only | 75 (% importance) | 1.6 | adds | R21: melee-only proc. |
-| `long_range` | anti-affinity | -30 (% importance) | -0.7 | adds | R30: melee-gated. |
+| `spirit_burst_damage` | 40 + 0.37×20 = 47 within 1s | 47 (raw dmg within 1s) | 1.3 | adds | Per-melee burst. |
+| `spirit_burst_proc` | per-melee proc | 0.50 (proc index) | 1.1 | adds | R6: melee instant-trigger, 8s CD. |
+| `spirit_resist_shred` | -6% × melee-uptime ~0.4 | 3 (eff shred %) | 0.6 | adds | Melee-gated. |
+| `spirit_damage` | T1 baseline + proc-equiv | 9 (SP-equiv) | 0.5 | adds | 4.3 baseline + 5 proc-equiv. |
+| `melee_damage` | melee-triggered effects lift melee | 8 (eff melee-dmg %) | 0.7 | adds | R12. |
+| `close_range` | melee-gated | 75 (% importance) | 1.6 | adds | R21. |
+| `engage` | melee commits | 50 (% importance) | 1.1 | adds | R11. |
 | `grounded` | melee is grounded | 40 (% importance) | 1.6 | adds | R7. |
-| `engage` | melee strikes commit | 50 (% importance) | 1.1 | adds | R11. |
 
 
 ---
@@ -698,30 +670,31 @@ Melee-proc spirit damage: 40 + 0.37×Spirit Power on melee hit, applies -6% Spir
 - **wiki**: https://deadlock.wiki/Active_Reload
 
 ### Interpretation
-Active-triggered reload + 7s buff window: +25% Fire Rate, +16% Bullet Lifesteal, +0.75m Move Speed. The T2 gun-burst enabler — instant-reload + post-reload power spike.
+Active-triggered reload + 7s buff window: +20% Max Ammo passive. On hitting the highlighted reload window: instant reload + +25% Fire Rate + +16% Bullet Lifesteal + +0.75m Move Speed for 7s (12s CD). Per Notes: skill-gated — miss the window and the item fails. T2 gun-burst enabler.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Max Ammo | +20% | Passive |
-| Fire Rate Conditional | +25% | Active (post-reload buff) |
-| Bullet Lifesteal Conditional | +16% | Active (post-reload buff) |
-| Move Speed | +0.75m | Active (post-reload buff) |
-| Duration | 7s | Active |
+| Fire Rate Conditional | +25% | Active (7s after instant reload) |
+| Bullet Lifesteal Conditional | +16% | Active (7s) |
+| Move Speed | +0.75m | Active (7s) |
+| Buff Duration | 7s | Active |
+| Cooldown | 12s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `magazine_size_dependant` | +20% ammo + instant-reload | 32 (eff ammo %) | 0.6 | adds | 20% explicit + instant-reload bump (per 01 convention). |
-| `fire_rate` | +25% × ~7/14 active uptime | 12 (eff %) | 1.2 | adds | Active conditional, ~50% uptime in fights. |
-| `bullet_lifesteal` | +16% × uptime | 8 (eff %) | 1.2 | adds | 16 × ~0.5 active uptime. |
-| `gun_burst_damage` | post-reload burst window + fire-rate burst | 20 (dmg-% within 1s) | 0.4 | adds | R2: fire_rate lifts gun_burst MORE than continuous (DPS in 1s window). |
-| `gun_continuous_damage` | sustained DPS during buff | 8 (dmg-% outside 1s) | 0.2 | adds | R2: continuous gets lighter fire-rate credit. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31 implicit T2 baseline. |
-| `horizontal_mobility` | +0.75m × uptime | 0.4 (m/s eff) | 0.4 | adds | 0.75 × ~0.5 active uptime. |
-| `self_heal` | lifesteal heal during buff | 30 (HP total) | 0.2 | adds | 16% lifesteal × burst DPS over the 7s window. |
-| `burst_heal` | first-1s of lifesteal | 6 (HP within 1s) | 0.1 | adds | One trigger-window worth of lifesteal. |
-| `continous_heal` | rest of lifesteal | 24 (HP outside 1s) | 0.1 | adds | Lifesteal sustained over remaining 6s window. |
+| `fire_rate` | +25% × (7/12) buff uptime | 15 (eff %) | 1.5 | adds | Mid uptime on skill check. |
+| `bullet_damage` | T2 baseline + FR-derived | 14 (eff gun-dmg %) | 0.5 | adds | 7.2 baseline + ~7 FR-derived. |
+| `bullet_lifesteal` | +16% × (7/12) | 9 (eff %) | 1.4 | adds | Window-gated. |
+| `gun_burst_damage` | FR burst lift | 60 (raw dmg within 1s) | 1.2 | adds | R2: FR primarily lifts burst. |
+| `gun_continuous_damage` | sustained gun + mag | 20 (raw dmg outside 1s) | 0.4 | adds | R2 lighter + mag depth. |
+| `magazine_size_dependant` | +20% direct + instant reload | 25 (eff ammo %) | 0.5 | adds | Direct + reload skip. |
+| `horizontal_mobility` | +0.75m × (7/12) | 0.4 (m/s eff) | 0.4 | adds | Active mobility. |
+| `self_heal` | bullet lifesteal sustain | 80 (HP total) | 0.5 | adds | Lifesteal-driven. |
+| `farmer` | reload skip helps wave clear | 35 (% importance) | 0.7 | adds | R28. |
+
 
 ---
 
@@ -730,7 +703,7 @@ Active-triggered reload + 7s buff window: +25% Fire Rate, +16% Bullet Lifesteal,
 - **wiki**: https://deadlock.wiki/Fleetfoot
 
 ### Interpretation
-Hybrid mobility/defense weapon: +6% Wpn Dmg, +35% Slide Distance, +6% Bullet Resist passive; active +3m Move Speed + 40% Slow Resist for 5s. Cleanse-flavored mobility booster.
+Mobility-flavored Weapon kit: +6% Weapon Damage, +35% Slide Distance, +6% Bullet Resist. Active (16s CD): +3m Move Speed + +40% Slow Resist for 5s. Hybrid mobility + escape tool worn on guns.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -738,23 +711,22 @@ Hybrid mobility/defense weapon: +6% Wpn Dmg, +35% Slide Distance, +6% Bullet Res
 | Weapon Damage | +6% | Passive |
 | Slide Distance | +35% | Passive |
 | Bullet Resist | +6% | Passive |
-| Move Speed Conditional | +3m | Active |
-| Slow Resist | +40% | Active |
-| Duration | 5s | Active |
+| Move Speed Conditional | +3m | Active (5s) |
+| Slow Resist | +40% | Active (5s) |
+| Cooldown | 16s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `horizontal_mobility` | +3m × 5/15 active + 35% slide | 1.2 (m/s eff) | 1.2 | adds | Active 3m × (5/15 uptime) = 1.0; + slide-distance contribution. |
-| `cc_resist` | +40% Slow Resist × 5/15 uptime | 13 (eff %) | 0.9 | adds | 40 × 0.33. |
-| `bullet_resistance` | +6% Bullet Resist passive | 6 (eff %) | 0.5 | adds | Full uptime. |
-| `bullet_damage` | +6% + T2 baseline | 13.2 (eff gun-dmg %) | 0.5 | adds | 6 + 7.2 T2 baseline. |
-| `gun_burst_damage` | per-shot lift | 7 (dmg-% within 1s) | 0.1 | adds | R2 — bullet_damage equal both. |
-| `gun_continuous_damage` | sustained lift | 7 (dmg-% outside 1s) | 0.1 | adds | R2. |
-| `escape` | +Move Speed + slow resist | 55 (% importance) | 1.0 | adds | Mobility + cleanse → disengage. |
-| `engage` | also helps gap-close | 35 (% importance) | 0.8 | adds | Same speed buff. |
-| `counter_importance` | cleanses slows | 45 (% importance) | 0.9 | adds | R13. |
-| `farmer` | mobility helps farm | 25 (% importance) | 0.5 | adds | R28. |
+| `horizontal_mobility` | +3m × (5/16) uptime + slide passive | 1.3 (m/s eff) | 1.2 | adds | Direct mobility burst. |
+| `bullet_damage` | +6% direct + T2 baseline | 13 (eff gun-dmg %) | 0.5 | adds | 7.2 baseline + 6 explicit. |
+| `cc_resist` | +40% × (5/16) slow resist | 12 (eff %) | 0.8 | adds | Active-only slow resist. |
+| `bullet_resistance` | +6% direct | 6 (eff %) | 0.5 | adds | Direct. |
+| `escape` | mobility + slow resist | 60 (% importance) | 1.1 | adds | ⚖️ Dual mobility tool. |
+| `engage` | active dive ability | 40 (% importance) | 0.9 | adds | R11. |
+| `counter_importance` | counter to slow comps | 35 (% importance) | 0.7 | adds | R13. |
+| `gun_continuous_damage` | sustained gun lift | 15 (raw dmg outside 1s) | 0.3 | adds | R2. |
+
 
 ---
 
@@ -763,24 +735,24 @@ Hybrid mobility/defense weapon: +6% Wpn Dmg, +35% Slide Distance, +6% Bullet Res
 - **wiki**: https://deadlock.wiki/Intensifying_Magazine
 
 ### Interpretation
-Sustained-fire ramp-up: +20% Max Ammo and up-to-45% Max Weapon Damage that ramps over 2.5s of continuous fire. The named anchor for `gun_continuous_damage` at T2.
+Sustained-fire ramp gun stick: +20% Max Ammo. Holding Fire ramps +0% → +45% Weapon Damage over 2.5s. Per Mechanics: some abilities flag "firing" while not shooting, letting you pre-charge before fights. T2 sustained-DPS anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Max Ammo | +20% | Passive |
-| Max Weapon Damage Conditional | 45% | Passive (ramped over 2.5s) |
-| Time for Max Damage | 2.5s | Passive |
+| Max Weapon Damage Conditional | 45% | Passive (after 2.5s holding Fire) |
+| Time for Max Damage | 2.5s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `magazine_size_dependant` | +20% ammo | 20 (eff ammo %) | 0.4 | adds | Pure passive ammo. |
-| `gun_continuous_damage` | ramp to 45% wpn dmg @ 2.5s sustained | 30 (dmg-% outside 1s) | 0.6 | adds | Avg ~30% across sustained fire (ramp-in 0→45). Named anchor for sustained gun. |
-| `gun_burst_damage` | first 1s only at ramp-start | 9 (dmg-% within 1s) | 0.2 | adds | First-1s window is below max — ramp doesn't favor burst. |
-| `bullet_damage` | avg amp + T2 baseline | 29.7 (eff gun-dmg %) | 1.7 | adds | Avg 45/2 = 22.5 + 7.2 baseline. |
-| `bullet_damage` | scales with sustained-fire build | 30 (eff gun-dmg %) | — | relies | The 45% only realizes when player commits to long bursts. |
-| `gun_continuous_proc` | rewards sustained fire | 0.4 (proc index) | 0.6 | adds | Long-pressure-trigger flavor. |
+| `bullet_damage` | +45% × ~0.55 ramp uptime + T2 baseline | 32 (eff gun-dmg %) | 1.2 | adds | ⚖️ Strong sustained gun amp. |
+| `gun_continuous_damage` | full ramp lives in continuous window | 70 (raw dmg outside 1s) | 1.4 | adds | ⚖️ T2 named gun_continuous anchor. |
+| `gun_burst_damage` | 1s mark gets ~18% partial ramp | 25 (raw dmg within 1s) | 0.5 | adds | R2: pre-charge enables burst. |
+| `magazine_size_dependant` | +20% Max Ammo | 20 (eff ammo %) | 0.4 | adds | Direct. |
+| `farmer` | sustained ramp helps wave clear | 50 (% importance) | 1.0 | adds | R28. |
+
 
 ---
 
@@ -789,31 +761,28 @@ Sustained-fire ramp-up: +20% Max Ammo and up-to-45% Max Weapon Damage that ramps
 - **wiki**: https://deadlock.wiki/Kinetic_Dash
 
 ### Interpretation
-Stamina-bundle weapon: +1 Stamina, +12% Stamina Recovery, plus a 7s post-dash buff (+25% Fire Rate, +6 Temp Ammo). R9 stamina-suite item; dash triggers a burst gun spike.
+Dash-jump triggered fire-rate burst: +1 Stamina, +12% Stamina Recovery. On Dash-Jump: +25% Fire Rate + 6 temp ammo for 7s (or until next reload). Aerial-DPS enabler.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Stamina | +1 | Passive |
 | Stamina Recovery | +12% | Passive |
-| Fire Rate Conditional | +25% | Active (post-dash buff) |
-| Temporary Ammo Conditional | +6 | Active |
-| Duration | 7s | Active |
+| Fire Rate Conditional | +25% | Passive (Dash-Jump, 7s) |
+| Temporary Ammo Conditional | +6 | Passive |
+| Duration | 7s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `vertical_mobility` | +1 stamina | 1 (units) | 0.2 | adds | R9. |
-| `horizontal_mobility` | +1 stamina dash | 0.7 (m/s eff) | 0.7 | adds | R9: 0.6–0.7 m/s. |
-| `aerial` | extra dash | 40 (% importance) | 0.9 | adds | R9. |
-| `engage` | dash + post-dash buff | 60 (% importance) | 1.3 | adds | R9 + engage flavor. |
-| `escape` | dash | 40 (% importance) | 0.8 | adds | R9. |
-| `fire_rate` | +25% × 7/14 uptime | 12 (eff %) | 1.2 | adds | Active uptime. |
-| `magazine_size_dependant` | +6 temp ammo × uptime | 12 (eff ammo %) | 0.2 | adds | Conditional ammo. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `gun_burst_damage` | post-dash burst window | 18 (dmg-% within 1s) | 0.4 | adds | R2 (fire_rate lifts burst heavier). |
-| `gun_continuous_damage` | sustained DPS during buff | 7 (dmg-% outside 1s) | 0.1 | adds | R2 lighter. |
-| `farmer` | dash mobility + ammo | 30 (% importance) | 0.6 | adds | R28. |
+| `fire_rate` | +25% × ~0.5 dash-uptime | 13 (eff %) | 1.3 | adds | Mid uptime — dash-gated. |
+| `bullet_damage` | T2 baseline + FR-derived | 13 (eff gun-dmg %) | 0.5 | adds | 7.2 baseline + 6 FR-derived. |
+| `gun_burst_damage` | FR burst window after dash | 55 (raw dmg within 1s) | 1.1 | adds | R2: FR lifts burst. |
+| `aerial` | dash-jump triggered | 70 (% importance) | 1.6 | adds | ⚖️ Named aerial trigger. |
+| `vertical_mobility` | +1 stamina + recovery + dash-trigger reward | 2.5 (units) | 1.3 | adds | Direct mobility synergy. |
+| `horizontal_mobility` | stamina-dash | 0.7 (m/s eff) | 0.7 | adds | Stamina-derived. |
+| `magazine_size_dependant` | +6 temp ammo per dash | 12 (eff ammo %) | 0.2 | adds | Temporary ammo. |
+
 
 ---
 
@@ -822,7 +791,7 @@ Stamina-bundle weapon: +1 Stamina, +12% Stamina Recovery, plus a 7s post-dash bu
 - **wiki**: https://deadlock.wiki/Long_Range
 
 ### Interpretation
-Range-gated weapon amp: +40% Weapon Damage past 15m, +8% fall-off, +0.75m Sprint. The T2 long-range named anchor — pure scope kit.
+Distance-gated gun amp: +8% Weapon Fall-off Range, +0.75m Sprint Speed. +40% Weapon Damage when target is beyond 15m. T2 long-range gun anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -830,19 +799,17 @@ Range-gated weapon amp: +40% Weapon Damage past 15m, +8% fall-off, +0.75m Sprint
 | Weapon Fall-off Range | +8% | Passive |
 | Sprint Speed | +0.75m | Passive |
 | Weapon Damage Conditional | +40% | Passive (>15m) |
-| Min. Distance | 15m | Condition |
+| Min. Distance | 15m | Trigger |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `long_range` | +40% wpn dmg >15m | 70 (% importance) | 1.6 | adds | T2 named long-range anchor. |
-| `bullet_damage` | +40% × long-range uptime + T2 baseline | 25.2 (eff gun-dmg %) | 1.7 | adds | (40 × ~0.45 long-range uptime) + 7.2 baseline. |
-| `bullet_damage` | scales with long-range build | 40 (eff gun-dmg %) | — | relies | The 40% only realizes when actively at range. |
-| `close_range` | nothing past 15m | -30 (% importance) | -0.6 | adds | Mirror R30 anti-close. |
-| `gun_burst_damage` | per-shot amp lifts burst | 18 (dmg-% within 1s) | 0.4 | adds | R2 equal. |
-| `gun_continuous_damage` | sustained lift | 18 (dmg-% outside 1s) | 0.4 | adds | R2 equal. |
-| `single_target` | scope shots | 35 (% importance) | 1.1 | adds | Long-range tends single-target. |
-| `horizontal_mobility` | +0.75m sprint-only | 0.4 (m/s eff) | 0.4 | adds | Sprint-only ×0.5. |
+| `long_range` | gun-amp >15m gating | 70 (% importance) | 1.6 | adds | ⚖️ Named long_range T2 anchor. |
+| `bullet_damage` | +40% × ~0.5 long uptime + T2 baseline | 27 (eff gun-dmg %) | 1.0 | adds | 7.2 baseline + 20 effective. |
+| `gun_continuous_damage` | sustained long-range fire | 35 (raw dmg outside 1s) | 0.7 | adds | R2. |
+| `gun_burst_damage` | per-shot long amp | 25 (raw dmg within 1s) | 0.5 | adds | R2. |
+| `horizontal_mobility` | +0.75m sprint | 0.5 (m/s eff) | 0.5 | adds | Small mobility. |
+
 
 ---
 
@@ -851,7 +818,7 @@ Range-gated weapon amp: +40% Weapon Damage past 15m, +8% fall-off, +0.75m Sprint
 - **wiki**: https://deadlock.wiki/Melee_Charge
 
 ### Interpretation
-Heavy-melee amplifier: +50% Heavy Melee Distance, +10% Melee Damage, +6% Bullet Resist, +25% Bonus Heavy Damage. The T2 melee anchor.
+Heavy-melee amp: +50% Heavy Melee Distance, +10% Melee Damage, +6% Bullet Resist. +25% Bonus Heavy Damage on next Heavy Melee (5s CD). T2 heavy-melee setup tool.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -859,21 +826,18 @@ Heavy-melee amplifier: +50% Heavy Melee Distance, +10% Melee Damage, +6% Bullet 
 | Heavy Melee Distance | +50% | Passive |
 | Melee Damage | +10% | Passive |
 | Bullet Resist | +6% | Passive |
-| Bonus Heavy Damage | +25% | Passive |
+| Bonus Heavy Damage | +25% | Passive (next heavy, 5s CD) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `melee_damage` | +10% melee + +25% heavy + 50% range | 32 (eff melee-dmg %) | 1.9 | adds | T2 melee combining direct dmg, heavy-dmg amp, and reach. |
-| `close_range` | melee-only mechanic | 85 (% importance) | 1.8 | adds | R21. |
-| `long_range` | anti-affinity | -40 (% importance) | -0.9 | adds | R30. |
-| `bullet_resistance` | +6% Bullet Resist | 6 (eff %) | 0.5 | adds | Full passive. |
-| `engage` | heavy melee = engage tool | 65 (% importance) | 1.4 | adds | R11. |
-| `grounded` | melee = grounded | 50 (% importance) | 2.0 | adds | R7. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `gun_burst_damage` | baseline floor | 4 (dmg-% within 1s) | 0.1 | adds | R2 floor from baseline. |
-| `gun_continuous_damage` | baseline floor | 4 (dmg-% outside 1s) | 0.1 | adds | R2 floor. |
-| `stun` | heavy melee can stun briefly | 0.5 (eff s) | 1.5 | adds | Heavy melee stagger window. |
+| `melee_damage` | +10% + 25% on Heavy/5s | 20 (eff melee-dmg %) | 1.2 | adds | 10 direct + ~10 effective Heavy-on-CD. |
+| `bullet_damage` | T2 baseline (Weapon item, no Vit baseline) | 7.2 (eff gun-dmg %) | 0.3 | adds | R31 baseline only. |
+| `bullet_resistance` | +6% direct | 6 (eff %) | 0.5 | adds | Direct. |
+| `close_range` | melee-gated | 85 (% importance) | 1.8 | adds | R21. |
+| `engage` | heavy melee = engage | 65 (% importance) | 1.4 | adds | R11. |
+| `grounded` | melee is grounded | 45 (% importance) | 1.8 | adds | R7. |
+
 
 ---
 
@@ -882,28 +846,25 @@ Heavy-melee amplifier: +50% Heavy Melee Distance, +10% Melee Damage, +6% Bullet 
 - **wiki**: https://deadlock.wiki/Mystic_Shot
 
 ### Interpretation
-Hybrid Weapon/Spirit proc: +7 SP flat + EVERY shot fires an additional spirit-damage bullet (40 + 1.2×SP). Per Notes: the mystic bullet mimics the weapon's trajectory, hits BEFORE regular bullets, can't crit, is immune to evasion, and is fired at the crosshair center for spreadshot weapons. Classic hybrid-damage T2 anchor — gun trigger drives consistent spirit damage on every shot.
+Hybrid gun-spirit bullet proc: +7 Spirit Power, next bullet deals +40+1.2×SP bonus spirit damage (8s CD). Per Notes: creates an additional purple bullet that mimics the regular shot. Cannot crit, immune to evasion. T2 hybrid_damage_usage anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Power | +7 | Passive |
-| Spirit Damage Proc | 40 + 1.2×SP | Passive (additional bullet per shot, immune to evasion) |
-| Trigger | Per shot | Every shot fires extra mystic bullet (can't crit, no Ricochet) |
+| Spirit Damage | 40 + 1.2×SP | Passive (next bullet, 8s CD) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_damage` | 7 SP flat + (40+1.2×20)/5 proc | 19.8 (SP-equiv) | 1.1 | adds | Per 01: 7 + (40+24)/5 = 7 + 12.8. |
-| `spirit_damage` | proc scales with SP | 24 (SP-equiv) | — | relies | The 1.2×SP scaling. |
-| `spirit_burst_proc` | proc on each shot | 0.8 (proc index) | 1.6 | adds | Burst per-shot, short window. Higher than typical procs (every shot procs). |
-| `spirit_continuous_proc` | sustained shot stream | 0.5 (proc index) | 1.2 | adds | Continuous: every shot procs the mystic bullet. |
-| `spirit_burst_damage` | per-shot mystic-bullet spirit dmg in 1s | 192 (raw dmg within 1s) | 2.0 | adds | ~3 shots/s × 64 dmg = 192 raw spirit in 1s — every shot procs. |
-| `spirit_continuous_damage` | sustained spirit DPS | 192 (raw dmg outside 1s) | 2.0 | adds | ~3 shots/s × 64 dmg sustained. |
-| `hybrid_damage_usage` | gun trigger + spirit damage per shot | 90 (% importance) | 1.8 | adds | The defining double-dip — every weapon shot is also a spirit hit. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `multi_ability_focus` | SP lifts all abilities | 25 (% importance) | 0.7 | adds | R4. |
-| `bullet_evasion` | NOTE: mystic bullet is IMMUNE to evasion (anti-evasion) | -10 (eff %) | -0.7 | adds | Per Notes: mystic bullet ignores evasion — counters evasion enemies (negative ally weight for evasion-stacking enemies). |
+| `hybrid_damage_usage` | gun-triggered spirit burst | 75 (% importance) | 1.5 | adds | ⚖️ Named hybrid anchor. |
+| `spirit_burst_damage` | 40+1.2×30 = 76 within 1s | 76 (raw dmg within 1s) | 1.4 | adds | Per-bullet spirit chunk. |
+| `spirit_burst_proc` | per-bullet on 8s CD | 0.40 (proc index) | 0.9 | adds | R6: per-bullet, 8s gate. |
+| `spirit_damage` | +7 SP + proc-equiv (Weapon, no Spirit baseline) | 17 (SP-equiv) | 0.6 | adds | 7 explicit + 10 proc-equiv. |
+| `bullet_damage` | T2 baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
+| `counter_importance` | immune to evasion | 35 (% importance) | 0.7 | adds | Per Notes — bypasses evasion. |
+| `single_target` | per-bullet single-target | 40 (% importance) | 1.2 | adds | Per-shot proc. |
+
 
 ---
 
@@ -912,7 +873,7 @@ Hybrid Weapon/Spirit proc: +7 SP flat + EVERY shot fires an additional spirit-da
 - **wiki**: https://deadlock.wiki/Opening_Rounds
 
 ### Interpretation
-Opening-fight gun spike: +60% Bullet Velocity, +8% Wpn Dmg, +4 SP passive, plus +30% Weapon Damage Conditional (on fresh engagement). Greedy `scaling_early` flavor — wins the opener-burst trade. R32: long_range capped <1.5 (Sharpshooter is the 2.0 anchor).
+Above-50%-HP gun amp: +60% Bullet Velocity, +8% Weapon Damage, +4 Spirit Power. +30% Weapon Damage when enemy is above 50% health. T2 burst-opener — peaks before the enemy is wounded.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -920,21 +881,18 @@ Opening-fight gun spike: +60% Bullet Velocity, +8% Wpn Dmg, +4 SP passive, plus 
 | Bullet Velocity | +60% | Passive |
 | Weapon Damage | +8% | Passive |
 | Spirit Power | +4 | Passive |
-| Weapon Damage Conditional | +30% | Conditional (fight opener) |
+| Weapon Damage Conditional | +30% | Passive (enemy above 50% HP) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `self_buff` | +30% wpn dmg on engage | 45 (% importance) | 1.3 | adds | R19: legitimate conditional-uptime buff state. |
-| `bullet_damage` | +8% + 30% × opener uptime + T2 baseline | 30.2 (eff gun-dmg %) | 1.1 | adds | 8 + (30 × ~0.5 opener-uptime) + 7.2 baseline. |
-| `gun_burst_damage` | opener-burst window | 25 (dmg-% within 1s) | 0.5 | adds | R2 + opener-burst flavor. |
-| `gun_continuous_damage` | sustained lift | 10 (dmg-% outside 1s) | 0.2 | adds | R2 — opener fades. |
-| `long_range` | +60% bullet velocity helps long | 50 (% importance) | 1.1 | adds | Bullet velocity at range. Capped <1.5 per Sharpshooter anchor. |
-| `mid_range` | also helps mid | 30 (% importance) | 1.3 | adds | Mid-range tracking. |
-| `engage` | opener buff = engage flavor | 60 (% importance) | 1.3 | adds | Opener mechanic. |
-| `spirit_damage` | +4 SP secondary | 4 (SP-equiv) | 0.1 | adds | Small. |
-| `headshot_damage` | bullet velocity aids headshots | 25 (% importance) | 0.6 | adds | Partial. |
-| `scaling_early` | greedy opener-burst tempo | 70 (% importance) | 1.6 | adds | Opener buff favors early-peak heroes. |
+| `bullet_damage` | +8% + 30% × ~0.5 (>50% HP window) + T2 baseline | 30 (eff gun-dmg %) | 1.1 | adds | 7.2 + 8 + 15. |
+| `gun_burst_damage` | per-shot opener amp | 50 (raw dmg within 1s) | 1.0 | adds | R2: opener-burst. |
+| `gun_continuous_damage` | sustained till target dropped | 30 (raw dmg outside 1s) | 0.6 | adds | R2 lighter. |
+| `scaling_early` | rewards committing to opener | 50 (% importance) | 1.4 | adds | Opens-fight flavor. |
+| `engage` | opener-amp = first-engage tool | 50 (% importance) | 1.1 | adds | R11. |
+| `long_range` | +60% velocity favors range | 30 (% importance) | 0.7 | adds | Velocity-aided. |
+
 
 ---
 
@@ -943,29 +901,27 @@ Opening-fight gun spike: +60% Bullet Velocity, +8% Wpn Dmg, +4 SP passive, plus 
 - **wiki**: https://deadlock.wiki/Recharging_Rush
 
 ### Interpretation
-**Charge-stack refresher** (per description): "Dealing significant weapon damage replenishes a charge for each of your charged abilities." The 200dmg/3.5s threshold REFUNDS ability charges, NOT ammo. Plus +20% Max Ammo, +10% Wpn Dmg passive. R29-class charge-economy item bridging gun damage into ability casts.
+Gun-damage triggered charge refresh: +20% Max Ammo, +10% Weapon Damage. Dealing 200 weapon damage in 3.5s replenishes a charge on each of your charged abilities (25s CD). Per Affected Abilities list: helps multi-charge spell heroes (Mirage, Shiv, Holliday, etc.). Bridge between gun output and ability uptime.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Max Ammo | +20% | Passive |
 | Weapon Damage | +10% | Passive |
-| Damage Threshold | 200 | Passive (refunds 1 charge on charged abilities when met) |
-| Time Frame | 3.5s | Passive |
+| Damage Threshold | 200 | Passive (in 3.5s window) |
+| Cooldown | 25s | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `charge_dependant` | gun-damage refunds charged-ability charges | 70 (% importance) | 1.5 | adds | Defining mechanic — bridges gun damage into ability charges per description. |
-| `cooldown_reduction` | charge refund ≈ effective CDR on charged abilities | 12 (eff CDR %) | 1.1 | adds | R29: charge-stack mechanism. |
-| `magazine_size_dependant` | +20% ammo | 20 (eff ammo %) | 0.4 | adds | Direct passive. |
-| `bullet_damage` | +10% + T2 baseline | 17.2 (eff gun-dmg %) | 0.6 | adds | 10 + 7.2. |
-| `gun_burst_damage` | per-shot amp | 10 (dmg-% within 1s) | 0.2 | adds | R2. |
-| `gun_continuous_damage` | sustained DPS | 10 (dmg-% outside 1s) | 0.2 | adds | R2 equal — no fire-rate to favor burst. |
-| `gun_burst_proc` | 200dmg/3.5s threshold | 0.8 (proc index) | 1.2 | adds | R5: threshold proc, burst-flavor. |
-| `gun_continuous_proc` | sustained accumulator | 0.3 (proc index) | 0.5 | adds | R5: every accumulated 200dmg refunds — recurring. |
-| `hybrid_damage_usage` | gun damage drives ability econ | 50 (% importance) | 1.0 | adds | Per description: feeds ability casts via gun damage. |
-| `ability_spam` | refunded charges = more casts | 40 (% importance) | 1.1 | adds | More ability casts available. |
+| `bullet_damage` | +10% direct + T2 baseline | 17 (eff gun-dmg %) | 0.6 | adds | 7.2 + 10. |
+| `magazine_size_dependant` | +20% Max Ammo | 20 (eff ammo %) | 0.4 | adds | Direct. |
+| `ability_spam` | charge refresh on weapon dmg | 55 (% importance) | 1.5 | adds | R20: enables more ability uses. |
+| `charge_dependant` | only useful on charged abilities | 50 (% importance) | 1.1 | adds | Direct mechanic. |
+| `cooldown_reduction` | charge refresh ≈ effective CDR | 14 (eff CDR %) | 1.3 | adds | Conditional CDR via gun dmg. |
+| `gun_continuous_damage` | sustained gun amp | 25 (raw dmg outside 1s) | 0.5 | adds | R2. |
+| `hybrid_damage_usage` | gun output enables abilities | 50 (% importance) | 1.0 | adds | Gun-ability bridge. |
+
 
 ---
 
@@ -974,27 +930,26 @@ Opening-fight gun spike: +60% Bullet Velocity, +8% Wpn Dmg, +4 SP passive, plus 
 - **wiki**: https://deadlock.wiki/Slowing_Bullets
 
 ### Interpretation
-On-hit slow weapon: +15% Wpn Dmg, -30% Move Speed and -22% Dash Distance on hit (3.5s). The T2 universal-slow gun mod.
+Bullet build-up slow: +15% Weapon Damage. Bullets build to -30% Move Speed + -22% Dash Distance for 3.5s. Per Notes: 2–10 shots to proc by hero.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Weapon Damage | +15% | Passive |
-| Move Speed Conditional | -30% | Passive (on hit) |
+| Move Speed Conditional | -30% | Passive (3.5s after buildup) |
 | Dash Distance | -22% | Passive |
-| Slow Duration | 3.5s | Passive |
+| Slow Duration | 3.5s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `movement_slow` | -30% × 3.5s × ~0.9 on-hit uptime × 1 target | 27 (eff slow weighted) | 0.9 | adds | Per 01: slow% × duration × count × uptime. |
-| `bullet_damage` | +15% + T2 baseline | 22.2 (eff gun-dmg %) | 0.8 | adds | 15 + 7.2. |
-| `gun_burst_damage` | per-shot lift | 16 (dmg-% within 1s) | 0.3 | adds | R2. |
-| `gun_continuous_damage` | sustained lift | 16 (dmg-% outside 1s) | 0.3 | adds | R2 equal. |
-| `gun_continuous_proc` | every bullet applies slow | 0.5 (proc index) | 0.8 | adds | R5 continuous-flavored every-shot proc. |
-| `debuff` | enemy slow debuff | 18 (% importance) | 0.5 | adds | Cleanseable mild debuff. |
-| `counter_importance` | counter to mobile heroes | 45 (% importance) | 0.9 | adds | R13. |
-| `vertical_mobility` | -22% dash distance (anti) | 10 (units) | 2.0 | adds | Dash-restrict anti-vertical. |
+| `movement_slow` | -30% × 3.5s × on-bullet uptime ~0.7 | 25 (eff slow weighted) | 1.1 | adds | ⚖️ T2 movement_slow gun anchor. |
+| `bullet_damage` | +15% + T2 baseline | 22 (eff gun-dmg %) | 0.8 | adds | 7.2 + 15. |
+| `counter_importance` | slow vs mobile heroes | 40 (% importance) | 0.8 | adds | R13. |
+| `gun_continuous_proc` | per-bullet buildup | 0.20 (proc index) | 0.3 | adds | R6: per-bullet. |
+| `single_target` | per-bullet single-target | 35 (% importance) | 1.1 | adds | Per-shot. |
+| `mid_range` | gun-range slow | 25 (% importance) | 1.1 | adds | Standard rifle range. |
+
 
 ---
 
@@ -1003,24 +958,26 @@ On-hit slow weapon: +15% Wpn Dmg, -30% Move Speed and -22% Dash Distance on hit 
 - **wiki**: https://deadlock.wiki/Spirit_Shredder_Bullets
 
 ### Interpretation
-On-hit gun proc: -8% Spirit Resist (shred) and +10% Spirit Lifesteal conditional, 8s. The T2 gun-driven spirit-resist shred.
+Bullet spirit-resist debuff + team spirit lifesteal: passive bullets/melee → -8% Spirit Resist + +10% Spirit Lifesteal (you AND allies) on target for 8s. Per Notes: lifesteal is flat — bypasses diminishing returns. T2 hybrid-team enabler.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Spirit Resist Conditional | -8% | Passive (debuff on hit) |
-| Spirit Lifesteal Conditional | +10% | Passive (self-buff) |
-| Debuff Duration | 8s | Passive |
+| Spirit Resist Conditional | -8% | Passive (8s debuff) |
+| Spirit Lifesteal Conditional | +10% | Passive (you + allies vs target) |
+| Debuff Duration | 8s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_resist_shred` | -8% × 8s × on-hit uptime | 6 (eff shred %) | 0.8 | adds | 8 × ~0.75 maintain. |
-| `spirit_lifesteal` | +10% conditional | 6 (eff %) | 0.9 | adds | 10 × ~0.6 uptime. |
-| `gun_continuous_proc` | every bullet applies shred | 0.35 (proc index) | 0.5 | adds | R5 continuous-flavor proc. |
-| `gun_burst_proc` | first-shot proc | 0.4 (proc index) | 0.6 | adds | R5 burst-flavor. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `debuff` | enemy spirit-resist shred | 20 (% importance) | 0.5 | adds | Mild debuff. |
+| `spirit_resist_shred` | -8% × ~0.85 uptime | 7 (eff shred %) | 1.0 | adds | ⚖️ T2 spirit_resist_shred gun anchor. |
+| `spirit_lifesteal` | +10% flat (skips DR) for you AND allies | 14 (eff %) | 2.0 | adds | Team-share lifesteal. |
+| `hybrid_damage_usage` | gun bullet enables spirit-DPS | 60 (% importance) | 1.2 | adds | Gun-spirit bridge. |
+| `ally_buff` | grants lifesteal to allies | 50 (% importance) | 1.2 | adds | R24: team benefit. |
+| `bullet_damage` | T2 baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
+| `gun_continuous_proc` | per-bullet debuff | 0.20 (proc index) | 0.3 | adds | R6: per-bullet. |
+| `counter_importance` | vs spirit-resist tanks | 45 (% importance) | 0.9 | adds | R13. |
+
 
 ---
 
@@ -1029,25 +986,27 @@ On-hit gun proc: -8% Spirit Resist (shred) and +10% Spirit Lifesteal conditional
 - **wiki**: https://deadlock.wiki/Split_Shot
 
 ### Interpretation
-Active multishot: 5 weapon multishot during buff; stacks (max 5) of +8% Wpn Dmg per stack. AoE/cluster-flavored weapon item.
+Active 5-shot multishot + stack-ramp gun amp: 5-bullet multishot for 5s (27s CD); hitting 2+ heroes per multishot grants stacking +8% WD per stack (max 5 stacks, 12s). Per Notes: ~20° total spread. Special for Celeste (3 shots, 70° spread).
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Weapon Multishot Conditional | 5 | Active |
-| Weapon Damage per Stack | +8% | Active |
+| Weapon Multishot Conditional | 5 | Active (5s) |
+| Weapon Damage per Stack | +8% | Active (max 5 stacks) |
 | Buff Duration | 5s | Active |
 | Max Stacks | 5 | Active |
-| Stack Duration | 12s | Active |
+| Stack Duration | 12s | — |
+| Cooldown | 27s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `aoe_cluster` | 5 multishot during active | 65 (% importance) | 1.6 | adds | Multi-shot = AoE clustering. |
-| `bullet_damage` | up to +40% × uptime + T2 baseline | 19.2 (eff gun-dmg %) | 0.7 | adds | (8×5) × (5/20 uptime) × 0.6 stack-build + 7.2 baseline = 12 + 7.2. |
-| `gun_burst_damage` | burst window during 5s active | 22 (dmg-% within 1s) | 0.5 | adds | R2 + multishot burst within active. |
-| `gun_continuous_damage` | stack buildup over fight | 14 (dmg-% outside 1s) | 0.3 | adds | R2. |
-| `farmer` | multishot clears NPCs | 40 (% importance) | 0.8 | adds | R28: cap 50. |
+| `bullet_damage` | +8% × ~3 typical stacks + T2 baseline | 31 (eff gun-dmg %) | 1.2 | adds | 7.2 baseline + ~24 stack effective. |
+| `aoe_cluster` | 5-shot multishot hits crowds | 60 (% importance) | 1.5 | adds | Multishot crowd amp. |
+| `gun_burst_damage` | 5-shot per-trigger burst | 70 (raw dmg within 1s) | 1.4 | adds | R2: multishot burst. |
+| `gun_continuous_damage` | sustained gun ramp | 35 (raw dmg outside 1s) | 0.7 | adds | R2. |
+| `farmer` | multishot helps wave clear | 45 (% importance) | 0.9 | adds | R28. |
+
 
 ---
 
@@ -1056,39 +1015,33 @@ Active multishot: 5 weapon multishot during buff; stacks (max 5) of +8% Wpn Dmg 
 - **wiki**: https://deadlock.wiki/Stalker
 
 ### Interpretation
-**Close-range wound applicator with wallhack-reveal** (per description): "Dealing weapon damage at close range opens a wound and grants you bonus move speed. Wounded enemies take spirit damage over time, have reduced bullet resist, and are revealed through walls." -50% footstep sound + +50 HP passive. The DPS shown is a SPIRIT-FLAVOR DoT applied to wounded targets, not direct bullet DPS. Strong flank-assassin enabler (silent footsteps + wallhack on wounded).
+Close-range stealth-flavored hybrid: -50% Footstep Sound, +50 HP. On weapon damage at <8m: +1.5m MS + opens a wound on target (17 DPS spirit DoT, -6% Bullet Resist, wall-reveal for 5s). Per Notes: triggers off any physical/melee ability damage. T2 close-range tracker.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Footstep Sound Distance | -50% | Passive |
 | Bonus Health | +50 | Passive |
-| Spirit Damage Per Second | 17 | Passive (DoT on wounded target) |
-| Bullet Resist Conditional | -6% | Passive (debuff on wounded) |
-| Move Speed Conditional | +1.5m | Passive (after wound) |
-| Wall-Vision | Yes | Passive (wounded enemy revealed through walls) |
-| Debuff Duration | 5s | Passive |
+| Damage Per Second | 17 | Passive (spirit DoT, 5s) |
+| Bullet Resist Conditional | -6% | Passive (5s on target) |
+| Move Speed Conditional | +1.5m | Passive (5s buff) |
 | Close Range | 8m | Trigger |
+| Cooldown | 6s | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `close_range` | wound only opens within 8m | 80 (% importance) | 1.7 | adds | R21 close-only. |
-| `long_range` | anti-affinity | -35 (% importance) | -0.8 | adds | R30. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `spirit_damage` | 17 spirit DPS × 5s × ~0.7 wound-uptime | 12 (SP-equiv) | 0.4 | adds | Per description: DoT is SPIRIT damage. ~60 spirit/wound × ~0.7 uptime / 5 = 8.4 SP-equiv. |
-| `bullet_resist_shred` | -6% × duration × wound-uptime | 5 (eff shred %) | 0.8 | adds | 6 × ~0.8 close-range uptime. |
-| `dot` | spirit DoT on wounded | 60 (raw dmg) | 0.7 | adds | 17 DPS × ~3.5s effective ≈ 60 DoT. |
-| `spirit_continuous_damage` | spirit DoT sustained | 60 (raw dmg outside 1s) | 0.6 | adds | DoT outside 1s. |
-| `spirit_continuous_proc` | per-bullet wound application | 0.3 (proc index) | 0.7 | adds | R5. |
-| `horizontal_mobility` | +1.5m close-range buff | 0.7 (m/s eff) | 0.7 | adds | 1.5 × ~0.45 close-range uptime. |
-| `engage` | close-flank engage | 65 (% importance) | 1.4 | adds | R11/R30 + silent footsteps enable. |
-| `single_target` | wound is single-target | 55 (% importance) | 1.7 | adds | Wounded one target at a time. |
-| `high_max_hp` | +50 HP explicit | 50 (HP) | 0.3 | adds | Weapon item, only explicit HP. |
-| `away_from_team` | flank/solo tool | 60 (% importance) | 2.0 | adds | Silent footsteps + wallhack flavor. |
-| `small_hitbox` | silent footsteps = stealth-flavor (partial) | 25 (% importance) | 1.0 | adds | R26 partial. |
-| `assist_importance` | wallhack helps team picks | 30 (% importance) | 0.7 | adds | Wall-vision reveals targets for team. |
-| `counter_importance` | wallhack counters stealth/escape | 35 (% importance) | 0.7 | adds | R13. |
+| `dot` | 17 DPS × 5s = 85 spirit DoT | 85 (eff dmg) | 1.0 | adds | ⚖️ Strong T2 DoT trigger. |
+| `close_range` | <8m trigger | 80 (% importance) | 1.7 | adds | Close-gated. |
+| `spirit_continuous_damage` | sustained DoT outside 1s | 70 (raw dmg outside 1s) | 0.9 | adds | R2: DoT continuous. |
+| `spirit_burst_damage` | first-1s DoT tick | 17 (raw dmg within 1s) | 0.3 | adds | Initial. |
+| `bullet_resist_shred` | -6% × ~0.7 uptime | 4 (eff shred %) | 0.7 | adds | Close-gated. |
+| `horizontal_mobility` | +1.5m × (5/6) trigger uptime | 1.2 (m/s eff) | 1.1 | adds | High uptime on weapon dmg. |
+| `bullet_damage` | T2 baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
+| `engage` | close-range commit + tracker | 60 (% importance) | 1.3 | adds | R11. |
+| `high_max_hp` | +50 HP (Weapon, no Vit baseline) | 50 (HP) | 0.3 | adds | Explicit. |
+| `counter_importance` | wall-reveal counters stealth | 50 (% importance) | 1.0 | adds | R13. |
+
 
 ---
 
@@ -1097,7 +1050,7 @@ Active multishot: 5 weapon multishot during buff; stacks (max 5) of +8% Wpn Dmg 
 - **wiki**: https://deadlock.wiki/Swift_Striker
 
 ### Interpretation
-Pure passive fire-rate + sprint: +20% Fire Rate, +0.75m Sprint Speed. The clean T2 fire-rate baseline.
+Pure fire-rate + mobility stick: +20% Fire Rate, +0.75m Sprint Speed. T2 named fire_rate anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1108,12 +1061,12 @@ Pure passive fire-rate + sprint: +20% Fire Rate, +0.75m Sprint Speed. The clean 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate` | +20% Fire Rate passive | 20 (eff %) | 2.0 | adds | T2 clean passive fire-rate. |
-| `horizontal_mobility` | +0.75m sprint-only | 0.4 (m/s eff) | 0.4 | adds | Sprint-only ×0.5. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 1.1 | adds | R31. |
-| `gun_burst_damage` | RPM lifts burst | 20 (dmg-% within 1s) | 0.7 | adds | R2 corrected: fire_rate lifts burst more — DPS in 1s window. |
-| `gun_continuous_damage` | sustained mild lift | 10 (dmg-% outside 1s) | 0.8 | adds | R2 corrected lighter. |
-| `farmer` | mobility + RPM | 25 (% importance) | 1.3 | adds | R28. |
+| `fire_rate` | +20% direct | 20 (eff %) | 2.0 | adds | ⚖️ T2 named fire_rate anchor. |
+| `bullet_damage` | T2 baseline + FR-derived | 17 (eff gun-dmg %) | 1.4 | adds | 7.2 + ~10. |
+| `gun_burst_damage` | FR primarily lifts burst | 75 (raw dmg within 1s) | 2.0 | adds | R2. |
+| `gun_continuous_damage` | FR lighter on continuous | 20 (raw dmg outside 1s) | 1.6 | adds | R2. |
+| `horizontal_mobility` | +0.75m sprint | 0.5 (m/s eff) | 0.5 | adds | Direct. |
+
 
 ---
 
@@ -1122,7 +1075,7 @@ Pure passive fire-rate + sprint: +20% Fire Rate, +0.75m Sprint Speed. The clean 
 - **wiki**: https://deadlock.wiki/Titanic_Magazine
 
 ### Interpretation
-Massive flat passive: +100% Max Ammo, +14% Weapon Damage. The game-wide 2.0 outlier anchor for `magazine_size_dependant` per 03_normalization (with outlier protection on neighbors).
+Pure ammo + WD stick: +100% Max Ammo, +14% Weapon Damage. T2 magazine_size anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1133,11 +1086,12 @@ Massive flat passive: +100% Max Ammo, +14% Weapon Damage. The game-wide 2.0 outl
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `magazine_size_dependant` | +100% Max Ammo passive | 100 (eff ammo %) | 2.0 | adds | Game-wide 2.0 anchor. |
-| `bullet_damage` | +14% + T2 baseline | 21.2 (eff gun-dmg %) | — | adds | 14 + 7.2. |
-| `gun_continuous_damage` | huge mag = sustained fire | 28 (dmg-% outside 1s) | — | adds | R2 + mag heavily lifts continuous. |
-| `gun_burst_damage` | per-shot amp only (mag doesn't lift burst) | 14 (dmg-% within 1s) | — | adds | R2: bullet_damage lifts burst, mag doesn't. |
-| `farmer` | massive mag clears waves | 40 (% importance) | — | adds | R28. |
+| `magazine_size_dependant` | +100% direct | 100 (eff ammo %) | 2.0 | adds | ⚖️ Named T2 magazine_size anchor. |
+| `bullet_damage` | +14% direct + T2 baseline | 21 (eff gun-dmg %) | — | adds | 7.2 + 14. |
+| `gun_continuous_damage` | mag depth + per-shot WD | 60 (raw dmg outside 1s) | — | adds | R2: mag-heavy. |
+| `gun_burst_damage` | per-shot WD lift | 25 (raw dmg within 1s) | — | adds | R2 lighter. |
+| `farmer` | huge ammo helps wave clear | 50 (% importance) | 1.0 | adds | R28. |
+
 
 ---
 
@@ -1146,25 +1100,26 @@ Massive flat passive: +100% Max Ammo, +14% Weapon Damage. The game-wide 2.0 outl
 - **wiki**: https://deadlock.wiki/Weakening_Headshot
 
 ### Interpretation
-On-headshot debuff: -13% Bullet Resist on enemy for 12s, +60 HP. T2 bullet_resist_shred via headshot trigger.
+Headshot-gated debuff: +60 HP. Headshot → -13% Bullet Resist on target for 12s. T2 headshot-driven resist shred.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bonus Health | +60 | Passive |
-| Bullet Resist Conditional | -13% | Passive (on headshot) |
-| Debuff Duration | 12s | Passive |
+| Bullet Resist Conditional | -13% | Passive (on headshot, 12s) |
+| Debuff Duration | 12s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_resist_shred` | -13% × 12s × headshot uptime | 9 (eff shred %) | 1.5 | adds | 13 × ~0.7 headshot-maintenance. |
-| `headshot_damage` | rewards landing heads | 30 (% importance) | 0.7 | adds | Importance % for headshot trigger. |
-| `gun_burst_proc` | first-head proc | 0.7 (proc index) | 1.1 | adds | Burst-flavor. |
-| `bullet_damage` | T2 weapon baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
-| `high_max_hp` | +60 HP explicit | 60 (HP) | 0.4 | adds | Weapon item. |
-| `single_target` | headshot is single-target | 35 (% importance) | 1.1 | adds | Targeted. |
-| `debuff` | enemy resist debuff | 22 (% importance) | 0.6 | adds | Mild. |
+| `bullet_resist_shred` | -13% × ~0.7 headshot uptime | 9 (eff shred %) | 1.5 | adds | Headshot-gated. |
+| `headshot_damage` | headshot-trigger pure-skill | 55 (% importance) | 1.3 | adds | R29. |
+| `bullet_damage` | T2 baseline | 7.2 (eff gun-dmg %) | 0.3 | adds | R31. |
+| `single_target` | per-headshot single-target | 45 (% importance) | 1.4 | adds | Per-target debuff. |
+| `mid_range` | headshot range | 30 (% importance) | 1.3 | adds | Headshot tool. |
+| `high_max_hp` | +60 HP (Weapon, no Vit baseline) | 60 (HP) | 0.3 | adds | Explicit. |
+| `counter_importance` | shred vs bulky targets | 35 (% importance) | 0.7 | adds | R13. |
+
 
 ---
 
@@ -1173,30 +1128,28 @@ On-headshot debuff: -13% Bullet Resist on enemy for 12s, +60 HP. T2 bullet_resis
 - **wiki**: https://deadlock.wiki/Battle_Vest
 
 ### Interpretation
-Hybrid defensive/offensive: +18% Bullet Resist, +3 OOC Regen, +18% Wpn Dmg conditional, +7% Fire Rate conditional. Defensive item with gun-amp synergy.
+Above-65%-HP combat buff: +18% Bullet Resist, +3 OOC Regen. While above 65% HP: +18% Weapon Damage + +7% Fire Rate. T2 healthy-bully kit.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bullet Resist | +18% | Passive |
 | Out of Combat Regen | +3 | Passive |
-| Weapon Damage Conditional | +18% | Passive (conditional) |
-| Fire Rate Conditional | +7% | Passive (conditional) |
+| Weapon Damage Conditional | +18% | Passive (>65% HP) |
+| Fire Rate Conditional | +7% | Passive (>65% HP) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_resistance` | +18% Bullet Resist | 18 (eff %) | 1.4 | adds | Full passive. |
-| `melee_resistance` | bullet resist → pseudo melee | 9 (eff %) | 0.5 | adds | Per 01 pseudo (~0.5x). |
-| `bullet_damage` | +18% × ~0.5 uptime | 9 (eff gun-dmg %) | 0.3 | adds | Conditional × uptime. (Vitality item — no R31 weapon baseline.) |
-| `fire_rate` | +7% × uptime | 4 (eff %) | 0.4 | adds | Conditional. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +3 OOC | 14 (HP total) | 0.1 | adds | 3 × 15 × 0.3 = 13.5 HP cycle. |
-| `continous_heal` | +3 OOC outside 1s | 12.6 (HP outside 1s) | 0.1 | adds | 3 × 14 × 0.3 = 12.6. |
-| `burst_heal` | +3 OOC first 1s | 0.9 (HP within 1s) | 0.0 | adds | Small initial tick. |
-| `gun_burst_damage` | per-shot amp + fire-rate burst | 14 (dmg-% within 1s) | 0.3 | adds | R2 corrected (fire_rate lifts burst more). |
-| `gun_continuous_damage` | sustained lift | 6 (dmg-% outside 1s) | 0.1 | adds | R2 lighter. |
-| `damage_sponge` | conditional damage when hit | 35 (% importance) | — | relies | R26: conditional likely triggers on being damaged. |
+| `bullet_resistance` | +18% direct | 18 (eff %) | 1.4 | adds | Direct. |
+| `bullet_damage` | +18% × ~0.6 healthy uptime (Vit, no Weapon baseline) | 11 (eff gun-dmg %) | 0.4 | adds | Direct conditional only. |
+| `fire_rate` | +7% × ~0.6 healthy uptime | 4 (eff %) | 0.4 | adds | Conditional. |
+| `gun_burst_damage` | FR+WD burst lift while healthy | 35 (raw dmg within 1s) | 0.7 | adds | R2 healthy-state. |
+| `gun_continuous_damage` | sustained healthy fire | 20 (raw dmg outside 1s) | 0.4 | adds | R2. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `self_heal` | +3 OOC × 20s | 60 (HP total) | 0.4 | adds | OOC sustain. |
+| `damage_sponge` | rewards staying healthy | 35 (% importance) | 0.7 | adds | R26: healthy-bully. |
+
 
 ---
 
@@ -1205,7 +1158,7 @@ Hybrid defensive/offensive: +18% Bullet Resist, +3 OOC Regen, +18% Wpn Dmg condi
 - **wiki**: https://deadlock.wiki/Bullet_Lifesteal_(item)
 
 ### Interpretation
-Pure passive bullet lifesteal: +13% Bullet Lifesteal, +90 HP, +6% Wpn Dmg. The T2 raw bullet-lifesteal baseline (Vampiric Burst T4 is the effective 2.0 anchor).
+Pure bullet sustain stat stick: +13% Bullet Lifesteal, +90 HP, +6% Weapon Damage. T2 bullet_lifesteal anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1217,16 +1170,12 @@ Pure passive bullet lifesteal: +13% Bullet Lifesteal, +90 HP, +6% Wpn Dmg. The T
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_lifesteal` | +13% passive | 13 (eff %) | 2.0 | adds | Direct passive. |
-| `self_heal` | lifesteal-as-heal (per fight) | 80 (HP total) | 0.5 | adds | 13% of typical 600 gun dmg dealt = ~78 HP per fight. |
-| `continous_heal` | sustained lifesteal | 70 (HP outside 1s) | 0.3 | adds | Lifesteal pings outside the 1s window. |
-| `burst_heal` | first-1s of lifesteal | 10 (HP within 1s) | 0.1 | adds | First burst of shots. |
-| `high_max_hp` | +90 HP + T2 baseline | 112 (HP) | 0.8 | adds | 90 + 22. |
-| `high_max_hp` | lifesteal scales with HP cushion | 18 (HP) | — | relies | R8/R10. |
-| `bullet_damage` | +6% (Vitality item, no baseline) | 6 (eff gun-dmg %) | 0.2 | adds | Direct. |
-| `gun_burst_damage` | per-shot amp | 6 (dmg-% within 1s) | 0.1 | adds | R2. |
-| `gun_continuous_damage` | sustained DPS w/ sustain | 6 (dmg-% outside 1s) | 0.1 | adds | R2. |
-| `damage_sponge` | lifesteal rewards taking damage (incidental) | 25 (% importance) | — | relies | R26 partial. |
+| `bullet_lifesteal` | +13% direct | 13 (eff %) | 2.0 | adds | ⚖️ T2 bullet_lifesteal anchor. |
+| `bullet_damage` | +6% direct (Vit, no Weapon baseline) | 6 (eff gun-dmg %) | 0.2 | adds | Direct only. |
+| `self_heal` | lifesteal sustain | 90 (HP total) | 0.6 | adds | Lifesteal-driven. |
+| `high_max_hp` | T2 Vit baseline + 90 HP | 112 (HP) | 0.7 | adds | 22 + 90. |
+| `damage_sponge` | lifesteal + HP = sustained tank | 35 (% importance) | 0.7 | adds | R26. |
+
 
 ---
 
@@ -1235,7 +1184,7 @@ Pure passive bullet lifesteal: +13% Bullet Lifesteal, +90 HP, +6% Wpn Dmg. The T
 - **wiki**: https://deadlock.wiki/Debuff_Reducer
 
 ### Interpretation
-Pure passive debuff resistance: +90 HP, +25% Debuff Resist. The T2 anti-CC defensive.
+Pure debuff-resist stick: +90 HP, +25% Debuff Resist. Reduces duration of all negative effects. T2 anti-CC counter-stick.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1246,43 +1195,42 @@ Pure passive debuff resistance: +90 HP, +25% Debuff Resist. The T2 anti-CC defen
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `debuff_resistance` | +25% Debuff Resist | 25 (eff %) | 2.0 | adds | Direct. |
-| `cc_resist` | duration-reduction covers slow/stun | 18 (eff %) | 1.2 | adds | Per 04 judgment — debuff reducer also blunts CC. |
-| `high_max_hp` | +90 + T2 baseline | 112 (HP) | 0.7 | adds | 90 + 22. |
-| `counter_importance` | tactical counter to CC | 65 (% importance) | 1.3 | adds | R13/R27. |
-| `damage_sponge` | HP/CC-tank synergy (incidental) | 30 (% importance) | — | relies | R26. |
+| `debuff_resistance` | +25% direct | 25 (eff %) | 2.0 | adds | ⚖️ T2 debuff_resistance anchor. |
+| `cc_resist` | debuff resist reduces CC | 18 (eff %) | 1.2 | adds | R13. |
+| `high_max_hp` | T2 Vit baseline + 90 HP | 112 (HP) | 0.7 | adds | 22 + 90. |
+| `counter_importance` | vs CC-heavy comps | 55 (% importance) | 1.1 | adds | R13. |
+| `damage_sponge` | debuff resist + HP | 30 (% importance) | 0.6 | adds | R26. |
+
 
 ---
 
 ## Enchanters Emblem
 - **normalized_name**: `enchanters_emblem` · **tier**: 2 (1600) · **category**: Vitality · **codename**: `upgrade_magic_shield`
-- **wiki**: https://deadlock.wiki/Enchanter's_Emblem
+- **wiki**: https://deadlock.wiki/Enchanters_Emblem
 
 ### Interpretation
-Hybrid spirit-defense/offense: +18% Spirit Resist, +2 OOC Regen, +15 SP, +5% Ability CDR. Strong dual-purpose T2 item for spirit casters.
+Above-65%-HP caster kit: +18% Spirit Resist, +2 OOC Regen. While above 65% HP: +15 Spirit Power + +5% Ability CDR. T2 healthy-caster amp.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Resist | +18% | Passive |
 | Out of Combat Regen | +2 | Passive |
-| Spirit Power | +15 | Passive |
-| Ability Cooldown Reduction | +5% | Passive |
+| Spirit Power Conditional | +15 | Passive (>65% HP) |
+| Ability Cooldown Reduction | +5% | Passive (>65% HP) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_resistance` | +18% Spirit Resist | 18 (eff %) | 1.4 | adds | Full passive. |
-| `spirit_damage` | +15 SP (Vitality item, no SP baseline) | 15 (SP-equiv) | 0.5 | adds | Direct flat. |
-| `spirit_burst_damage` | SP lifts spirit burst | 12 (dmg-equiv within 1s) | 0.1 | adds | R2 (equal lift). |
-| `spirit_continuous_damage` | SP lifts sustained | 12 (dmg-equiv outside 1s) | 0.1 | adds | R2. |
-| `cooldown_reduction` | +5% CDR | 5 (eff CDR %) | 0.5 | adds | Direct passive CDR. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +2 OOC | 9 (HP total) | 0.1 | adds | 2 × 15 × 0.3. |
-| `continous_heal` | OOC outside 1s | 8.4 (HP outside 1s) | 0.0 | adds | 2 × 14 × 0.3. |
-| `burst_heal` | OOC first 1s | 0.6 (HP within 1s) | 0.0 | adds | Small. |
-| `multi_ability_focus` | SP + CDR universal | 50 (% importance) | 1.4 | adds | R4. |
-| `hybrid_damage_usage` | broadly slotted in spirit kits | 10 (% importance) | 0.2 | adds | Small partial. |
+| `spirit_resistance` | +18% direct | 18 (eff %) | 1.4 | adds | Direct. |
+| `spirit_damage` | +15 SP × ~0.6 healthy uptime (Vit, no Spirit baseline) | 9 (SP-equiv) | 0.3 | adds | Conditional only. |
+| `cooldown_reduction` | +5% × ~0.6 healthy uptime | 3 (eff CDR %) | 0.3 | adds | Conditional. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `self_heal` | +2 OOC × 20s | 40 (HP total) | 0.3 | adds | OOC. |
+| `spirit_burst_damage` | SP lifts spirit burst | 15 (raw dmg within 1s) | 0.3 | adds | R2. |
+| `spirit_continuous_damage` | SP lifts continuous | 15 (raw dmg outside 1s) | 0.2 | adds | R2. |
+| `damage_sponge` | healthy-bully | 25 (% importance) | 0.5 | adds | R26. |
+
 
 ---
 
@@ -1291,29 +1239,26 @@ Hybrid spirit-defense/offense: +18% Spirit Resist, +2 OOC Regen, +15 SP, +5% Abi
 - **wiki**: https://deadlock.wiki/Enduring_Speed
 
 ### Interpretation
-Universal mobility + cleanse: +2m Move Speed, +2 OOC Regen, +25% Slow Resist. Per 04 judgment: slow-resist → `cc_resist`, NOT `debuff_resistance`.
+Mobility + slow resist stick: +2m Move Speed, +2 OOC Regen, +25% Slow Resist. Per Notes: slow resist multiplicatively reduces incoming slows by 25% (60% slow → 45%). Also protects vs dash slows. T2 mobility anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Move Speed | +2m | Passive |
 | Out of Combat Regen | +2 | Passive |
-| Slow Resist | +25% | Passive |
+| Slow Resist | +25% | Passive (also dash slow) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `horizontal_mobility` | +2m universal MS | 2.0 (m/s eff) | 2.0 | adds | Universal — full credit. |
-| `cc_resist` | +25% Slow Resist | 25 (eff %) | 1.7 | adds | Per 04: slow-resist → cc_resist. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +2 OOC | 9 (HP total) | 0.1 | adds | Standard. |
-| `continous_heal` | OOC outside 1s | 8.4 (HP outside 1s) | 0.0 | adds | Same. |
-| `burst_heal` | OOC first 1s | 0.6 (HP within 1s) | 0.0 | adds | Small. |
-| `escape` | high MS + slow resist | 60 (% importance) | 1.1 | adds | Escape-focused. |
-| `engage` | universal MS helps engage too | 35 (% importance) | 0.8 | adds | Smaller credit. |
-| `farmer` | mobility helps farm | 30 (% importance) | 0.6 | adds | R28/R14. |
-| `counter_importance` | counter to slow comps | 40 (% importance) | 0.8 | adds | R13. |
-| `small_hitbox` | mobility partial | 20 (% importance) | 0.8 | adds | R26 incidental. |
+| `horizontal_mobility` | +2m direct | 1.4 (m/s eff) | 1.3 | adds | Direct. |
+| `cc_resist` | +25% slow resist | 18 (eff %) | 1.2 | adds | Slow + dash slow. |
+| `counter_importance` | vs slow comps | 50 (% importance) | 1.0 | adds | R13. |
+| `escape` | mobility + slow resist | 55 (% importance) | 1.0 | adds | R14. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `self_heal` | +2 OOC × 20s | 40 (HP total) | 0.3 | adds | OOC. |
+| `farmer` | mobility = rotations | 35 (% importance) | 0.7 | adds | R28. |
+
 
 ---
 
@@ -1322,31 +1267,33 @@ Universal mobility + cleanse: +2m Move Speed, +2 OOC Regen, +25% Slow Resist. Pe
 - **wiki**: https://deadlock.wiki/Guardian_Ward
 
 ### Interpretation
-Active ally-target barrier + MS: 250 barrier, +2.75m MS, 6s, 40m cast. The T2 ally-support shield item.
+Self-OR-ally cast barrier: +8% Ability Range, +1.5 OOC Regen. Active (60s self / 30s ally): 250 barrier + +2.75m MS for 6s, 40m cast range. Per description: "Can be self-cast." T2 utility-barrier anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Ability Range | +8% | Passive |
 | Out of Combat Regen | +1.5 | Passive |
-| Barrier Conditional | 250 | Active |
+| Barrier Conditional | 250 | Active (6s) |
 | Move Speed Conditional | +2.75m | Active |
 | Buff Duration | 6s | Active |
 | Cast Range | 40m | Active |
+| Cooldown | 60s (30s ally-cast) | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 250 barrier active | 100 (shield HP) | 0.3 | adds | 250 × ~0.4 uptime weight. |
-| `team_heal` | ally-target shield value | 100 (HP total) | 0.4 | adds | Ally-target shield = team_heal cross-credit. |
-| `assist_importance` | ally-target active | 75 (% importance) | 1.8 | adds | R27: niche ally-focused. |
-| `horizontal_mobility` | +2.75m active to ally | 1.0 (m/s eff) | 1.0 | adds | Cast on ally — partial self-credit. |
-| `range_extender_dependant` | +8% Ability Range | 8 (eff %) | 0.5 | adds | Direct. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +1.5 OOC | 7 (HP total) | 0.0 | adds | 1.5 × 15 × 0.3. |
-| `continous_heal` | OOC outside 1s | 6.5 (HP outside 1s) | 0.0 | adds | 1.5 × 14 × 0.3. |
-| `close_to_team` | ally-aim incentivizes proximity | 30 (% importance) | 0.9 | adds | 40m cast range but proximity rewarded. |
-| `counter_importance` | shield save vs burst | 40 (% importance) | 0.8 | adds | R13. |
+| `shield` | 250 × (6/45 avg uptime) | 33 (shield HP) | 0.1 | adds | Active barrier. |
+| `assist_importance` | ally-cast halves CD | 65 (% importance) | 1.5 | adds | Ally-cast incentivized. |
+| `self_buff` | also self-cast | 45 (% importance) | 1.3 | adds | Self-cast option per description. |
+| `team_heal` | 250 barrier on ally | 100 (HP total) | 0.4 | adds | Barrier = effective HP. |
+| `ally_buff` | +2.75m MS + barrier | 55 (% importance) | 1.4 | adds | R24. |
+| `horizontal_mobility` | +2.75m × (6/45) | 0.4 (m/s eff) | 0.4 | adds | Active uptime. |
+| `range_extender_dependant` | +8% direct | 8 (eff %) | 0.5 | adds | Direct. |
+| `escape` | barrier + MS escape | 45 (% importance) | 0.9 | adds | R14. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `self_heal` | +1.5 OOC × 20s | 30 (HP total) | 0.2 | adds | Small OOC. |
+
 
 ---
 
@@ -1355,27 +1302,28 @@ Active ally-target barrier + MS: 250 barrier, +2.75m MS, 6s, 40m cast. The T2 al
 - **wiki**: https://deadlock.wiki/Healbane
 
 ### Interpretation
-Anti-heal trigger: +7 SP, -35% Healing Reduction conditional, 275 heal-on-hero-kill, 8s. The T2 dedicated anti-heal item.
+Spirit-damage anti-heal + kill bonus: +7 SP. Spirit damage → -35% Healing Reduction for 8s; if enemy dies under effect: +275 heal to you. T2 anti-heal anchor for spirit users.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Power | +7 | Passive |
-| Healing Reduction Conditional | -35% | Passive (on-hit/on-trigger) |
+| Healing Reduction Conditional | -35% | Passive (8s on spirit dmg) |
 | Heal On Hero Kill | 275 | Passive |
-| Duration | 8s | Passive |
+| Duration | 8s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `anti_heal` | -35% × 8s × on-hit uptime | 28 (eff %) | 2.0 | adds | 35 × ~0.8 uptime. T2 dedicated. |
-| `counter_importance` | dedicated anti-heal counter | 75 (% importance) | 1.5 | adds | R27: niche counter, high score. |
-| `self_heal` | 275 heal on hero kill (avg per fight) | 80 (HP total) | 0.5 | adds | ~0.3 kills/fight × 275 HP. |
-| `burst_heal` | 275 on kill is burst-flavor | 80 (HP within 1s) | 0.7 | adds | Single-tick heal on kill. |
-| `assist_importance` | kill-trigger covers assists | 25 (% importance) | 0.6 | adds | Per 01: kills count as assists. |
-| `spirit_damage` | +7 SP (Vitality item, no SP baseline) | 7 (SP-equiv) | 0.2 | adds | Direct flat. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `high_kill_count` | kill-trigger reward | 35 (% importance) | 1.0 | adds | Item rewards securing kills. |
+| `anti_heal` | -35% × ~0.7 spirit-dmg uptime | 25 (eff %) | 1.9 | adds | ⚖️ T2 anti_heal anchor. |
+| `spirit_damage` | +7 SP (Vit, no Spirit baseline) | 7 (SP-equiv) | 0.2 | adds | Direct. |
+| `self_heal` | 275 on kill × ~0.5 kills/fight | 140 (HP total) | 0.9 | adds | Kill-reward heal. |
+| `burst_heal` | 275 instant on kill | 275 (HP within 1s) | 2.0 | adds | Instant on kill. |
+| `counter_importance` | vs healing-stack comps | 55 (% importance) | 1.1 | adds | R13. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `high_kill_count` | rewards securing kills | 50 (% importance) | 1.4 | adds | Kill-reward. |
+| `debuff` | anti-heal debuff | 35 (% importance) | 0.9 | adds | Hard-to-counter. |
+
 
 ---
 
@@ -1384,28 +1332,27 @@ Anti-heal trigger: +7 SP, -35% Healing Reduction conditional, 275 heal-on-hero-k
 - **wiki**: https://deadlock.wiki/Healing_Booster
 
 ### Interpretation
-Pure heal-amp + passive regen: +3 HP/s, +1 OOC, +20% Healing Effectiveness. Per Notes: +20% Healing Effectiveness also affects Bullet Lifesteal AND Spirit Lifesteal received by you, plus temporary regen (Frozen Shelter etc.) — but NOT constant base regen. Item amplifies ally heals received as well. Per 04 judgment: meaningful self_heal credit too.
+Healing amp: +3 Health Regen, +1 OOC Regen, +20% Healing Effectiveness. Per Notes: amps Bullet/Spirit Lifesteal AND ally heals; doesn't amp constant Health Regen (only temporary regen sources). T2 healing-effectiveness anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Health Regen | +3 | Passive |
 | Out of Combat Regen | +1 | Passive |
-| Healing Effectiveness | +20% | Passive (also lifts Bullet/Spirit Lifesteal per Notes) |
+| Healing Effectiveness | +20% | Passive |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `team_heal` | +20% heal amp received from allies | 55 (HP total) | 0.2 | adds | Amp benefits ally heals received. |
-| `continous_heal` | 3 HP/s × 29s post-fight + OOC + amp lift | 85 (HP outside 1s) | 0.4 | adds | 3×(30−1) + 1×(15−1)×0.3 + amp boost ≈ 87 + 4. |
-| `burst_heal` | first 1s | 4 (HP within 1s) | 0.0 | adds | 3 + small OOC contribution. |
-| `self_heal` | total HP per cycle + amp on lifesteal | 110 (HP total) | 0.7 | adds | Sum + 20% amp lift on lifesteal items the carrier holds. |
-| `assist_importance` | heal amp helps allies | 50 (% importance) | 1.2 | adds | R27: hybrid utility. |
-| `spirit_lifesteal` | +20% amp on owned spirit lifesteal | 4 (eff %) | — | relies | RELY: only meaningful if carrier also has spirit lifesteal sources. |
-| `bullet_lifesteal` | +20% amp on owned bullet lifesteal | 4 (eff %) | — | relies | RELY: only meaningful if carrier also has bullet lifesteal sources. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.2 | adds | R31. |
-| `high_max_hp` | heal scales with HP | 20 (HP) | — | relies | R8. |
-| `farmer` | sustain → farm uptime | 30 (% importance) | 0.6 | adds | R28. |
+| `self_heal` | 3 × 30s + 20% amp on lifesteal | 120 (HP total) | 0.8 | adds | Sustained + amp. |
+| `continous_heal` | regen outside 1s | 100 (HP outside 1s) | 0.5 | adds | 3 × ~25s + amp on bullet/spirit lifesteal. |
+| `burst_heal` | first-1s tick | 3 (HP within 1s) | 0.0 | adds | Small. |
+| `ally_buff` | also amps ally heal received | 45 (% importance) | 1.1 | adds | Per Notes: amps healing applied TO allies. |
+| `assist_importance` | helps team heal effectiveness | 35 (% importance) | 0.8 | adds | R27. |
+| `counter_importance` | counter to anti-heal debuffs | 40 (% importance) | 0.8 | adds | R13. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `farmer` | regen sustains farm | 30 (% importance) | 0.6 | adds | R28. |
+
 
 ---
 
@@ -1414,29 +1361,28 @@ Pure heal-amp + passive regen: +3 HP/s, +1 OOC, +20% Healing Effectiveness. Per 
 - **wiki**: https://deadlock.wiki/Reactive_Barrier
 
 ### Interpretation
-**CC-triggered barrier** (per description): "Gain a Barrier when you are Stunned, Chained, Immobilized, Slept or Silenced." 325 + 1.8×SP barrier, 10s. Anti-CC counter, NOT a damage-sponge — barrier triggers on hard-CC, not damage.
+CC-triggered barrier: +1 OOC Regen. When Stunned/Chained/Immobilized/Slept/Silenced (55s CD): gain 325 + 1.8×SP barrier for 10s. Per Abilities/items list: triggers off dozens of hero abilities + item actives like Silencer, Knockdown, Curse, etc. T2 anti-CC counter.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Out of Combat Regen | +1 | Passive |
-| Barrier Conditional | 325 + 1.8×SP | Passive (on CC: Stun/Chain/Immobilize/Sleep/Silence) |
-| Duration | 10s | Passive |
+| Barrier Conditional | 325 + 1.8×SP | Passive (on CC trigger, 10s) |
+| Duration | 10s | — |
+| Cooldown | 55s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 325 + 1.8×SP barrier × cc-trigger uptime | 200 (shield HP) | 0.7 | adds | 361 × ~0.55 typical CC-uptime in a fight. |
-| `counter_importance` | dedicated anti-CC counter | 75 (% importance) | 1.5 | adds | R27: niche counter to CC-heavy comps. |
-| `cc_resist` | barrier softens CC damage windows | 12 (eff %) | 0.8 | adds | Indirectly mitigates CC effective damage. |
-| `burst_resistance` | barrier absorbs burst during CC windows | 35 (eff %) | 1.4 | adds | Per 01: shield ~0.6 toward burst_resistance. |
-| `bullet_resistance` | partial pseudo | 6 (eff %) | 0.5 | adds | Per 01. |
-| `spirit_resistance` | partial pseudo | 6 (eff %) | 0.5 | adds | Per 01. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.2 | adds | R31. |
-| `high_max_hp` | shield = effective HP buff | 25 (HP) | — | relies | R8/R10. |
-| `self_heal` | +1 OOC | 4.5 (HP total) | 0.0 | adds | Small. |
-| `damage_sponge` | NOT triggered by damage — only CC | 10 (% importance) | — | relies | R26: small partial only (description clarifies trigger is CC, not damage). |
-| `spirit_damage` | barrier scales with SP | 7 (SP-equiv) | — | relies | The 1.8×SP scaling. |
+| `shield` | (325 + 1.8×20) × (10/55) uptime | 65 (shield HP) | 0.3 | adds | ~360 HP × ~18%. |
+| `counter_importance` | dedicated anti-CC | 70 (% importance) | 1.4 | adds | ⚖️ Named anti-CC barrier. |
+| `cc_resist` | barrier softens CC dmg | 12 (eff %) | 0.8 | adds | Indirect CC dmg mitigation. |
+| `damage_sponge` | barrier soaks burst during CC | 35 (% importance) | 0.7 | adds | R26. |
+| `high_max_hp` | T2 Vit baseline + shield-as-HP | 35 (HP) | 0.2 | adds | 22 + ~13. |
+| `escape` | barrier lets you survive CC | 40 (% importance) | 0.8 | adds | R14. |
+| `self_heal` | +1 OOC × 20s | 20 (HP total) | 0.1 | adds | Small OOC. |
+| `spirit_damage` | barrier scales with SP | 6 (SP-equiv) | — | relies | RELY: scaling matters only with SP. |
+
 
 ---
 
@@ -1445,28 +1391,28 @@ Pure heal-amp + passive regen: +3 HP/s, +1 OOC, +20% Healing Effectiveness. Per 
 - **wiki**: https://deadlock.wiki/Restorative_Locket
 
 ### Interpretation
-Active stack-consume heal: 16 heal/stack (25 max → 400 burst), 3 max stamina restored. Hybrid burst-heal anchor.
+Stack-consume burst heal: +10% Spirit Resist. Active (20s CD): when enemy in 35m uses an ability, store a Restoration Stack (16 heal/stack, max 25 = 400 burst); consume stacks to heal + restore up to 3 stamina. Per Notes: only Active Abilities trigger stacks. T2 burst-heal anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Heal Per Stack | 16 | Active |
-| Max Stacks | 25 | Active |
+| Spirit Resist | +10% | Passive |
+| Heal Per Stack | 16 | Active (20s CD) |
+| Max Stacks | 25 (= 400 burst) | Active |
 | Max Stamina Restore | 3 | Active |
+| Cast Range | 35m | Passive (stack-collection) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `self_heal` | up to 400 HP burst self-cast | 220 (HP total) | 1.5 | adds | ~14 stacks × 16 = 220 typical self-cast. |
-| `team_heal` | ally-cast option | 110 (HP total) | 0.5 | adds | ~50/50 self/ally split. |
-| `burst_heal` | single-tick stack heal | 220 (HP within 1s) | 2.0 | adds | Burst-flavor: instant heal on cast. |
-| `assist_importance` | ally-targetable hybrid | 55 (% importance) | 1.3 | adds | R27. |
-| `vertical_mobility` | 3 stamina restored | 1 (units) | 0.2 | adds | Direct stamina restore. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.2 | adds | R31. |
-| `high_max_hp` | heal cushion | 18 (HP) | — | relies | R8. |
-| `counter_importance` | reactive heal vs burst | 50 (% importance) | 1.0 | adds | R13. |
-| `farmer` | sustain enables farm | 25 (% importance) | 0.5 | adds | R28. |
-| `damage_sponge` | stack-build flavor (incidental) | 15 (% importance) | — | relies | R26 small. |
+| `burst_heal` | up to 400 HP instant per consume | 280 (HP within 1s) | 2.0 | adds | ⚖️ T2 burst_heal anchor. ~280 typical with ~18 stacks. |
+| `self_heal` | sustained per fight ≈ 280 | 280 (HP total) | 1.9 | adds | Per-fight self-sustain. |
+| `vertical_mobility` | stamina-3 restore | 1.5 (units) | 0.8 | adds | Stamina burst. |
+| `spirit_resistance` | +10% direct | 10 (eff %) | 0.8 | adds | Direct. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `counter_importance` | counters ability-spam comps | 55 (% importance) | 1.1 | adds | R13: anti-caster heal. |
+| `damage_sponge` | big burst heal soaks burst | 40 (% importance) | 0.8 | adds | R26. |
+
 
 ---
 
@@ -1475,26 +1421,28 @@ Active stack-consume heal: 16 heal/stack (25 max → 400 burst), 3 max stamina r
 - **wiki**: https://deadlock.wiki/Return_Fire
 
 ### Interpretation
-Active damage-reflect: 65% bullet / 25% spirit returned for 6.5s + 10% Bullet Resist passive. Counter-flavored item.
+Damage-reflection active: +10% Bullet Resist. Active (23s CD): for 6.5s, automatically fire bullets back at any attacker — 65% bullet damage returned, 25% spirit damage returned. Per Notes: returns pre-mitigation damage; works even with 100% immunity (e.g. via Metal Skin); doesn't apply buildup procs.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bullet Resist | +10% | Passive |
-| Bullet Damage Returned | 65% | Active |
-| Spirit Damage Returned | 25% | Active |
+| Bullet Damage Returned | 65% | Active (6.5s) |
+| Spirit Damage Returned | 25% | Active (6.5s) |
 | Duration | 6.5s | Active |
+| Cooldown | 23s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_resistance` | +10% passive + 65% return effective | 22 (eff %) | 1.7 | adds | 10 + (65 × ~6.5/20 uptime × ~0.5 weighting). |
-| `melee_resistance` | bullet resist → pseudo melee | 11 (eff %) | 0.6 | adds | Per 01 pseudo ~0.5x. |
-| `spirit_resistance` | 25% spirit return × uptime | 8 (eff %) | 0.6 | adds | 25 × (6.5/20). |
-| `damage_sponge` | reflect-on-damage | 60 (% importance) | 1.3 | adds | R26 — purpose-built reflect. |
-| `counter_importance` | reactive counter | 60 (% importance) | 1.2 | adds | R13. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `bullet_damage` | reflected gun damage | 8 (eff gun-dmg %) | 0.3 | adds | Reflect damage counts. |
+| `gun_burst_damage` | reflect 65% bullet within 1s window | 40 (raw dmg within 1s) | 0.8 | adds | Reflect-burst. |
+| `bullet_resistance` | +10% direct | 10 (eff %) | 0.8 | adds | Direct. |
+| `counter_importance` | counter to focus-fire comps | 60 (% importance) | 1.2 | adds | ⚖️ Reflect-counter anchor. |
+| `damage_sponge` | reflect-while-tanky | 45 (% importance) | 0.9 | adds | R26. |
+| `high_max_hp` | T2 Vit baseline | 22 (HP) | 0.1 | adds | R31. |
+| `engage` | active aggressive option | 35 (% importance) | 0.8 | adds | R11. |
+| `self_buff` | active is self-only | 35 (% importance) | 1.0 | adds | Self-only. |
+
 
 ---
 
@@ -1503,7 +1451,7 @@ Active damage-reflect: 65% bullet / 25% spirit returned for 6.5s + 10% Bullet Re
 - **wiki**: https://deadlock.wiki/Spirit_Lifesteal_(item)
 
 ### Interpretation
-Pure passive spirit lifesteal: +13% Spirit Lifesteal, +90 HP, +6 SP. T2 spirit-sustain baseline.
+Pure spirit sustain stat stick: +13% Spirit Lifesteal, +90 HP, +6 Spirit Power. T2 spirit_lifesteal anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1515,16 +1463,12 @@ Pure passive spirit lifesteal: +13% Spirit Lifesteal, +90 HP, +6 SP. T2 spirit-s
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_lifesteal` | +13% passive | 13 (eff %) | 2.0 | adds | Direct passive. |
-| `self_heal` | spirit lifesteal sustain | 70 (HP total) | 0.5 | adds | 13% × spirit DPS over fight. |
-| `continous_heal` | sustained spirit lifesteal outside 1s | 60 (HP outside 1s) | 0.3 | adds | Spirit DoT-style lifesteal pings. |
-| `burst_heal` | spirit-burst lifesteal first 1s | 10 (HP within 1s) | 0.1 | adds | Initial spirit cast lifesteal. |
-| `high_max_hp` | +90 + T2 baseline | 112 (HP) | 0.8 | adds | 90 + 22. |
-| `high_max_hp` | lifesteal-HP synergy | 18 (HP) | — | relies | R8. |
-| `spirit_damage` | +6 SP | 6 (SP-equiv) | 0.2 | adds | Flat. |
-| `spirit_burst_damage` | SP lifts burst | 5 (dmg-equiv within 1s) | 0.1 | adds | R2. |
-| `spirit_continuous_damage` | SP lifts sustained + sustained lifesteal | 8 (dmg-equiv outside 1s) | 0.1 | adds | R2 + sustain. |
-| `damage_sponge` | lifesteal rewards taking damage (incidental) | 25 (% importance) | — | relies | R26 partial. |
+| `spirit_lifesteal` | +13% direct | 13 (eff %) | 1.9 | adds | ⚖️ T2 spirit_lifesteal anchor. |
+| `spirit_damage` | +6 SP (Vit, no Spirit baseline) | 6 (SP-equiv) | 0.2 | adds | Direct. |
+| `self_heal` | lifesteal sustain | 90 (HP total) | 0.6 | adds | Lifesteal-driven. |
+| `high_max_hp` | T2 Vit baseline + 90 HP | 112 (HP) | 0.7 | adds | 22 + 90. |
+| `damage_sponge` | lifesteal + HP | 35 (% importance) | 0.7 | adds | R26. |
+
 
 ---
 
@@ -1533,30 +1477,29 @@ Pure passive spirit lifesteal: +13% Spirit Lifesteal, +90 HP, +6 SP. T2 spirit-s
 - **wiki**: https://deadlock.wiki/Spirit_Shielding
 
 ### Interpretation
-Spirit-proc shield: 300×5 barrier on taking 225 spirit dmg in 3.5s, plus +18% Spirit Resist conditional, 8s barrier duration. Damage-sponge anti-spirit defense.
+Spirit-damage triggered barrier: +2.5 OOC Regen. Passive (45s CD): on taking 225 spirit damage in 3.5s, gain 5× 300 barrier (≈1500 HP) + +18% Spirit Resist for 8s. T2 anti-spirit-burst counter.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Out of Combat Regen | +2.5 | Passive |
-| Barrier Conditional | 300 × 5 | Passive (threshold trigger) |
+| Barrier | 300 × 5 (= 1500) | Passive (on threshold trigger) |
 | Spirit Resist Conditional | +18% | Passive |
-| Damage Threshold | 225 | Trigger |
-| Time Frame | 3.5s | Trigger window |
-| Barrier Duration | 8s | Active |
+| Damage Threshold | 225 (in 3.5s) | — |
+| Barrier Duration | 8s | — |
+| Cooldown | 45s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 300 × 5 = 1500 amortized × trigger rate | 600 (shield HP) | 2.0 | adds | 1500 max × ~0.4 trigger rate. |
-| `spirit_resistance` | +18% × proc uptime + shield pseudo | 15 (eff %) | 1.2 | adds | Per 01: shield-on-spirit-damage ~0.6x credit. |
-| `spirit_burst_resistance` | tanks spirit burst | 45 (eff %) | 2.0 | adds | Direct purpose. |
-| `spirit_continuous_resistance` | sustained spirit defense | 20 (eff %) | 2.0 | adds | Lower weight than burst. |
-| `damage_sponge` | shield-on-damage | 55 (% importance) | 1.2 | adds | R26 — purpose. |
-| `burst_resistance` | shield absorbs burst | 35 (eff %) | 1.4 | adds | Per 01. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +2.5 OOC | 11 (HP total) | 0.1 | adds | 2.5 × 15 × 0.3. |
-| `counter_importance` | reactive vs spirit comps | 55 (% importance) | 1.1 | adds | R13. |
+| `shield` | 1500 × (8/45) trigger uptime × 0.5 stack avg | 130 (shield HP) | 0.6 | adds | ⚖️ T2 spirit-burst barrier anchor. |
+| `spirit_resistance` | +18% × (8/45) | 3 (eff %) | 0.2 | adds | Active uptime. |
+| `spirit_burst_resistance` | spirit-burst defense | 35 (eff %) | 1.8 | adds | ⚖️ Named spirit-burst defense. |
+| `counter_importance` | dedicated anti-spirit-burst | 65 (% importance) | 1.3 | adds | R13. |
+| `damage_sponge` | massive spirit-burst soak | 50 (% importance) | 1.1 | adds | R26. |
+| `high_max_hp` | T2 Vit baseline + shield-as-HP | 50 (HP) | 0.3 | adds | 22 + ~28. |
+| `self_heal` | +2.5 OOC × 20s | 50 (HP total) | 0.3 | adds | OOC. |
+
 
 ---
 
@@ -1565,31 +1508,29 @@ Spirit-proc shield: 300×5 barrier on taking 225 spirit dmg in 3.5s, plus +18% S
 - **wiki**: https://deadlock.wiki/Weapon_Shielding
 
 ### Interpretation
-Mirror of Spirit Shielding for bullet damage: 300×5 barrier on 250 bullet dmg in 4s, +18% Bullet Resist conditional, 8s.
+Weapon-damage triggered barrier: +2.5 OOC Regen. Passive (35s CD): on taking 250 weapon damage in 4s, gain 5× 300 barrier (≈1500 HP) + +18% Bullet Resist for 8s. T2 anti-bullet-burst counter.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Out of Combat Regen | +2.5 | Passive |
-| Barrier Conditional | 300 × 5 | Passive (threshold trigger) |
+| Barrier | 300 × 5 (= 1500) | Passive (on threshold trigger) |
 | Bullet Resist Conditional | +18% | Passive |
-| Damage Threshold | 250 | Trigger |
-| Time Frame | 4s | Trigger window |
-| Barrier Duration | 8s | Active |
+| Damage Threshold | 250 (in 4s) | — |
+| Barrier Duration | 8s | — |
+| Cooldown | 35s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 300 × 5 amortized | 600 (shield HP) | 2.0 | adds | Mirror Spirit Shielding. |
-| `bullet_resistance` | +18% × proc uptime + shield pseudo | 15 (eff %) | 1.2 | adds | Conditional resist + shield pseudo. |
-| `melee_resistance` | bullet resist → pseudo melee | 8 (eff %) | 0.5 | adds | Per 01 ~0.5x. |
-| `gun_burst_resistance` | tanks gun burst | 45 (eff %) | 2.0 | adds | Direct purpose. |
-| `gun_continuous_resistance` | sustained gun defense | 20 (eff %) | 1.7 | adds | Lower weight. |
-| `damage_sponge` | shield-on-damage | 55 (% importance) | 1.2 | adds | R26. |
-| `burst_resistance` | absorbs burst | 35 (eff %) | 1.4 | adds | Per 01. |
-| `high_max_hp` | T2 Vitality baseline | 22 (HP) | 0.1 | adds | R31. |
-| `self_heal` | +2.5 OOC | 11 (HP total) | 0.1 | adds | Same formula. |
-| `counter_importance` | reactive vs gun comps | 55 (% importance) | 1.1 | adds | R13. |
+| `shield` | 1500 × (8/35) trigger uptime × 0.5 stack avg | 170 (shield HP) | 0.7 | adds | ⚖️ T2 bullet-burst barrier anchor. |
+| `bullet_resistance` | +18% × (8/35) | 4 (eff %) | 0.3 | adds | Active uptime. |
+| `gun_burst_resistance` | bullet-burst defense | 40 (eff %) | 2.0 | adds | ⚖️ Named bullet-burst defense. |
+| `counter_importance` | dedicated anti-bullet-burst | 65 (% importance) | 1.3 | adds | R13. |
+| `damage_sponge` | massive bullet-burst soak | 50 (% importance) | 1.1 | adds | R26. |
+| `high_max_hp` | T2 Vit baseline + shield-as-HP | 55 (HP) | 0.3 | adds | 22 + ~33. |
+| `self_heal` | +2.5 OOC × 20s | 50 (HP total) | 0.3 | adds | OOC. |
+
 
 ---
 
@@ -1598,33 +1539,30 @@ Mirror of Spirit Shielding for bullet damage: 300×5 barrier on 250 bullet dmg i
 - **wiki**: https://deadlock.wiki/Arcane_Surge
 
 ### Interpretation
-Stamina-bundle Spirit item: +1 Stamina, +12% Stamina Recovery, plus 7s cast-window self-buff (+12% Ability Range, +15% Duration, +20 SP).
+Dash-jump triggered single-ability amp: +1 Stamina, +12% Stamina Recovery. After Dash-Jump (7s window), next ability cast gets: +12% Ability Range + +15% Ability Duration + +20 Spirit Power. Per Notes: items/passives don't benefit. T2 single-ability burst-amp.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Stamina | +1 | Passive |
 | Stamina Recovery | +12% | Passive |
-| Ability Range Conditional | +12% | Passive (post-cast buff) |
+| Ability Range Conditional | +12% | Passive (post-Dash-Jump, 7s window) |
 | Ability Duration Conditional | +15% | Passive |
 | Spirit Power Conditional | +20 | Passive |
-| Cast Window | 7s | Passive |
+| Cast Window | 7s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `vertical_mobility` | +1 stamina | 1 (units) | 0.2 | adds | R9. |
-| `horizontal_mobility` | +1 stamina dash | 0.7 (m/s eff) | 0.7 | adds | R9. |
-| `aerial` | extra dash | 40 (% importance) | 0.9 | adds | R9. |
-| `engage` | dash + spirit buff window | 55 (% importance) | 1.2 | adds | R9. |
-| `escape` | dash | 40 (% importance) | 0.8 | adds | R9. |
-| `spirit_damage` | +20 SP × uptime + T2 baseline | 15.5 (SP-equiv) | 0.5 | adds | (20 × 7/14 uptime) + 5.5 baseline. |
-| `range_extender_dependant` | +12% Ability Range × uptime | 6 (eff %) | 0.4 | adds | RELY-flavored partial. |
-| `duration_dependant` | +15% Ability Duration × uptime | 8 (eff %) | 0.7 | adds | Same. |
-| `self_buff` | conditional cast-window buff | 55 (% importance) | 1.6 | adds | R19 legitimate. |
-| `spirit_burst_damage` | SP lifts burst | 8 (dmg-equiv within 1s) | 0.1 | adds | R2. |
-| `spirit_continuous_damage` | SP lifts sustained | 8 (dmg-equiv outside 1s) | 0.1 | adds | R2. |
-| `ability_spam` | cast-window rewards spam | 35 (% importance) | 0.9 | adds | The 7s buff incentivizes back-to-back casts. |
+| `spirit_damage` | +20 SP × ~0.6 dash-uptime + T2 baseline | 17 (SP-equiv) | 0.6 | adds | 5.5 + 12. |
+| `range_extender_dependant` | +12% × ~0.6 uptime | 7 (eff %) | 0.5 | adds | Dash-gated. |
+| `duration_dependant` | +15% × ~0.6 uptime | 9 (eff %) | 0.8 | adds | Dash-gated. |
+| `single_ability_focus` | next-ability-only amp | 55 (% importance) | 1.4 | adds | R17. |
+| `vertical_mobility` | stamina + recovery | 2.0 (units) | 1.1 | adds | Stamina-direct. |
+| `horizontal_mobility` | stamina-dash | 0.65 (m/s eff) | 0.6 | adds | Stamina-derived. |
+| `engage` | dash-into-cast = engage | 50 (% importance) | 1.1 | adds | R11. |
+| `spirit_burst_damage` | dash-cast = burst window | 25 (raw dmg within 1s) | 0.5 | adds | R2. |
+
 
 ---
 
@@ -1633,28 +1571,27 @@ Stamina-bundle Spirit item: +1 Stamina, +12% Stamina Recovery, plus 7s cast-wind
 - **wiki**: https://deadlock.wiki/Bullet_Resist_Shredder
 
 ### Interpretation
-Hybrid Spirit/Weapon: +9% Bullet Resist, +9% Wpn Dmg passive, plus -10% Bullet Resist debuff on enemy 8s. Per Notes: the debuff CAN BE UTILIZED BY OTHER PLAYERS — teammates benefit from the shred too. Anti-gun-tank role plus team utility.
+Spirit-damage-triggered bullet resist shred: +9% Bullet Resist, +9% Weapon Damage. Spirit damage → -10% Bullet Resist on target for 8s. Per Notes: debuff can be used by teammates. T2 spirit-gun hybrid debuff.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bullet Resist | +9% | Passive |
 | Weapon Damage | +9% | Passive |
-| Bullet Resist Conditional | -10% | Passive (debuff, teammates also benefit) |
-| Duration | 8s | Passive (refreshes, no stacking) |
+| Bullet Resist Conditional | -10% | Passive (8s on spirit dmg) |
+| Duration | 8s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `bullet_resist_shred` | -10% × 8s × on-hit + team utility | 10 (eff shred %) | 1.7 | adds | 10 × ~0.8 maintain + teammate-utility bump per Notes. |
-| `bullet_resistance` | +9% Bullet Resist | 9 (eff %) | 0.7 | adds | Passive. |
-| `melee_resistance` | bullet resist pseudo | 5 (eff %) | 0.3 | adds | Per 01. |
-| `bullet_damage` | +9% Wpn Dmg (Spirit item, no weapon baseline) | 9 (eff gun-dmg %) | 0.3 | adds | Direct. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `counter_importance` | counter-flavored | 50 (% importance) | 1.0 | adds | R13. |
-| `assist_importance` | teammates benefit from shred per Notes | 50 (% importance) | 1.2 | adds | Per Notes: debuff is team-utilizable, not self-only. |
-| `gun_burst_damage` | +9% per-shot | 5 (dmg-% within 1s) | 0.1 | adds | R2. |
-| `gun_continuous_damage` | sustained | 5 (dmg-% outside 1s) | 0.1 | adds | R2. |
+| `bullet_resist_shred` | -10% × ~0.7 uptime | 7 (eff shred %) | 1.2 | adds | ⚖️ T2 bullet_resist_shred Spirit anchor. |
+| `hybrid_damage_usage` | spirit triggers gun amp | 70 (% importance) | 1.4 | adds | ⚖️ Named hybrid anchor. |
+| `bullet_damage` | +9% (Spirit, no Weapon baseline) | 9 (eff gun-dmg %) | 0.3 | adds | Direct. |
+| `bullet_resistance` | +9% direct | 9 (eff %) | 0.7 | adds | Direct. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+| `counter_importance` | vs bullet-resist tanks | 50 (% importance) | 1.0 | adds | R13. |
+| `ally_buff` | teammates can use debuff | 35 (% importance) | 0.9 | adds | Per Notes — team-shareable. |
+
 
 ---
 
@@ -1663,31 +1600,30 @@ Hybrid Spirit/Weapon: +9% Bullet Resist, +9% Wpn Dmg passive, plus -10% Bullet R
 - **wiki**: https://deadlock.wiki/Cold_Front
 
 ### Interpretation
-Active AoE damage + slow: 95 + 0.47×SP damage, -60% Move Speed in 10m radius, 4s. Greedy `scaling_early` spirit burst — early-peak hero's combo opener.
+Expanding ice AoE: +6% Spirit Resist. Active (25s CD): 95+0.47×SP damage + -60% Move Speed for 4s, 10m end radius. Per Notes: wave expands over ~1s, can be dodged. T2 AoE-slow caster nuke.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Resist | +6% | Passive |
-| Damage | 95 + 0.47×SP | Active |
-| Move Speed Conditional | -60% | Active (enemy) |
+| Damage | 95 + 0.47×SP | Active (25s CD) |
+| Move Speed Conditional | -60% | Active (4s) |
 | Duration | 4s | Active |
 | End Radius | 10m | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `movement_slow` | -60% × 4s × ~2 enemies (AoE) | 60 (eff slow weighted) | 2.0 | adds | 60 × 1.0 active × 2 AoE-targets average. |
-| `spirit_damage` | 95+0.47×SP/5 + T2 baseline | 26.4 (SP-equiv) | 1.1 | adds | (95 + 0.47×20)/5 + 5.5 baseline. |
-| `spirit_damage` | scales with SP | 9 (SP-equiv) | — | relies | The 0.47×SP scaling. |
-| `aoe_cluster` | 10m AoE | 65 (% importance) | 1.6 | adds | AoE active. |
-| `spirit_burst_damage` | instant SP damage in 1s | 104 (raw dmg within 1s) | 1.1 | adds | 95 + 0.47×20 = 104.4 instant. |
-| `spirit_continuous_damage` | slow sustains follow-up dmg | 30 (raw dmg outside 1s) | 0.3 | adds | Follow-up dmg on slowed targets. |
-| `spirit_resistance` | +6% Spirit Resist passive | 6 (eff %) | 0.5 | adds | Passive. |
-| `spirit_burst_proc` | active proc burst | 1.0 (proc index) | 2.0 | adds | Instant trigger, large effect duration. |
-| `counter_importance` | slow counter to mobility | 50 (% importance) | 1.0 | adds | R13. |
-| `debuff` | enemy slow debuff | 25 (% importance) | 0.6 | adds | Moderate priority. |
-| `scaling_early` | greedy spirit-caster combo opener | 70 (% importance) | 1.6 | adds | The named anchor for early-peak greedy spirit-caster items. |
+| `movement_slow` | -60% × 4s × ~3 enemies | 45 (eff slow weighted) | 2.0 | adds | ⚖️ T2 movement_slow AoE anchor. |
+| `aoe_cluster` | 10m AoE | 55 (% importance) | 1.4 | adds | Mid AoE radius. |
+| `spirit_burst_damage` | 95+0.47×30 ≈ 109 within 1s | 109 (raw dmg within 1s) | 2.0 | adds | Cast-burst. |
+| `spirit_burst_proc` | one big cast proc | 0.40 (proc index) | 0.9 | adds | R6: instant. |
+| `spirit_damage` | (95+0.47×30)/25 + baseline | 10 (SP-equiv) | 0.3 | adds | 5.5 + 4.4. |
+| `scaling_early` | greedy spirit caster snowball | 70 (% importance) | 2.0 | adds | ⚖️ Greedy early-peak. |
+| `engage` | AoE slow = engage | 60 (% importance) | 1.3 | adds | R11. |
+| `counter_importance` | counter to mobile comps | 50 (% importance) | 1.0 | adds | R13. |
+| `spirit_resistance` | +6% direct | 6 (eff %) | 0.5 | adds | Direct. |
+
 
 ---
 
@@ -1696,21 +1632,21 @@ Active AoE damage + slow: 95 + 0.47×SP damage, -60% Move Speed in 10m radius, 4
 - **wiki**: https://deadlock.wiki/Compress_Cooldown
 
 ### Interpretation
-Pure passive CDR: +18% Ability Cooldown Reduction. The clean T2 CDR baseline.
+Imbued cooldown reducer: +18% Ability Cooldown Reduction on one imbued ability. T2 single-ability CDR anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Ability Cooldown Reduction | +18% | Passive |
+| Ability Cooldown Reduction | +18% | Passive (imbued ability) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `cooldown_reduction` | +18% CDR | 18 (eff CDR %) | 1.6 | adds | Pure passive CDR. |
-| `multi_ability_focus` | kit-wide CDR | 60 (% importance) | 1.7 | adds | R4: applies to all abilities. |
-| `ability_spam` | CDR enables spam | 45 (% importance) | 1.2 | adds | Direct enabler. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `single_ability_focus` | offsets multi | -20 (% importance) | -0.5 | adds | R4 small offset. |
+| `cooldown_reduction` | +18% direct (imbued) | 18 (eff CDR %) | 1.6 | adds | ⚖️ T2 imbued CDR anchor. |
+| `single_ability_focus` | imbues one ability | 55 (% importance) | 1.4 | adds | R17. |
+| `ability_spam` | CDR enables more casts | 45 (% importance) | 1.2 | adds | R20. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+
 
 ---
 
@@ -1719,20 +1655,20 @@ Pure passive CDR: +18% Ability Cooldown Reduction. The clean T2 CDR baseline.
 - **wiki**: https://deadlock.wiki/Duration_Extender
 
 ### Interpretation
-Pure passive duration boost: +22% Ability Duration. The T2 duration_dependant adds anchor.
+Imbued duration extender: +22% Ability Duration on one imbued ability. T2 single-ability duration anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Ability Duration | +22% | Passive |
+| Ability Duration | +22% | Passive (imbued ability) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `duration_dependant` | +22% Ability Duration | 22 (eff %) | 2.0 | adds | T2 adds anchor. |
-| `multi_ability_focus` | kit-wide duration | 55 (% importance) | 1.6 | adds | R4. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `single_ability_focus` | offsets multi | -20 (% importance) | -0.5 | adds | R4. |
+| `duration_dependant` | +22% direct (imbued) | 22 (eff %) | 2.0 | adds | ⚖️ T2 imbued duration anchor. |
+| `single_ability_focus` | imbues one ability | 55 (% importance) | 1.4 | adds | R17. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+
 
 ---
 
@@ -1741,7 +1677,7 @@ Pure passive duration boost: +22% Ability Duration. The T2 duration_dependant ad
 - **wiki**: https://deadlock.wiki/Improved_Spirit
 
 ### Interpretation
-Pure flat SP: +18 Spirit Power, +1.5 OOC Regen. The clean T2 SP baseline (per tag_descriptions anchor: "Improved Spirit").
+Pure SP + OOC stat stick: +18 Spirit Power, +1.5 OOC Regen. T2 spirit-damage anchor.
 
 ### Wiki stats
 | Stat | Value | Notes |
@@ -1752,13 +1688,11 @@ Pure flat SP: +18 Spirit Power, +1.5 OOC Regen. The clean T2 SP baseline (per ta
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_damage` | +18 SP + T2 baseline | 23.5 (SP-equiv) | 0.8 | adds | 18 + 5.5. |
-| `spirit_burst_damage` | SP lifts burst | 12 (dmg-equiv within 1s) | 0.1 | adds | R2 (equal lift). |
-| `spirit_continuous_damage` | SP lifts sustained | 12 (dmg-equiv outside 1s) | 0.1 | adds | R2. |
-| `multi_ability_focus` | SP universal | 55 (% importance) | 1.6 | adds | R4. |
-| `single_ability_focus` | offsets multi | -20 (% importance) | -0.5 | adds | R4. |
-| `self_heal` | +1.5 OOC | 7 (HP total) | 0.0 | adds | Standard. |
-| `continous_heal` | OOC outside 1s | 6.5 (HP outside 1s) | 0.0 | adds | 1.5 × 14 × 0.3. |
+| `spirit_damage` | +18 SP direct + T2 baseline | 24 (SP-equiv) | 0.8 | adds | ⚖️ T2 spirit_damage anchor. 5.5 + 18. |
+| `spirit_burst_damage` | SP lifts spirit burst | 25 (raw dmg within 1s) | 0.5 | adds | R2. |
+| `spirit_continuous_damage` | SP lifts continuous | 25 (raw dmg outside 1s) | 0.3 | adds | R2. |
+| `self_heal` | +1.5 OOC × 20s | 30 (HP total) | 0.2 | adds | Small OOC. |
+
 
 ---
 
@@ -1767,29 +1701,26 @@ Pure flat SP: +18 Spirit Power, +1.5 OOC Regen. The clean T2 SP baseline (per ta
 - **wiki**: https://deadlock.wiki/Mystic_Slow
 
 ### Interpretation
-Proc slow on spirit damage: -30% Move Speed, -12% Dash Distance, 2s. Plus +50 HP, +0.75m Sprint.
+Spirit-damage triggered slow: +50 HP, +0.75m Sprint. Spirit damage → -30% Move Speed + -12% Dash Distance for 2s. T2 caster-poke slow.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bonus Health | +50 | Passive |
 | Sprint Speed | +0.75m | Passive |
-| Move Speed Conditional | -30% | Passive (on spirit hit) |
+| Move Speed Conditional | -30% | Passive (2s on spirit dmg) |
 | Dash Distance Conditional | -12% | Passive |
-| Duration | 2s | Passive |
+| Duration | 2s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `movement_slow` | -30% × 2s × spirit-trigger uptime | 18 (eff slow weighted) | 0.6 | adds | 30 × ~0.6. |
-| `spirit_continuous_proc` | every spirit hit applies | 0.4 (proc index) | 0.9 | adds | R5: short refresh, short duration. |
-| `spirit_burst_proc` | first-proc burst | 0.5 (proc index) | 1.0 | adds | R5. |
-| `high_max_hp` | +50 HP (Spirit item) | 50 (HP) | 0.3 | adds | Direct explicit only. |
-| `horizontal_mobility` | +0.75m sprint-only | 0.4 (m/s eff) | 0.4 | adds | Sprint × 0.5. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `vertical_mobility` | -12% dash disrupt (anti) | 5 (units) | 1.0 | adds | Anti-dash. |
-| `counter_importance` | counter to mobility | 35 (% importance) | 0.7 | adds | R13. |
-| `debuff` | enemy slow debuff | 18 (% importance) | 0.5 | adds | Mild. |
+| `movement_slow` | -30% × 2s × ~2 enemies × spirit uptime | 18 (eff slow weighted) | 0.8 | adds | Spirit-trigger gates. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+| `high_max_hp` | +50 HP (Spirit, no Vit baseline) | 50 (HP) | 0.3 | adds | Explicit. |
+| `counter_importance` | counter to mobility comps | 45 (% importance) | 0.9 | adds | R13. |
+| `horizontal_mobility` | +0.75m sprint | 0.5 (m/s eff) | 0.5 | adds | Direct. |
+
 
 ---
 
@@ -1798,25 +1729,23 @@ Proc slow on spirit damage: -30% Move Speed, -12% Dash Distance, 2s. Plus +50 HP
 - **wiki**: https://deadlock.wiki/Mystic_Vulnerability
 
 ### Interpretation
-On-spirit-hit proc: -8% Spirit Resist (shred) for 7s, +8% Spirit Resist passive. The T2 spirit-resist shred named anchor.
+Spirit-damage triggered SR shred: +8% Spirit Resist. Spirit damage → -8% Spirit Resist on target for 7s. Per Notes: does NOT stack (refreshes only); Escalating Exposure takes priority. T2 spirit-poke resist-shred.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Resist | +8% | Passive |
-| Spirit Resist Conditional | -8% | Passive (debuff on hit) |
-| Duration | 7s | Passive |
+| Spirit Resist Conditional | -8% | Passive (7s on spirit dmg) |
+| Duration | 7s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_resist_shred` | -8% × 7s × on-hit uptime | 6 (eff shred %) | 0.8 | adds | 8 × ~0.8 maintain. |
-| `spirit_resistance` | +8% Spirit Resist passive | 8 (eff %) | 0.6 | adds | Passive. |
-| `spirit_continuous_proc` | every spirit-hit applies | 0.3 (proc index) | 0.7 | adds | R5 continuous-flavor. |
-| `spirit_burst_proc` | first-proc burst | 0.4 (proc index) | 0.8 | adds | R5. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `counter_importance` | shred vs spirit tanks | 40 (% importance) | 0.8 | adds | R13. |
-| `debuff` | low-priority debuff | 10 (% importance) | 0.2 | adds | Per tag_descriptions: vulnerability stacks low-cleanse-priority. |
+| `spirit_resist_shred` | -8% × ~0.8 spirit-uptime | 7 (eff shred %) | 1.0 | adds | ⚖️ T2 spirit_resist_shred component anchor. |
+| `spirit_resistance` | +8% direct | 8 (eff %) | 0.6 | adds | Direct. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+| `counter_importance` | vs spirit-resist tanks | 40 (% importance) | 0.8 | adds | R13. |
+
 
 ---
 
@@ -1825,27 +1754,27 @@ On-spirit-hit proc: -8% Spirit Resist (shred) for 7s, +8% Spirit Resist passive.
 - **wiki**: https://deadlock.wiki/Quicksilver_Reload
 
 ### Interpretation
-Active reload + spirit proc: 100% bullets reloaded instantly, +10% Fire Rate, fires a 44+0.16×SP spirit damage burst on reload.
+Charge-Up imbued bullet amp: imbues one ability — first hit deals +44+0.16×SP bonus damage + +10% Fire Rate + reloads 100% of magazine. Per Notes: Charge-Up (NOT affected by CDR), 12s buff duration; bonus only triggers if initial damage > 0. T2 hybrid charge-bullet enabler.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
-| Damage | 44 + 0.16×SP | Active |
-| Fire Rate | +10% | Active |
-| Bullets Reloaded | 100% | Active |
+| Damage | 44 + 0.16×SP | Passive (imbued ability first hit) |
+| Fire Rate | +10% | Passive (12s buff post-charge) |
+| Bullets Reloaded | 100% | Passive (instant reload) |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `magazine_size_dependant` | instant reload | 35 (eff ammo %) | 0.7 | adds | Instant-reload boost. |
-| `fire_rate` | +10% × uptime | 5 (eff %) | 0.5 | adds | Active × ~0.5. |
-| `spirit_damage` | (44 + 0.16×20)/5 + T2 baseline | 15 (SP-equiv) | 0.5 | adds | (44 + 3.2)/5 + 5.5. |
-| `spirit_burst_damage` | reload burst dmg in 1s | 47 (raw dmg within 1s) | 0.5 | adds | 44 + 0.16×20 = 47.2 instant. |
-| `gun_burst_damage` | post-reload + fire-rate burst | 14 (dmg-% within 1s) | 0.3 | adds | R2 (fire_rate-heavy burst). |
-| `gun_continuous_damage` | reload sustains DPS | 8 (dmg-% outside 1s) | 0.2 | adds | R2 lighter. |
-| `spirit_burst_proc` | reload proc | 0.7 (proc index) | 1.4 | adds | Instant proc on cast. |
-| `hybrid_damage_usage` | spirit+gun dual | 55 (% importance) | 1.1 | adds | Double-dip. |
-| `ability_spam` | reload-cast cadence | 30 (% importance) | 0.8 | adds | Spammable. |
+| `hybrid_damage_usage` | imbued bullets + spirit dmg + reload | 70 (% importance) | 1.4 | adds | ⚖️ T2 hybrid anchor. |
+| `charge_dependant` | Charge-Up mechanic per Notes | 65 (% importance) | 1.4 | adds | ⚖️ T2 charge-up anchor. |
+| `fire_rate` | +10% × ~0.5 charge uptime | 5 (eff %) | 0.5 | adds | Active-only. |
+| `spirit_burst_damage` | 44+0.16×30 ≈ 49 within 1s | 49 (raw dmg within 1s) | 0.9 | adds | One-shot imbued. |
+| `spirit_damage` | (~49 dmg per charge) + baseline | 11 (SP-equiv) | 0.4 | adds | 5.5 + ~5.5. |
+| `bullet_damage` | T2 baseline (Spirit item, no Weapon baseline) | 0 (eff gun-dmg %) | 0.0 | adds | No baseline. |
+| `magazine_size_dependant` | 100% reload on imbue trigger | 20 (eff ammo %) | 0.4 | adds | Reload skip. |
+| `single_ability_focus` | imbues one ability | 50 (% importance) | 1.2 | adds | R17. |
+
 
 ---
 
@@ -1854,29 +1783,29 @@ Active reload + spirit proc: 100% bullets reloaded instantly, +10% Fire Rate, fi
 - **wiki**: https://deadlock.wiki/Slowing_Hex
 
 ### Interpretation
-Active single-target slow: -20% Move Speed, -30% Dash Distance, 3.5s, 25m cast. The T2 single-target slow.
+Targeted slow + movement-silence: +0.5m Sprint. Active (27s CD): -20% Move Speed + -30% Dash Distance + silences movement abilities/items + increases gravity, 25m cast range, 3.5s. Per Notes: silences ~20 hero movement abilities + items like Warp Stone / Majestic Leap / Phantom Strike actives. T2 anti-mobility lockdown.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Sprint Speed | +0.5m | Passive |
-| Move Speed Conditional | -20% | Active (target) |
+| Move Speed Conditional | -20% | Active (3.5s on target) |
 | Dash Distance Conditional | -30% | Active |
 | Cast Range | 25m | Active |
 | Duration | 3.5s | Active |
+| Cooldown | 27s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `movement_slow` | -20% × 3.5/15 × 1 target | 5 (eff slow weighted) | 0.2 | adds | Active single-target × uptime. |
-| `single_target` | targeted active | 65 (% importance) | 2.0 | adds | Single-target active. |
-| `vertical_mobility` | -30% dash (anti) | 10 (units) | 2.0 | adds | Anti-dash. |
-| `mid_range` | 25m cast | 35 (% importance) | 1.6 | adds | Mid-range tool. |
-| `long_range` | 25m partial | 20 (% importance) | 0.4 | adds | Borderline long. |
-| `horizontal_mobility` | +0.5m sprint passive | 0.25 (m/s eff) | 0.2 | adds | Sprint-only. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `counter_importance` | counter to mobility | 50 (% importance) | 1.0 | adds | R13. |
-| `debuff` | enemy slow debuff | 18 (% importance) | 0.5 | adds | Mild. |
+| `movement_slow` | -20% × 3.5s × 1 target × (3.5/27) | 12 (eff slow weighted) | 0.5 | adds | Single-target slow. |
+| `silence` | movement-items silenced × 3.5s | 8 (weighted) | 2.0 | adds | ⚖️ Targeted movement-silence. |
+| `counter_importance` | anti-mobility lockdown | 75 (% importance) | 1.5 | adds | ⚖️ Named anti-mobility T2. |
+| `single_target` | per-target lockdown | 55 (% importance) | 1.7 | adds | Targeted cast. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+| `horizontal_mobility` | +0.5m sprint | 0.35 (m/s eff) | 0.3 | adds | Direct. |
+| `engage` | anti-escape commits engage | 50 (% importance) | 1.1 | adds | R11. |
+
 
 ---
 
@@ -1885,29 +1814,28 @@ Active single-target slow: -20% Move Speed, -30% Dash Distance, 3.5s, 25m cast. 
 - **wiki**: https://deadlock.wiki/Spirit_Sap
 
 ### Interpretation
-Active enemy SP drain + shred: -9% Spirit Resist, -30 SP from enemy, 12s, 40m cast. Anti-spirit-caster T2 tool.
+Targeted spirit-resist + SP drain: +50 HP. Active (18s CD): -9% Spirit Resist + -30 Spirit Power on target for 12s, 40m cast range. T2 anti-caster shutdown.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Bonus Health | +50 | Passive |
-| Spirit Resist Conditional | -9% | Active (debuff) |
-| Spirit Power | -30 | Active (enemy SP drain) |
+| Spirit Resist Conditional | -9% | Active (12s on target) |
+| Spirit Power | -30 | Active (target's SP) |
 | Duration | 12s | Active |
 | Cast Range | 40m | Active |
+| Cooldown | 18s | Active |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_resist_shred` | -9% × 12/30 cycle | 4 (eff shred %) | 0.5 | adds | Active uptime × 1 target. |
-| `spirit_resistance` | -30 SP from enemy = spirit denial | 10 (eff %) | 0.8 | adds | Per 01: reducing enemy SP counts toward spirit_resistance. |
-| `counter_importance` | anti-spirit-caster | 65 (% importance) | 1.3 | adds | R13/R27. |
-| `single_target` | targeted active | 55 (% importance) | 1.7 | adds | Single-target. |
-| `long_range` | 40m cast | 35 (% importance) | 0.8 | adds | Long-cast. |
-| `mid_range` | 40m also covers mid | 20 (% importance) | 0.9 | adds | Partial. |
-| `high_max_hp` | +50 HP (Spirit item) | 50 (HP) | 0.3 | adds | Direct explicit. |
-| `spirit_damage` | T2 Spirit baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
-| `debuff` | enemy SP debuff | 25 (% importance) | 0.6 | adds | Moderate priority. |
+| `spirit_resist_shred` | -9% × (12/18) uptime | 6 (eff shred %) | 0.8 | adds | Active uptime. |
+| `counter_importance` | counter to caster comps | 70 (% importance) | 1.4 | adds | ⚖️ Named anti-caster T2. |
+| `debuff` | resist + SP drain | 45 (% importance) | 1.1 | adds | Dual debuff. |
+| `single_target` | per-target debuff | 60 (% importance) | 1.8 | adds | Targeted. |
+| `spirit_damage` | T2 baseline | 5.5 (SP-equiv) | 0.2 | adds | R31. |
+| `high_max_hp` | +50 HP (Spirit, no Vit baseline) | 50 (HP) | 0.3 | adds | Explicit. |
+
 
 ---
 
@@ -1916,26 +1844,25 @@ Active enemy SP drain + shred: -9% Spirit Resist, -30 SP from enemy, 12s, 40m ca
 - **wiki**: https://deadlock.wiki/Suppressor
 
 ### Interpretation
-Conditional enemy fire-rate slow: +6 SP, +8% Bullet Resist passive, plus -28% Fire Rate enemy debuff 5s. Per 04 judgment: fire_rate_slow item.
+Spirit-damage triggered fire-rate slow: +6 Spirit Power, +8% Bullet Resist. Spirit damage → -28% Fire Rate on target for 5s. T2 anti-gun debuff via spirit poke.
 
 ### Wiki stats
 | Stat | Value | Notes |
 |---|---|---|
 | Spirit Power | +6 | Passive |
 | Bullet Resist | +8% | Passive |
-| Fire Rate Conditional | -28% | Passive (debuff) |
-| Duration | 5s | Passive |
+| Fire Rate Conditional | -28% | Passive (5s on spirit dmg) |
+| Duration | 5s | — |
 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate_slow` | -28% × ~0.7 trigger uptime × 1 target | 20 (eff slow %) | 1.9 | adds | Per 04 judgment fact. |
-| `bullet_resistance` | +8% passive + fire-rate-slow pseudo | 14 (eff %) | 1.1 | adds | 8 explicit + fire-rate-slow pseudo. |
-| `gun_continuous_resistance` | sustained gun blunting | 12 (eff %) | 1.0 | adds | Per 01 pseudo. |
-| `melee_resistance` | bullet pseudo | 4 (eff %) | 0.2 | adds | Per 01. |
-| `spirit_damage` | +6 SP + T2 baseline | 11.5 (SP-equiv) | 0.4 | adds | 6 + 5.5. |
-| `counter_importance` | gun-comp counter | 55 (% importance) | 1.1 | adds | R13. |
-| `debuff` | enemy fire-rate debuff | 18 (% importance) | 0.5 | adds | Mild. |
+| `fire_rate_slow` | -28% × 5s × ~2 enemies × spirit uptime | 30 (eff slow %) | 2.0 | adds | ⚖️ T2 fire_rate_slow Spirit anchor. |
+| `counter_importance` | anti-DPS via spirit | 55 (% importance) | 1.1 | adds | R13. |
+| `spirit_damage` | +6 SP + T2 baseline | 12 (SP-equiv) | 0.4 | adds | 5.5 + 6. |
+| `bullet_resistance` | +8% direct | 8 (eff %) | 0.6 | adds | Direct. |
+| `hybrid_damage_usage` | spirit triggers anti-gun | 50 (% importance) | 1.0 | adds | Hybrid bridge. |
+| `debuff` | FR slow debuff | 35 (% importance) | 0.9 | adds | Anti-gun debuff. |
 
 
 ---
@@ -1965,8 +1892,8 @@ Active AoE DoT + bullet shred: 45 DPS (+0.2×SP) burning ground in 10m for 5s, -
 | `spirit_damage` | 45 DPS × 5s = 225 + 0.2×20×5 = 245 → /5 SP-equiv + T3 baseline | 58 (SP-equiv) | 1.3 | adds | (45×5 + 0.2×20×5)/5 = 49 + 9.6 baseline = 58. (T3 baseline NOT applied since Weapon item — only spirit_damage from item's own SP.) |
 | `bullet_resist_shred` | -7% × 5s × AoE uptime | 5 (eff shred %) | 0.6 | adds | (7 + 0.055×20) × (5/25 cycle) × ~3 AoE targets ≈ 5. |
 | `aoe_cluster` | 10m AoE DoT | 70 (% importance) | 1.8 | adds | Wide AoE. |
-| `spirit_continuous_damage` | sustained DoT outside 1s | 196 (raw dmg outside 1s) | 1.4 | adds | DPS × (duration−1s) × AoE-multiplier. |
-| `spirit_burst_damage` | first tick in 1s | 49 (raw dmg within 1s) | 0.3 | adds | First-1s tick on multiple targets. |
+| `spirit_continuous_damage` | sustained DoT outside 1s | 196 (raw dmg outside 1s) | 1.6 | adds | DPS × (duration−1s) × AoE-multiplier. |
+| `spirit_burst_damage` | first tick in 1s | 49 (raw dmg within 1s) | 0.6 | adds | First-1s tick on multiple targets. |
 | `spirit_continuous_proc` | sustained ground DoT | 0.35 (proc index) | 0.8 | adds | R5 continuous-flavor. |
 | `bullet_damage` | T3 weapon baseline | 9.6 (eff gun-dmg %) | 0.2 | adds | R31. |
 | `farmer` | AoE clears jungle | 45 (% importance) | 0.9 | adds | R28. |
@@ -2129,7 +2056,7 @@ NPC-consume mechanic with permanent-stack buff: target enemy NPC → consume for
 | `scaling_late` | NPC-consume → late-game stacked buff persisting through death | 80 (% importance) | 2.0 | adds | Buff persists through death, builds across the game — quintessential punish-now-pay-later late-game scaler. |
 | `bullet_damage` | +10×0.8 = ~8% per stack × stack uptime + baseline | 28 (eff gun-dmg %) | 1.1 | adds | (8 × ~3 avg stacks × 0.8 uptime — 160s buff) + 9.6 T3 baseline. |
 | `bullet_damage` | scales with maintained stacks | 30 (eff gun-dmg %) | — | relies | RELY on stacking to realize full value. |
-| `high_max_hp` | +200 HP at 4 stacks × uptime | 160 (HP) | 0.7 | adds | 50×4 × 0.8 uptime = 160 effective. Weapon-item (no HP baseline). |
+| `high_max_hp` | +200 HP at 4 stacks × uptime | 160 (HP) | 0.6 | adds | 50×4 × 0.8 uptime = 160 effective. Weapon-item (no HP baseline). |
 | `range_extender_dependant` | +12% Ability Range × uptime | 10 (eff %) | 0.4 | adds | Conditional. |
 | `self_heal` | +2 OOC | 9 (HP total) | 0.0 | adds | Standard. |
 | `continous_heal` | OOC outside 1s | 8.4 (HP outside 1s) | 0.0 | adds | 2 × 14 × 0.3. |
@@ -2165,7 +2092,7 @@ Bullet-hit stacker: +35% Max Ammo, +75 HP, +18% Wpn Dmg passive; stacks +2% Bull
 | `magazine_size_dependant` | +35% Max Ammo | 35 (eff ammo %) | 0.5 | adds | Direct passive ammo. |
 | `bullet_damage` | +18% Wpn Dmg + T3 baseline | 27.6 (eff gun-dmg %) | 0.7 | adds | 18 + 9.6. |
 | `bullet_resistance` | up to 30% × stack uptime | 22 (eff %) | 1.1 | adds | 30 × ~0.7 stack-uptime. |
-| `melee_resistance` | bullet resist pseudo | 11 (eff %) | 0.4 | adds | Per 01 ~0.5x. |
+| `melee_resistance` | bullet resist pseudo | 11 (eff %) | 0.5 | adds | Per 01 ~0.5x. |
 | `high_max_hp` | +75 HP (Weapon item) | 75 (HP) | 0.3 | adds | Weapon-item explicit only. |
 | `gun_burst_damage` | per-shot lift | 18 (dmg-% within 1s) | 0.2 | adds | R2. |
 | `gun_continuous_damage` | sustained DPS + mag | 25 (dmg-% outside 1s) | 0.3 | adds | R2 + ammo lifts continuous. |
@@ -2227,7 +2154,7 @@ Headshot scaler: +5% Wpn Dmg, +50 HP, +75×4 head bonus dmg, 4% Heal per headsho
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `headshot_damage` | +75×4 + 4% heal | 85 (% importance) | 1.3 | adds | T3 named anchor for headshot-importance. |
+| `headshot_damage` | +75×4 + 4% heal | 85 (% importance) | 1.4 | adds | T3 named anchor for headshot-importance. |
 | `bullet_damage` | +5% + T3 baseline | 14.6 (eff gun-dmg %) | 0.4 | adds | 5 + 9.6. |
 | `gun_burst_damage` | first-head burst (+75 dmg in 1s) | 60 (raw dmg within 1s) | 0.8 | adds | First-head delivers 75 raw burst dmg in 1s window. |
 | `gun_burst_proc` | first-head proc | 1.0 (proc index) | 1.5 | adds | Burst index 1.0. |
@@ -2263,13 +2190,13 @@ Team-buff aura: +17% Bullet Resist passive aura (35m), +2.25m MS / +26% Fire Rat
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `bullet_resistance` | +17% aura | 17 (eff %) | 0.9 | adds | Wide-radius aura. |
-| `melee_resistance` | bullet pseudo | 9 (eff %) | 0.3 | adds | Per 01. |
+| `melee_resistance` | bullet pseudo | 9 (eff %) | 0.4 | adds | Per 01. |
 | `ally_buff` | team-wide aura buff | 80 (% importance) | 2.0 | adds | Aura item — primary purpose. |
 | `team_heal` | aura saves teammates | 35 (HP total) | 0.1 | adds | Effective shielding via resist. |
 | `assist_importance` | team-fight presence | 60 (% importance) | 1.4 | adds | R27: universal-strong. |
 | `close_to_team` | aura needs allies nearby | 70 (% importance) | 2.0 | adds | 35m radius wants team grouped. |
 | `fire_rate` | +26% × active uptime | 13 (eff %) | 0.9 | adds | 26 × ~0.5 active. |
-| `horizontal_mobility` | +1.5m sprint + active MS | 1.0 (m/s eff) | 0.7 | adds | Sprint passive ×0.5 + active. |
+| `horizontal_mobility` | +1.5m sprint + active MS | 1.0 (m/s eff) | 0.6 | adds | Sprint passive ×0.5 + active. |
 | `bullet_damage` | T3 weapon baseline | 9.6 (eff gun-dmg %) | 0.2 | adds | R31. |
 | `gun_burst_damage` | fire-rate burst lift on team | 18 (dmg-% within 1s) | 0.2 | adds | R2 burst-heavy. |
 | `engage` | aura active = team push | 50 (% importance) | 1.1 | adds | Active rewards group engages. |
@@ -2328,7 +2255,7 @@ Enemy-debuff aura: -10% Bullet Resist and -15% Fire Rate on enemies within 15m, 
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `bullet_resist_shred` | -10% × aura uptime × ~2 enemies | 18 (eff shred %) | 2.0 | adds | 10 × 0.9 in-range × 2 AoE. |
-| `fire_rate_slow` | -15% × aura × 2 enemies | 25 (eff slow %) | 1.6 | adds | 15 × 0.9 × 2 — passive, multi-target. |
+| `fire_rate_slow` | -15% × aura × 2 enemies | 25 (eff slow %) | 1.1 | adds | 15 × 0.9 × 2 — passive, multi-target. |
 | `bullet_resistance` | fire-rate-slow pseudo | 10 (eff %) | 0.5 | adds | Per 01. |
 | `gun_continuous_resistance` | sustained gun blunting | 10 (eff %) | 0.6 | adds | Per 01. |
 | `aoe_cluster` | 15m aura | 55 (% importance) | 1.4 | adds | AoE flavor. |
@@ -2365,8 +2292,8 @@ Close-range gun-amp anchor: +50% Weapon Damage within 15m + 25% slow, +75 HP, +3
 | `melee_damage` | R18 close-range gun amp at melee dist | 50 (eff melee-dmg %) | 2.0 | adds | ⚖️ Judgment anchor — R12/R18: close-range weapon power IS melee_damage. |
 | `close_range` | gun amp <15m | 90 (% importance) | 1.9 | adds | R21. |
 | `long_range` | anti-affinity | -40 (% importance) | -0.9 | adds | R30. |
-| `melee_resistance` | +30% | 30 (eff %) | 1.2 | adds | Direct. |
-| `movement_slow` | -25% × 2s × on-hit | 25 (eff slow weighted) | 0.6 | adds | 25 × ~0.9 uptime × 1 target × 1s avg. |
+| `melee_resistance` | +30% | 30 (eff %) | 1.3 | adds | Direct. |
+| `movement_slow` | -25% × 2s × on-hit | 25 (eff slow weighted) | 0.7 | adds | 25 × ~0.9 uptime × 1 target × 1s avg. |
 | `gun_burst_damage` | per-shot close amp | 30 (dmg-% within 1s) | 0.4 | adds | R2. |
 | `gun_continuous_damage` | sustained close fire | 30 (dmg-% outside 1s) | 0.4 | adds | R2. |
 | `high_max_hp` | +75 HP (Weapon) | 75 (HP) | 0.3 | adds | Explicit. |
@@ -2405,9 +2332,9 @@ Stealth + ambush kit: +5 OOC regen, +1.5m sprint, 13s invisibility active (45s C
 | `fire_rate` | +25% × (5s/45s) ambush uptime | 3 (eff %) | 0.2 | adds | 25 × 0.11 ambush uptime. |
 | `spirit_damage` | +25 SP × (5/45) | 3 (SP-equiv) | — | relies | RELY: only during ambush. |
 | `melee_damage` | +25% × (5/45) | 3 (eff melee-dmg %) | 0.1 | adds | Ambush amp. |
-| `gun_burst_damage` | post-stealth ambush = first-1s gun burst | 70 (raw dmg within 1s) | 1.0 | adds | Ambush window IS designed for burst opener. R2 fire-rate lifts burst more. |
+| `gun_burst_damage` | post-stealth ambush = first-1s gun burst | 70 (raw dmg within 1s) | 0.9 | adds | Ambush window IS designed for burst opener. R2 fire-rate lifts burst more. |
 | `gun_continuous_damage` | 5s window mostly fits burst not sustained | 15 (raw dmg outside 1s) | 0.2 | adds | Small sustained lift. |
-| `horizontal_mobility` | +1.5m sprint passive + 5m invis sprint × (13/45) | 3 (m/s eff) | 2.0 | adds | 1.5 + 5 × 0.29 = 3.0 effective. |
+| `horizontal_mobility` | +1.5m sprint passive + 5m invis sprint × (13/45) | 3 (m/s eff) | 1.9 | adds | 1.5 + 5 × 0.29 = 3.0 effective. |
 | `aerial` | stealth helps aerial flanks | 35 (% importance) | — | relies | R7 partial — invis enables aerial routes. |
 | `self_buff` | self-cast stealth + ambush | 70 (% importance) | 2.0 | adds | Self-only utility. |
 | `single_target` | ambush opener is single-target | 50 (% importance) | 1.5 | adds | First-target burst tool. |
@@ -2446,7 +2373,7 @@ Long-range sniper kit: +20% Fall-off, +25% Zoom, +60% Bullet Velocity, +10% Wpn 
 | `close_range` | anti-affinity | -40 (% importance) | -0.8 | adds | Mirror R30 — sniper kit anti-close. |
 | `gun_burst_damage` | per-shot amp | 35 (dmg-% within 1s) | 0.5 | adds | R2. |
 | `gun_continuous_damage` | sustained lift | 35 (dmg-% outside 1s) | 0.5 | adds | R2. |
-| `headshot_damage` | zoom + velocity aid heads | 55 (% importance) | 0.8 | adds | Big zoom + velocity. |
+| `headshot_damage` | zoom + velocity aid heads | 55 (% importance) | 0.9 | adds | Big zoom + velocity. |
 | `single_target` | scope shots single-target | 60 (% importance) | 1.8 | adds | Sniper. |
 | `horizontal_mobility` | net -0.7 + 1m sprint × 0.5 | 0 (m/s eff) | 0.0 | adds | Net ~0 (penalty offsets sprint). |
 
@@ -2474,7 +2401,7 @@ Headshot spirit-resist stacker: +75 HP, on-hit: -8% Spirit Resist + 10% Spirit L
 |---|---|---|---|---|---|
 | `spirit_resist_shred` | -8% on-hit + 7%×4 stacks × headshot uptime | 22 (eff shred %) | 2.0 | adds | 8 + (7×4 × ~0.5 head-uptime) = 22. |
 | `spirit_lifesteal` | +10% × on-hit uptime | 7 (eff %) | 0.7 | adds | 10 × ~0.7. |
-| `headshot_damage` | rewards heads for stack | 50 (% importance) | 0.7 | adds | Head-driven stacking. |
+| `headshot_damage` | rewards heads for stack | 50 (% importance) | 0.8 | adds | Head-driven stacking. |
 | `gun_continuous_proc` | every-bullet shred | 0.4 (proc index) | 2.0 | adds | R5. |
 | `gun_burst_proc` | head-stack burst | 0.6 (proc index) | 2.0 | adds | R5. |
 | `high_max_hp` | +75 HP (Weapon) | 75 (HP) | 0.3 | adds | Explicit. |
@@ -2506,8 +2433,8 @@ Chain-lightning gun proc: 33 + 0.19×SP shock damage, 15% proc chance, 4 jumps, 
 | `aoe_cluster` | chain to 4 enemies | 70 (% importance) | 1.8 | adds | AoE proc on bullet hit. |
 | `gun_continuous_proc` | 15% chance every bullet | 0.45 (proc index) | — | adds | R5: per-shot proc. |
 | `gun_burst_proc` | first-shot chain burst | 0.4 (proc index) | — | adds | R5. |
-| `spirit_continuous_damage` | sustained spirit chain dmg | 70 (raw dmg outside 1s) | 0.5 | adds | (37×4)×0.15 = 22/shot × ~3 shots/s sustained. |
-| `spirit_burst_damage` | first-1s chain dmg | 30 (raw dmg within 1s) | 0.2 | adds | First hits chain. |
+| `spirit_continuous_damage` | sustained spirit chain dmg | 70 (raw dmg outside 1s) | 0.6 | adds | (37×4)×0.15 = 22/shot × ~3 shots/s sustained. |
+| `spirit_burst_damage` | first-1s chain dmg | 30 (raw dmg within 1s) | 0.4 | adds | First hits chain. |
 | `bullet_damage` | T3 weapon baseline | 9.6 (eff gun-dmg %) | — | adds | R31. |
 | `farmer` | chain clears NPCs | 50 (% importance) | 1.0 | adds | R28: AoE = farm. |
 | `hybrid_damage_usage` | spirit-via-gun proc | 50 (% importance) | — | adds | Double-dip. |
@@ -2532,7 +2459,7 @@ On-hit DoT + anti-heal: 1.7%/s Bleed Damage (+0.005×SP), -35% Healing Reduction
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `anti_heal` | -35% × 4s × on-hit uptime | 26 (eff %) | 1.2 | adds | 35 × ~0.75 maintain. |
+| `anti_heal` | -35% × 4s × on-hit uptime | 26 (eff %) | 1.3 | adds | 35 × ~0.75 maintain. |
 | `dot` | 1.7%/s bleed × 4s | 80 (raw dmg) | 0.6 | adds | %/s of max HP × 4s × ~1.5 avg HP fraction = ~80 DoT. |
 | `gun_continuous_proc` | per-bullet DoT/anti-heal | 0.45 (proc index) | — | adds | R5: short refresh, 4s effect. |
 | `gun_burst_proc` | first-tick burst | 0.3 (proc index) | — | adds | R5 burst-light. |
@@ -2569,12 +2496,12 @@ Heavy-gun tank package: +40% Wpn Dmg, +22% Debuff Resist, -14% Stamina Recovery,
 | `bullet_damage` | +40% Wpn Dmg + T3 baseline | 49.6 (eff gun-dmg %) | 1.2 | adds | 40 + 9.6. |
 | `gun_burst_damage` | per-shot heavy amp | 28 (dmg-% within 1s) | 0.4 | adds | R2. |
 | `gun_continuous_damage` | sustained heavy | 28 (dmg-% outside 1s) | 0.4 | adds | R2. |
-| `movement_slow` | -30% × 3.5s × on-hit | 27 (eff slow weighted) | 0.6 | adds | 30 × ~0.9 uptime × 1. |
+| `movement_slow` | -30% × 3.5s × on-hit | 27 (eff slow weighted) | 0.8 | adds | 30 × ~0.9 uptime × 1. |
 | `debuff_resistance` | +22% | 22 (eff %) | 1.2 | adds | Direct. |
 | `cc_resist` | partial CC blunting | 16 (eff %) | 0.7 | adds | Per 04 — debuff_resistance blunts CC. |
 | `gun_continuous_proc` | every bullet slows | 0.45 (proc index) | 0.7 | adds | R5. |
 | `horizontal_mobility` | -0.5m + -14% stamina rec | -0.5 (m/s eff) | -0.3 | adds | Net mobility penalty. |
-| `vertical_mobility` | -14% stamina recovery (anti) | -0.3 (units) | -0.0 | adds | Anti-vertical. |
+| `vertical_mobility` | -14% stamina recovery (anti) | -0.3 (units) | -0.1 | adds | Anti-vertical. |
 | `grounded` | slow heavy-gunner | 35 (% importance) | 1.4 | adds | R7 grounded leaning. |
 | `counter_importance` | slow + debuff resist counters | 40 (% importance) | 0.8 | adds | R13. |
 
@@ -2598,13 +2525,13 @@ Major bullet-resist defensive: +30% Bullet Resist, +3 OOC, +15% Bullet Resist Co
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `bullet_resistance` | +30% + 15% × uptime | 39 (eff %) | 2.0 | adds | 30 + (15 × ~0.6 conditional uptime). T3 anchor. |
-| `melee_resistance` | bullet pseudo | 20 (eff %) | 0.8 | adds | Per 01. |
+| `melee_resistance` | bullet pseudo | 20 (eff %) | 0.9 | adds | Per 01. |
 | `high_max_hp` | T3 Vitality baseline | 29 (HP) | 0.1 | adds | R31. |
 | `self_heal` | +3 OOC | 14 (HP total) | 0.1 | adds | 3 × 15 × 0.3. |
 | `continous_heal` | OOC outside 1s | 12.6 (HP outside 1s) | 0.0 | adds | 3 × 14 × 0.3. |
 | `damage_sponge` | bullet-resist tank synergy (incidental) | 30 (% importance) | — | relies | R26 partial. |
 | `gun_continuous_resistance` | sustained gun defense | 25 (eff %) | 1.4 | adds | Per 01. |
-| `gun_burst_resistance` | gun-burst defense | 15 (eff %) | 0.4 | adds | Lower than continuous for flat resist. |
+| `gun_burst_resistance` | gun-burst defense | 15 (eff %) | 0.5 | adds | Lower than continuous for flat resist. |
 
 ---
 
@@ -2629,11 +2556,11 @@ Spell-parry counter: 0.8s spell parry window, on-parry 150 heal + 20 SP + 1.75m 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_burst_resistance` | 0.8s spell parry = 100% spirit-burst absorb | 60 (eff %) | 1.8 | adds | ⚖️ judgment anchor: parry window negates a spirit burst entirely (per 03 anchor: Spellbreaker/Counterspell). |
+| `spirit_burst_resistance` | 0.8s spell parry = 100% spirit-burst absorb | 60 (eff %) | 2.0 | adds | ⚖️ judgment anchor: parry window negates a spirit burst entirely (per 03 anchor: Spellbreaker/Counterspell). |
 | `counter_importance` | dedicated anti-spirit-burst | 80 (% importance) | 1.6 | adds | R27: niche counter, high score. |
 | `bullet_evasion` | partial — spell parry doesn't help bullets | 0 | 0.0 | adds | (Skip — wrong axis.) |
 | `self_heal` | 150 per-parry × ~0.5 trigger uptime | 75 (HP total) | 0.3 | adds | 150 × 0.5 success rate. |
-| `burst_heal` | 150 on parry-trigger within 1s | 75 (HP within 1s) | 0.5 | adds | Instant heal on parry. |
+| `burst_heal` | 150 on parry-trigger within 1s | 75 (HP within 1s) | 0.4 | adds | Instant heal on parry. |
 | `spirit_damage` | +5 + 20 × uptime + baseline | 14 (SP-equiv) | 0.3 | adds | 5 + (20 × 6/30 active uptime) = 9 — Vitality item, no SP baseline. |
 | `horizontal_mobility` | +1.75m × uptime | 0.4 (m/s eff) | 0.3 | adds | 1.75 × ~0.2. |
 | `high_max_hp` | +50 + T3 baseline | 79 (HP) | 0.3 | adds | 50 + 29. |
@@ -2663,7 +2590,7 @@ Active cleanse + heal: 250 HP heal on cast, +2m MS, 3s; +10% Spirit Resist passi
 | `cc_resist` | cleanse covers CC too | 30 (eff %) | 1.4 | adds | Per 04. |
 | `counter_importance` | reactive cleanse | 75 (% importance) | 1.5 | adds | R27 niche counter. |
 | `self_heal` | 250 HP per cast | 110 (HP total) | 0.5 | adds | 250 × ~0.45 per-fight cast freq. |
-| `burst_heal` | 250 instant on cast | 110 (HP within 1s) | 0.7 | adds | Burst heal flavor. |
+| `burst_heal` | 250 instant on cast | 110 (HP within 1s) | 0.5 | adds | Burst heal flavor. |
 | `horizontal_mobility` | +2m × uptime | 0.5 (m/s eff) | 0.3 | adds | 2 × 0.25 active uptime. |
 | `escape` | cleanse + MS = escape tool | 55 (% importance) | 1.0 | adds | Disengage utility. |
 | `spirit_resistance` | +10% | 10 (eff %) | 0.5 | adds | Passive. |
@@ -2689,10 +2616,10 @@ Big HP + regen: +375 Bonus Health, +2% Max Health Regen, +1.5m MS Conditional. T
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `high_max_hp` | +375 HP + T3 baseline | 404 (HP) | 1.7 | adds | 375 + 29. T3 anchor for HP per 03. |
+| `high_max_hp` | +375 HP + T3 baseline | 404 (HP) | 1.6 | adds | 375 + 29. T3 anchor for HP per 03. |
 | `continous_heal` | +2% Max HP/s outside 1s | 130 (HP outside 1s) | 0.4 | adds | 2% × ~1000 effective HP × 14s post-fight = ~280; weighted by trigger ~0.5 = 140. |
 | `self_heal` | total regen across cycle | 150 (HP total) | 0.7 | adds | Sum estimate. |
-| `burst_heal` | first 1s regen | 10 (HP within 1s) | 0.1 | adds | Small first tick. |
+| `burst_heal` | first 1s regen | 10 (HP within 1s) | 0.0 | adds | Small first tick. |
 | `damage_sponge` | tank-class HP item | 60 (% importance) | — | relies | R26: HP cushion is tank's purpose. |
 | `large_hitbox` | large HP softly correlates | 25 (% importance) | — | relies | Partial. |
 | `horizontal_mobility` | +1.5m × ~0.5 uptime | 0.4 (m/s eff) | 0.3 | adds | Conditional partial. |
@@ -2727,7 +2654,7 @@ Bullet-lifesteal + spirit defense: +14% Bullet Lifesteal, +100 HP, +6% Wpn Dmg p
 | `gun_continuous_damage` | sustained lift | 7 (dmg-% outside 1s) | 0.1 | adds | R2. |
 | `self_heal` | bullet-lifesteal sustain | 85 (HP total) | 0.4 | adds | 14% × ~600 gun dmg. |
 | `continous_heal` | lifesteal outside 1s | 75 (HP outside 1s) | 0.2 | adds | Sustained pings. |
-| `burst_heal` | first-1s lifesteal | 10 (HP within 1s) | 0.1 | adds | Initial. |
+| `burst_heal` | first-1s lifesteal | 10 (HP within 1s) | 0.0 | adds | Initial. |
 | `high_max_hp` | +100 + T3 baseline | 129 (HP) | 0.5 | adds | 100 + 29. |
 | `damage_sponge` | lifesteal+resist on cooldown | 35 (% importance) | — | relies | R26. |
 
@@ -2754,7 +2681,7 @@ AoE burst heal: 325 Total HP regen in 2s, 18m aura; +5% Ability Range, +8 SP. Pe
 |---|---|---|---|---|---|
 | `team_heal` | 325 × ~3 allies in 18m | 700 (HP total) | 2.0 | adds | AoE heal benefits team. |
 | `self_heal` | self contribution | 325 (HP total) | 1.4 | adds | Self-targeted in nova too. |
-| `burst_heal` | 325 in 2s ≈ ~160 in first 1s | 160 (HP within 1s) | 1.0 | adds | Per 04: BURST heal flavor (tight 2s window). |
+| `burst_heal` | 325 in 2s ≈ ~160 in first 1s | 160 (HP within 1s) | 0.8 | adds | Per 04: BURST heal flavor (tight 2s window). |
 | `continous_heal` | rest outside 1s | 165 (HP outside 1s) | 0.5 | adds | 325 − 160. |
 | `aoe_cluster` | 18m heal aura | 65 (% importance) | 1.6 | adds | Wide AoE. |
 | `assist_importance` | team-heal pulse | 80 (% importance) | 1.9 | adds | R27: niche team support. |
@@ -2788,13 +2715,13 @@ Melee lifesteal upgrade: +16% Melee Damage, +125 HP, on-melee 100 heal + 30% mel
 |---|---|---|---|---|---|
 | `melee_damage` | +16% + heal-on-hit synergy | 22 (eff melee-dmg %) | 0.9 | adds | Strong direct melee dmg. |
 | `self_heal` | 100 HP + 30% melee heal × melee hits | 170 (HP total) | 0.8 | adds | 100 base × ~1.5 procs + 30% melee-heal lift. |
-| `burst_heal` | each melee proc instant within 1s | 100 (HP within 1s) | 0.6 | adds | Single-tick on contact. |
-| `movement_slow` | -60% × 2.5s × melee-trigger | 60 (eff slow weighted) | 1.3 | adds | 60 × ~0.4 melee uptime × 1 target. |
+| `burst_heal` | each melee proc instant within 1s | 100 (HP within 1s) | 0.5 | adds | Single-tick on contact. |
+| `movement_slow` | -60% × 2.5s × melee-trigger | 60 (eff slow weighted) | 1.8 | adds | 60 × ~0.4 melee uptime × 1 target. |
 | `close_range` | melee-only | 95 (% importance) | 2.0 | adds | R21. |
 | `long_range` | anti-affinity | -45 (% importance) | -1.0 | adds | R30. |
 | `engage` | melee strikes commit | 75 (% importance) | 1.7 | adds | R11. |
 | `grounded` | melee = grounded | 50 (% importance) | 2.0 | adds | R7. |
-| `high_max_hp` | +125 + T3 baseline | 154 (HP) | 0.7 | adds | 125 + 29. |
+| `high_max_hp` | +125 + T3 baseline | 154 (HP) | 0.6 | adds | 125 + 29. |
 | `damage_sponge` | melee brawler (incidental) | 30 (% importance) | — | relies | R26. |
 
 ---
@@ -2817,8 +2744,8 @@ Active jump-burst with barrier: 200×12 Barrier (huge), 5s Interrupt Cooldown, +
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `shield` | 200 × 12 = 2400 nominal × ~0.3 uptime | 700 (shield HP) | 1.6 | adds | Massive nominal but cooldown-gated. |
-| `vertical_mobility` | active jump-burst | 2 (units) | 0.3 | adds | Major vertical traverse. |
+| `shield` | 200 × 12 = 2400 nominal × ~0.3 uptime | 700 (shield HP) | 2.0 | adds | Massive nominal but cooldown-gated. |
+| `vertical_mobility` | active jump-burst | 2 (units) | 0.7 | adds | Major vertical traverse. |
 | `aerial` | +50% air control during active | 70 (% importance) | 1.6 | adds | Aerial-focused active. |
 | `escape` | jump = disengage | 65 (% importance) | 1.2 | adds | Major escape tool. |
 | `engage` | jump = also commit | 35 (% importance) | 0.8 | adds | Engage utility. |
@@ -2850,8 +2777,8 @@ Active bullet damage immunity: +12% Bullet Resist passive, active grants 5s of f
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `bullet_resistance` | +12% passive + 100% damage block × 5/20 active | 37 (eff %) | 1.9 | adds | 12 + (100 × 0.25 active uptime). Per Notes: blocks damage entirely during active. |
-| `melee_resistance` | bullet pseudo | 18 (eff %) | 0.7 | adds | Per 01. |
-| `gun_burst_resistance` | tanks gun burst windows entirely during active | 60 (eff %) | 1.8 | adds | Per 01 anchor: active blocks ALL weapon damage = strongest burst-R counter. |
+| `melee_resistance` | bullet pseudo | 18 (eff %) | 0.8 | adds | Per 01. |
+| `gun_burst_resistance` | tanks gun burst windows entirely during active | 60 (eff %) | 2.0 | adds | Per 01 anchor: active blocks ALL weapon damage = strongest burst-R counter. |
 | `gun_continuous_resistance` | sustained gun defense during active | 35 (eff %) | 2.0 | adds | Same active blocks sustained too. |
 | `burst_resistance` | active = full burst absorb window | 50 (eff %) | 2.0 | adds | Per 01: damage absorption during active. |
 | `counter_importance` | reactive vs gun comps | 65 (% importance) | 1.3 | adds | R13/R27. |
@@ -2882,7 +2809,7 @@ Dedicated ally save: 20% Heal Amount channel 2.5s, 35m cast range, +0.75m sprint
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `team_heal` | 20% ally max HP per cast | 250 (HP total) | 0.7 | adds | ~20% × 1000 ally HP × ~0.4 trigger uptime × 1 cast = 250. |
-| `burst_heal` | 20% over 2.5s channel = bursty | 80 (HP within 1s) | 0.5 | adds | ~80 HP within first 1s of channel. |
+| `burst_heal` | 20% over 2.5s channel = bursty | 80 (HP within 1s) | 0.4 | adds | ~80 HP within first 1s of channel. |
 | `continous_heal` | rest over 1.5s | 120 (HP outside 1s) | 0.4 | adds | Remaining channel. |
 | `assist_importance` | dedicated ally heal | 85 (% importance) | 2.0 | adds | R27: high niche support. |
 | `counter_importance` | reactive save | 55 (% importance) | 1.1 | adds | R13. |
@@ -2913,7 +2840,7 @@ Major spirit-resist defensive: +30% Spirit Resist, +3 OOC, +15% Spirit Resist Co
 |---|---|---|---|---|---|
 | `spirit_resistance` | +30% + 15% × uptime | 39 (eff %) | 2.0 | adds | ⚖️ Named judgment anchor for spirit_resistance. |
 | `spirit_continuous_resistance` | sustained spirit defense | 30 (eff %) | 2.0 | adds | Per 01. |
-| `spirit_burst_resistance` | spirit burst partial | 15 (eff %) | 0.4 | adds | Per 01 (flat resist ~0.3x burst). |
+| `spirit_burst_resistance` | spirit burst partial | 15 (eff %) | 0.5 | adds | Per 01 (flat resist ~0.3x burst). |
 | `high_max_hp` | T3 Vitality baseline | 29 (HP) | 0.1 | adds | R31. |
 | `self_heal` | +3 OOC | 14 (HP total) | 0.1 | adds | Standard. |
 | `continous_heal` | OOC outside 1s | 12.6 (HP outside 1s) | 0.0 | adds | 3 × 14 × 0.3. |
@@ -2938,8 +2865,8 @@ Major stamina bundle: +2 Stamina, +18% Stamina Recovery, +23% Air Jump/Dash Dist
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `vertical_mobility` | +2 stamina + 23% dash | 2 (units) | 0.3 | adds | T3 anchor for vertical. |
-| `horizontal_mobility` | +2 stamina dashes | 1.4 (m/s eff) | 1.6 | adds | R9: 2 × 0.7. |
+| `vertical_mobility` | +2 stamina + 23% dash | 2 (units) | 0.7 | adds | T3 anchor for vertical. |
+| `horizontal_mobility` | +2 stamina dashes | 1.4 (m/s eff) | 1.5 | adds | R9: 2 × 0.7. |
 | `aerial` | +23% air dash + +2 stamina | 70 (% importance) | 1.6 | adds | R9 — aerial focused. |
 | `engage` | extra dashes commit | 65 (% importance) | 1.4 | adds | R9. |
 | `escape` | extra dashes retreat | 65 (% importance) | 2.0 | adds | R9. |
@@ -3003,15 +2930,15 @@ Invisibility + burst heal: +2m Sprint, +2 OOC, +125 HP, +10 SP; Invisibility sta
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `burst_heal` | 85 HP on cast within 1s | 85 (HP within 1s) | 0.5 | adds | Per 04: BURST heal. |
+| `burst_heal` | 85 HP on cast within 1s | 85 (HP within 1s) | 0.4 | adds | Per 04: BURST heal. |
 | `self_heal` | 85 per cast | 65 (HP total) | 0.3 | adds | 85 × ~0.75 cast freq. |
-| `horizontal_mobility` | +2m sprint + invis-MS active | 2.5 (m/s eff) | 1.7 | adds | Sprint × 0.5 + active 3.5 × 0.4 active uptime. |
+| `horizontal_mobility` | +2m sprint + invis-MS active | 2.5 (m/s eff) | 1.6 | adds | Sprint × 0.5 + active 3.5 × 0.4 active uptime. |
 | `escape` | invis = clean disengage | 80 (% importance) | 1.5 | adds | Strong escape. |
 | `engage` | invis-flank initiate | 55 (% importance) | 1.2 | adds | R11. |
 | `bullet_evasion` | invis dodges incoming | 25 (eff %) | 1.7 | adds | Stealth defense. |
-| `away_from_team` | flank-tool | 50 (% importance) | 1.7 | adds | Solo/flank flavor. |
+| `away_from_team` | flank-tool | 50 (% importance) | 2.0 | adds | Solo/flank flavor. |
 | `spirit_damage` | +10 SP (Vitality) | 10 (SP-equiv) | 0.2 | adds | Direct. |
-| `high_max_hp` | +125 + T3 baseline | 154 (HP) | 0.7 | adds | 125 + 29. |
+| `high_max_hp` | +125 + T3 baseline | 154 (HP) | 0.6 | adds | 125 + 29. |
 | `small_hitbox` | invis effectively zero-hitbox | 50 (% importance) | 2.0 | adds | Stealth = harder to hit. |
 
 ---
@@ -3065,12 +2992,12 @@ Anti-heal + DoT active: 2.6%/s Bleed (+0.004×SP), -50% Healing Reduction, 10s, 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `anti_heal` | -50% × 10s × ~0.5 cycle | 40 (eff %) | 1.9 | adds | Strong active anti-heal. |
+| `anti_heal` | -50% × 10s × ~0.5 cycle | 40 (eff %) | 2.0 | adds | Strong active anti-heal. |
 | `dot` | 2.6%/s × 10s = ~26% target HP | 260 (raw dmg) | 2.0 | adds | 26% of ~1000 HP = 260 raw DoT. |
 | `debuff` | high-priority (priority cleanse) | 70 (% importance) | 1.8 | adds | ⚖️ Per tag_desc: Decay is a top-priority debuff. |
 | `counter_importance` | dedicated anti-sustain counter | 80 (% importance) | 1.6 | adds | R27. |
 | `spirit_damage` | dot SP-equiv + T3 baseline | 60 (SP-equiv) | 1.4 | adds | DoT amortized as SP-equiv + 8.3 baseline. |
-| `spirit_continuous_damage` | sustained DoT | 240 (raw dmg outside 1s) | 1.7 | adds | Full DoT outside 1s. |
+| `spirit_continuous_damage` | sustained DoT | 240 (raw dmg outside 1s) | 2.0 | adds | Full DoT outside 1s. |
 | `spirit_continuous_proc` | sustained debuff stream | 0.4 (proc index) | 0.9 | adds | R5. |
 | `pure_damage` | %max-HP DoT counts | 30 (eff dmg) | 0.7 | adds | %max-HP bleed = pure-damage flavor. |
 | `single_target` | targeted active | 65 (% importance) | 2.0 | adds | Targeted. |
@@ -3104,7 +3031,7 @@ Active disarm + bullet shred: Disarm + -13% Bullet Resist, 32m cast, 4.25s. ⚖�
 | `bullet_resist_shred` | -13% × 4.25/25 cycle | 4 (eff shred %) | 0.4 | adds | Active single-target. |
 | `bullet_resistance` | disarm pseudo (no bullets fired) | 8 (eff %) | 0.4 | adds | Per 01: disarm ~0.4x bullet_resistance for duration. |
 | `gun_continuous_resistance` | sustained gun shutoff | 12 (eff %) | 0.7 | adds | Disarm primarily denies sustained fire. |
-| `gun_burst_resistance` | disarm during burst | 8 (eff %) | 0.2 | adds | Disarm blocks burst too. |
+| `gun_burst_resistance` | disarm during burst | 8 (eff %) | 0.3 | adds | Disarm blocks burst too. |
 | `counter_importance` | anti-gun-comp counter | 75 (% importance) | 1.5 | adds | R27. |
 | `single_target` | targeted disarm | 65 (% importance) | 2.0 | adds | Single-target active. |
 | `long_range` | 32m cast | 35 (% importance) | 0.8 | adds | Long cast. |
@@ -3197,7 +3124,7 @@ Triggered regen + ability-cast heal: 4 HP/s for 7s; on ability cast 70 heal + 1.
 |---|---|---|---|---|---|
 | `self_heal` | 4×7×0.75 trigger + 70 per-cast | 90 (HP total) | 0.4 | adds | 21 (regen) + ~70 ability-cast heal per fight. |
 | `continous_heal` | 4 × 6s × 0.75 + cast-heal outside 1s | 30 (HP outside 1s) | 0.1 | adds | 18 regen outside 1s + ~10 cast-heal beyond. |
-| `burst_heal` | regen first 1s + per-cast | 70 (HP within 1s) | 0.4 | adds | 70 burst per cast within 1s. |
+| `burst_heal` | regen first 1s + per-cast | 70 (HP within 1s) | 0.3 | adds | 70 burst per cast within 1s. |
 | `horizontal_mobility` | +1.75m × 3/15 active | 0.4 (m/s eff) | 0.3 | adds | Active. |
 | `high_max_hp` | +90 HP (Spirit) | 90 (HP) | 0.4 | adds | Explicit. |
 | `high_max_hp` | heal scales with HP | 18 (HP) | — | relies | R8. |
@@ -3257,14 +3184,14 @@ AoE silence + damage: Silenced status, 75+0.7×SP damage, 40m cast range, 3s sil
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `silence` | 3s × ~2 abilities denied | 6 (weighted) | 1.2 | adds | T3 anchor: 3s denies ~2 ability casts. |
+| `silence` | 3s × ~2 abilities denied | 6 (weighted) | 1.0 | adds | T3 anchor: 3s denies ~2 ability casts. |
 | `spirit_resistance` | silence pseudo (no spirit dmg from silenced) | 8 (eff %) | 0.4 | adds | Per 01: silence ~0.3x toward spirit_resistance. |
 | `counter_importance` | anti-spirit-caster | 75 (% importance) | 1.5 | adds | R27. |
 | `interrupt` | breaks channels | 50 (eff freq) | 1.3 | adds | Silence interrupts. |
 | `single_target` | targeted silence | 55 (% importance) | 1.7 | adds | Targeted. |
 | `spirit_damage` | 75+0.7×SP /5 + T3 baseline | 26 (SP-equiv) | 0.6 | adds | (75+14)/5 + 8.3 = 26. |
-| `spirit_burst_damage` | active instant dmg in 1s | 89 (raw dmg within 1s) | 0.6 | adds | 75 + 0.7×20 = 89 instant. |
-| `spirit_burst_proc` | instant active proc | 0.9 (proc index) | 1.8 | adds | Instant trigger, large effect. |
+| `spirit_burst_damage` | active instant dmg in 1s | 89 (raw dmg within 1s) | 1.1 | adds | 75 + 0.7×20 = 89 instant. |
+| `spirit_burst_proc` | instant active proc | 0.9 (proc index) | 2.0 | adds | Instant trigger, large effect. |
 | `long_range` | 40m cast | 50 (% importance) | 1.1 | adds | Long. |
 | `mid_range` | partial | 25 (% importance) | 1.1 | adds | Partial. |
 | `debuff` | priority silence debuff | 45 (% importance) | 1.1 | adds | Priority. |
@@ -3295,9 +3222,9 @@ Melee-spirit hybrid: 50 + 0.84×SP Spirit Damage, 12% Spirit Resist Steal, 25 SP
 | `spirit_damage` | (50+0.84×20)/5 proc + 25 steal × uptime + T3 baseline | 30 (SP-equiv) | 0.9 | adds | (50+16.8)/5 = 13.4 + 25×0.4 steal + 8.3 baseline. |
 | `spirit_damage` | proc scales with SP | 17 (SP-equiv) | — | relies | The 0.84×SP scaling. |
 | `spirit_resist_shred` | 12% × melee-uptime | 6 (eff shred %) | 0.5 | adds | 12 × ~0.5 melee uptime. |
-| `spirit_burst_proc` | melee-trigger proc | 0.9 (proc index) | 1.8 | adds | Burst-flavored melee proc. |
+| `spirit_burst_proc` | melee-trigger proc | 0.9 (proc index) | 2.0 | adds | Burst-flavored melee proc. |
 | `melee_damage` | +7% + spirit-on-melee | 15 (eff melee-dmg %) | 0.6 | adds | Direct + R12 melee-counts. |
-| `spirit_burst_damage` | proc dmg in 1s | 67 (raw dmg within 1s) | 0.5 | adds | 50 + 0.84×20 = 66.8 per melee hit. |
+| `spirit_burst_damage` | proc dmg in 1s | 67 (raw dmg within 1s) | 0.8 | adds | 50 + 0.84×20 = 66.8 per melee hit. |
 | `close_range` | melee-trigger | 80 (% importance) | 1.7 | adds | R21. |
 | `long_range` | anti-affinity | -35 (% importance) | -0.8 | adds | R30. |
 | `grounded` | melee = grounded | 45 (% importance) | 1.8 | adds | R7. |
@@ -3379,8 +3306,8 @@ Imbue post-cast buff: +28 Imbued Ability SP, 20% Fire Rate Conditional, +1.75m M
 | `single_ability_focus` | imbue → one ability | 75 (% importance) | 1.9 | adds | R23. |
 | `fire_rate` | +20% × uptime | 8 (eff %) | 0.5 | adds | 20 × ~0.4 post-cast uptime. |
 | `horizontal_mobility` | +1.75m × 8/20 | 0.5 (m/s eff) | 0.3 | adds | Active uptime. |
-| `spirit_burst_damage` | post-cast SP burst | 14 (dmg-equiv within 1s) | 1.1 | adds | R2 + cast-burst flavor. |
-| `spirit_continuous_damage` | SP lifts sustained | 14 (dmg-equiv outside 1s) | 1.0 | adds | R2. |
+| `spirit_burst_damage` | post-cast SP burst | 14 (dmg-equiv within 1s) | 2.0 | adds | R2 + cast-burst flavor. |
+| `spirit_continuous_damage` | SP lifts sustained | 14 (dmg-equiv outside 1s) | 1.2 | adds | R2. |
 | `gun_burst_damage` | fire-rate burst window | 9 (dmg-% within 1s) | 0.1 | adds | R2 (fire_rate burst-heavy). |
 | `hybrid_damage_usage` | spirit+gun bridge | 55 (% importance) | 1.1 | adds | Hybrid imbue. |
 | `self_buff` | post-cast buff state | 50 (% importance) | 1.4 | adds | R19 legitimate buff. |
@@ -3410,7 +3337,7 @@ Anti-tank %max-HP proc with Charge-Up mechanic (NOT affected by CDR per Notes): 
 | `counter_importance` | dedicated anti-tank counter | 80 (% importance) | 1.6 | adds | R27: dedicated tank-buster. |
 | `spirit_damage` | 40 + 8%HP proc as SP-equiv + T3 baseline | 25 (SP-equiv) | — | adds | Per 01 amortized. |
 | `spirit_continuous_proc` | per-ability proc | 0.4 (proc index) | 2.0 | adds | R5 continuous-flavor. |
-| `spirit_burst_proc` | first-proc burst | 0.5 (proc index) | 1.0 | adds | R5. |
+| `spirit_burst_proc` | first-proc burst | 0.5 (proc index) | 1.1 | adds | R5. |
 | `spirit_burst_damage` | first-trigger dmg in 1s | 120 (raw dmg within 1s) | — | adds | 40 + 8%×1000HP = 120 raw on a 1000-HP target. |
 | `charge_dependant` | Charge-Up mechanic per Notes | 50 (% importance) | 1.1 | adds | Charge-Up item — fits charge_dependant axis. |
 | `farmer` | free use on NPCs (no CD trigger) per Notes | 25 (% importance) | 1.3 | adds | Cooldown only triggers on heroes; can spam on NPCs. |
@@ -3441,7 +3368,7 @@ Aura AoE DoT: 25 + 0.23×SP pulse damage, 9m radius passive. Constant-pressure D
 | `spirit_continuous_damage` | sustained pulse DPS outside 1s | 130 (raw dmg outside 1s) | — | adds | Sustained pulse damage. |
 | `spirit_burst_damage` | first pulse within 1s | 30 (raw dmg within 1s) | — | adds | First pulse. |
 | `spirit_continuous_proc` | passive pulse-on-tick | 0.45 (proc index) | — | adds | R5 continuous. |
-| `melee_resistance` | +18% | 18 (eff %) | 0.7 | adds | Direct passive. |
+| `melee_resistance` | +18% | 18 (eff %) | 0.8 | adds | Direct passive. |
 | `close_range` | 9m aura → close-fight friendly | 50 (% importance) | 1.1 | adds | Aura helps in close brawl. |
 | `farmer` | aura clears nearby NPCs | 40 (% importance) | — | adds | R28. |
 | `high_max_hp` | +100 HP (Spirit) | 100 (HP) | — | adds | Explicit. |
@@ -3506,13 +3433,13 @@ Aura AoE DoT: 25 + 0.23×SP pulse damage, 9m radius passive. Constant-pressure D
 |---|---|---|---|---|---|
 | `aoe_cluster` | 6 jumps × 10m chain | 65 (% importance) | 1.6 | adds | Chain-lightning AoE. |
 | `spirit_damage` | (43+0.19×20) × proc-rate × jumps + T4 baseline (Weapon item, no spirit baseline) | 38 (SP-equiv) | 0.6 | adds | Weapon item — no spirit baseline. 47 dmg/proc × 0.20 × ~4 effective jumps ≈ 38 SP-equiv. |
-| `spirit_continuous_damage` | sustained proc dmg outside 1s | 140 (raw dmg outside 1s) | 0.6 | adds | Per-bullet proc, sustained. |
-| `spirit_burst_damage` | first proc + initial chain within 1s | 50 (raw dmg within 1s) | 0.2 | adds | First-bullet shock. |
+| `spirit_continuous_damage` | sustained proc dmg outside 1s | 140 (raw dmg outside 1s) | 0.8 | adds | Per-bullet proc, sustained. |
+| `spirit_burst_damage` | first proc + initial chain within 1s | 50 (raw dmg within 1s) | 0.4 | adds | First-bullet shock. |
 | `spirit_continuous_proc` | passive per-bullet shock | 0.50 (proc index) | 1.2 | adds | 20% per shot with 0.25s ICD ≈ 0.5. |
 | `fire_rate` | +5% passive | 5 (eff %) | 0.2 | adds | Direct. |
 | `bullet_damage` | T4 baseline | 9.6 (eff gun-dmg %) | 0.2 | adds | R31 baseline only. |
-| `movement_slow` | -75% × 3s × 1 target (active) | 32 (eff slow weighted) | 0.5 | adds | Active 3s slow. |
-| `silence` | active silences movement items | 6 (weighted) | 0.8 | adds | Narrow silence (movement-only). |
+| `movement_slow` | -75% × 3s × 1 target (active) | 32 (eff slow weighted) | 0.6 | adds | Active 3s slow. |
+| `silence` | active silences movement items | 6 (weighted) | 0.7 | adds | Narrow silence (movement-only). |
 | `counter_importance` | counter to mobility + stamina spam | 50 (% importance) | 1.0 | adds | R13. |
 | `single_ability_focus` | active is the main payoff | 35 (% importance) | 0.9 | adds | R17 partial. |
 
@@ -3541,9 +3468,9 @@ Headshot-gated armor strip + healing reduction: +125 HP, on-headshot debuff (-16
 | `bullet_resist_shred` | -16% × headshot uptime | 11 (eff shred %) | 0.8 | adds | 16 × ~0.7 headshot uptime (12s buff window). |
 | `spirit_resist_shred` | -16% × headshot uptime | 11 (eff shred %) | 0.7 | adds | Same. Hybrid debuff anchor. |
 | `anti_heal` | -35% healing red × uptime | 25 (eff %) | 0.8 | adds | 35 × ~0.7 uptime. |
-| `headshot_damage` | headshot-gated entirely | 75 (% importance) | 0.7 | adds | R29: pure headshot trigger. |
+| `headshot_damage` | headshot-gated entirely | 75 (% importance) | 0.8 | adds | R29: pure headshot trigger. |
 | `bullet_damage` | T4 baseline | 9.6 (eff gun-dmg %) | 0.2 | adds | R31. |
-| `high_max_hp` | +125 HP (Weapon item, no Vitality baseline) | 125 (HP) | 0.4 | adds | Explicit HP only. |
+| `high_max_hp` | +125 HP (Weapon item, no Vitality baseline) | 125 (HP) | 0.3 | adds | Explicit HP only. |
 | `single_target` | headshot is single-target | 65 (% importance) | 2.0 | adds | Per-target debuff. |
 | `mid_range` | headshots favor mid-range | 45 (% importance) | 2.0 | adds | Headshot tool. |
 | `counter_importance` | counter to high-resist + heal-stack builds | 60 (% importance) | 1.2 | adds | Hybrid resist + anti-heal in one. |
@@ -3618,7 +3545,7 @@ Low-HP triggered combat boost: +160 HP, +15% Fire Rate. While below 50% HP (16s 
 | `gun_continuous_damage` | sustained lift | 30 (raw dmg outside 1s) | 0.3 | adds | R2: fire_rate lifts continuous lightly. |
 | `horizontal_mobility` | +4m/s × trigger uptime | 2.5 (m/s eff) | 1.1 | adds | 4 × 0.63 uptime. |
 | `debuff_resistance` | +40% × trigger | 25 (eff %) | 0.9 | adds | 40 × 0.63. |
-| `high_max_hp` | +160 HP (Weapon item, no Vitality baseline) | 160 (HP) | 0.5 | adds | Explicit. |
+| `high_max_hp` | +160 HP (Weapon item, no Vitality baseline) | 160 (HP) | 0.4 | adds | Explicit. |
 | `damage_sponge` | low-HP trigger rewards taking dmg | 50 (% importance) | 1.1 | adds | R26: comeback-flavored. |
 | `counter_importance` | comeback mechanic | 35 (% importance) | 0.7 | adds | R13: clutch tool. |
 | `engage` | aggressive low-HP brawler | 45 (% importance) | 1.0 | adds | Encourages staying in fights. |
@@ -3709,7 +3636,7 @@ Bullet proc gun amp: +30% Max Ammo. 25% chance per bullet to deal +100% Bonus We
 | `aoe_cluster` | bounces to 2 extra targets | 70 (% importance) | 1.8 | adds | ⚖️ Crowd-DPS amp. |
 | `fire_rate` | +18% | 18 (eff %) | 0.8 | adds | Direct. |
 | `bullet_damage` | T4 baseline + 65% × 2 in crowd | 22 (eff gun-dmg %) | 0.4 | adds | 9.6 baseline + ~13% effective vs crowd (only in 2+ target situations). |
-| `gun_burst_damage` | fire-rate lifts burst + crowd multiplier | 150 (raw dmg within 1s) | 1.4 | adds | R2: fire-rate heavy on burst. |
+| `gun_burst_damage` | fire-rate lifts burst + crowd multiplier | 150 (raw dmg within 1s) | 1.3 | adds | R2: fire-rate heavy on burst. |
 | `gun_continuous_damage` | sustained gun + crowd | 90 (raw dmg outside 1s) | 0.8 | adds | R2: fire-rate light on continuous. |
 | `gun_continuous_proc` | per-bullet ricochet lifts proc rate | 0.20 (proc index) | 0.3 | adds | Indirect — extends proc reach. |
 | `farmer` | clears NPC waves faster | 60 (% importance) | 1.2 | adds | R28: crowd-clearer. |
@@ -3737,7 +3664,7 @@ Anti-spirit gun item: +12% Spirit Resist. Passive 1: bullets apply -25% Spirit D
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `silence` | 2.5s silence × (12.5s window ≈ 20% uptime) per target | 15 (weighted) | 2.0 | adds | ⚖️ Named silence anchor. |
+| `silence` | 2.5s silence × (12.5s window ≈ 20% uptime) per target | 15 (weighted) | 1.7 | adds | ⚖️ Named silence anchor. |
 | `debuff` | -25% spirit dmg debuff + silence | 35 (% importance) | 0.9 | adds | Hybrid debuff. |
 | `counter_importance` | counters spirit casters | 80 (% importance) | 1.6 | adds | ⚖️ Notes: counters spirit-burst comps. |
 | `spirit_resistance` | +12% direct | 12 (eff %) | 0.4 | adds | Direct passive. |
@@ -3770,7 +3697,7 @@ Hybrid gun/ability ramp: +5% Ability CDR. While in-combat, every ability/item ca
 |---|---|---|---|---|---|
 | `fire_rate` | +11% × ~4 typical stacks | 44 (eff %) | 2.0 | adds | Most builds proc 4 stacks routinely. |
 | `bullet_damage` | T4 baseline + fire-rate-derived lift | 25 (eff gun-dmg %) | 0.4 | adds | 9.6 + fire-rate amp from stacks. |
-| `gun_burst_damage` | fire-rate lifts burst heavily | 160 (raw dmg within 1s) | 1.5 | adds | R2. |
+| `gun_burst_damage` | fire-rate lifts burst heavily | 160 (raw dmg within 1s) | 1.4 | adds | R2. |
 | `gun_continuous_damage` | sustained gun + reload speed | 90 (raw dmg outside 1s) | 0.8 | adds | R2 + reload helps continuous. |
 | `cooldown_reduction` | +5% direct | 5 (eff CDR %) | 0.2 | adds | Direct. |
 | `magazine_size_dependant` | -10% reload time × stacks | 25 (eff ammo %) | 0.2 | adds | Reload speed extends effective ammo uptime. |
@@ -3806,14 +3733,14 @@ Build-up hybrid amp: +15% Ability Duration, +13% Spirit Lifesteal, +90 HP, +6 SP
 | `hybrid_damage_usage` | rewards using BOTH gun + spirit | 80 (% importance) | 1.6 | adds | ⚖️ Named hybrid anchor. |
 | `fire_rate` | +32% × ~0.6 typical Overflow uptime | 19 (eff %) | 0.8 | adds | Charge → 15s buff. |
 | `spirit_damage` | 6 flat + 40 × 0.6 uptime (Weapon item, no spirit baseline) | 30 (SP-equiv) | 0.5 | adds | No baseline (Weapon). |
-| `spirit_burst_damage` | spirit per-shot during Overflow | 60 (raw dmg within 1s) | 0.3 | adds | SP lifts spirit-flavored procs in burst window. |
+| `spirit_burst_damage` | spirit per-shot during Overflow | 60 (raw dmg within 1s) | 0.5 | adds | SP lifts spirit-flavored procs in burst window. |
 | `spirit_continuous_damage` | sustained spirit | 60 (raw dmg outside 1s) | 0.3 | adds | SP lifts continuous symmetrically. |
 | `bullet_damage` | T4 baseline + fire-rate lift | 20 (eff gun-dmg %) | 0.3 | adds | 9.6 baseline + FR-derived. |
 | `gun_burst_damage` | FR-driven burst lift | 130 (raw dmg within 1s) | 1.2 | adds | R2: FR heavy on burst. |
 | `gun_continuous_damage` | sustained gun | 50 (raw dmg outside 1s) | 0.5 | adds | R2: light continuous. |
-| `spirit_lifesteal` | +13% direct | 13 (eff %) | 0.9 | adds | Direct. |
+| `spirit_lifesteal` | +13% direct | 13 (eff %) | 0.8 | adds | Direct. |
 | `duration_dependant` | +15% Ability Duration | 15 (eff %) | 0.6 | adds | Direct. |
-| `high_max_hp` | +90 HP (Weapon, no baseline) | 90 (HP) | 0.3 | adds | Explicit. |
+| `high_max_hp` | +90 HP (Weapon, no baseline) | 90 (HP) | 0.2 | adds | Explicit. |
 | `self_heal` | lifesteal sustain | 60 (HP total) | 0.2 | adds | 13% lifesteal × dmg dealt. |
 
 
@@ -3840,7 +3767,7 @@ The named anti-burst panic button: +200 HP, +15% Bullet Resist. On lethal damage
 |---|---|---|---|---|---|
 | `counter_importance` | named anti-burst defense | 90 (% importance) | 1.8 | adds | ⚖️ Named anchor — lethal-damage save. |
 | `damage_sponge` | death immunity ≈ second life | 70 (% importance) | 1.5 | adds | R26: dies → doesn't die. |
-| `shield` | 4.5s invuln window ≈ effective HP | 200 (shield HP) | 0.3 | adds | Treats death-immune as ~200 HP barrier (procs once per 90s). |
+| `shield` | 4.5s invuln window ≈ effective HP | 200 (shield HP) | 0.4 | adds | Treats death-immune as ~200 HP barrier (procs once per 90s). |
 | `high_max_hp` | T4 Vitality baseline + 200 HP + shield-as-HP | 254 (HP) | 0.7 | adds | 29 baseline + 200 + ~25 shield-equiv. |
 | `bullet_resistance` | +15% direct | 15 (eff %) | 0.5 | adds | Direct. |
 | `cc_resist` | removes non-stun debuffs on trigger | 12 (eff %) | 0.4 | adds | Partial cleanse. |
@@ -3879,7 +3806,7 @@ The named damage-sponge anchor: +25% Base Health, +15% Weapon Damage. Active (37
 | `bullet_resistance` | 35% × (7/37) uptime + R31 lift | 12 (eff %) | 0.4 | adds | 35 × 0.19 uptime. |
 | `spirit_resistance` | 35% × (7/37) | 7 (eff %) | 0.2 | adds | Same. |
 | `melee_damage` | +30% × (7/37) | 6 (eff melee-dmg %) | 0.2 | adds | R12: short-burst melee amp. |
-| `movement_slow` | -30% × 7s × ~3 enemies in aura | 25 (eff slow weighted) | 0.4 | adds | Aura slow vs crowd. |
+| `movement_slow` | -30% × 7s × ~3 enemies in aura | 25 (eff slow weighted) | 0.5 | adds | Aura slow vs crowd. |
 | `aoe_cluster` | 14m aura | 75 (% importance) | 1.9 | adds | Large radius. |
 | `bullet_damage` | +15% + T4 Weapon baseline-equiv | 15 (eff gun-dmg %) | 0.2 | adds | Vitality item — +15% explicit only (no Weapon baseline). |
 | `high_max_hp` | +25% base HP (≈ +125) + T4 Vitality baseline 29 | 154 (HP) | 0.4 | adds | R31 baseline + +125. |
@@ -3950,9 +3877,9 @@ Ult-tied barrier + spirit ramp: +15% Ability Duration. Passive (40s CD): on ulti
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `ult_focused` | trigger requires ultimate cast | 90 (% importance) | 1.9 | adds | ⚖️ Named ult_focused anchor. |
-| `shield` | 1000 × (20/40) uptime | 500 (shield HP) | 0.7 | adds | Largest single barrier at T4. |
+| `shield` | 1000 × (20/40) uptime | 500 (shield HP) | 1.0 | adds | Largest single barrier at T4. |
 | `spirit_damage` | +35 × (20/40) + T4 Vitality baseline | 26 (SP-equiv) | 0.4 | adds | Vitality item — no spirit baseline. 35 × 0.5 + ~8 utility. |
-| `spirit_burst_damage` | SP lifts spirit burst | 35 (raw dmg within 1s) | 0.2 | adds | R2: SP lifts spirit burst. |
+| `spirit_burst_damage` | SP lifts spirit burst | 35 (raw dmg within 1s) | 0.3 | adds | R2: SP lifts spirit burst. |
 | `spirit_continuous_damage` | SP lifts continuous | 35 (raw dmg outside 1s) | 0.2 | adds | R2 symmetric. |
 | `damage_sponge` | massive barrier during ult | 65 (% importance) | 1.4 | adds | R26. |
 | `duration_dependant` | +15% direct | 15 (eff %) | 0.6 | adds | Direct. |
@@ -4057,14 +3984,14 @@ Vitality/spirit sustain hybrid: +13% Spirit Lifesteal, +10% Spirit Resist, +100 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_lifesteal` | 13% + 70% × (7/30) | 29 (eff %) | 2.0 | adds | ⚖️ Largest spirit lifesteal source. |
+| `spirit_lifesteal` | 13% + 70% × (7/30) | 29 (eff %) | 1.8 | adds | ⚖️ Largest spirit lifesteal source. |
 | `spirit_damage` | 6 flat + 30 × (7/30) (Vitality, no SP baseline) | 13 (SP-equiv) | 0.2 | adds | 6 + 7 conditional. |
-| `spirit_burst_damage` | SP lifts spirit burst in 7s window | 30 (raw dmg within 1s) | 0.1 | adds | R2: 7s active window. |
-| `spirit_continuous_damage` | SP lifts continuous | 30 (raw dmg outside 1s) | 0.1 | adds | R2 symmetric. |
+| `spirit_burst_damage` | SP lifts spirit burst in 7s window | 30 (raw dmg within 1s) | 0.2 | adds | R2: 7s active window. |
+| `spirit_continuous_damage` | SP lifts continuous | 30 (raw dmg outside 1s) | 0.2 | adds | R2 symmetric. |
 | `spirit_resistance` | +10% direct | 10 (eff %) | 0.3 | adds | Direct. |
 | `self_heal` | lifesteal sustain | 180 (HP total) | 0.5 | adds | Lifesteal during 7s burst. |
 | `self_buff` | self-cast active | 55 (% importance) | 1.6 | adds | Self-only. |
-| `high_max_hp` | T4 Vitality baseline + 100 HP | 129 (HP) | 0.4 | adds | 29 + 100. |
+| `high_max_hp` | T4 Vitality baseline + 100 HP | 129 (HP) | 0.3 | adds | 29 + 100. |
 | `single_ability_focus` | rewards one big nuke window | 40 (% importance) | 1.0 | adds | R17. |
 
 
@@ -4121,10 +4048,10 @@ Anti-CC brawler kit: +50% Slow Resist, +2.5m Move Speed, +25% Melee Resist, +8 H
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `fire_rate_slow` | -40% × 4s × ~2 attackers | 48 (eff slow %) | 2.0 | adds | ⚖️ Named anchor for fire_rate_slow. |
+| `fire_rate_slow` | -40% × 4s × ~2 attackers | 48 (eff slow %) | 1.4 | adds | ⚖️ Named anchor for fire_rate_slow. |
 | `cc_resist` | +50% slow resist | 40 (eff %) | 1.2 | adds | ⚖️ Named slow-resist anchor. |
 | `horizontal_mobility` | +2.5m direct | 2.5 (m/s eff) | 1.1 | adds | Direct sprint. |
-| `melee_resistance` | +25% direct | 25 (eff %) | 0.6 | adds | Direct. |
+| `melee_resistance` | +25% direct | 25 (eff %) | 0.7 | adds | Direct. |
 | `self_heal` | +8 regen × combat time | 240 (HP total) | 0.7 | adds | 8 × 30s combat = 240. |
 | `continous_heal` | regen outside 1s | 240 (HP outside 1s) | 0.5 | adds | Sustained regen. |
 | `burst_heal` | first-1s regen | 8 (HP within 1s) | 0.0 | adds | 8 HP within 1s. |
@@ -4157,18 +4084,18 @@ Pure-stat hybrid stat stick: +25% Spirit Lifesteal, +25% Bullet Lifesteal, +180 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_lifesteal` | +25% direct | 25 (eff %) | 1.7 | adds | Direct. |
+| `spirit_lifesteal` | +25% direct | 25 (eff %) | 1.6 | adds | Direct. |
 | `bullet_lifesteal` | +25% direct | 25 (eff %) | 1.7 | adds | Direct. |
 | `hybrid_damage_usage` | gun+spirit lifesteal stat stick | 80 (% importance) | 1.6 | adds | ⚖️ Hybrid scaling anchor. |
 | `bullet_damage` | +12% direct (Vitality, no Weapon baseline) | 12 (eff gun-dmg %) | 0.2 | adds | Direct. |
 | `spirit_damage` | +12 SP (Vitality, no spirit baseline) | 12 (SP-equiv) | 0.2 | adds | Direct. |
 | `gun_burst_damage` | per-shot lift | 70 (raw dmg within 1s) | 0.6 | adds | R2: bullet_damage symmetric. |
 | `gun_continuous_damage` | sustained lift | 70 (raw dmg outside 1s) | 0.6 | adds | R2. |
-| `spirit_burst_damage` | SP lifts spirit burst | 25 (raw dmg within 1s) | 0.1 | adds | R2. |
+| `spirit_burst_damage` | SP lifts spirit burst | 25 (raw dmg within 1s) | 0.2 | adds | R2. |
 | `spirit_continuous_damage` | SP lifts continuous | 25 (raw dmg outside 1s) | 0.1 | adds | R2. |
 | `self_heal` | hybrid lifesteal sustain | 320 (HP total) | 0.9 | adds | Sustained dual lifesteal. |
 | `scaling_late` | pure stat stick | 55 (% importance) | 1.4 | adds | R32: late-game accumulator. |
-| `high_max_hp` | T4 Vitality baseline + 180 HP | 209 (HP) | 0.6 | adds | 29 + 180. |
+| `high_max_hp` | T4 Vitality baseline + 180 HP | 209 (HP) | 0.5 | adds | 29 + 180. |
 | `damage_sponge` | lifesteal + HP = tank | 50 (% importance) | 1.1 | adds | R26. |
 
 
@@ -4197,15 +4124,15 @@ Teleport-engage active: +15% Weapon Damage, +8 SP. Active (35s CD): teleport to 
 |---|---|---|---|---|---|
 | `disarm` | 3s × 1 target × 35s CD | 0.26 (s × count) | 0.1 | adds | ⚖️ Named disarm anchor — only T4 disarm. |
 | `engage` | teleport-to-enemy is named engage tool | 90 (% importance) | 2.0 | adds | ⚖️ Named engage anchor. |
-| `spirit_burst_damage` | 75+0.93×20 = 94 within 1s | 95 (raw dmg within 1s) | 0.4 | adds | Single-hit burst. |
+| `spirit_burst_damage` | 75+0.93×20 = 94 within 1s | 95 (raw dmg within 1s) | 0.8 | adds | Single-hit burst. |
 | `spirit_damage` | 8 flat + (75+0.93×20)/35s CD = ~11 SP-equiv | 11 (SP-equiv) | 0.2 | adds | Vitality item, no baseline. |
-| `spirit_burst_proc` | one big burst on cast | 0.40 (proc index) | 0.8 | adds | R6: instant trigger. |
-| `movement_slow` | -50% × 3s × 1 target | 30 (eff slow weighted) | 0.4 | adds | 50 × 0.6 weighted. |
+| `spirit_burst_proc` | one big burst on cast | 0.40 (proc index) | 0.9 | adds | R6: instant trigger. |
+| `movement_slow` | -50% × 3s × 1 target | 30 (eff slow weighted) | 0.6 | adds | 50 × 0.6 weighted. |
 | `single_target` | single-target engage | 65 (% importance) | 2.0 | adds | Direct. |
 | `counter_importance` | pulls aerial → grounded | 60 (% importance) | 1.2 | adds | R13: anti-aerial. |
 | `anti_air` | pulls enemies to ground | 65 (% importance) | 1.7 | adds | R7 mirror — explicit anti-aerial. |
 | `grounded` | forces target grounded | 35 (% importance) | 1.4 | adds | Pull-to-ground mechanic. |
-| `horizontal_mobility` | teleport = effective mobility | 1.5 (m/s eff) | 0.7 | adds | 25m teleport / 35s CD. |
+| `horizontal_mobility` | teleport = effective mobility | 1.5 (m/s eff) | 0.6 | adds | 25m teleport / 35s CD. |
 | `bullet_damage` | +15% (Vitality, no baseline) | 15 (eff gun-dmg %) | 0.2 | adds | Direct. |
 | `high_max_hp` | T4 Vitality baseline | 29 (HP) | 0.1 | adds | R31. |
 
@@ -4293,7 +4220,7 @@ Anti-spirit-burst panic shield: +18% Spirit Resist, +25% Debuff Resist, +90 HP. 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `spirit_burst_resistance` | 65% on threshold spirit hits + R31 lift | 60 (eff %) | 1.2 | adds | ⚖️ Named anchor — biggest spirit-burst defense. |
+| `spirit_burst_resistance` | 65% on threshold spirit hits + R31 lift | 60 (eff %) | 1.3 | adds | ⚖️ Named anchor — biggest spirit-burst defense. |
 | `spirit_resistance` | +18% direct | 18 (eff %) | 0.6 | adds | Direct. |
 | `debuff_resistance` | +25% direct | 25 (eff %) | 0.9 | adds | Direct. |
 | `cc_resist` | debuff resist reduces all CC | 25 (eff %) | 0.8 | adds | R13. |
@@ -4363,12 +4290,12 @@ DPS-window burst: +13% Bullet Lifesteal, +10% Bullet Resist, +100 HP, +6% Weapon
 | `bullet_lifesteal` | 13% + 70% × (5/30) | 25 (eff %) | 1.7 | adds | ⚖️ Largest bullet lifesteal source. |
 | `fire_rate` | 34% × (5/30) | 6 (eff %) | 0.3 | adds | Active burst FR. |
 | `bullet_damage` | +6% + fire-rate burst amp (Vitality, no Weapon baseline) | 12 (eff gun-dmg %) | 0.2 | adds | 6 + FR lift. |
-| `gun_burst_damage` | FR-driven burst in 5s = pure burst window | 95 (raw dmg within 1s) | 0.9 | adds | ⚖️ R2: 5s active is the textbook burst window. |
+| `gun_burst_damage` | FR-driven burst in 5s = pure burst window | 95 (raw dmg within 1s) | 0.8 | adds | ⚖️ R2: 5s active is the textbook burst window. |
 | `gun_continuous_damage` | extends mag past cap | 50 (raw dmg outside 1s) | 0.5 | adds | R2 + ammo extension. |
 | `magazine_size_dependant` | +75% × (5/30) | 13 (eff ammo %) | 0.1 | adds | Active ammo refill, no mag cap. |
 | `self_heal` | 70% lifesteal × 5s burst | 250 (HP total) | 0.7 | adds | Burst lifesteal sustain. |
 | `bullet_resistance` | +10% direct | 10 (eff %) | 0.3 | adds | Direct. |
-| `high_max_hp` | T4 Vitality baseline + 100 HP | 129 (HP) | 0.4 | adds | 29 + 100. |
+| `high_max_hp` | T4 Vitality baseline + 100 HP | 129 (HP) | 0.3 | adds | 29 + 100. |
 | `single_ability_focus` | active-driven | 45 (% importance) | 1.1 | adds | R17. |
 | `engage` | 5s burst window favors commit | 55 (% importance) | 1.2 | adds | Engagement burst tool. |
 
@@ -4400,7 +4327,7 @@ Anti-spirit-caster CDR sponge: +22% Spirit Resist, +14 SP. Passive (1s ICD): eve
 | `damage_sponge` | rewards being hit | 50 (% importance) | 1.1 | adds | R26: incentivizes taking spirit dmg. |
 | `ability_spam` | CDR enables more casts | 50 (% importance) | 1.3 | adds | R20: more uses/min. |
 | `scaling_late` | CDR + SP = scaling caster | 40 (% importance) | 1.0 | adds | R32. |
-| `spirit_burst_damage` | SP lifts spirit burst | 25 (raw dmg within 1s) | 0.1 | adds | R2 symmetric. |
+| `spirit_burst_damage` | SP lifts spirit burst | 25 (raw dmg within 1s) | 0.2 | adds | R2 symmetric. |
 | `spirit_continuous_damage` | SP lifts continuous | 25 (raw dmg outside 1s) | 0.1 | adds | R2. |
 | `high_max_hp` | T4 Vitality baseline | 29 (HP) | 0.1 | adds | R31. |
 
@@ -4427,10 +4354,10 @@ AoE freeze + stamina-lock: +10% Spirit Resist. Active (24s CD): 175+0.7×SP dama
 |---|---|---|---|---|---|
 | `aoe_cluster` | 16m radius | 75 (% importance) | 1.9 | adds | ⚖️ Large AoE. |
 | `stun` | 1s freeze × ~3 enemies × (1/24s CD) | 0.12 (eff s) | 0.2 | adds | Freeze = hard CC. |
-| `movement_slow` | slow + stamina freeze after | 35 (eff slow weighted) | 0.5 | adds | Slow + stamina lock. |
+| `movement_slow` | slow + stamina freeze after | 35 (eff slow weighted) | 0.7 | adds | Slow + stamina lock. |
 | `spirit_damage` | (175+0.7×20)/24s + T4 baseline | 16 (SP-equiv) | 0.2 | adds | 189/24 ≈ 7.9 + 8.3 baseline. |
-| `spirit_burst_damage` | one big AoE burst within 1s | 180 (raw dmg within 1s) | 0.8 | adds | Single-cast burst. |
-| `spirit_burst_proc` | one big proc on cast | 0.40 (proc index) | 0.8 | adds | R6: instant cast proc. |
+| `spirit_burst_damage` | one big AoE burst within 1s | 180 (raw dmg within 1s) | 1.5 | adds | Single-cast burst. |
+| `spirit_burst_proc` | one big proc on cast | 0.40 (proc index) | 0.9 | adds | R6: instant cast proc. |
 | `spirit_resistance` | +10% direct | 10 (eff %) | 0.3 | adds | Direct. |
 | `engage` | AoE freeze = group engage | 65 (% importance) | 1.4 | adds | R11. |
 | `counter_importance` | anti-stamina + anti-mobility | 60 (% importance) | 1.2 | adds | R13: freezes stamina regen. |
@@ -4459,7 +4386,7 @@ The named Spirit stat-stick anchor: +15% Spirit Power (% of current — unique),
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `spirit_damage` | 30 flat + (15% × 100 SP existing build) + T4 baseline | 53 (SP-equiv) | 0.8 | adds | ⚖️ Named SP anchor T4. 8.3 baseline + 30 + 15. |
-| `spirit_burst_damage` | SP lifts burst | 60 (raw dmg within 1s) | 0.3 | adds | R2 symmetric. |
+| `spirit_burst_damage` | SP lifts burst | 60 (raw dmg within 1s) | 0.5 | adds | R2 symmetric. |
 | `spirit_continuous_damage` | SP lifts continuous | 60 (raw dmg outside 1s) | 0.3 | adds | R2. |
 | `scaling_late` | % of current SP rewards stacking | 65 (% importance) | 1.6 | adds | ⚖️ Greedy SP scaler — uniquely rewards SP stacking. |
 | `high_max_hp` | +75 HP (Spirit, no Vit baseline) | 75 (HP) | 0.2 | adds | Explicit. |
@@ -4488,7 +4415,7 @@ Buff stripper / lockdown active: -10% Damage Penalty. Active (55s CD): Silence +
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `silence` | 3.25s × 1 target | 5 (weighted) | 0.7 | adds | ⚖️ Longest silence at T4. |
+| `silence` | 3.25s × 1 target | 5 (weighted) | 0.6 | adds | ⚖️ Longest silence at T4. |
 | `disarm` | 3.25s × 1 target × (3.25/55) | 0.20 (s × count) | 0.1 | adds | Same duration as silence. |
 | `interrupt` | interrupts channels on cast | 75 (eff freq) | 2.0 | adds | ⚖️ Named interrupt anchor. |
 | `debuff` | strips all non-ult buffs + silence + disarm | 80 (% importance) | 2.0 | adds | ⚖️ Largest buff-strip in game. |
@@ -4525,7 +4452,7 @@ Ability-duplicator (effect detail not captured in scrape — small stat passives
 | `spirit_resistance` | +5% direct | 5 (eff %) | 0.2 | adds | Direct. |
 | `bullet_resistance` | +5% direct | 5 (eff %) | 0.2 | adds | Direct. |
 | `spirit_damage` | T4 baseline + ult-duplication = SP-equiv burst | 13 (SP-equiv) | 0.2 | adds | 8.3 baseline + small ult-duplication value. |
-| `spirit_burst_damage` | duplicates a burst ability | 55 (raw dmg within 1s) | 0.3 | adds | R2: ult-duplication is burst-flavored. |
+| `spirit_burst_damage` | duplicates a burst ability | 55 (raw dmg within 1s) | 0.4 | adds | R2: ult-duplication is burst-flavored. |
 | `counter_importance` | gives flex utility | 30 (% importance) | 0.6 | adds | R13. |
 | `scaling_late` | shines in big-cooldown fights | 40 (% importance) | 1.0 | adds | R32. |
 
@@ -4554,8 +4481,8 @@ Stacking spirit amp on target: -8% Spirit Resist On Spirit Damage (built-in mech
 | `spirit_damage` | 4.5% × ~8 typical stacks + 8.3 baseline | 50 (SP-equiv) | 0.8 | adds | ⚖️ Named spirit-amp ramp anchor. |
 | `spirit_resist_shred` | -8% direct on spirit hits + stack amp ≈ shred | 25 (eff shred %) | 1.5 | adds | Alt-form of shred (amp instead of resist debuff). |
 | `scaling_late` | stack ramp rewards sustained casting | 65 (% importance) | 1.6 | adds | ⚖️ Stack scaling. |
-| `spirit_burst_damage` | first stacks within 1s | 90 (raw dmg within 1s) | 0.4 | adds | R2. |
-| `spirit_continuous_damage` | stack ramp over 12s | 220 (raw dmg outside 1s) | 1.0 | adds | R2: sustained. |
+| `spirit_burst_damage` | first stacks within 1s | 90 (raw dmg within 1s) | 0.7 | adds | R2. |
+| `spirit_continuous_damage` | stack ramp over 12s | 220 (raw dmg outside 1s) | 1.2 | adds | R2: sustained. |
 | `spirit_continuous_proc` | per-hit stack | 0.45 (proc index) | 1.1 | adds | R5: ramp via continuous spirit. |
 | `single_target` | stack per target | 60 (% importance) | 1.8 | adds | Stacks single-target. |
 | `spirit_resistance` | +17% direct | 17 (eff %) | 0.6 | adds | Direct. |
@@ -4619,12 +4546,12 @@ Delayed silence + damage-store: +10% Fire Rate. Active (45s CD): silence target 
 ### Calculator tags
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
-| `silence` | 4.5s × 1 target × (4.5/45) | 6 (weighted) | 0.8 | adds | ⚖️ T4 silence anchor. |
+| `silence` | 4.5s × 1 target × (4.5/45) | 6 (weighted) | 0.7 | adds | ⚖️ T4 silence anchor. |
 | `spirit_resist_shred` | -9% × (12/45) uptime | 4 (eff shred %) | 0.2 | adds | Resist shred uptime. |
 | `debuff` | silence + SP-drain + resist-shred | 60 (% importance) | 1.5 | adds | Triple debuff. |
 | `counter_importance` | counter to spirit casters | 75 (% importance) | 1.5 | adds | R13: anti-caster. |
 | `spirit_damage` | T4 baseline | 8.3 (SP-equiv) | 0.1 | adds | R31. |
-| `spirit_burst_damage` | 30% stored dmg burst on expire | 90 (raw dmg within 1s) | 0.4 | adds | Burst spike when silence ends. |
+| `spirit_burst_damage` | 30% stored dmg burst on expire | 90 (raw dmg within 1s) | 0.7 | adds | Burst spike when silence ends. |
 | `fire_rate` | +10% direct | 10 (eff %) | 0.4 | adds | Direct. |
 | `single_target` | per-target silence | 65 (% importance) | 2.0 | adds | Single-target. |
 | `single_ability_focus` | active is the payoff | 45 (% importance) | 1.1 | adds | R17. |
@@ -4654,9 +4581,9 @@ Ult-triggered stun + bonus dmg: -30% Move Speed on Spirit Damage, +50 HP, +0.75m
 |---|---|---|---|---|---|
 | `ult_focused` | trigger gated to ultimate | 90 (% importance) | 1.9 | adds | ⚖️ Named ult_focused anchor. |
 | `stun` | 0.75s × on-ult uptime | 0.40 (eff s) | 0.5 | adds | R6: per-ult-cast burst stun. |
-| `spirit_burst_damage` | 150 bonus dmg per ult | 110 (raw dmg within 1s) | 0.5 | adds | Burst chunk on ult. |
+| `spirit_burst_damage` | 150 bonus dmg per ult | 110 (raw dmg within 1s) | 0.9 | adds | Burst chunk on ult. |
 | `spirit_damage` | 150/ult-CD ≈ effective T4 anchor | 18 (SP-equiv) | 0.3 | adds | 8.3 baseline + ~10 conditional. |
-| `movement_slow` | -30% on spirit dmg dealt × ~3 targets | 30 (eff slow weighted) | 0.4 | adds | Passive on-hit slow. |
+| `movement_slow` | -30% on spirit dmg dealt × ~3 targets | 30 (eff slow weighted) | 0.6 | adds | Passive on-hit slow. |
 | `counter_importance` | huge ult-window control | 65 (% importance) | 1.3 | adds | R13. |
 | `horizontal_mobility` | +0.75m sprint | 0.75 (m/s eff) | 0.3 | adds | Direct. |
 | `single_ability_focus` | one ability does everything | 70 (% importance) | 1.8 | adds | R17. |
@@ -4689,11 +4616,11 @@ Flying escape: +15% Ability Duration, +125 HP, +14 SP, -15% Gravity Scale, +25% 
 |---|---|---|---|---|---|
 | `escape` | named escape anchor T4 | 95 (% importance) | 1.8 | adds | ⚖️ Long-distance escape. |
 | `horizontal_mobility` | +7m × (12/32) flight | 2.5 (m/s eff) | 1.1 | adds | Active mobility. |
-| `vertical_mobility` | flight = best vertical mobility | 5 (units) | 0.4 | adds | ⚖️ Named vertical_mobility anchor. |
+| `vertical_mobility` | flight = best vertical mobility | 5 (units) | 1.2 | adds | ⚖️ Named vertical_mobility anchor. |
 | `aerial` | flight tool | 85 (% importance) | 2.0 | adds | ⚖️ Named aerial-flavored item. |
 | `cc_resist` | slow-immune flight | 30 (eff %) | 0.9 | adds | Slow immunity during flight. |
 | `spirit_damage` | +14 SP + T4 baseline | 22 (SP-equiv) | 0.3 | adds | 14 + 8.3. |
-| `high_max_hp` | +125 HP (Spirit, no Vit baseline) | 125 (HP) | 0.4 | adds | Explicit. |
+| `high_max_hp` | +125 HP (Spirit, no Vit baseline) | 125 (HP) | 0.3 | adds | Explicit. |
 | `duration_dependant` | +15% direct | 15 (eff %) | 0.6 | adds | Direct. |
 | `farmer` | long-rotation mobility | 60 (% importance) | 1.2 | adds | R28: enables farm flex. |
 | `single_ability_focus` | one active = full mobility | 40 (% importance) | 1.0 | adds | R17. |
@@ -4759,11 +4686,11 @@ Delayed AoE echo on imbued ability: +8% Spirit Lifesteal. Passive (6.25s ICD): i
 |---|---|---|---|---|---|
 | `aoe_cluster` | 16m AoE | 75 (% importance) | 1.9 | adds | Large radius. |
 | `spirit_damage` | 50% dmg of imbued ability + T4 baseline | 30 (SP-equiv) | 0.5 | adds | 8.3 baseline + amp on ability. |
-| `spirit_burst_damage` | delayed AoE within ~3-4s | 100 (raw dmg within 1s) | 0.5 | adds | First-target burst. |
-| `spirit_burst_proc` | imbue triggers AoE delayed | 0.30 (proc index) | 0.6 | adds | R6 with delay. |
+| `spirit_burst_damage` | delayed AoE within ~3-4s | 100 (raw dmg within 1s) | 0.8 | adds | First-target burst. |
+| `spirit_burst_proc` | imbue triggers AoE delayed | 0.30 (proc index) | 0.7 | adds | R6 with delay. |
 | `spirit_continuous_damage` | echo extends ability dmg | 40 (raw dmg outside 1s) | 0.2 | adds | Brief continuous extension. |
-| `movement_slow` | -40% × 3s × 1 target | 30 (eff slow weighted) | 0.4 | adds | Per-imbue. |
-| `spirit_lifesteal` | 8% + 22% imbued ≈ 18% effective | 18 (eff %) | 1.2 | adds | Combined. |
+| `movement_slow` | -40% × 3s × 1 target | 30 (eff slow weighted) | 0.6 | adds | Per-imbue. |
+| `spirit_lifesteal` | 8% + 22% imbued ≈ 18% effective | 18 (eff %) | 1.1 | adds | Combined. |
 | `self_heal` | lifesteal sustain | 90 (HP total) | 0.3 | adds | Imbued lifesteal. |
 | `single_ability_focus` | imbues one ability | 70 (% importance) | 1.8 | adds | R17. |
 | `counter_importance` | crowd-punish | 35 (% importance) | 0.7 | adds | R13. |
@@ -4791,7 +4718,7 @@ The ult / cooldown-reset utility (active not captured in scrape — famously res
 | `ability_spam` | doubles all abilities once | 75 (% importance) | 2.0 | adds | R20: enables 2× cast cycle. |
 | `multi_ability_focus` | resets ALL abilities | 70 (% importance) | 2.0 | adds | R20: hits all abilities. |
 | `spirit_damage` | T4 baseline + ult-reset amp | 18 (SP-equiv) | 0.3 | adds | 8.3 baseline + ~10 via reset value. |
-| `spirit_burst_damage` | enables double-burst combos | 80 (raw dmg within 1s) | 0.4 | adds | R2: reset enables 2× burst. |
+| `spirit_burst_damage` | enables double-burst combos | 80 (raw dmg within 1s) | 0.7 | adds | R2: reset enables 2× burst. |
 | `scaling_late` | shines with bigger CDs | 65 (% importance) | 1.6 | adds | ⚖️ Late-game power-spike. |
 | `counter_importance` | comeback / momentum tool | 50 (% importance) | 1.0 | adds | R13. |
 | `single_ability_focus` | also rewards repeating key spell | 35 (% importance) | 0.9 | adds | R17. |
@@ -4827,8 +4754,8 @@ Self-OR-ally-cast aura DoT: +100 HP, +17% Debuff Resist. Active (35s CD): +40% S
 | `ally_buff` | +40% SR on ally for 10s | 60 (% importance) | 1.5 | adds | R24: ally use case. |
 | `spirit_resistance` | +40% × (10/35) × self-cast share | 6 (eff %) | 0.2 | adds | Self-cast option gives self +40% SR; ~50/50 self vs ally cast. |
 | `dot` | 3.5% max HP × 10s per target | 90 (eff dmg) | 0.5 | adds | ⚖️ Named DoT anchor. |
-| `spirit_burst_damage` | first second of aura DoT | 50 (raw dmg within 1s) | 0.2 | adds | R2. |
-| `spirit_continuous_damage` | 9s of sustained DoT | 250 (raw dmg outside 1s) | 1.2 | adds | R2: heavy sustained. |
+| `spirit_burst_damage` | first second of aura DoT | 50 (raw dmg within 1s) | 0.4 | adds | R2. |
+| `spirit_continuous_damage` | 9s of sustained DoT | 250 (raw dmg outside 1s) | 1.4 | adds | R2: heavy sustained. |
 | `spirit_continuous_proc` | per-second tick | 0.50 (proc index) | 1.2 | adds | R5. |
 | `counter_importance` | counter to tanks (% max HP) | 80 (% importance) | 1.6 | adds | R13. |
 | `debuff_resistance` | +17% direct | 17 (eff %) | 0.6 | adds | Direct. |
@@ -4864,11 +4791,11 @@ DoT explosion + anti-heal: +6% Ability Range. Passive (20s CD): significant spir
 |---|---|---|---|---|---|
 | `dot` | 24+0.06×20 = 25 DPS × 8s + 110 explosion | 200 (eff dmg) | 1.0 | adds | ⚖️ Named DoT anchor T4. |
 | `aoe_cluster` | 12m AoE | 75 (% importance) | 1.9 | adds | Big AoE. |
-| `spirit_burst_damage` | 110 explosion + first-1s DoT | 130 (raw dmg within 1s) | 0.9 | adds | Initial chunk. |
-| `spirit_continuous_damage` | 7×25 DPS sustained | 175 (raw dmg outside 1s) | 1.2 | adds | R2: sustained DoT. |
+| `spirit_burst_damage` | 110 explosion + first-1s DoT | 130 (raw dmg within 1s) | 1.6 | adds | Initial chunk. |
+| `spirit_continuous_damage` | 7×25 DPS sustained | 175 (raw dmg outside 1s) | 1.5 | adds | R2: sustained DoT. |
 | `spirit_continuous_proc` | per-tick burn | 0.50 (proc index) | 1.2 | adds | R5. |
 | `spirit_damage` | (~200 dmg/20s CD) + baseline | 18 (SP-equiv) | 0.5 | adds | 10 + 8.3 baseline. |
-| `anti_heal` | -70% healing reduction × 8s | 50 (eff %) | 1.6 | adds | ⚖️ Strong anti-heal T4. |
+| `anti_heal` | -70% healing reduction × 8s | 50 (eff %) | 1.7 | adds | ⚖️ Strong anti-heal T4. |
 | `debuff` | DoT + anti-heal | 50 (% importance) | 1.2 | adds | Dual debuff. |
 | `counter_importance` | anti-tank + anti-heal | 70 (% importance) | 1.4 | adds | R13. |
 | `range_extender_dependant` | +6% direct | 6 (eff %) | 0.2 | adds | Direct. |
@@ -4929,7 +4856,7 @@ Group-pull AoE trap: +8% Ability Range, +0.75m Sprint Speed. Active (42s CD): va
 | `displace` | vacuum-pulls enemies into small area | 25 (e × m) | 2.0 | adds | ⚖️ Named displace anchor — group pull. |
 | `trap_block_obstruct` | vortex creates AoE trap zone | 30 (p × s) | 2.0 | adds | ⚖️ Named trap anchor — group lockdown. |
 | `aoe_cluster` | 12m capture | 80 (% importance) | 2.0 | adds | Large group AoE. |
-| `movement_slow` | -35% × 4s × ~3 enemies | 32 (eff slow weighted) | 0.5 | adds | Slow on multiple. |
+| `movement_slow` | -35% × 4s × ~3 enemies | 32 (eff slow weighted) | 0.6 | adds | Slow on multiple. |
 | `engage` | group-pull engage tool | 80 (% importance) | 1.8 | adds | ⚖️ Named engage anchor for groups. |
 | `counter_importance` | vs grouped enemies | 65 (% importance) | 1.3 | adds | R13: punishes grouping. |
 | `range_extender_dependant` | +8% direct | 8 (eff %) | 0.2 | adds | Direct. |
@@ -4968,11 +4895,11 @@ Street Brawl gun nuke: charged shot (2.5s CD) deals +10% current-HP spirit damag
 |---|---|---|---|---|---|
 | `pure_damage` | 10% current HP per shot | 90 (eff dmg) | 1.5 | adds | ⚖️ SB pure-damage anchor — % current HP bypasses pools. |
 | `anti_heal` | -40% × 4s × ~0.7 uptime | 30 (eff %) | 1.0 | adds | Heavy anti-heal. |
-| `movement_slow` | -40% × 4s × on-bullet | 35 (eff slow weighted) | 0.5 | adds | Strong slow. |
+| `movement_slow` | -40% × 4s × on-bullet | 35 (eff slow weighted) | 0.7 | adds | Strong slow. |
 | `debuff` | triple-axis debuff per shot | 90 (% importance) | 1.5 | adds | ⚖️ Multi-debuff bullet. |
 | `counter_importance` | anti-tank + anti-heal + anti-mobility | 95 (% importance) | 1.5 | adds | ⚖️ SB anti-everything counter. |
 | `bullet_damage` | per-shot amp (Weapon, no SB baseline) | 35 (eff gun-dmg %) | 0.6 | adds | Direct gun amp from %HP dmg. |
-| `gun_burst_damage` | charged-shot is single big burst | 95 (raw dmg within 1s) | 0.9 | adds | R2: per-shot heavy. |
+| `gun_burst_damage` | charged-shot is single big burst | 95 (raw dmg within 1s) | 0.8 | adds | R2: per-shot heavy. |
 | `single_target` | per-target | 70 (% importance) | 1.5 | adds | Per-shot bullet. |
 | `aoe_cluster` | 1.5m bullet penetration | 35 (% importance) | 0.9 | adds | Mild AoE via bullet radius. |
 | `long_range` | enlarged piercing bullet favors range | 45 (% importance) | 1.0 | adds | Penetration helps long shots. |
@@ -5032,7 +4959,7 @@ Street Brawl melee monster: +150% Heavy Melee Distance, +50% Melee Resist, +30% 
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `melee_damage` | +30% + heavy reach + ability scaling | 55 (eff melee-dmg %) | 1.5 | adds | ⚖️ SB melee anchor. |
-| `melee_resistance` | +50% direct | 50 (eff %) | 1.3 | adds | Direct. |
+| `melee_resistance` | +50% direct | 50 (eff %) | 1.5 | adds | Direct. |
 | `cooldown_reduction` | 16% × heavy-hit uptime | 14 (eff CDR %) | 0.6 | adds | Melee-gated CDR. |
 | `engage` | heavy melee = commit | 75 (% importance) | 1.5 | adds | R11. |
 | `close_range` | melee-gated | 95 (% importance) | 1.5 | adds | R21. |
@@ -5067,7 +4994,7 @@ Street Brawl global team-heal + cleanse: Active (30s CD) globally heals allies 6
 | `team_heal` | 400 min heal × 5 allies global | 2000 (HP total) | 1.5 | adds | ⚖️ SB team-heal anchor. |
 | `assist_importance` | global team cleanse + heal | 95 (% importance) | 1.5 | adds | ⚖️ Best support ult in SB. |
 | `ally_buff` | +5m MS + stamina + heal globally | 90 (% importance) | 1.5 | adds | R24: best ally buff. |
-| `burst_heal` | instant 400+ HP per ally | 400 (HP within 1s) | 1.5 | adds | Instant burst heal. |
+| `burst_heal` | instant 400+ HP per ally | 400 (HP within 1s) | 1.3 | adds | Instant burst heal. |
 | `self_heal` | also heals self | 400 (HP total) | 1.2 | adds | Self included. |
 | `cc_resist` | cleanse | 35 (eff %) | 1.1 | adds | Strong cleanse. |
 | `horizontal_mobility` | +5m × (6/30) | 1.0 (m/s eff) | 0.4 | adds | Ally MS burst. |
@@ -5099,8 +5026,8 @@ Street Brawl auto-Unstoppable: Passive (12s CD): block next movement-lock / Stun
 |---|---|---|---|---|---|
 | `cc_resist` | block CC + Unstoppable 4s × (4/12) | 75 (eff %) | 1.5 | adds | ⚖️ SB CC-immunity anchor — auto-trigger. |
 | `counter_importance` | counter to CC-heavy comps | 90 (% importance) | 1.5 | adds | ⚖️ Best anti-CC in SB. |
-| `shield` | 500 × (6/12) uptime | 250 (shield HP) | 0.4 | adds | High-uptime barrier. |
-| `horizontal_mobility` | +3m × (6/12) | 1.5 (m/s eff) | 0.7 | adds | High uptime MS. |
+| `shield` | 500 × (6/12) uptime | 250 (shield HP) | 0.5 | adds | High-uptime barrier. |
+| `horizontal_mobility` | +3m × (6/12) | 1.5 (m/s eff) | 0.6 | adds | High uptime MS. |
 | `debuff_resistance` | block + Unstoppable | 40 (eff %) | 1.4 | adds | Combined. |
 | `escape` | barrier + MS + Unstoppable | 80 (% importance) | 1.5 | adds | Strong escape combo. |
 | `engage` | dive without fear of CC | 60 (% importance) | 1.3 | adds | R11. |
@@ -5135,8 +5062,8 @@ Street Brawl slide-DPS kit: +2 Stamina, +80% Slide Distance. Passive (0.3s per-t
 | `fire_rate` | +60% × slide uptime ~0.4 | 24 (eff %) | 1.1 | adds | Slide-gated. |
 | `aoe_cluster` | 12m slide AoE dmg | 65 (% importance) | 1.5 | adds | Slide-AoE crowd dmg. |
 | `spirit_damage` | 100 dmg × slide hits | 25 (SP-equiv) | 0.4 | adds | Per-target dmg. |
-| `spirit_burst_damage` | sliding AoE burst | 100 (raw dmg within 1s) | 0.5 | adds | Slide-burst. |
-| `vertical_mobility` | +80% slide distance + stamina | 3 (units) | 0.3 | adds | Slide IS mobility. |
+| `spirit_burst_damage` | sliding AoE burst | 100 (raw dmg within 1s) | 0.8 | adds | Slide-burst. |
+| `vertical_mobility` | +80% slide distance + stamina | 3 (units) | 0.7 | adds | Slide IS mobility. |
 | `horizontal_mobility` | slide = mobile fight | 2.5 (m/s eff) | 1.1 | adds | Direct mobility. |
 | `engage` | slide-into-fight | 75 (% importance) | 1.5 | adds | R11: slide engage. |
 | `escape` | slide-out-of-fight | 55 (% importance) | 1.0 | adds | Slide utility. |
@@ -5170,7 +5097,7 @@ Street Brawl random-stat snowball: Passive — periodically (2s frequency) gain 
 | `farmer` | game-time-gated growth | 70 (% importance) | 1.4 | adds | R28: rewards staying alive. |
 | `damage_sponge` | random HP scaling | 50 (% importance) | 1.1 | adds | R26. |
 | `counter_importance` | comeback / momentum tool | 35 (% importance) | 0.7 | adds | R13: respawn reduction. |
-| `scaling_early` | -70% respawn = recovery from early deaths | 35 (% importance) | 0.8 | adds | Comeback-flavored. |
+| `scaling_early` | -70% respawn = recovery from early deaths | 35 (% importance) | 1.0 | adds | Comeback-flavored. |
 | `self_buff` | self-only stat scaling | 55 (% importance) | 1.5 | adds | Self-only. |
 
 
@@ -5200,8 +5127,8 @@ Street Brawl AoE buff-strip + lockout: +40% Debuff Resist, +300 HP. Active (18s 
 | `anti_heal` | prevents healing 7s × ~3 enemies | 50 (eff %) | 1.5 | adds | Hard healing lock. |
 | `counter_importance` | AoE buff-strip = team teamfight win | 95 (% importance) | 1.5 | adds | ⚖️ Best AoE counter in SB. |
 | `spirit_damage` | (250+0.47×40)/18 ≈ ~15 dps + amp | 30 (SP-equiv) | 0.5 | adds | Direct amp. |
-| `spirit_burst_damage` | one big AoE burst | 250 (raw dmg within 1s) | 1.2 | adds | Initial burst. |
-| `spirit_burst_proc` | one big proc | 0.40 (proc index) | 0.8 | adds | R6. |
+| `spirit_burst_damage` | one big AoE burst | 250 (raw dmg within 1s) | 1.5 | adds | Initial burst. |
+| `spirit_burst_proc` | one big proc | 0.40 (proc index) | 0.9 | adds | R6. |
 | `debuff_resistance` | +40% direct | 40 (eff %) | 1.4 | adds | Direct. |
 | `high_max_hp` | +300 HP | 300 (HP) | 0.8 | adds | Explicit. |
 | `engage` | team-engage lockout | 80 (% importance) | 1.5 | adds | R11: AoE strip. |
@@ -5231,12 +5158,12 @@ Street Brawl aerial god mode: +120% Stamina Recovery, -70% Gravity, +100% Air Co
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `aerial` | flight-grade kit + +40% dmg airborne | 100 (% importance) | 1.5 | adds | ⚖️ SB aerial anchor — peak aerial item. |
-| `vertical_mobility` | unlimited jump + dash | 8 (units) | 0.7 | adds | ⚖️ Best vertical mobility. |
+| `vertical_mobility` | unlimited jump + dash | 8 (units) | 1.5 | adds | ⚖️ Best vertical mobility. |
 | `horizontal_mobility` | air-control + low gravity ≈ effective MS | 3.5 (m/s eff) | 1.5 | adds | Air mobility. |
 | `bullet_damage` | +40% airborne damage | 30 (eff gun-dmg %) | 0.5 | adds | Airborne-gated 40% × ~0.7. |
 | `spirit_damage` | +40% airborne spirit | 20 (SP-equiv) | 0.3 | adds | Airborne 40% × spirit. |
 | `gun_burst_damage` | airborne burst lift | 100 (raw dmg within 1s) | 0.9 | adds | R2. |
-| `spirit_burst_damage` | airborne spirit burst | 50 (raw dmg within 1s) | 0.2 | adds | R2. |
+| `spirit_burst_damage` | airborne spirit burst | 50 (raw dmg within 1s) | 0.4 | adds | R2. |
 | `bullet_resistance` | -40% in air dmg received | 25 (eff %) | 0.9 | adds | Airborne defense. |
 | `spirit_resistance` | -40% in air dmg received | 25 (eff %) | 0.9 | adds | Symmetric. |
 | `anti_air` | rules the air ↔ helps anti-air play | 60 (% importance) | — | relies | R7: aerial helps anti-air. |
@@ -5273,12 +5200,12 @@ Street Brawl stamina-stealth-melee combo: +3 Stamina, +350 HP. Active (passive t
 | `spirit_resist_shred` | 40% × steal | 25 (eff shred %) | 1.5 | adds | Symmetric. |
 | `melee_damage` | melee-trigger DPS | 40 (eff melee-dmg %) | 1.1 | adds | R12 + named melee combo. |
 | `spirit_damage` | (125+0.4×40)/melee-CD × steal | 35 (SP-equiv) | 0.5 | adds | DoT scales with SP. |
-| `spirit_continuous_damage` | 6s steal DoT outside 1s | 250 (raw dmg outside 1s) | 1.2 | adds | R2: sustained DoT. |
-| `spirit_burst_damage` | first-1s of DoT | 125 (raw dmg within 1s) | 0.6 | adds | Heavy initial burst. |
+| `spirit_continuous_damage` | 6s steal DoT outside 1s | 250 (raw dmg outside 1s) | 1.4 | adds | R2: sustained DoT. |
+| `spirit_burst_damage` | first-1s of DoT | 125 (raw dmg within 1s) | 1.0 | adds | Heavy initial burst. |
 | `close_range` | melee-gated | 95 (% importance) | 1.5 | adds | R21. |
 | `escape` | invis on stamina | 65 (% importance) | 1.2 | adds | Stealth escape. |
 | `grounded` | melee grounded | 50 (% importance) | 1.5 | adds | R7. |
-| `high_max_hp` | +350 HP | 350 (HP) | 1.0 | adds | Explicit. |
+| `high_max_hp` | +350 HP | 350 (HP) | 0.9 | adds | Explicit. |
 | `counter_importance` | bypasses vision | 35 (% importance) | 0.7 | adds | R13. |
 | `single_target` | per-target melee | 60 (% importance) | 1.5 | adds | Per-melee proc. |
 
@@ -5306,8 +5233,8 @@ Street Brawl imbued freeze + amp: Active (10s CD): imbue ability with +50% CD re
 | `stun` | 1s freeze × per-target uptime | 0.6 (eff s) | 0.8 | adds | ⚖️ SB freeze anchor on imbued. |
 | `spirit_damage` | +70 SP × imbue + 200 dmg | 90 (SP-equiv) | 1.4 | adds | ⚖️ Big SP amp on imbued. |
 | `cooldown_reduction` | +50% on imbued ability | 25 (eff CDR %) | 1.0 | adds | Imbue-targeted CDR. |
-| `spirit_burst_damage` | +200 dmg burst on imbued hit | 200 (raw dmg within 1s) | 0.9 | adds | Imbued burst. |
-| `spirit_burst_proc` | imbued ability trigger | 0.40 (proc index) | 0.8 | adds | R6. |
+| `spirit_burst_damage` | +200 dmg burst on imbued hit | 200 (raw dmg within 1s) | 1.5 | adds | Imbued burst. |
+| `spirit_burst_proc` | imbued ability trigger | 0.40 (proc index) | 0.9 | adds | R6. |
 | `single_ability_focus` | imbues one ability | 80 (% importance) | 1.5 | adds | ⚖️ R17 named — single imbue anchor. |
 | `engage` | freeze enables engage | 65 (% importance) | 1.4 | adds | R11. |
 | `counter_importance` | CC + amp = anti-tank | 60 (% importance) | 1.2 | adds | R13. |
@@ -5375,9 +5302,9 @@ Street Brawl delayed AoE stun + daze: Active (23s CD): after 1.7s delay, stun al
 | Calc tag | Descriptive raw | Comparative raw | Normalized | Mode | Reasoning |
 |---|---|---|---|---|---|
 | `stun` | 2s × ~3 enemies × (2/23 CD) | 0.85 (eff s) | 1.1 | adds | ⚖️ SB AoE-stun anchor. |
-| `silence` | 2s daze × ~3 enemies | 8 (weighted) | 1.1 | adds | Daze includes silence. |
+| `silence` | 2s daze × ~3 enemies | 8 (weighted) | 0.9 | adds | Daze includes silence. |
 | `disarm` | 2s daze × ~3 enemies × (2/23) | 0.45 (s × count) | 0.2 | adds | Daze includes disarm. |
-| `movement_slow` | daze slows | 35 (eff slow weighted) | 0.5 | adds | Daze slow. |
+| `movement_slow` | daze slows | 35 (eff slow weighted) | 0.7 | adds | Daze slow. |
 | `aoe_cluster` | 12m AoE | 80 (% importance) | 1.5 | adds | Big radius. |
 | `engage` | AoE CC = team engage | 90 (% importance) | 1.5 | adds | ⚖️ Named engage anchor. |
 | `counter_importance` | CC + lockout = anti-everything | 85 (% importance) | 1.5 | adds | R13: AoE CC ult. |
@@ -5412,7 +5339,7 @@ Street Brawl charge-stacking utility: +70% Faster Time Between Charges, +30% CDR
 | `spirit_damage` | +50 SP on charged abilities × imbue | 60 (SP-equiv) | 0.9 | adds | Big SP for charged. |
 | `ability_spam` | charges enable spam | 80 (% importance) | 1.5 | adds | ⚖️ Charge stacking. |
 | `single_ability_focus` | rewards key charged ability | 65 (% importance) | 1.5 | adds | R17. |
-| `spirit_burst_damage` | charged ability burst | 80 (raw dmg within 1s) | 0.4 | adds | R2. |
+| `spirit_burst_damage` | charged ability burst | 80 (raw dmg within 1s) | 0.7 | adds | R2. |
 | `spirit_continuous_damage` | repeated charges sustained | 80 (raw dmg outside 1s) | 0.4 | adds | R2. |
 | `scaling_late` | charge-stacker scales late | 55 (% importance) | 1.4 | adds | R32. |
 | `multi_ability_focus` | imbue extends to any active | 35 (% importance) | 1.0 | adds | Half-mirror to single-focus. |
@@ -5439,7 +5366,7 @@ Street Brawl invuln-spin-laser: Active (40s CD): void state — untargetable + i
 | `aoe_cluster` | rotating laser around self | 85 (% importance) | 1.5 | adds | ⚖️ SB AoE-DPS anchor. |
 | `escape` | untargetable 6s | 90 (% importance) | 1.5 | adds | ⚖️ Best invuln in SB. |
 | `spirit_damage` | (270+1.8×40) × 6 / 40 CD | 70 (SP-equiv) | 1.1 | adds | Heavy sustained amp. |
-| `spirit_burst_damage` | first second of laser | 270 (raw dmg within 1s) | 1.3 | adds | Heavy burst. |
+| `spirit_burst_damage` | first second of laser | 270 (raw dmg within 1s) | 1.5 | adds | Heavy burst. |
 | `spirit_continuous_damage` | 5s sustained laser | 1500 (raw dmg outside 1s) | 1.5 | adds | ⚖️ Massive sustained DPS. |
 | `spirit_continuous_proc` | per-second tick | 0.60 (proc index) | 1.4 | adds | R5. |
 | `cc_resist` | invincible 6s | 60 (eff %) | 1.5 | adds | Untargetable. |
@@ -5517,7 +5444,7 @@ Street Brawl suicide-bomber ult: Active (25s CD): become Unstoppable + +10m MS +
 | `bullet_damage` | +150% WD × 4s × (4/25) | 35 (eff gun-dmg %) | 0.6 | adds | Burst window WD. |
 | `spirit_damage` | +150 SP × (4/25) | 30 (SP-equiv) | 0.5 | adds | Burst window SP. |
 | `gun_burst_damage` | +150% WD in 4s burst window | 220 (raw dmg within 1s) | 1.5 | adds | R2: heavy burst. |
-| `spirit_burst_damage` | +150 SP burst | 180 (raw dmg within 1s) | 0.8 | adds | R2: heavy spirit burst. |
+| `spirit_burst_damage` | +150 SP burst | 180 (raw dmg within 1s) | 1.5 | adds | R2: heavy spirit burst. |
 | `horizontal_mobility` | +10m × (4/25) | 1.6 (m/s eff) | 0.7 | adds | Pre-suicide rush MS. |
 | `high_max_hp` | +3000 HP for 4s | 600 (HP) | 1.5 | adds | Massive temporary HP. |
 | `damage_sponge` | Unstoppable + 3000 HP | 70 (% importance) | 1.5 | adds | R26. |

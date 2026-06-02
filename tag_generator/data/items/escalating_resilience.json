@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/escalating_resilience/escalating_resilience.png",
   "name": "Escalating Resilience",
   "normalized_name": "escalating_resilience",
@@ -21,7 +22,7 @@
       "bullet_damage": 0.7,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
-      "bullet_proc": 0.2,
+      "bullet_proc": 0.33,
       "bullet_resist_shred": null,
       "bullet_resistance": 1.1,
       "burst_damage": null,
@@ -62,6 +63,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Escalating_Resilience",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Escalating_Resilience"
 }

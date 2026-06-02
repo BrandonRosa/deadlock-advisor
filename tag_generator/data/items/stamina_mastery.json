@@ -1,5 +1,6 @@
 {
   "category": "Vitality",
+  "compare_to": [],
   "image_path": "/resources/items/stamina_mastery/stamina_mastery.png",
   "name": "Stamina Mastery",
   "normalized_name": "stamina_mastery",
@@ -11,13 +12,13 @@
   "values": {
     "playstyle_score": {
       "ability_spam": null,
-      "aerial": 1.5,
+      "aerial": 2,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
       "aoe_cluster": null,
       "assist_importance": null,
-      "away_from_team": 0.2,
+      "away_from_team": 0.25,
       "bullet_damage": null,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
@@ -27,7 +28,7 @@
       "burst_damage": null,
       "burst_heal": null,
       "burst_resistance": 0.1,
-      "cc_resist": 0.05,
+      "cc_resist": 0.5,
       "charge_dependant": null,
       "close_range": 0.05,
       "close_to_team": null,
@@ -44,8 +45,8 @@
       "dot": null,
       "duration_dependant": null,
       "engage": 1.4,
-      "escape": 2.0,
-      "farmer": 1.0,
+      "escape": 2,
+      "farmer": 1,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -59,16 +60,16 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": 0.15,
-      "horizontal_mobility": 1.0,
+      "horizontal_mobility": 1,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
       "long_range": null,
-      "low_max_hp": 0.1,
+      "low_max_hp": 0.25,
       "magazine_size_dependant": null,
       "melee_damage": null,
       "melee_resistance": null,
-      "mid_range": 0.05,
+      "mid_range": 0.75,
       "movement_slow": null,
       "multi_ability_focus": null,
       "pure_damage": null,
@@ -81,7 +82,7 @@
       "silence": null,
       "single_ability_focus": null,
       "single_target": null,
-      "small_hitbox": 1.0,
+      "small_hitbox": 1,
       "spawn_minions": null,
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
@@ -98,9 +99,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": 1.5
+      "vertical_mobility": 2
     }
   },
-  "wiki_url": "https://deadlock.wiki/Stamina_Mastery",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Stamina_Mastery"
 }

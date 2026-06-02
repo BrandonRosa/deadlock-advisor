@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/slowing_bullets/slowing_bullets.png",
   "name": "Slowing Bullets",
   "normalized_name": "slowing_bullets",
@@ -59,6 +60,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -66,7 +68,7 @@
       "melee_damage": 0.1,
       "melee_resistance": null,
       "mid_range": 0.1,
-      "movement_slow": 1.0,
+      "movement_slow": 0.75,
       "multi_ability_focus": null,
       "pure_damage": null,
       "range_extender_dependant": null,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Slowing_Bullets",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Slowing_Bullets"
 }

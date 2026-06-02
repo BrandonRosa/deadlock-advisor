@@ -5,7 +5,6 @@
   "normalized_name": "grit",
   "tier": 800,
   "upgrades_from": [],
-  "wiki_url": "https://deadlock.wiki/Grit",
   "values": {
     "playstyle_score": {
       "ability_spam": null,
@@ -24,8 +23,8 @@
       "bullet_resistance": null,
       "burst_damage": null,
       "burst_heal": null,
-      "burst_resistance": 1.0,
-      "cc_resist": null,
+      "burst_resistance": 1,
+      "cc_resist": 0.33,
       "charge_dependant": null,
       "close_range": null,
       "close_to_team": null,
@@ -75,7 +74,7 @@
       "scaling_late": null,
       "self_buff": 1.1,
       "self_heal": 0.3,
-      "shield": 0.66,
+      "shield": 0.75,
       "silence": null,
       "single_ability_focus": null,
       "single_target": null,
@@ -98,5 +97,6 @@
       "ult_focused": null,
       "vertical_mobility": null
     }
-  }
+  },
+  "wiki_url": "https://deadlock.wiki/Grit"
 }

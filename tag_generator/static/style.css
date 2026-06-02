@@ -4566,3 +4566,181 @@ body.sim-fullscreen #page-sim.active {
 }
 .calc-team.drag-target.ally-drop  { outline-color: var(--good); background: rgba(83, 192, 85, .06); }
 .calc-team.drag-target.enemy-drop { outline-color: var(--danger); background: rgba(185, 70, 62, .06); }
+
+/* ── Tag Detail page ─────────────────────────────────────────────────────── */
+.tag-detail-link {
+  cursor: pointer;
+  text-decoration: underline dotted transparent;
+  transition: color .12s, text-decoration-color .12s;
+}
+.tag-detail-link:hover {
+  color: var(--gold-lt);
+  text-decoration-color: var(--gold-lt);
+}
+.tag-detail-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--panel2);
+  margin: 8px 0 12px 0;
+}
+.tag-detail-tab-body { display: none; }
+.tag-detail-tab-body.active { display: block; }
+
+/* Items tab — flex columns, one per tier. Each column is independent height. */
+.tag-tier-grid {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+.tag-tier-col {
+  flex: 1 1 0;
+  min-width: 220px;
+  background: var(--panel);
+  border: 1px solid var(--panel2);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tag-tier-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--panel2);
+}
+.tag-tier-lbl  { font-weight: 600; color: var(--gold); }
+.tag-tier-count{ font-size: 11px; color: var(--muted); }
+.tag-tier-add {
+  background: transparent;
+  border: 1px dashed var(--panel2);
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.tag-tier-add:hover {
+  color: var(--cream);
+  border-color: var(--spirit);
+}
+.tag-tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tag-item-card {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px;
+  background: var(--panel2);
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.tag-item-card:hover { border-color: var(--panel2); }
+.tag-item-img {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tag-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tag-item-name {
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag-item-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.tag-item-input {
+  width: 56px;
+  padding: 2px 4px;
+  background: var(--panel);
+  border: 1px solid var(--panel2);
+  color: var(--ink);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.tag-item-del {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+}
+.tag-item-del:hover { color: var(--danger); }
+
+/* Builds tab — hero/build columns */
+.td-hero-cell { display: flex; align-items: center; gap: 6px; }
+.td-hero-img  { width: 24px; height: 24px; object-fit: cover; border-radius: 4px; }
+.td-build-name   { font-weight: 500; color: var(--ink); }
+.td-build-follow { font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* Add-item picker modal list */
+.tdadd-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--panel2);
+  border-radius: 6px;
+  margin: 8px 0;
+}
+.tdadd-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--panel2);
+}
+.tdadd-row:last-child { border-bottom: none; }
+.tdadd-row:hover { background: var(--panel2); }
+.tdadd-img { width: 24px; height: 24px; object-fit: cover; border-radius: 4px; }
+.tdadd-name { flex: 1; color: var(--ink); }
+.tdadd-cat  { font-size: 11px; color: var(--muted); }
+.tdadd-empty { padding: 16px; text-align: center; color: var(--muted); font-style: italic; }
+
+/* Builds tab — sortable headers */
+.td-builds-table th.td-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.td-builds-table th.td-sortable:hover { color: var(--cream); }
+.td-builds-table th.is-sorted { color: var(--gold); }
+.td-sort-ind { color: var(--gold); font-size: 11px; }
+
+/* Auto-collapse row for null/zero entries */
+.td-collapse-row td {
+  padding: 0 !important;
+  background: var(--panel);
+  border-top: 1px solid var(--panel2);
+}
+.td-collapse-toggle {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+.td-collapse-toggle:hover { color: var(--cream); background: var(--panel2); }
+.td-row-empty { opacity: 0.55; }
+.td-row-empty:hover { opacity: 1; }

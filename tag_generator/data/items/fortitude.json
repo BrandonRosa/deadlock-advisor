@@ -3,6 +3,7 @@
   "image_path": "/resources/items/fortitude/fortitude.png",
   "name": "Fortitude",
   "normalized_name": "fortitude",
+  "remarks": "",
   "tier": 3200,
   "upgrades_from": [
     "extra_health"
@@ -16,7 +17,7 @@
       "anti_heal": null,
       "aoe_cluster": null,
       "assist_importance": null,
-      "away_from_team": 0.05,
+      "away_from_team": 0.25,
       "bullet_damage": null,
       "bullet_evasion": null,
       "bullet_lifesteal": null,
@@ -44,7 +45,7 @@
       "duration_dependant": null,
       "engage": 0.4,
       "escape": 0.3,
-      "farmer": 0.3,
+      "farmer": 0.55,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
@@ -57,8 +58,8 @@
       "headshot_damage": null,
       "high_assist_count": null,
       "high_kill_count": null,
-      "high_max_hp": 2.0,
-      "horizontal_mobility": 0.3,
+      "high_max_hp": 2,
+      "horizontal_mobility": 0.45,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
@@ -75,7 +76,7 @@
       "scaling_early": null,
       "scaling_late": null,
       "self_buff": null,
-      "self_heal": 0.7,
+      "self_heal": 0.75,
       "shield": null,
       "silence": null,
       "single_ability_focus": null,
@@ -100,6 +101,5 @@
       "vertical_mobility": 0.33
     }
   },
-  "wiki_url": "https://deadlock.wiki/Fortitude",
-  "remarks": ""
+  "wiki_url": "https://deadlock.wiki/Fortitude"
 }

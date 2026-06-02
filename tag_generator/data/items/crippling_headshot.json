@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/crippling_headshot/crippling_headshot.png",
   "name": "Crippling Headshot",
   "normalized_name": "crippling_headshot",
@@ -12,11 +13,11 @@
     "playstyle_score": {
       "ability_spam": null,
       "aerial": null,
-      "ally_buff": 0.05,
+      "ally_buff": 0.25,
       "anti_air": null,
-      "anti_heal": 0.8,
+      "anti_heal": 1.15,
       "aoe_cluster": null,
-      "assist_importance": 1.2,
+      "assist_importance": 0.66,
       "away_from_team": null,
       "bullet_damage": 0.25,
       "bullet_evasion": null,
@@ -55,15 +56,15 @@
       "gun_continuous_damage": null,
       "gun_continuous_proc": 0.3,
       "gun_continuous_resistance": null,
-      "headshot_damage": 0.66,
+      "headshot_damage": 2,
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": 0.5,
       "horizontal_mobility": null,
-      "hybrid_damage_usage": 1.0,
+      "hybrid_damage_usage": 1,
       "interrupt": null,
       "large_hitbox": null,
-      "long_range": 0.5,
+      "long_range": null,
       "low_max_hp": null,
       "magazine_size_dependant": null,
       "melee_damage": null,
@@ -101,6 +102,5 @@
       "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Crippling_Headshot",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Crippling_Headshot"
 }
