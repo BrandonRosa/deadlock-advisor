@@ -8,7 +8,7 @@
   "values": {
     "playstyle_score": {
       "ability_spam": null,
-      "aerial": 2.0,
+      "aerial": 1.5,
       "ally_buff": null,
       "anti_air": null,
       "anti_heal": null,
@@ -37,7 +37,9 @@
       "displace": null,
       "dot": null,
       "duration_dependant": 0.6,
-      "farmer": 1.0,
+      "engage": 0.75,
+      "escape": 1,
+      "farmer": 1,
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": 0.1,
@@ -51,7 +53,7 @@
       "high_assist_count": null,
       "high_kill_count": null,
       "high_max_hp": 0.4,
-      "horizontal_mobility": 1.1,
+      "horizontal_mobility": 0.5,
       "hybrid_damage_usage": null,
       "interrupt": null,
       "large_hitbox": null,
@@ -90,9 +92,13 @@
       "trap_block_obstruct": null,
       "ult_focused": null,
       "vertical_mobility": 0.4,
-      "engage": 1.0,
-      "escape": 1.8
+      "burst_heal": null,
+      "continous_heal": null,
+      "spirit_lifesteal": null,
+      "bullet_lifesteal": null,
+      "lane_pusher": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Magic_Carpet"
+  "wiki_url": "https://deadlock.wiki/Magic_Carpet",
+  "compare_to": []
 }
