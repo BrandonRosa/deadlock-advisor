@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/blood_tribute/blood_tribute.png",
   "name": "Blood Tribute",
   "normalized_name": "blood_tribute",
@@ -28,7 +29,7 @@
       "charge_dependant": null,
       "close_range": null,
       "close_to_team": null,
-      "continous_heal": 0.1,
+      "continous_heal": 0.25,
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": null,
@@ -40,13 +41,13 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 0.5,
+      "engage": 0.66,
       "escape": -0.15,
       "farmer": null,
       "fire_rate": 1.25,
       "fire_rate_slow": null,
       "grounded": null,
-      "gun_burst_damage": 0.4,
+      "gun_burst_damage": 0.5,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
       "gun_continuous_damage": 0.2,
@@ -59,6 +60,7 @@
       "horizontal_mobility": 0.75,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": -0.66,
@@ -95,10 +97,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Blood_Tribute",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Blood_Tribute"
 }

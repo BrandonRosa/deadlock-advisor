@@ -43,7 +43,7 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 1,
+      "engage": 0.75,
       "escape": 1.5,
       "farmer": null,
       "fire_rate": null,
@@ -85,7 +85,7 @@
       "spawn_minions": null,
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
-      "spirit_burst_resistance": 0.05,
+      "spirit_burst_resistance": 0.33,
       "spirit_continuous_damage": null,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
@@ -97,7 +97,7 @@
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.1,
+      "ult_focused": 0.25,
       "vertical_mobility": 0.75
     }
   },

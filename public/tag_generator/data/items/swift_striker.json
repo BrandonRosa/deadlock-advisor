@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/swift_striker/swift_striker.png",
   "name": "Swift Striker",
   "normalized_name": "swift_striker",
@@ -46,13 +47,13 @@
       "engage": null,
       "escape": null,
       "farmer": null,
-      "fire_rate": 2.0,
+      "fire_rate": 2,
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": 0.7,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
-      "gun_continuous_damage": 0.9,
+      "gun_continuous_damage": 0.66,
       "gun_continuous_proc": 0.33,
       "gun_continuous_resistance": null,
       "headshot_damage": null,
@@ -62,6 +63,7 @@
       "horizontal_mobility": 0.33,
       "hybrid_damage_usage": 0.15,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Swift_Striker",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Swift_Striker"
 }

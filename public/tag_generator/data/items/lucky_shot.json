@@ -47,7 +47,7 @@
       "fire_rate_slow": null,
       "grounded": null,
       "gun_burst_damage": 1,
-      "gun_burst_proc": 0.5,
+      "gun_burst_proc": 1,
       "gun_burst_resistance": null,
       "gun_continuous_damage": 1,
       "gun_continuous_proc": 0.66,

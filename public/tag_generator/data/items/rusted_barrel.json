@@ -58,7 +58,7 @@
       "high_kill_count": null,
       "high_max_hp": 0.6,
       "horizontal_mobility": 0.4,
-      "hybrid_damage_usage": 0.1,
+      "hybrid_damage_usage": 0.15,
       "interrupt": null,
       "large_hitbox": null,
       "long_range": 0.6,

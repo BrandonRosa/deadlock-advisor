@@ -10,7 +10,7 @@
   ],
   "values": {
     "playstyle_score": {
-      "ability_spam": 2,
+      "ability_spam": 1.5,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -29,7 +29,7 @@
       "charge_dependant": null,
       "close_range": null,
       "close_to_team": null,
-      "continous_heal": 0.5,
+      "continous_heal": 0.25,
       "continuous_damage": null,
       "continuous_resistance": null,
       "cooldown_reduction": 2,
@@ -68,7 +68,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 2,
+      "multi_ability_focus": 1,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,

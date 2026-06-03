@@ -376,6 +376,9 @@
       }
     },
     {
+      "blacklist_items": [
+        "mystic_burst"
+      ],
       "build_description_eng": "Focuses on Seven's Lightning Ball ability. Great for farming, spawned minions, and slowing enemies. Awful vs High HP enemies, Aerial, or dispersed teams.",
       "followed_build": "General",
       "name": "Ball ",
@@ -769,10 +772,7 @@
           "ult_focused": 0.15,
           "vertical_mobility": 0.1
         }
-      },
-      "blacklist_items": [
-        "mystic_burst"
-      ]
+      }
     },
     {
       "build_description_eng": "Focuses on Seven's Stun. Great for Aerial/Diving characters. Doest deal allot of damage, but great for countering dives.",
@@ -1189,7 +1189,8 @@
         "healing_booster"
       ],
       "required_items_excluded": [
-        "superior_cooldown"
+        "superior_cooldown",
+        "monster_rounds"
       ],
       "signature_items": [
         "extra_regen",
@@ -1202,7 +1203,10 @@
         "healbane"
       ],
       "signature_items_excluded": [
-        "ballistic_enchantment"
+        "ballistic_enchantment",
+        "surge_of_power",
+        "cultist_sacrifice",
+        "healing_rite"
       ],
       "values": {
         "ally_weight": {
@@ -1581,7 +1585,14 @@
       "name": "Farmer",
       "normalized_build_name": "seven_farmer",
       "required_items": [
-        "superior_cooldown"
+        "superior_cooldown",
+        "monster_rounds"
+      ],
+      "signature_items": [
+        "surge_of_power",
+        "arcane_surge",
+        "cultist_sacrifice",
+        "healing_rite"
       ],
       "values": {
         "ally_weight": {
@@ -1789,7 +1800,7 @@
           "cc_resist": 0.25,
           "charge_dependant": 0.6,
           "close_range": 0.2,
-          "close_to_team": null,
+          "close_to_team": "+-0.15",
           "continous_heal": null,
           "continuous_damage": 0.25,
           "continuous_resistance": 0.15,
@@ -1809,19 +1820,19 @@
           "fire_rate_slow": 0.15,
           "grounded": 0,
           "gun_burst_damage": 0.15,
-          "gun_burst_proc": null,
+          "gun_burst_proc": "+-0.15",
           "gun_burst_resistance": 0.15,
           "gun_continuous_damage": 0.1,
-          "gun_continuous_proc": null,
+          "gun_continuous_proc": "+-0.15",
           "gun_continuous_resistance": 0.15,
           "headshot_damage": null,
           "high_assist_count": null,
           "high_kill_count": null,
           "high_max_hp": 0.15,
           "horizontal_mobility": 0.66,
-          "hybrid_damage_usage": 0.33,
+          "hybrid_damage_usage": 0.5,
           "interrupt": null,
-          "lane_pusher": null,
+          "lane_pusher": 0.5,
           "large_hitbox": null,
           "long_range": -0.1,
           "low_max_hp": 0,

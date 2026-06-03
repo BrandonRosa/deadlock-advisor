@@ -64,7 +64,7 @@
       "melee_resistance": null,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 0.5,
+      "multi_ability_focus": 1.5,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,

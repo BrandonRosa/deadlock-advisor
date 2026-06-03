@@ -41,7 +41,7 @@
       "displace": null,
       "dot": null,
       "duration_dependant": null,
-      "engage": 0.33,
+      "engage": 0.5,
       "escape": null,
       "farmer": 0.25,
       "fire_rate": null,

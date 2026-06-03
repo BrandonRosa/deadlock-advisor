@@ -60,7 +60,7 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
-      "lane_pusher": 1,
+      "lane_pusher": 0.5,
       "large_hitbox": null,
       "long_range": -0.25,
       "low_max_hp": null,

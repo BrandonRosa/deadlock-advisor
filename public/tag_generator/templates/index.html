@@ -483,8 +483,9 @@
                   <option value="inverse">Inverse (Endgame Solver)</option>
                   <option value="surge">Surge (Power Spike)</option>
                   <option value="anchored">Anchored (Unified)</option>
-                  <option value="spike2" selected>Spike Composer (Unified+Pin)</option>
+                  <option value="spike2">Spike Composer (Unified+Pin)</option>
                   <option value="twinlane">Twin-Lane (Unified+Counter Col)</option>
+                  <option value="maestro" selected>Maestro (Unified+Smooth)</option>
                   <option value="fullsurvey">FullSurvey (CPU KILLER)</option>
                 </select>
               </label>
@@ -710,6 +711,11 @@
           </div>
           <div class="qa-section-hdr">Hero Notes <span class="muted-label">(optional)</span></div>
           <div id="qe-hero-notes"></div>
+          <div class="qa-section-hdr">
+            Acceptance Criteria <span class="muted-label">(good/bad items per phase)</span>
+          </div>
+          <p class="muted-label" style="margin:4px 0 8px">Three-tier inheritance: <strong>Universal</strong> applies to everyone; <strong>Ally/Enemy Team</strong> adds to that for their side; <strong>per-hero</strong> adds to both. At any non-universal level, tick <em>override</em> on a phase to discard everything inherited above for that phase. Upgrades count: owning <code>improved_spirit</code> satisfies an <code>extra_spirit</code> criterion.</p>
+          <div id="qe-accept-list"></div>
         </div>
         <div class="qa-edit-right">
           <div class="qa-side-toggle">
@@ -731,6 +737,7 @@
           <button class="btn-primary" id="btn-save-qa-report">Save Report</button>
         </div>
       </div>
+      <div id="qa-run-overview"></div>
       <div id="qa-run-algo-tabs" class="qa-algo-tabs"></div>
       <div id="qa-run-results"></div>
     </section>

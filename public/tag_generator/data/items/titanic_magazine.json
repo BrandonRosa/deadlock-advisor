@@ -1,5 +1,6 @@
 {
   "category": "Weapon",
+  "compare_to": [],
   "image_path": "/resources/items/titanic_magazine/titanic_magazine.png",
   "name": "Titanic Magazine",
   "normalized_name": "titanic_magazine",
@@ -52,7 +53,7 @@
       "gun_burst_damage": 0.2,
       "gun_burst_proc": null,
       "gun_burst_resistance": null,
-      "gun_continuous_damage": 0.9,
+      "gun_continuous_damage": 1,
       "gun_continuous_proc": null,
       "gun_continuous_resistance": null,
       "headshot_damage": null,
@@ -62,10 +63,11 @@
       "horizontal_mobility": null,
       "hybrid_damage_usage": null,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
-      "magazine_size_dependant": 2.0,
+      "magazine_size_dependant": 2,
       "melee_damage": null,
       "melee_resistance": null,
       "mid_range": null,
@@ -98,10 +100,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Titanic_Magazine",
-  "compare_to": []
+  "wiki_url": "https://deadlock.wiki/Titanic_Magazine"
 }

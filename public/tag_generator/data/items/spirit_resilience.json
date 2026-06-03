@@ -85,7 +85,7 @@
       "spawn_minions": null,
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
-      "spirit_burst_resistance": 0.4,
+      "spirit_burst_resistance": 0.5,
       "spirit_continuous_damage": null,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": 2,
