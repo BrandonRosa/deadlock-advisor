@@ -4,36 +4,126 @@
     "name": "Spirit Vs Bullet Teams",
     "created_at": "2026-05-04T14:46:15.725513",
     "allies": [
-      "apollo",
-      "bebop",
       "calico",
       "celeste",
       "lash",
-      "seven"
+      "seven",
+      "grey_talon",
+      "kelvin"
     ],
     "enemies": [
       "drifter",
       "ivy",
       "silver",
-      "haze"
+      "haze",
+      "venator",
+      "vyper"
     ],
     "scoreFormula": "v3",
     "algos": [
-      "greedy-phase",
-      "marginal",
-      "cosine",
-      "cosine-match",
-      "beam",
-      "lookahead",
-      "expert",
-      "strengths",
-      "assassin",
-      "adaptive",
-      "fusion",
-      "oracle",
-      "cyclic"
+      "maestro"
     ],
-    "heroNotes": {}
+    "heroNotes": {},
+    "acceptance": {
+      "allyTeam": {
+        "Early": {
+          "good": [
+            "weapon_shielding",
+            "rusted_barrel",
+            "bullet_resilience",
+            "metal_skin",
+            "suppressor"
+          ],
+          "bad": []
+        },
+        "Extra Late": {
+          "good": [
+            "juggernaut",
+            "plated_armor"
+          ],
+          "bad": []
+        },
+        "Lane": {
+          "good": [
+            "weapon_shielding",
+            "rusted_barrel",
+            "suppressor"
+          ],
+          "bad": []
+        },
+        "Late": {
+          "good": [
+            "disarming_hex",
+            "metal_skin",
+            "bullet_resilience",
+            "juggernaut",
+            "plated_armor"
+          ],
+          "bad": []
+        },
+        "Mid": {
+          "good": [
+            "weapon_shielding",
+            "bullet_resilience",
+            "metal_skin",
+            "disarming_hex",
+            "suppressor"
+          ],
+          "bad": []
+        }
+      },
+      "enemyTeam": {
+        "Early": {
+          "good": [
+            "spirit_sap",
+            "spirit_shielding",
+            "spirit_resilience"
+          ],
+          "bad": [
+            "enchanters_emblem"
+          ]
+        },
+        "Extra Late": {
+          "good": [
+            "spellbreaker",
+            "witchmail"
+          ],
+          "bad": []
+        },
+        "Lane": {
+          "good": [
+            "spirit_sap",
+            "spirit_shielding"
+          ],
+          "bad": [
+            "enchanters_emblem"
+          ]
+        },
+        "Late": {
+          "good": [
+            "witchmail",
+            "spellbreaker",
+            "spirit_resilience"
+          ],
+          "bad": []
+        },
+        "Mid": {
+          "good": [
+            "spirit_shielding",
+            "spirit_resilience"
+          ],
+          "bad": []
+        }
+      }
+    },
+    "testBuilds": {},
+    "viewBuilds": {
+      "grey_talon": "grey_talon_charged_shot",
+      "kelvin": "kelvin_spirit_damage_kelvin_beam_path_ball",
+      "seven": "seven_ult",
+      "venator": "venator_braeden_gut_nade_gut_2_nade_ult_trap",
+      "vyper": "vyper_dps_venome_1_slide_venom_bola"
+    }
   },
   {
     "id": "8129d345-f3f4-4671-8270-50cdaafbae9c",
@@ -195,18 +285,26 @@
       "greedy-phase",
       "marginal",
       "cosine",
-      "cosine-match",
       "beam",
-      "lookahead",
       "expert",
-      "strengths",
-      "assassin",
       "adaptive",
       "fusion",
-      "oracle",
-      "cyclic"
+      "architect",
+      "inverse",
+      "surge",
+      "anchored",
+      "spike2",
+      "twinlane",
+      "fullsurvey"
     ],
-    "heroNotes": {}
+    "heroNotes": {},
+    "acceptance": {},
+    "testBuilds": {},
+    "viewBuilds": {
+      "graves": "graves_general",
+      "kelvin": "kelvin_general",
+      "paradox": "paradox_general"
+    }
   },
   {
     "id": "66ba23a3-980b-4662-95d2-b05c291ec14c",
@@ -271,5 +369,47 @@
       "cyclic"
     ],
     "heroNotes": {}
+  },
+  {
+    "id": "3d9739ac-0d70-442e-bec2-a4b8c947bf03",
+    "name": "Even Ish",
+    "created_at": "2026-06-03T20:24:45.352194",
+    "allies": [
+      "shiv",
+      "silver",
+      "paige",
+      "seven",
+      "mcginnis",
+      "haze"
+    ],
+    "enemies": [
+      "mo_&_krill",
+      "venator",
+      "rem",
+      "kelvin",
+      "paradox",
+      "vyper"
+    ],
+    "scoreFormula": "v3",
+    "algos": [
+      "greedy-phase",
+      "marginal",
+      "cosine",
+      "beam",
+      "expert",
+      "adaptive",
+      "fusion",
+      "architect",
+      "inverse",
+      "surge",
+      "anchored",
+      "spike2",
+      "twinlane",
+      "fullsurvey"
+    ],
+    "heroNotes": {},
+    "acceptance": {},
+    "testBuilds": {},
+    "viewBuilds": {}
   }
 ]

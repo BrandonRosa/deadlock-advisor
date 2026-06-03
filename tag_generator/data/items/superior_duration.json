@@ -70,7 +70,7 @@
       "melee_resistance": 0.2,
       "mid_range": null,
       "movement_slow": null,
-      "multi_ability_focus": 0.5,
+      "multi_ability_focus": 1,
       "pure_damage": null,
       "range_extender_dependant": null,
       "scaling_early": null,
@@ -86,7 +86,7 @@
       "spirit_burst_damage": null,
       "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
-      "spirit_continuous_damage": 0.05,
+      "spirit_continuous_damage": 0.7,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
       "spirit_damage": 0.25,
@@ -97,7 +97,7 @@
       "stun": 0.1,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.33,
+      "ult_focused": 0.4,
       "vertical_mobility": null
     }
   },

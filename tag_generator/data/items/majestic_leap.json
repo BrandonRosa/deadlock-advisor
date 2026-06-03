@@ -34,7 +34,7 @@
       "continuous_resistance": null,
       "cooldown_reduction": 0.15,
       "counter_importance": null,
-      "damage_sponge": 0.3,
+      "damage_sponge": null,
       "debuff": null,
       "debuff_resistance": null,
       "disarm": null,
@@ -42,7 +42,7 @@
       "dot": null,
       "duration_dependant": null,
       "engage": 0.8,
-      "escape": 0.33,
+      "escape": 0.2,
       "farmer": 0.3,
       "fire_rate": null,
       "fire_rate_slow": null,
@@ -95,7 +95,7 @@
       "stun": null,
       "team_heal": null,
       "trap_block_obstruct": null,
-      "ult_focused": 0.5,
+      "ult_focused": 0.66,
       "vertical_mobility": 0.75
     }
   },

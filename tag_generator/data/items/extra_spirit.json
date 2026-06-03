@@ -85,7 +85,7 @@
       "spirit_burst_damage": 0.5,
       "spirit_burst_proc": null,
       "spirit_burst_resistance": null,
-      "spirit_continuous_damage": 0.1,
+      "spirit_continuous_damage": 0.66,
       "spirit_continuous_proc": null,
       "spirit_continuous_resistance": null,
       "spirit_damage": 1.15,

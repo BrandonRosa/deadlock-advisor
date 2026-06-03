@@ -2411,12 +2411,20 @@ h1, h2, .page-header h1, .display-font {
 .qa-pick-card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 6px; overflow: hidden; cursor: pointer;
-  transition: border-color .15s;
+  transition: border-color .15s, opacity .15s, filter .15s;
   display: flex; flex-direction: column; align-items: center;
   padding-bottom: 4px;
+  /* Unselected default: greyed/dim so the eye focuses on what's already picked */
+  opacity: 0.55;
+  filter: grayscale(45%);
 }
-.qa-pick-card:not(.taken):hover { border-color: var(--accent); }
-.qa-pick-card.taken { opacity: 0.45; cursor: default; }
+.qa-pick-card:hover { opacity: 0.9; filter: grayscale(0); border-color: var(--accent); }
+.qa-pick-card.taken {
+  opacity: 1; filter: none;
+  border-color: var(--accent);
+  cursor: pointer;   /* click to remove */
+}
+.qa-pick-card.taken:hover { border-color: var(--danger); }
 .qa-pick-img {
   width: 100%; aspect-ratio: 1; object-fit: cover;
 }
@@ -2450,6 +2458,311 @@ h1, h2, .page-header h1, .display-font {
   color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 12px;
 }
 .qa-note-input:focus { outline: none; border-color: var(--accent); }
+
+/* ── QA Per-Hero Settings Row (view+test build pickers + note) ─ */
+.qa-hero-settings-hdr,
+.qa-hero-settings-row {
+  display: grid;
+  grid-template-columns: 100px 140px 140px 1fr;
+  gap: 8px; align-items: center;
+  margin-top: 4px;
+}
+.qa-hero-settings-hdr { margin-bottom: 2px; }
+.qa-view-build-select,
+.qa-test-build-select {
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 6px; border-radius: 4px;
+  font-size: 12px; cursor: pointer;
+}
+.qa-view-build-select:focus,
+.qa-test-build-select:focus { outline: none; border-color: var(--accent); }
+.qa-view-build-select { border-left: 2px solid var(--accent); }
+.qa-test-build-select { border-left: 2px solid #d8a03a; }
+
+/* ── QA Acceptance Criteria (Editor) ─────────────────────────── */
+.qa-acc-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 6px; overflow: hidden;
+}
+.qa-acc-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; cursor: pointer; font-size: 12px;
+  user-select: none;
+}
+.qa-acc-hdr:hover { background: var(--bg); }
+.qa-acc-caret { color: var(--muted); width: 12px; }
+.qa-acc-name  { font-weight: 600; color: var(--text); flex: 1; }
+.qa-acc-summary { display: flex; gap: 4px; align-items: center; }
+.qa-acc-pill {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 10px;
+}
+.qa-acc-pill.qa-acc-good { background: rgba(83, 192, 85,.18); color: var(--success); }
+.qa-acc-pill.qa-acc-bad  { background: rgba(185, 70, 62,.18); color: var(--danger);  }
+.qa-acc-pill.qa-acc-ovr  { background: rgba(220,160, 50,.18); color: #d8a03a; }
+
+.qa-acc-card-univ {
+  border-color: var(--accent);
+  background: rgba(80,140,200,.04);
+}
+.qa-acc-card-univ .qa-acc-hdr { background: rgba(80,140,200,.06); }
+.qa-acc-card-univ .qa-acc-name { color: var(--accent); }
+
+.qa-acc-card-ally {
+  border-color: rgba(83, 192, 85,.5);
+  background: rgba(83, 192, 85,.04);
+}
+.qa-acc-card-ally .qa-acc-hdr  { background: rgba(83, 192, 85,.07); }
+.qa-acc-card-ally .qa-acc-name { color: var(--success); }
+
+.qa-acc-card-enemy {
+  border-color: rgba(185, 70, 62,.5);
+  background: rgba(185, 70, 62,.04);
+}
+.qa-acc-card-enemy .qa-acc-hdr  { background: rgba(185, 70, 62,.07); }
+.qa-acc-card-enemy .qa-acc-name { color: var(--danger); }
+
+.qa-acc-phase-row {
+  position: relative;
+}
+.qa-acc-phase-meta {
+  grid-column: 2 / 3; margin-top: 2px;
+  display: flex; justify-content: flex-end;
+}
+.qa-acc-override-lbl {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--muted); cursor: pointer;
+  user-select: none;
+}
+.qa-acc-override-lbl input { cursor: pointer; accent-color: var(--accent); }
+.qa-acc-inherit {
+  font-size: 10px; color: var(--muted);
+  margin-top: 2px; font-weight: 400; text-transform: none; letter-spacing: 0;
+}
+.qa-acc-inherit-strike { text-decoration: line-through; opacity: 0.6; }
+
+.qa-acc-body {
+  padding: 4px 10px 10px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.qa-acc-phase-row {
+  display: grid; grid-template-columns: 80px 1fr;
+  gap: 8px; align-items: start;
+}
+.qa-acc-phase-name {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; padding-top: 4px;
+}
+.qa-acc-slots {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+}
+.qa-acc-slot {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 4px 6px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.qa-acc-slot-good { border-left: 2px solid var(--success); }
+.qa-acc-slot-bad  { border-left: 2px solid var(--danger);  }
+.qa-acc-slot-lbl {
+  font-size: 10px; font-weight: 700; color: var(--muted);
+}
+.qa-acc-chips {
+  display: flex; flex-wrap: wrap; gap: 3px;
+}
+.qa-acc-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1px 4px 1px 7px;
+  font-size: 11px; color: var(--text);
+}
+.qa-acc-chip-good { border-color: rgba(83, 192, 85,.4); }
+.qa-acc-chip-bad  { border-color: rgba(185, 70, 62,.4);  }
+.qa-acc-chip-x {
+  background: transparent; color: var(--muted); border: none;
+  cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px;
+}
+.qa-acc-chip-x:hover { color: var(--danger); }
+
+.qa-acc-picker { position: relative; }
+.qa-acc-input {
+  width: 100%; box-sizing: border-box;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: 3px 6px; border-radius: 3px; font-size: 11px;
+}
+.qa-acc-input:focus { outline: none; border-color: var(--accent); }
+.qa-acc-suggest {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 4px; margin-top: 2px; z-index: 10;
+  max-height: 180px; overflow-y: auto;
+}
+.qa-acc-suggest:empty { display: none; }
+.qa-acc-suggest-item {
+  padding: 4px 8px; font-size: 11px; cursor: pointer;
+  display: flex; justify-content: space-between; gap: 6px;
+}
+.qa-acc-suggest-item:hover { background: var(--bg); }
+
+/* ── QA Acceptance Results (Run / Report) ────────────────────── */
+.qa-acc-agg {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.qa-acc-agg-lbl { font-size: 12px; font-weight: 700; color: var(--muted); }
+.qa-acc-agg-pill {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 12px;
+}
+.qa-acc-agg-pill.ok   { background: rgba(83, 192, 85,.18); color: var(--success); }
+.qa-acc-agg-pill.warn { background: rgba(220,160, 50,.18); color: #d8a03a; }
+.qa-acc-agg-pill.bad  { background: rgba(185, 70, 62,.18); color: var(--danger);  }
+
+.qa-acc-eval {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+}
+.qa-acc-eval-hdr {
+  font-weight: 700; color: var(--muted);
+  text-transform: uppercase; font-size: 10px;
+  margin-bottom: 4px;
+}
+.qa-acc-eval-row {
+  display: grid; grid-template-columns: 70px 1fr 1fr;
+  gap: 6px; padding: 2px 0;
+}
+.qa-acc-eval-phase {
+  font-weight: 700; color: var(--text); font-size: 11px;
+}
+.qa-acc-eval-pill {
+  padding: 1px 6px; border-radius: 8px; font-size: 11px;
+  background: var(--card); border: 1px solid var(--border);
+}
+.qa-acc-eval-pill.ok  { border-color: rgba(83, 192, 85,.5); color: var(--success); }
+.qa-acc-eval-pill.bad { border-color: rgba(185, 70, 62,.5);  color: var(--danger);  }
+.qa-acc-eval-pill.na  { color: var(--muted); }
+.qa-acc-miss { color: var(--muted); font-size: 10px; }
+
+/* ── QA Overview (phase-column table) ────────────────────────── */
+.qa-overview-tab { padding: 4px 0; }
+.qa-ov-legend {
+  color: var(--muted); font-size: 11px;
+  margin: 0 0 12px; padding: 8px 12px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+}
+.qa-ov-leg-itm {
+  display: inline-block; vertical-align: middle;
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  margin: 0 3px;
+}
+
+.qa-ov-algo {
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.qa-ov-algo-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 6px; margin-bottom: 8px;
+  border-bottom: 1px dashed var(--border);
+}
+.qa-ov-algo-name {
+  font-weight: 700; color: var(--accent); font-size: 14px;
+  flex: 0 0 auto; margin-right: auto;
+}
+.qa-ov-pill {
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.qa-ov-pill.ok   { background: rgba(83, 192, 85,.18); color: var(--success); border-color: rgba(83, 192, 85,.4); }
+.qa-ov-pill.warn { background: rgba(220,160, 50,.18); color: #d8a03a;        border-color: rgba(220,160, 50,.4); }
+.qa-ov-pill.bad  { background: rgba(185, 70, 62,.18); color: var(--danger);  border-color: rgba(185, 70, 62,.4); }
+
+.qa-ov-table-wrap { overflow-x: auto; }
+.qa-ov-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+}
+.qa-ov-table th {
+  background: var(--bg); color: var(--muted);
+  font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 6px 8px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky; top: 0;
+}
+.qa-ov-table td {
+  padding: 6px 8px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.qa-ov-trow:last-child td { border-bottom: none; }
+
+.qa-ov-hero-cell {
+  white-space: nowrap; min-width: 150px;
+}
+.qa-ov-side {
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px;
+  text-transform: uppercase; margin-right: 6px;
+}
+.qa-ov-side.ally-hdr  { background: rgba(83, 192, 85,.18); color: var(--success); }
+.qa-ov-side.enemy-hdr { background: rgba(185, 70, 62,.18); color: var(--danger);  }
+.qa-ov-hero-name  { font-weight: 600; color: var(--text); }
+.qa-ov-build-name { color: var(--muted); font-size: 10px; display: block; margin-top: 1px; }
+
+.qa-ov-cell { min-width: 80px; }
+.qa-ov-itms {
+  display: flex; flex-wrap: wrap; gap: 3px; align-items: center;
+}
+.qa-ov-itm {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--bg);
+  font-size: 9px; color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.qa-ov-itm-good { border-color: var(--success); box-shadow: 0 0 0 1px rgba(83,192,85,.4); }
+.qa-ov-itm-bad  { border-color: var(--danger);  box-shadow: 0 0 0 1px rgba(185,70,62,.4); }
+.qa-ov-empty { color: var(--muted); font-size: 14px; padding: 0 4px; }
+
+.qa-ov-missed {
+  display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px;
+}
+.qa-ov-miss {
+  background: rgba(185,70,62,.1);
+  color: var(--danger);
+  border: 1px solid rgba(185,70,62,.45);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.qa-ov-result-cell {
+  white-space: nowrap;
+}
+.qa-ov-result-cell .qa-ov-pill {
+  display: block; margin-bottom: 3px;
+}
+
+.qa-algo-tab-overview {
+  background: rgba(80,140,200,.06);
+  font-weight: 600;
+}
 
 /* ── QA Algo Tabs ────────────────────────────────────────────── */
 .qa-algo-tabs {

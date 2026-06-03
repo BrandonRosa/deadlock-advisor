@@ -51,7 +51,7 @@
       "gun_burst_proc": 1.5,
       "gun_burst_resistance": null,
       "gun_continuous_damage": 0.05,
-      "gun_continuous_proc": 0.2,
+      "gun_continuous_proc": 0.5,
       "gun_continuous_resistance": null,
       "headshot_damage": 2,
       "high_assist_count": null,

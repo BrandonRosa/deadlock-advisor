@@ -265,12 +265,15 @@ const CODEX = (() => {
 
     apply();
 
-    // Calculator is the new default landing page (per Codex IA). Kick off its
-    // initial data load if available — falls through silently if loadCalc
-    // isn't defined yet.
+    // Calculator is the default landing page on every fresh load. Explicitly
+    // force showPage('calc') in addition to the HTML's `class="page active"`
+    // default — this way any future state-restoration work that might try to
+    // remember the last-visited page still has to opt OUT of this default,
+    // rather than implicitly inheriting whatever section ended up active.
     if (typeof loadCalc === 'function') {
       try { loadCalc(); } catch (e) { /* let calc populate lazily on click */ }
     }
+    showPage('calc');
   }
 
   // Run bind() now if DOM is already parsed, else on DOMContentLoaded.
@@ -1821,8 +1824,15 @@ async function submitReverseEngineer() {
     const MARK_MULT = { sig: 1.6, req: 2.5 };
     const swRaw = {}; tagCodes.forEach(t => swRaw[t] = 0);
     let totalW = 0;
+    // Positional decay scales with item count so the last item never falls
+    // below ~50% of the first. Small lists (n ≤ 9) keep the original 0.12
+    // rate; larger lists relax it so a 12-item build still gives meaningful
+    // weight to late picks.
+    const decayK = (RE.items.length > 1)
+      ? Math.min(0.12, 1 / (RE.items.length - 1))
+      : 0;
     RE.items.forEach((it, i) => {
-      const posW  = 1 / (1 + i * 0.12);   // earlier = more weight; decay ~50% by item 6
+      const posW  = 1 / (1 + i * decayK);
       const tierW = TIER_W[it.tier] || 1.0;
       const markW = MARK_MULT[it.mark] || 1.0;
       const w     = posW * tierW * markW;
@@ -1869,6 +1879,8 @@ async function submitReverseEngineer() {
     }
 
     // ── Normalize + prune: keep top N tags, scale so peak ≈ maxCap ───────
+    // Output is rounded to 2 decimals — sub-0.01 noise has no useful signal
+    // and just clutters the tag manager UI.
     function scaleVec(raw, maxCap) {
       const absMax = Math.max(...Object.values(raw).map(Math.abs), 0.001);
       if (absMax < 0.01) return {};
@@ -1876,7 +1888,7 @@ async function submitReverseEngineer() {
       const out = {};
       Object.keys(raw).forEach(t => {
         const v = raw[t] * scale;
-        if (Math.abs(v) >= 0.05) out[t] = parseFloat(v.toFixed(3));
+        if (Math.abs(v) >= 0.05) out[t] = parseFloat(v.toFixed(2));
       });
       return out;
     }
@@ -1887,7 +1899,7 @@ async function submitReverseEngineer() {
       const out = {};
       sorted.slice(0, keepTop).forEach(([t, v]) => {
         const scaled = (v / topVal) * maxCap;
-        if (Math.abs(scaled) >= 0.1) out[t] = parseFloat(scaled.toFixed(3));
+        if (Math.abs(scaled) >= 0.1) out[t] = parseFloat(scaled.toFixed(2));
       });
       return out;
     }
@@ -1898,9 +1910,12 @@ async function submitReverseEngineer() {
     const allyW  = (algo !== 'items-only' && RE.allies.length)  ? prunedVec(awRaw, 0.75, 4) : {};
 
     // ── Build values object ──────────────────────────────────────────────
+    // item_affinity defaults to 0 (explicit neutrality, no null ambiguity);
+    // enemy/ally remain nullable since they're pruned to top-N and the
+    // omitted tags are "no opinion" not "explicitly zero".
     const buildValues = { ally_weight: {}, item_affinity: {}, enemy_weight: {}, playstyle_score: {} };
     S.tags.forEach(({ code: t }) => {
-      buildValues.item_affinity[t]  = selfW[t]  ?? null;
+      buildValues.item_affinity[t]  = selfW[t]  ?? 0;
       buildValues.enemy_weight[t] = enemyW[t] ?? null;
       buildValues.ally_weight[t]  = allyW[t]  ?? null;
       buildValues.playstyle_score[t]   = null;
@@ -2817,7 +2832,10 @@ document.getElementById('back-baselines').addEventListener('click', () => {
   S.tags     = await api.get('/api/tags');
   S.heroList = await api.get('/api/heroes');
   renderHeroGrid();
-  showPage('heroes');
+  // Calculator is the landing page — heroes data is preloaded into S for
+  // when the user navigates to that page, but the initial view stays on Calc.
+  if (typeof loadCalc === 'function') { try { loadCalc(); } catch (_e) {} }
+  showPage('calc');
 })();
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -2853,7 +2871,7 @@ const MATCH = {
   },
   // Set to true to replace eager build-path computation with a per-build "Calculate" button
   lazyBuildPaths: false,
-  bpAlgo: 'spike2',        // 2026-06-02: defaulted to Spike Composer (explicit-pin unified algo)
+  bpAlgo: 'maestro',       // 2026-06-03: defaulted to Maestro (unified+smooth, claim-aware)
   scoreFormula: 'v3',      // 2026-05-13: v3 (Target Focus) better matches player picks per win:good logs
   filter: { text: '', colors: [] },
   primedHero: null,  // when exactly 1 filtered result + Enter pressed → primed for 1/2/3 assignment
@@ -7913,13 +7931,36 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const HARD_GATE_STRONG      = 0.7;
     const ASSIST_BOOST          = 1.25;
     const MARGINAL_DECAY        = 2.5;   // (tierMult(comp)/tierMult(upg))^DECAY — higher = less subtraction
-    const SOFT_LIFT_SCALE       = 0.03;  // small "soft counter" tailwind on regular items
-    const HARD_LIFT_SCALE       = 0.08;  // meaningful but not dominant when gate opens
+    const SOFT_LIFT_SCALE       = 0.07;  // soft counter tailwind on regular items
+    const HARD_LIFT_SCALE       = 0.18;  // counter reaction without dominating the build
     const COUNTER_BOOST         = 1.20;  // when build_counter ≥ 0.5
+    // Counter pin count scales by anchor density — low-anchor builds get just 1
+    // pin (build identity isn't half-counter), high-anchor builds get up to 2.
+    const COUNTER_PIN_MAX_LOW   = 1;     // few req/sig → 1 counter pin max
+    const COUNTER_PIN_MAX_HIGH  = 2;     // many req/sig → 2 counter pins max
+    const COUNTER_PIN_HIGH_AT   = 3;     // ≥ this many req/sig items → "high anchor"
+    const COUNTER_PIN_MIN_VULN  = 1.0;   // skip vulnerabilities weaker than this
+    const COUNTER_PIN_MIN_AGREE = 2;     // need 2+ enemies to share the vuln tag
+    const COUNTER_PIN_FORCE_VULN = 3.0;  // when consensus this strong, hard-pin (ignore budget)
+    const COUNTER_TIER_BIAS     = 0.35;  // per-tier-step penalty, prefers T2 over T3/T4
+    // Local req/sig multipliers — softer than the global REQ_MULT/SIG_MULT so
+    // anchored items don't completely dominate the score walk. The pin pass
+    // already guarantees they LAND; this softens their influence on fill picks.
+    const REQ_MULT_LOCAL        = 1.7;
+    const REQ_COMP_MULT_LOCAL   = 1.4;
+    const SIG_MULT_LOCAL        = 1.25;
+    const SIG_COMP_MULT_LOCAL   = 1.1;
+    const PHASE_TIER_DAMP       = 0.8;   // (phaseTierMult)^DAMP — softens cross-phase rigidity
     const MAX_BUYS_PER_PHASE    = 30;    // safety cap on the per-phase fill loop
     // Extra Late's `addBudget` is 1,000,000 (effectively infinite) so we'd
     // otherwise fill until MAX_BUYS_PER_PHASE. Cap to the in-game slot count.
     const EXTRA_LATE_SLOT_CAP   = 12;    // matches BUILD_PHASES['Extra Late'].totalSlots
+
+    // Determined once: how anchor-heavy this build is. Used to scale how many
+    // counter pins we allow + how strongly the algorithm leans on anchors.
+    const _anchorCount = (requiredSet?.size || 0) + (signatureSet?.size || 0);
+    const COUNTER_PIN_MAX = _anchorCount >= COUNTER_PIN_HIGH_AT
+      ? COUNTER_PIN_MAX_HIGH : COUNTER_PIN_MAX_LOW;
 
     // ── Build assist & counter disposition (build-side gate) ──
     // Reads the BUILD'S item_affinity for these role tags. Negative = the
@@ -7984,13 +8025,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         if (buildAssist < 0.5) assistMult = 0.5 + buildAssist;
         else                   assistMult = ASSIST_BOOST;
       }
-      // Counter gate (mirrors assist). If the build doesn't actively want
-      // counter items, drop or weight-down. Required/signature exempt.
+      // Counter gate: only suppress if the build explicitly doesn't want
+      // counters (rare — buildCounter < 0). Otherwise counter items compete
+      // on score like anyone else. Every build should react to a clearly
+      // vulnerable enemy comp regardless of its own counter disposition.
       let counterMult = 1.0;
       if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
-        if (buildCounter < 0)   return -Infinity;
-        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;  // 0.5 .. 1.0
-        else                    counterMult = COUNTER_BOOST;
+        if (buildCounter < 0)        return -Infinity;
+        else if (buildCounter >= 0.5) counterMult = COUNTER_BOOST;
       }
 
       let s = it.self || 0;
@@ -7999,15 +8041,19 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       s += softCounterLift(k);
       s += hardCounterLift(k, it);
 
-      // Constraint multipliers — mirror itemBoostMult priority
-      if (requiredSet.has(k))           s *= REQ_MULT;
-      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
-      else if (signatureSet.has(k))     s *= SIG_MULT;
-      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+      // Constraint multipliers — local softer values so anchors guide rather
+      // than dominate. Pin pass already guarantees they LAND.
+      if (requiredSet.has(k))           s *= REQ_MULT_LOCAL;
+      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT_LOCAL;
+      else if (signatureSet.has(k))     s *= SIG_MULT_LOCAL;
+      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT_LOCAL;
 
       s *= assistMult * counterMult;
       const tier = bpItemMap[k]?.tier || 800;
-      s *= getPhaseTierMult(phaseName, tier);
+      // Dampen phase-tier preference — keep the direction (T1 favored in Lane,
+      // T4 in Late) but soften the magnitude so off-tier picks can compete
+      // when their score warrants.
+      s *= Math.pow(getPhaseTierMult(phaseName, tier), PHASE_TIER_DAMP);
       s += confShift(k, phaseName);
 
       // Upgrade stat-delta: subtract owned components, tier-rescaled so a
@@ -8060,6 +8106,15 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return out;
     }
     function placeBuy(phaseName, idx, key) {
+      if (owned.has(key)) return;
+      // Show un-owned direct components first — buying an upgrade implicitly
+      // buys its components in-game, so the build path should read
+      // "extra_spirit → improved_spirit" rather than a bare "improved_spirit".
+      // Souls accounting stays consistent: component effCost + reduced upgrade
+      // effCost sums to the upgrade's full tier cost.
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (!owned.has(c)) placeBuy(phaseName, idx, c);
+      }
       const cost = effCost(key);
       const consumedComps = [...ownedAncestors(key)];
       consumedComps.forEach(c => owned.delete(c));
@@ -8071,6 +8126,48 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         components: consumedComps,
         cost,
       });
+    }
+
+    // Identify guaranteed counter pins: items that address an enemy
+    // vulnerability the enemy team genuinely AGREES on (multiple enemies share
+    // the tag). Skipped silently when there's no real consensus — not every
+    // build needs a counter pin, only those facing a clear shared weakness.
+    // Within a vulnerability, lower-tier counters are preferred (they deploy
+    // earlier and cost less) unless a higher-tier item meaningfully addresses
+    // the tag better.
+    function computeCounterPins() {
+      if (!vulnList.length) return [];
+      const out = [];
+      const seenTags = new Set();
+      const seenKeys = new Set();
+      for (const v of vulnList) {
+        if (out.length >= COUNTER_PIN_MAX) break;
+        if (v.strength < COUNTER_PIN_MIN_VULN) continue;
+        if ((v.contributingEnemies || []).length < COUNTER_PIN_MIN_AGREE) continue;
+        if (seenTags.has(v.tag)) continue;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (seenKeys.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (requiredSet.has(k) || signatureSet.has(k)) continue;
+          const ps = bpItemMap[k]?.values?.playstyle_score || {};
+          const tagMatch = ps[v.tag] || 0;
+          if (tagMatch <= 0) continue;
+          const ci = ps.counter_importance || 0;
+          if (ci < COUNTER_TAG_THRESH) continue;
+          const tier = bpItemMap[k]?.tier || 800;
+          const tierStep = Math.max(0, (tier - 1600) / 1600);  // T1/T2=0, T3=1, T4=3
+          const sc = (tagMatch * v.strength * ci) - tierStep * COUNTER_TIER_BIAS;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (bestKey) {
+          out.push({ key: bestKey, tag: v.tag, vuln: v.strength });
+          seenKeys.add(bestKey);
+          seenTags.add(v.tag);
+        }
+      }
+      return out;
     }
 
     // ── Pass 1: pin required + signature items to their natural-tier phase ──
@@ -8124,6 +8221,21 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         }
       }
       placeBuy(PHASE_NAMES[idx], idx, it.key);
+    }
+
+    // ── Pass 1b: counter pins — guaranteed reactivity to enemy vulnerabilities.
+    // Soft pin by default (push forward if budget tight). HARD pin if the
+    // matched vulnerability is exceptionally strong — at that point even an
+    // anchor-heavy build must react, regardless of budget pressure.
+    for (const cp of computeCounterPins()) {
+      if (owned.has(cp.key) || isSubsumed(cp.key, owned)) continue;
+      const tier = bpItemMap[cp.key]?.tier || 800;
+      let idx = naturalPhaseIdx(tier);
+      const isForced = (cp.vuln || 0) >= COUNTER_PIN_FORCE_VULN;
+      if (!isForced) {
+        while (idx < PHASE_NAMES.length - 1 && phaseSpent[idx] >= phaseBudgets[idx]) idx++;
+      }
+      placeBuy(PHASE_NAMES[idx], idx, cp.key);
     }
 
     // ── Pass 2: walk phases sequentially, fill remaining budget by top-score ──
@@ -8188,11 +8300,27 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const HARD_GATE_STRONG      = 0.7;
     const ASSIST_BOOST          = 1.25;
     const MARGINAL_DECAY        = 2.5;
-    const SOFT_LIFT_SCALE       = 0.03;
-    const HARD_LIFT_SCALE       = 0.08;
+    const SOFT_LIFT_SCALE       = 0.07;
+    const HARD_LIFT_SCALE       = 0.18;
     const COUNTER_BOOST         = 1.20;
+    const COUNTER_PIN_MAX_LOW   = 1;
+    const COUNTER_PIN_MAX_HIGH  = 2;
+    const COUNTER_PIN_HIGH_AT   = 3;
+    const COUNTER_PIN_MIN_VULN  = 1.0;
+    const COUNTER_PIN_MIN_AGREE = 2;
+    const COUNTER_PIN_FORCE_VULN = 3.0;
+    const COUNTER_TIER_BIAS     = 0.35;
+    const REQ_MULT_LOCAL        = 1.7;
+    const REQ_COMP_MULT_LOCAL   = 1.4;
+    const SIG_MULT_LOCAL        = 1.25;
+    const SIG_COMP_MULT_LOCAL   = 1.1;
+    const PHASE_TIER_DAMP       = 0.8;
     const MAX_BUYS_PER_PHASE    = 30;
     const EXTRA_LATE_SLOT_CAP   = 12;
+
+    const _anchorCount = (requiredSet?.size || 0) + (signatureSet?.size || 0);
+    const COUNTER_PIN_MAX = _anchorCount >= COUNTER_PIN_HIGH_AT
+      ? COUNTER_PIN_MAX_HIGH : COUNTER_PIN_MAX_LOW;
 
     const buildAssist  = Number(rv?.item_affinity?.assist_importance  ?? 0);
     const buildCounter = Number(rv?.item_affinity?.counter_importance ?? 0);
@@ -8239,9 +8367,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
       let counterMult = 1.0;
       if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
-        if (buildCounter < 0)   return -Infinity;
-        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;
-        else                    counterMult = COUNTER_BOOST;
+        if (buildCounter < 0)        return -Infinity;
+        else if (buildCounter >= 0.5) counterMult = COUNTER_BOOST;
       }
 
       let s = it.self || 0;
@@ -8249,14 +8376,14 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       s += softCounterLift(k);
       s += hardCounterLift(k, it);
 
-      if (requiredSet.has(k))           s *= REQ_MULT;
-      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
-      else if (signatureSet.has(k))     s *= SIG_MULT;
-      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+      if (requiredSet.has(k))           s *= REQ_MULT_LOCAL;
+      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT_LOCAL;
+      else if (signatureSet.has(k))     s *= SIG_MULT_LOCAL;
+      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT_LOCAL;
 
       s *= assistMult * counterMult;
       const tier = bpItemMap[k]?.tier || 800;
-      s *= getPhaseTierMult(phaseName, tier);
+      s *= Math.pow(getPhaseTierMult(phaseName, tier), PHASE_TIER_DAMP);
       s += confShift(k, phaseName);
 
       if (ownedSet && depth < 1) {
@@ -8307,6 +8434,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return out;
     }
     function placeBuy(phaseName, idx, key) {
+      if (owned.has(key)) return;
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (!owned.has(c)) placeBuy(phaseName, idx, c);
+      }
       const cost = effCost(key);
       const consumedComps = [...ownedAncestors(key)];
       consumedComps.forEach(c => owned.delete(c));
@@ -8332,7 +8463,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     // priority-ordered, never mutated during the walk.
     const phasePins = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
     const _pinnedKeys = new Set();
-    const PRIORITY_ORDER = { required: 0, signature: 1, anchor: 2 };
+    const PRIORITY_ORDER = { required: 0, signature: 1, anchor: 2, counter: 3 };
 
     function pinPush(phaseIdx, key, priority) {
       if (_pinnedKeys.has(key)) return;
@@ -8363,6 +8494,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       _tentSpent[idx] += cost;
       pinPush(idx, key, priority);
     }
+    // HARD pin variant — ignores budget. Used for exceptionally strong
+    // counter consensus where reactivity matters more than budget pressure.
+    function hardPinAttempt(naturalIdx, key, priority) {
+      const cost = bpItemMap[key]?.tier || 0;
+      _tentSpent[naturalIdx] += cost;
+      pinPush(naturalIdx, key, priority);
+    }
 
     // Tier 2 — SIGNATURE (SOFT pin)
     b.items
@@ -8385,6 +8523,44 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     anchorKeys
       .sort((a, c) => (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0))
       .forEach(k => softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'anchor'));
+
+    // Tier 4 — COUNTER PINS. Only fires when the enemy team has agreed
+    // consensus on a vulnerability — 2+ enemies sharing the tag and total
+    // strength above the floor. Otherwise silently skipped. Soft pin by
+    // default; HARD pin when vulnerability is exceptionally strong (forces
+    // landing even on anchor-heavy builds with tight budgets).
+    if (vulnList.length) {
+      const seenTags = new Set();
+      let added = 0;
+      for (const v of vulnList) {
+        if (added >= COUNTER_PIN_MAX) break;
+        if (v.strength < COUNTER_PIN_MIN_VULN) continue;
+        if ((v.contributingEnemies || []).length < COUNTER_PIN_MIN_AGREE) continue;
+        if (seenTags.has(v.tag)) continue;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (_pinnedKeys.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          const ps = bpItemMap[k]?.values?.playstyle_score || {};
+          const tagMatch = ps[v.tag] || 0;
+          if (tagMatch <= 0) continue;
+          const ci = ps.counter_importance || 0;
+          if (ci < COUNTER_TAG_THRESH) continue;
+          const tier = bpItemMap[k]?.tier || 800;
+          const tierStep = Math.max(0, (tier - 1600) / 1600);
+          const sc = (tagMatch * v.strength * ci) - tierStep * COUNTER_TIER_BIAS;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (bestKey) {
+          const natIdx = naturalPhaseIdx(bpItemMap[bestKey]?.tier || 800);
+          if (v.strength >= COUNTER_PIN_FORCE_VULN) hardPinAttempt(natIdx, bestKey, 'counter');
+          else                                       softPinAttempt(natIdx, bestKey, 'counter');
+          seenTags.add(v.tag);
+          added++;
+        }
+      }
+    }
 
     // Within each phase, sort pins by tier asc (components before upgrades),
     // then by priority (required > signature > anchor) as tiebreaker.
@@ -8462,9 +8638,25 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const HARD_GATE_STRONG      = 0.7;
     const ASSIST_BOOST          = 1.25;
     const MARGINAL_DECAY        = 2.5;
-    const SOFT_LIFT_SCALE       = 0.03;
-    const HARD_LIFT_SCALE       = 0.08;
+    const SOFT_LIFT_SCALE       = 0.07;
+    const HARD_LIFT_SCALE       = 0.18;
     const COUNTER_BOOST         = 1.20;
+    const COUNTER_PIN_MAX_LOW   = 1;
+    const COUNTER_PIN_MAX_HIGH  = 2;
+    const COUNTER_PIN_HIGH_AT   = 3;
+    const COUNTER_PIN_MIN_VULN  = 1.0;
+    const COUNTER_PIN_MIN_AGREE = 2;
+    const COUNTER_PIN_FORCE_VULN = 3.0;
+    const COUNTER_TIER_BIAS     = 0.35;
+    const REQ_MULT_LOCAL        = 1.7;
+    const REQ_COMP_MULT_LOCAL   = 1.4;
+    const SIG_MULT_LOCAL        = 1.25;
+    const SIG_COMP_MULT_LOCAL   = 1.1;
+    const PHASE_TIER_DAMP       = 0.8;
+
+    const _anchorCount = (requiredSet?.size || 0) + (signatureSet?.size || 0);
+    const COUNTER_PIN_MAX = _anchorCount >= COUNTER_PIN_HIGH_AT
+      ? COUNTER_PIN_MAX_HIGH : COUNTER_PIN_MAX_LOW;
     const MAX_BUYS_PER_PHASE    = 30;
     const EXTRA_LATE_SLOT_CAP   = 12;
 
@@ -8519,28 +8711,28 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
       let counterMult = 1.0;
       if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
-        if (buildCounter < 0)   return -Infinity;
-        if (buildCounter < 0.5) counterMult = 0.5 + buildCounter;
-        else                    counterMult = COUNTER_BOOST;
+        if (buildCounter < 0)        return -Infinity;
+        else if (buildCounter >= 0.5) counterMult = COUNTER_BOOST;
       }
 
       let s = it.self || 0;
       if (isAuthored || buildAssist >= 0.5) s += 0.75 * (it.ally || 0);
 
-      if (mode !== 'core') {
-        s += softCounterLift(k);
-        s += hardCounterLift(k, it);
-      }
+      // Counter lifts always apply — even Core walk should react to enemy.
+      // The Counter walk's mode just disables req/sig boosts so its picks
+      // reflect pure-counter merit, not authored intent.
+      s += softCounterLift(k);
+      s += hardCounterLift(k, it);
 
       if (mode !== 'counter') {
-        if (requiredSet.has(k))           s *= REQ_MULT;
-        else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT;
-        else if (signatureSet.has(k))     s *= SIG_MULT;
-        else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT;
+        if (requiredSet.has(k))           s *= REQ_MULT_LOCAL;
+        else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT_LOCAL;
+        else if (signatureSet.has(k))     s *= SIG_MULT_LOCAL;
+        else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT_LOCAL;
       }
       s *= assistMult * counterMult;
       const tier = bpItemMap[k]?.tier || 800;
-      s *= getPhaseTierMult(phaseName, tier);
+      s *= Math.pow(getPhaseTierMult(phaseName, tier), PHASE_TIER_DAMP);
       s += confShift(k, phaseName);
 
       if (ownedSet && depth < 1) {
@@ -8591,6 +8783,12 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return out;
     }
     function placeBuyInto(ownedSet, changesMap, spentArr, phaseName, idx, key) {
+      if (ownedSet.has(key)) return;
+      // Show un-owned components first so the build path reads
+      // "extra_spirit → improved_spirit" rather than a bare upgrade.
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (!ownedSet.has(c)) placeBuyInto(ownedSet, changesMap, spentArr, phaseName, idx, c);
+      }
       const cost = effCostFor(ownedSet, key);
       const consumedComps = [...ownedAncestorsFor(ownedSet, key)];
       consumedComps.forEach(c => ownedSet.delete(c));
@@ -8633,6 +8831,47 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         while (idx < PHASE_NAMES.length - 1 && corePhaseSpent[idx] >= phaseBudgets[idx]) idx++;
       }
       placeBuyInto(coreOwned, coreChanges, corePhaseSpent, PHASE_NAMES[idx], idx, it.key);
+    }
+    // Counter pins — only when enemy team has agreed consensus on a vulnerability.
+    // Soft pin: push forward if natural phase is already over budget. Lower-tier
+    // counters preferred when match is comparable.
+    if (vulnList.length) {
+      const seenTags = new Set();
+      let added = 0;
+      for (const v of vulnList) {
+        if (added >= COUNTER_PIN_MAX) break;
+        if (v.strength < COUNTER_PIN_MIN_VULN) continue;
+        if ((v.contributingEnemies || []).length < COUNTER_PIN_MIN_AGREE) continue;
+        if (seenTags.has(v.tag)) continue;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (coreOwned.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (requiredSet.has(k) || signatureSet.has(k)) continue;
+          const ps = bpItemMap[k]?.values?.playstyle_score || {};
+          const tagMatch = ps[v.tag] || 0;
+          if (tagMatch <= 0) continue;
+          const ci = ps.counter_importance || 0;
+          if (ci < COUNTER_TAG_THRESH) continue;
+          const tier = bpItemMap[k]?.tier || 800;
+          const tierStep = Math.max(0, (tier - 1600) / 1600);
+          const sc = (tagMatch * v.strength * ci) - tierStep * COUNTER_TIER_BIAS;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (bestKey) {
+          let idx = naturalPhaseIdx(bpItemMap[bestKey]?.tier || 800);
+          // Hard pin (skip budget check) when consensus is exceptionally
+          // strong — even anchor-heavy builds must react in that case.
+          const isForced = v.strength >= COUNTER_PIN_FORCE_VULN;
+          if (!isForced) {
+            while (idx < PHASE_NAMES.length - 1 && corePhaseSpent[idx] >= phaseBudgets[idx]) idx++;
+          }
+          placeBuyInto(coreOwned, coreChanges, corePhaseSpent, PHASE_NAMES[idx], idx, bestKey);
+          seenTags.add(v.tag);
+          added++;
+        }
+      }
     }
     // Fill remaining budget per phase
     PHASE_NAMES.forEach((phase, idx) => {
@@ -8707,6 +8946,426 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       changes: coreChanges[name],
       assistChanges: [],
       counterChanges: counterChanges[name],
+    }));
+  }
+
+  // ── Maestro (unified final: smooth tier flow + claim-aware) ───────────────
+  // Combines what worked across the prior algorithms:
+  //   • Explicit pin hierarchy (Spike) with scaled counter-pin budget (Spike).
+  //   • Component-claim rule: a component used in any owned upgrade chain is
+  //     locked — no OTHER upgrade requiring it may be recommended. Prevents
+  //     the "grit twice in Lane" duplicate-component scenario at the algorithm
+  //     level (renderer needs no special handling).
+  //   • Tier-diversity penalty: each additional same-tier item already placed
+  //     in the current phase docks the next same-tier candidate's score —
+  //     smooths "2 T2 in Lane" patterns when an alternative exists.
+  //   • Extra Late slot-budget reserved for T3+ fillers (luxury slot).
+  //   • Damped PHASE_TIER_DAMP (0.75) — softer cross-phase tier insistence.
+  function runMaestro() {
+    const PHASE_NAMES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+
+    // Tuneable constants — single-knob adjustment per design plan.
+    const SOFT_LIFT_SCALE       = 0.07;
+    const HARD_LIFT_SCALE       = 0.18;
+    const REQ_MULT_LOCAL        = 1.7;
+    const REQ_COMP_MULT_LOCAL   = 1.4;
+    const SIG_MULT_LOCAL        = 1.25;
+    const SIG_COMP_MULT_LOCAL   = 1.10;
+    const PHASE_TIER_DAMP       = 0.75;
+    const ASSIST_BOOST          = 1.25;
+    const COUNTER_BOOST         = 1.20;
+    const HARD_AFFINITY_THRESH  = 0.30;
+    const HARD_STRONG_CONSENSUS = 1.5;
+    const HARD_GATE_AUTHORED    = 1.5;
+    const HARD_GATE_FIT         = 1.0;
+    const HARD_GATE_STRONG      = 0.7;
+    const MARGINAL_DECAY        = 2.5;
+    const COUNTER_PIN_MAX_LOW   = 1;
+    const COUNTER_PIN_MAX_HIGH  = 2;
+    const COUNTER_PIN_HIGH_AT   = 3;
+    const COUNTER_PIN_MIN_VULN  = 1.0;
+    const COUNTER_PIN_MIN_AGREE = 2;
+    const COUNTER_PIN_FORCE_VULN = 3.0;
+    const COUNTER_TIER_BIAS_LOW  = 0.85;   // low-anchor: strongly prefer T1/T2 counters
+    const COUNTER_TIER_BIAS_HIGH = 0.35;   // high-anchor: mild preference for low-tier counters
+    const PHASE_COUNTER_CAP_LOW  = 1;      // low-anchor: max 1 counter item per phase
+    const PHASE_COUNTER_CAP_HIGH = 2;      // high-anchor: max 2 counter items per phase
+    const COUNTER_FILL_TIER_PENALTY = 0.55; // low-anchor only: tier-step penalty on score-driven counter picks
+    const TIER_DIVERSITY_PENALTY = 0.45;
+    const EXTRA_LATE_MIN_TIER   = 3200;
+    const EXTRA_LATE_SLOT_CAP   = 12;
+    const MAX_BUYS_PER_PHASE    = 30;
+
+    const _anchorCount = (requiredSet?.size || 0) + (signatureSet?.size || 0);
+    const _isHighAnchor = _anchorCount >= COUNTER_PIN_HIGH_AT;
+    const COUNTER_PIN_MAX = _isHighAnchor ? COUNTER_PIN_MAX_HIGH : COUNTER_PIN_MAX_LOW;
+    const PHASE_COUNTER_CAP = _isHighAnchor ? PHASE_COUNTER_CAP_HIGH : PHASE_COUNTER_CAP_LOW;
+    const COUNTER_TIER_BIAS = _isHighAnchor ? COUNTER_TIER_BIAS_HIGH : COUNTER_TIER_BIAS_LOW;
+    // Low-anchor builds get reduced counter lift in scoring so counters
+    // don't crowd the fill loop. Scales linearly from 0.45 (no anchors) to
+    // 1.0 (3+ anchors). Pins still fire — this only tames score-driven picks.
+    const _liftScaleMult = 0.45 + 0.55 * Math.min(1, _anchorCount / COUNTER_PIN_HIGH_AT);
+
+    const buildAssist  = Number(rv?.item_affinity?.assist_importance  ?? 0);
+    const buildCounter = Number(rv?.item_affinity?.counter_importance ?? 0);
+    const vulnList = (typeof bsConsensusVulnerability === 'function')
+      ? bsConsensusVulnerability(b) : [];
+
+    // ── Component-claim rule helpers ──
+    // ancestorsOfKey: transitive component ancestors of `key` (excluding itself).
+    function ancestorsOfKey(key) {
+      const out = new Set();
+      const stack = [...(bpItemMap[key]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+    // A component `c` is "claimed" iff it appears in the upgrade chain of any
+    // owned item OTHER than itself. Once claimed, a different upgrade that
+    // would consume the same component is blocked from being recommended.
+    function isComponentClaimed(c, ownedSet) {
+      for (const k of ownedSet) {
+        if (k === c) continue;
+        if (ancestorsOfKey(k).has(c)) return true;
+      }
+      return false;
+    }
+    // Candidate is claim-blocked if any of its components is claimed by an
+    // owned-but-unrelated upgrade. We allow components the candidate already
+    // owns itself (no double-counting).
+    function isClaimedBlocked(key, ownedSet) {
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (ownedSet.has(c)) continue;
+        if (isComponentClaimed(c, ownedSet)) return true;
+      }
+      return false;
+    }
+
+    // ── Scoring ──
+    function softCounterLift(k) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const cap = Math.min(0.5, Math.max(0, ps.counter_importance || 0));
+      if (cap <= 0 || !vulnList.length) return 0;
+      let sum = 0;
+      for (const v of vulnList) sum += (ps[v.tag] || 0) * (v.strength || 0);
+      return sum * cap * SOFT_LIFT_SCALE * _liftScaleMult;
+    }
+    function hardCounterLift(k, it) {
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const ci = ps.counter_importance || 0;
+      if (ci < COUNTER_TAG_THRESH || !vulnList.length) return 0;
+      let sum = 0, maxTerm = 0;
+      for (const v of vulnList) {
+        const term = (ps[v.tag] || 0) * (v.strength || 0);
+        if (term > 0) { sum += term; if (term > maxTerm) maxTerm = term; }
+      }
+      if (sum <= 0) return 0;
+      let gate;
+      if (requiredSet.has(k) || signatureSet.has(k))   gate = HARD_GATE_AUTHORED;
+      else if ((it.self || 0) >= HARD_AFFINITY_THRESH) gate = HARD_GATE_FIT;
+      else if (maxTerm >= HARD_STRONG_CONSENSUS)       gate = HARD_GATE_STRONG;
+      else return 0;
+      return sum * ci * gate * HARD_LIFT_SCALE * _liftScaleMult;
+    }
+
+    function scoreInner(it, phaseName, ownedSet, phaseTierCount, depth) {
+      const k = it.key;
+      const ps = bpItemMap[k]?.values?.playstyle_score || {};
+      const itemAssist  = ps.assist_importance  || 0;
+      const itemCounter = ps.counter_importance || 0;
+      const isAuthored = requiredSet.has(k) || signatureSet.has(k);
+
+      // Build-side dispositions
+      let assistMult = 1.0;
+      if (itemAssist > 0 && !isAuthored) {
+        if (buildAssist < 0)   return -Infinity;
+        if (buildAssist < 0.5) assistMult = 0.5 + buildAssist;
+        else                   assistMult = ASSIST_BOOST;
+      }
+      let counterMult = 1.0;
+      if (itemCounter >= COUNTER_TAG_THRESH && !isAuthored) {
+        if (buildCounter < 0)         return -Infinity;
+        else if (buildCounter >= 0.5) counterMult = COUNTER_BOOST;
+      }
+
+      let s = it.self || 0;
+      if (isAuthored || buildAssist >= 0.5) s += 0.75 * (it.ally || 0);
+      s += softCounterLift(k);
+      s += hardCounterLift(k, it);
+
+      if (requiredSet.has(k))           s *= REQ_MULT_LOCAL;
+      else if (reqComponentSet.has(k))  s *= REQ_COMP_MULT_LOCAL;
+      else if (signatureSet.has(k))     s *= SIG_MULT_LOCAL;
+      else if (sigComponentSet.has(k))  s *= SIG_COMP_MULT_LOCAL;
+
+      s *= assistMult * counterMult;
+      const tier = bpItemMap[k]?.tier || 800;
+      s *= Math.pow(getPhaseTierMult(phaseName, tier), PHASE_TIER_DAMP);
+      s += confShift(k, phaseName);
+
+      // ── Distinctive: tier-diversity penalty ──
+      // After N same-tier items already placed this phase, this candidate
+      // gets -N * 0.45. Small enough to let a second T2 through if no T1
+      // alternative exists, but typically enough to lose to a T1 substitute.
+      if (phaseTierCount) {
+        const sameTierAlready = phaseTierCount[tier] || 0;
+        if (sameTierAlready > 0) s -= sameTierAlready * TIER_DIVERSITY_PENALTY;
+      }
+
+      // Upgrade marginal correction (tier-scale-aware) — same as Spike.
+      if (ownedSet && depth < 1) {
+        const ownedComps = (bpItemMap[k]?.upgrades_from || []).filter(c => ownedSet.has(c));
+        if (ownedComps.length) {
+          const upgradeTm = tierMult(tier);
+          for (const c of ownedComps) {
+            const cIt = scoredMap[c];
+            if (!cIt) continue;
+            const compTm = tierMult(bpItemMap[c]?.tier || 800);
+            const ratio = compTm / Math.max(0.01, upgradeTm);
+            const compScore = scoreInner(cIt, phaseName, null, null, depth + 1);
+            if (compScore === -Infinity) continue;
+            s -= compScore * Math.pow(ratio, MARGINAL_DECAY);
+          }
+        }
+      }
+      return s;
+    }
+    const score = (it, phaseName, ownedSet, phaseTierCount) =>
+      scoreInner(it, phaseName, ownedSet, phaseTierCount, 0);
+
+    // ── Walk state ──
+    let owned = new Set();
+    const phaseChanges = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    // Per-phase counter-tag placements (counter_importance >= COUNTER_TAG_THRESH).
+    // Used by the fill loop to enforce PHASE_COUNTER_CAP. Pins place freely
+    // but contribute to the count — score-driven fill picks are gated.
+    const phaseCounterCount = { 'Lane': 0, 'Early': 0, 'Mid': 0, 'Late': 0, 'Extra Late': 0 };
+    const phaseBudgets = PHASE_NAMES.map(p => {
+      const bp = BUILD_PHASES.find(x => x.name === p);
+      return bp ? (bp.addBudget || 3200) : 3200;
+    });
+    const phaseSpent = PHASE_NAMES.map(() => 0);
+
+    function effCost(k) {
+      const t = bpItemMap[k]?.tier || 0;
+      let cost = t;
+      (bpItemMap[k]?.upgrades_from || []).forEach(c => {
+        if (owned.has(c)) cost -= (bpItemMap[c]?.tier || 0);
+      });
+      return Math.max(0, cost);
+    }
+    function ownedAncestors(k) {
+      const out = new Set();
+      const stack = [...(bpItemMap[k]?.upgrades_from || [])];
+      while (stack.length) {
+        const c = stack.pop();
+        if (out.has(c)) continue;
+        if (owned.has(c)) out.add(c);
+        (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!out.has(c2)) stack.push(c2); });
+      }
+      return out;
+    }
+    function placeBuy(phaseName, idx, key, phaseTierCount) {
+      if (owned.has(key)) return;
+      for (const c of (bpItemMap[key]?.upgrades_from || [])) {
+        if (!owned.has(c)) placeBuy(phaseName, idx, c, phaseTierCount);
+      }
+      const cost = effCost(key);
+      const consumedComps = [...ownedAncestors(key)];
+      consumedComps.forEach(c => owned.delete(c));
+      owned.add(key);
+      phaseSpent[idx] += cost;
+      phaseChanges[phaseName].push({
+        action: consumedComps.length ? 'upgrade' : 'buy',
+        key, components: consumedComps, cost,
+      });
+      if (phaseTierCount) {
+        const t = bpItemMap[key]?.tier || 0;
+        phaseTierCount[t] = (phaseTierCount[t] || 0) + 1;
+      }
+      const _ci = bpItemMap[key]?.values?.playstyle_score?.counter_importance || 0;
+      if (_ci >= COUNTER_TAG_THRESH) phaseCounterCount[phaseName]++;
+    }
+    function naturalPhaseIdx(tier) {
+      const p = (typeof bsMergedPhaseForTier === 'function')
+        ? bsMergedPhaseForTier(tier)
+        : (tier <= 800 ? 'Lane' : tier <= 1600 ? 'Early' : tier <= 3200 ? 'Mid' : 'Late');
+      const i = PHASE_NAMES.indexOf(p);
+      return i < 0 ? 0 : i;
+    }
+
+    // ── Pin hierarchy (4 tiers: required / signature / anchor / counter) ──
+    const phasePins = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
+    const _pinnedKeys = new Set();
+    const PRIORITY_ORDER = { required: 0, signature: 1, anchor: 2, counter: 3 };
+
+    function pinPush(phaseIdx, key, priority) {
+      if (_pinnedKeys.has(key)) return;
+      _pinnedKeys.add(key);
+      phasePins[PHASE_NAMES[phaseIdx]].push({
+        key, priority, tier: bpItemMap[key]?.tier || 0,
+      });
+    }
+
+    // Tier 1 — REQUIRED (HARD pin, ignores budget)
+    b.items
+      .filter(it => requiredSet.has(it.key) && !blacklistSet.has(it.key))
+      .sort((a, c) => (bpItemMap[a.key]?.tier || 0) - (bpItemMap[c.key]?.tier || 0))
+      .forEach(it => pinPush(naturalPhaseIdx(bpItemMap[it.key]?.tier || 800), it.key, 'required'));
+
+    const _tentSpent = PHASE_NAMES.map((_, idx) =>
+      phasePins[PHASE_NAMES[idx]].reduce((s, p) => s + (p.tier || 0), 0));
+
+    function softPinAttempt(naturalIdx, key, priority) {
+      const cost = bpItemMap[key]?.tier || 0;
+      let idx = naturalIdx;
+      while (idx < PHASE_NAMES.length - 1
+        && _tentSpent[idx] + cost > (phaseBudgets[idx] * 1.2)) {
+        idx++;
+      }
+      _tentSpent[idx] += cost;
+      pinPush(idx, key, priority);
+    }
+    function hardPinAttempt(naturalIdx, key, priority) {
+      const cost = bpItemMap[key]?.tier || 0;
+      _tentSpent[naturalIdx] += cost;
+      pinPush(naturalIdx, key, priority);
+    }
+
+    // Tier 2 — SIGNATURE (SOFT pin)
+    b.items
+      .filter(it =>
+        signatureSet.has(it.key) && !requiredSet.has(it.key) && !blacklistSet.has(it.key)
+      )
+      .sort((a, c) => {
+        const ta = bpItemMap[a.key]?.tier || 0;
+        const tc = bpItemMap[c.key]?.tier || 0;
+        if (ta !== tc) return ta - tc;
+        return (c.total || 0) - (a.total || 0);
+      })
+      .forEach(it => softPinAttempt(naturalPhaseIdx(bpItemMap[it.key]?.tier || 800), it.key, 'signature'));
+
+    // Tier 3 — SURGE ANCHORS (SOFT pin, only if not already pinned)
+    const anchorKeys = [
+      ...((preAnchors && preAnchors.spikes) || []),
+      ...((preAnchors && preAnchors.antiSpikes) || []),
+    ].filter(k => k && !_pinnedKeys.has(k) && !blacklistSet.has(k));
+    anchorKeys
+      .sort((a, c) => (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0))
+      .forEach(k => softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'anchor'));
+
+    // Tier 4 — COUNTER PINS (count scaled by anchor density).
+    if (vulnList.length) {
+      const seenTags = new Set();
+      let added = 0;
+      for (const v of vulnList) {
+        if (added >= COUNTER_PIN_MAX) break;
+        if (v.strength < COUNTER_PIN_MIN_VULN) continue;
+        if ((v.contributingEnemies || []).length < COUNTER_PIN_MIN_AGREE) continue;
+        if (seenTags.has(v.tag)) continue;
+        let bestKey = null, bestScore = -Infinity;
+        for (const it of b.items) {
+          const k = it.key;
+          if (_pinnedKeys.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          const ps = bpItemMap[k]?.values?.playstyle_score || {};
+          const tagMatch = ps[v.tag] || 0;
+          if (tagMatch <= 0) continue;
+          const ci = ps.counter_importance || 0;
+          if (ci < COUNTER_TAG_THRESH) continue;
+          const tier = bpItemMap[k]?.tier || 800;
+          const tierStep = Math.max(0, (tier - 1600) / 1600);
+          const sc = (tagMatch * v.strength * ci) - tierStep * COUNTER_TIER_BIAS;
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (bestKey) {
+          const natIdx = naturalPhaseIdx(bpItemMap[bestKey]?.tier || 800);
+          if (v.strength >= COUNTER_PIN_FORCE_VULN) hardPinAttempt(natIdx, bestKey, 'counter');
+          else                                       softPinAttempt(natIdx, bestKey, 'counter');
+          seenTags.add(v.tag);
+          added++;
+        }
+      }
+    }
+
+    Object.values(phasePins).forEach(arr => {
+      arr.sort((a, c) => {
+        if (a.tier !== c.tier) return a.tier - c.tier;
+        return (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[c.priority] ?? 99);
+      });
+    });
+
+    if (_bpDbg) _bpDbg.maestroPhasePins = JSON.parse(JSON.stringify(phasePins));
+
+    // ── Walk ──
+    PHASE_NAMES.forEach((phase, idx) => {
+      const phaseTierCount = { 800: 0, 1600: 0, 3200: 0, 6400: 0 };
+
+      // 1. Place pinned items first, in priority order.
+      for (const pin of phasePins[phase]) {
+        if (owned.has(pin.key)) continue;
+        if (isSubsumed(pin.key, owned)) continue;
+        placeBuy(phase, idx, pin.key, phaseTierCount);
+      }
+
+      // 2. Fill remaining budget by top score. Extra Late: T3+ only.
+      const slotCap = (phase === 'Extra Late') ? EXTRA_LATE_SLOT_CAP : MAX_BUYS_PER_PHASE;
+      const budget = phaseBudgets[idx];
+      for (let i = 0; i < slotCap; i++) {
+        if (phaseChanges[phase].length >= slotCap) break;
+        if (phaseSpent[idx] >= budget) break;
+        let bestKey = null, bestScore = -Infinity;
+        const counterCapHit = phaseCounterCount[phase] >= PHASE_COUNTER_CAP;
+        for (const it of b.items) {
+          const k = it.key;
+          if (owned.has(k)) continue;
+          if (blacklistSet.has(k)) continue;
+          if (isSubsumed(k, owned)) continue;
+          if (isClaimedBlocked(k, owned)) continue;
+          if (phase === 'Extra Late' && (bpItemMap[k]?.tier || 0) < EXTRA_LATE_MIN_TIER) continue;
+          // Per-phase counter cap: once N counter-tag items already placed,
+          // skip further counter picks unless they're authored (req/sig).
+          // This kills the "3 counter slam in Mid" pattern on low-anchor builds
+          // (cap=1) while still letting high-anchor builds keep up reactivity (cap=2).
+          if (counterCapHit) {
+            const psK = bpItemMap[k]?.values?.playstyle_score || {};
+            const ciK = psK.counter_importance || 0;
+            if (ciK >= COUNTER_TAG_THRESH
+                && !requiredSet.has(k) && !signatureSet.has(k)) continue;
+          }
+          const cost = effCost(k);
+          if (cost <= 0) continue;
+          let sc = score(it, phase, owned, phaseTierCount);
+          if (sc === -Infinity) continue;
+          // Low-anchor builds: penalize high-tier counter fills. Pulls
+          // T1/T2 suppressor-style picks ahead of T3 disarming-hex/metal-skin
+          // when they're roughly comparable on tag-match × consensus.
+          if (!_isHighAnchor) {
+            const psK = bpItemMap[k]?.values?.playstyle_score || {};
+            const ciK = psK.counter_importance || 0;
+            if (ciK >= COUNTER_TAG_THRESH
+                && !requiredSet.has(k) && !signatureSet.has(k)) {
+              const tierK = bpItemMap[k]?.tier || 800;
+              const tierStepK = Math.max(0, (tierK - 1600) / 1600);
+              sc -= tierStepK * COUNTER_FILL_TIER_PENALTY;
+            }
+          }
+          if (sc > bestScore) { bestScore = sc; bestKey = k; }
+        }
+        if (!bestKey) break;
+        placeBuy(phase, idx, bestKey, phaseTierCount);
+      }
+    });
+
+    return PHASE_NAMES.map(name => ({
+      phase: name,
+      changes: phaseChanges[name],
+      assistChanges: [],
+      counterChanges: [],
     }));
   }
 
@@ -8796,6 +9455,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
   if (algo === 'anchored')  return withAnchors(applyConstraintsFixup(runAnchored()));   // unified (Candidate 1)
   if (algo === 'spike2')    return withAnchors(applyConstraintsFixup(runSpike()));      // unified (Candidate 2: explicit-pin spike composer)
   if (algo === 'twinlane')  return withAnchors(applyConstraintsFixup(runTwinLane()));   // unified (Candidate 3: twin walks)
+  if (algo === 'maestro')   return withAnchors(applyConstraintsFixup(runMaestro()));    // unified (final: smooth+claim)
   if (algo === 'fullsurvey') return withAnchors(applyConstraintsFixup(runFullSurvey()));
   if (algo === 'expert')    return withAnchors(applyConstraintsFixup(runExpertGreedy()));
   if (algo === 'assassin')  return withAnchors(applyConstraintsFixup(runTargetAssassin()));
@@ -10578,6 +11238,7 @@ const BP_ALGO_OPTIONS = [
   { value: 'anchored',     label: 'Anchored (Unified)' },
   { value: 'spike2',       label: 'Spike Composer (Unified+Pin)' },
   { value: 'twinlane',     label: 'Twin-Lane (Unified+Counter Col)' },
+  { value: 'maestro',      label: 'Maestro (Unified+Smooth)' },
   { value: 'fullsurvey',   label: 'FullSurvey (CPU KILLER)' },
 ];
 
@@ -10590,11 +11251,72 @@ const QA = {
   editAddSide:    'ally',
   editHeroSearch: '',
   editHeroNotes:  {},
+  // testBuilds: filter — which build(s) to TEST in the algorithm run.
+  //   { [heroName]: build.normalized_build_name }  — missing = all builds.
+  editTestBuilds: {},
+  // viewBuilds: forces which build a hero "IS" when they appear as ally/enemy
+  // in OTHER heroes' algorithm computations (sets MATCH.selectedBuilds before
+  // computeResults). Missing = use hero's default_build_name.
+  //   { [heroName]: build.normalized_build_name }
+  editViewBuilds: {},
+  // Acceptance shape (v3):
+  //   { universal: { phase: { good, bad } },          // applies to everyone
+  //     allyTeam:  { phase: { good, bad, override } }, // override discards universal for that phase
+  //     enemyTeam: { phase: { good, bad, override } },
+  //     heroes:    { hero: { phase: { good, bad, override } } } }  // override discards inherited
+  // Inheritance: effective = universal → side team → hero. At any non-universal
+  // level, override=true for a phase discards EVERYTHING inherited above for
+  // that phase. Otherwise items merge (deduped union).
+  editAcceptance: { universal: {}, allyTeam: {}, enemyTeam: {}, heroes: {} },
+  acceptExpanded: new Set(),  // which cards are expanded in the editor
   runScenarioId:  null,
   runResults:     {},
   runAlgo:        null,
   runNotes:       {},
 };
+
+const QA_PHASES = ['Lane', 'Early', 'Mid', 'Late', 'Extra Late'];
+const UNIV_KEY  = '_universal';
+const ALLY_KEY  = '_allyTeam';
+const ENEMY_KEY = '_enemyTeam';
+const SPECIAL_KEYS = new Set([UNIV_KEY, ALLY_KEY, ENEMY_KEY]);
+const OVERVIEW_TAB = '_overview';   // pseudo-algo for the Overview tab
+
+// Normalize any legacy acceptance shape into the v3 4-tier form.
+// v3 (current): { universal, allyTeam, enemyTeam, heroes }
+// v2:           { team, heroes }                       — promote team → universal
+// v1:           { hero: { phase: ... } }               — bare per-hero map
+function normalizeAcceptance(raw) {
+  const empty = { universal: {}, allyTeam: {}, enemyTeam: {}, heroes: {} };
+  if (!raw || typeof raw !== 'object') return empty;
+
+  // Filter out any pathological hero keys (e.g. "undefined" from a prior bug)
+  const cleanHeroes = (h) => {
+    const out = {};
+    Object.entries(h || {}).forEach(([k, v]) => {
+      if (k && k !== 'undefined' && k !== 'null' && k[0] !== '_') out[k] = v;
+    });
+    return out;
+  };
+
+  if ('universal' in raw || 'allyTeam' in raw || 'enemyTeam' in raw) {
+    return {
+      universal: raw.universal || {},
+      allyTeam:  raw.allyTeam  || {},
+      enemyTeam: raw.enemyTeam || {},
+      heroes:    cleanHeroes(raw.heroes),
+    };
+  }
+  if ('team' in raw || 'heroes' in raw) {
+    return {
+      universal: raw.team   || {},
+      allyTeam:  {},
+      enemyTeam: {},
+      heroes:    cleanHeroes(raw.heroes),
+    };
+  }
+  return { ...empty, heroes: cleanHeroes(raw) };
+}
 
 function escHtml(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -10669,11 +11391,41 @@ function renderQAReportsList(reports) {
 
 // ── Scenario Edit ─────────────────────────────────────────────────────────────
 
-function newQAScenario() { renderQAEditPage(null); }
+async function ensureQAItemData() {
+  if (!MATCH.itemData.length) {
+    MATCH.itemData = (await api.get('/api/items/all')).filter(it => !it.synthetic);
+  }
+  // bpItemMap is keyed by normalized_name for the acceptance chip labels
+  if (!Object.keys(bpItemMap || {}).length && MATCH.itemData.length) {
+    bpItemMap = {};
+    MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+  }
+}
 
-function editQAScenario(id) {
+// Fetch one hero's full data (builds, etc) for the editor build picker.
+// Idempotent — no-ops if already loaded.
+async function ensureHeroDataForQA(name) {
+  if (MATCH.heroData[name]) return MATCH.heroData[name];
+  const data = await api.get(`/api/heroes/${name}`);
+  if (data && !data.error) {
+    MATCH.heroData[name] = data;
+    cacheHeroBuilds(name);
+  }
+  return MATCH.heroData[name];
+}
+
+async function newQAScenario() {
+  await ensureQAItemData();
+  renderQAEditPage(null);
+}
+
+async function editQAScenario(id) {
+  await ensureQAItemData();
   const s = QA.scenarios.find(x => x.id === id);
-  if (s) renderQAEditPage(s);
+  if (!s) return;
+  // Prefetch hero data for the saved roster so build pickers can populate
+  await Promise.all([...(s.allies || []), ...(s.enemies || [])].map(ensureHeroDataForQA));
+  renderQAEditPage(s);
 }
 
 function renderQAEditPage(s) {
@@ -10683,6 +11435,11 @@ function renderQAEditPage(s) {
   QA.editAddSide    = 'ally';
   QA.editHeroSearch = '';
   QA.editHeroNotes  = s ? { ...(s.heroNotes || {}) } : {};
+  // testBuilds is the new field; migrate from legacy buildSelections if present
+  QA.editTestBuilds = s ? { ...(s.testBuilds || s.buildSelections || {}) } : {};
+  QA.editViewBuilds = s ? { ...(s.viewBuilds || {}) } : {};
+  QA.editAcceptance = normalizeAcceptance(s ? JSON.parse(JSON.stringify(s.acceptance || {})) : null);
+  QA.acceptExpanded = new Set();
 
   document.getElementById('qa-edit-title').textContent      = s ? `Edit: ${s.name}` : 'New Scenario';
   document.getElementById('qe-name').value                  = s ? s.name : '';
@@ -10703,6 +11460,7 @@ function renderQAEditPage(s) {
 
   renderQETeams();
   renderQEHeroNotes(QA.editHeroNotes);
+  renderQEAcceptance();
   renderQEHeroGrid();
   showPage('qa-edit');
 }
@@ -10718,9 +11476,12 @@ async function saveQAScenario() {
     name,
     scoreFormula: document.getElementById('qe-score-formula').value,
     algos,
-    allies:    QA.editAllies,
-    enemies:   QA.editEnemies,
-    heroNotes: getQEHeroNotes(),
+    allies:     QA.editAllies,
+    enemies:    QA.editEnemies,
+    heroNotes:  getQEHeroNotes(),
+    testBuilds: { ...QA.editTestBuilds },
+    viewBuilds: { ...QA.editViewBuilds },
+    acceptance: pruneEmptyAcceptance(QA.editAcceptance),
   };
 
   const res = QA.editId
@@ -10750,7 +11511,7 @@ function qeSetAddSide(side) {
   });
 }
 
-function qeSelectHero(name) {
+async function qeSelectHero(name) {
   if (QA.editAllies.includes(name) || QA.editEnemies.includes(name)) return;
   const arr   = QA.editAddSide === 'ally' ? QA.editAllies : QA.editEnemies;
   const label = QA.editAddSide === 'ally' ? 'allies' : 'enemies';
@@ -10758,7 +11519,11 @@ function qeSelectHero(name) {
   arr.push(name);
   renderQETeams();
   renderQEHeroNotes(QA.editHeroNotes);
+  renderQEAcceptance();
   renderQEHeroGrid();
+  // Fetch hero data so the build picker can populate; re-render notes when done
+  await ensureHeroDataForQA(name);
+  renderQEHeroNotes(QA.editHeroNotes);
 }
 
 function qeRemoveHero(side, name) {
@@ -10766,8 +11531,13 @@ function qeRemoveHero(side, name) {
   const idx = arr.indexOf(name);
   if (idx >= 0) arr.splice(idx, 1);
   delete QA.editHeroNotes[name];
+  delete QA.editTestBuilds[name];
+  delete QA.editViewBuilds[name];
+  delete QA.editAcceptance.heroes[name];
+  QA.acceptExpanded.delete(name);
   renderQETeams();
   renderQEHeroNotes(QA.editHeroNotes);
+  renderQEAcceptance();
   renderQEHeroGrid();
 }
 
@@ -10807,6 +11577,7 @@ function renderQEHeroGrid() {
 
     const card = document.createElement('div');
     card.className = `qa-pick-card${taken ? ' taken' : ''}`;
+    card.title = taken ? 'Click to remove' : 'Click to add';
     card.innerHTML = `
       ${imgSrc
         ? `<img src="${imgSrc}" class="qa-pick-img" alt="">`
@@ -10814,7 +11585,10 @@ function renderQEHeroGrid() {
       <div class="qa-pick-name">${escHtml(h.eng_name || h.normalized_name)}</div>
       ${inAlly  ? '<div class="qa-pick-badge ally-badge">Ally</div>'   : ''}
       ${inEnemy ? '<div class="qa-pick-badge enemy-badge">Enemy</div>' : ''}`;
-    if (!taken) card.addEventListener('click', () => qeSelectHero(h.normalized_name));
+    card.addEventListener('click', () => {
+      if (taken)        qeRemoveHero(inAlly ? 'ally' : 'enemy', h.normalized_name);
+      else              qeSelectHero(h.normalized_name);
+    });
     cont.appendChild(card);
   });
 }
@@ -10827,15 +11601,59 @@ function renderQEHeroNotes(existing = {}) {
     cont.innerHTML = '<p style="color:var(--muted);font-size:12px">Add heroes to roster first.</p>';
     return;
   }
-  cont.innerHTML = all.map(name => {
-    const display = S.heroList.find(h => h.normalized_name === name)?.eng_name || name;
-    return `
-      <div class="qa-note-row">
-        <label class="qa-note-lbl">${escHtml(display)}</label>
-        <input type="text" class="qa-note-input" data-hero="${escHtml(name)}"
-               placeholder="Note (optional)" value="${escHtml(existing[name] || '')}">
-      </div>`;
-  }).join('');
+
+  const buildOptions = (heroData, selected, autoLabel) => {
+    let opts = `<option value="">${escHtml(autoLabel)}</option>`;
+    if (heroData?.builds?.length) {
+      opts += heroData.builds.map(b => {
+        const v   = b.normalized_build_name || b.name;
+        const lbl = b.name || b.normalized_build_name;
+        const sel = (v === selected) ? ' selected' : '';
+        return `<option value="${escHtml(v)}"${sel}>${escHtml(lbl)}</option>`;
+      }).join('');
+    } else {
+      opts += '<option value="" disabled>loading…</option>';
+    }
+    return opts;
+  };
+
+  cont.innerHTML = `
+    <div class="qa-hero-settings-hdr">
+      <span></span>
+      <span class="muted-label" title="Which build this hero IS when scoring as ally/enemy (matches the calc view)">View Build</span>
+      <span class="muted-label" title="Which builds get TESTED through the algorithm (filter)">Test Build</span>
+      <span></span>
+    </div>
+    ${all.map(name => {
+      const display  = S.heroList.find(h => h.normalized_name === name)?.eng_name || name;
+      const heroData = MATCH.heroData[name];
+      const view = QA.editViewBuilds[name] || '';
+      const test = QA.editTestBuilds[name] || '';
+      return `
+        <div class="qa-hero-settings-row">
+          <label class="qa-note-lbl">${escHtml(display)}</label>
+          <select class="qa-view-build-select" data-hero="${escHtml(name)}">${buildOptions(heroData, view, 'Auto (default)')}</select>
+          <select class="qa-test-build-select" data-hero="${escHtml(name)}">${buildOptions(heroData, test, 'All Builds')}</select>
+          <input type="text" class="qa-note-input" data-hero="${escHtml(name)}"
+                 placeholder="Note (optional)" value="${escHtml(existing[name] || '')}">
+        </div>`;
+    }).join('')}
+  `;
+
+  cont.querySelectorAll('.qa-view-build-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      if (v) QA.editViewBuilds[sel.dataset.hero] = v;
+      else   delete QA.editViewBuilds[sel.dataset.hero];
+    });
+  });
+  cont.querySelectorAll('.qa-test-build-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      if (v) QA.editTestBuilds[sel.dataset.hero] = v;
+      else   delete QA.editTestBuilds[sel.dataset.hero];
+    });
+  });
 }
 
 function getQEHeroNotes() {
@@ -10847,8 +11665,669 @@ function getQEHeroNotes() {
   return notes;
 }
 
+// ── QA Edit: Acceptance Criteria ──────────────────────────────────────────────
+// 4-tier inheritance: Universal → side Team (ally/enemy) → per-Hero
+// At each non-universal level, `override: true` for a phase discards everything
+// inherited above for that phase. Otherwise items merge (deduped union).
+
+function getAcceptTargetPhases(target) {
+  if (target === UNIV_KEY)  return QA.editAcceptance.universal  || {};
+  if (target === ALLY_KEY)  return QA.editAcceptance.allyTeam   || {};
+  if (target === ENEMY_KEY) return QA.editAcceptance.enemyTeam  || {};
+  return QA.editAcceptance.heroes?.[target] || {};
+}
+
+function getAcceptTarget(target) {
+  if (target === UNIV_KEY) {
+    if (!QA.editAcceptance.universal) QA.editAcceptance.universal = {};
+    return QA.editAcceptance.universal;
+  }
+  if (target === ALLY_KEY) {
+    if (!QA.editAcceptance.allyTeam) QA.editAcceptance.allyTeam = {};
+    return QA.editAcceptance.allyTeam;
+  }
+  if (target === ENEMY_KEY) {
+    if (!QA.editAcceptance.enemyTeam) QA.editAcceptance.enemyTeam = {};
+    return QA.editAcceptance.enemyTeam;
+  }
+  if (!QA.editAcceptance.heroes) QA.editAcceptance.heroes = {};
+  if (!QA.editAcceptance.heroes[target]) QA.editAcceptance.heroes[target] = {};
+  return QA.editAcceptance.heroes[target];
+}
+
+function getAcceptPhase(target, phase) {
+  const t = getAcceptTarget(target);
+  if (!t[phase]) {
+    t[phase] = (target === UNIV_KEY)
+      ? { good: [], bad: [] }
+      : { good: [], bad: [], override: false };
+  }
+  return t[phase];
+}
+
+// Compute cumulative inherited items for `target` at `phase` — the items the
+// target sees before applying its own. Respects override flags at intermediate
+// levels (e.g. if ally team overrides at phase X, hero on ally side inherits
+// only the ally team's items, not universal's).
+function inheritedFor(target, phase) {
+  const acc = QA.editAcceptance;
+  if (target === UNIV_KEY) return { good: [], bad: [] };
+
+  let good = new Set(acc.universal?.[phase]?.good || []);
+  let bad  = new Set(acc.universal?.[phase]?.bad  || []);
+
+  if (target === ALLY_KEY || target === ENEMY_KEY) {
+    return { good: [...good], bad: [...bad] };
+  }
+
+  // Hero target — fold in its side's team
+  const side = QA.editAllies.includes(target) ? 'ally' : 'enemy';
+  const team = side === 'ally' ? acc.allyTeam : acc.enemyTeam;
+  const tP = team?.[phase];
+  if (tP?.override) { good = new Set(); bad = new Set(); }
+  (tP?.good || []).forEach(k => good.add(k));
+  (tP?.bad  || []).forEach(k => bad.add(k));
+  return { good: [...good], bad: [...bad] };
+}
+
+function pruneEmptyPhaseMap(phases) {
+  const out = {};
+  Object.entries(phases || {}).forEach(([phase, slots]) => {
+    const g = (slots?.good || []).filter(Boolean);
+    const b = (slots?.bad  || []).filter(Boolean);
+    const override = !!slots?.override;
+    // Keep the phase if it has items OR an explicit override toggle ON
+    if (g.length || b.length || override) {
+      const entry = { good: g, bad: b };
+      if (override) entry.override = true;
+      out[phase] = entry;
+    }
+  });
+  return out;
+}
+
+function pruneEmptyAcceptance(accept) {
+  // accept is the v3 { universal, allyTeam, enemyTeam, heroes } shape
+  const out = {};
+  const univ  = pruneEmptyPhaseMap(accept?.universal);
+  const ally  = pruneEmptyPhaseMap(accept?.allyTeam);
+  const enemy = pruneEmptyPhaseMap(accept?.enemyTeam);
+  if (Object.keys(univ).length)  out.universal = univ;
+  if (Object.keys(ally).length)  out.allyTeam  = ally;
+  if (Object.keys(enemy).length) out.enemyTeam = enemy;
+  const heroes = {};
+  Object.entries(accept?.heroes || {}).forEach(([hero, phases]) => {
+    const cleaned = pruneEmptyPhaseMap(phases);
+    if (Object.keys(cleaned).length) heroes[hero] = cleaned;
+  });
+  if (Object.keys(heroes).length) out.heroes = heroes;
+  return out;
+}
+
+function acceptCountForTarget(target) {
+  const phases = getAcceptTargetPhases(target);
+  let g = 0, b = 0, overrides = 0;
+  Object.values(phases).forEach(s => {
+    g += (s.good || []).length;
+    b += (s.bad  || []).length;
+    if (s.override) overrides++;
+  });
+  return { g, b, overrides };
+}
+
+function renderQEAcceptance() {
+  const cont = document.getElementById('qe-accept-list');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  // 3 team cards in inheritance order
+  cont.innerHTML += renderQEAcceptanceCard(UNIV_KEY);
+  cont.innerHTML += renderQEAcceptanceCard(ALLY_KEY);
+  cont.innerHTML += renderQEAcceptanceCard(ENEMY_KEY);
+
+  const all = [...QA.editAllies, ...QA.editEnemies];
+  if (!all.length) {
+    cont.innerHTML += '<p style="color:var(--muted);font-size:12px;margin-top:8px">Add heroes to the roster to set per-hero acceptance criteria.</p>';
+  } else {
+    all.forEach(name => { cont.innerHTML += renderQEAcceptanceCard(name); });
+  }
+
+  cont.querySelectorAll('.qa-acc-hdr').forEach(el => {
+    el.addEventListener('click', () => toggleQEAcceptanceHero(el.dataset.target));
+  });
+  cont.querySelectorAll('.qa-acc-override').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const slot = getAcceptPhase(cb.dataset.target, cb.dataset.phase);
+      slot.override = cb.checked;
+      renderQEAcceptance();
+    });
+  });
+  bindQEAcceptanceInputs(cont);
+}
+
+function renderQEAcceptanceCard(target) {
+  const isUniv  = target === UNIV_KEY;
+  const isAlly  = target === ALLY_KEY;
+  const isEnemy = target === ENEMY_KEY;
+  const isHero  = !SPECIAL_KEYS.has(target);
+
+  const display = isUniv  ? 'Universal — applies to everyone'
+                : isAlly  ? 'Ally Team — applies to all allies'
+                : isEnemy ? 'Enemy Team — applies to all enemies'
+                : (S.heroList.find(h => h.normalized_name === target)?.eng_name || target);
+
+  // Show side hint for heroes so users know which team-criteria they inherit
+  const heroSide = isHero ? (QA.editAllies.includes(target) ? 'ally' : 'enemy') : null;
+  const sideBadge = isHero
+    ? `<span class="qa-pick-badge ${heroSide === 'ally' ? 'ally-badge' : 'enemy-badge'}" style="margin-left:6px">${heroSide}</span>`
+    : '';
+
+  const expanded = QA.acceptExpanded.has(target);
+  const { g, b, overrides } = acceptCountForTarget(target);
+  const overrideTag = (!isUniv && overrides > 0)
+    ? `<span class="qa-acc-pill qa-acc-ovr">${overrides} override${overrides !== 1 ? 's' : ''}</span>`
+    : '';
+  const summary = (g || b || overrides)
+    ? `<span class="qa-acc-pill qa-acc-good">${g} good</span><span class="qa-acc-pill qa-acc-bad">${b} bad</span>${overrideTag}`
+    : '<span class="muted-label">none set</span>';
+
+  const cardCls = isUniv  ? 'qa-acc-card qa-acc-card-univ'
+                : isAlly  ? 'qa-acc-card qa-acc-card-ally'
+                : isEnemy ? 'qa-acc-card qa-acc-card-enemy'
+                : 'qa-acc-card';
+
+  return `
+    <div class="${cardCls}" data-target="${escHtml(target)}">
+      <div class="qa-acc-hdr" data-target="${escHtml(target)}">
+        <span class="qa-acc-caret">${expanded ? '▾' : '▸'}</span>
+        <span class="qa-acc-name">${escHtml(display)}${sideBadge}</span>
+        <span class="qa-acc-summary">${summary}</span>
+      </div>
+      ${expanded ? renderQEAcceptanceBody(target) : ''}
+    </div>`;
+}
+
+function toggleQEAcceptanceHero(target) {
+  if (QA.acceptExpanded.has(target)) QA.acceptExpanded.delete(target);
+  else                                QA.acceptExpanded.add(target);
+  renderQEAcceptance();
+}
+
+function renderQEAcceptanceBody(target) {
+  const isUniv = target === UNIV_KEY;
+  const isHero = !SPECIAL_KEYS.has(target);
+  const overrideLabel = isHero ? 'override inherited' : 'override universal';
+  const overrideTitle = isHero
+    ? 'If checked, the items inherited from Universal + side Team are ignored for this phase — only this hero\'s items apply.'
+    : 'If checked, the Universal criteria for this phase are ignored — only this team\'s items apply.';
+
+  return `<div class="qa-acc-body">${QA_PHASES.map(phase => {
+    const phases = getAcceptTargetPhases(target);
+    const slots  = phases[phase] || { good: [], bad: [], override: false };
+    const overrideOn = !!slots.override;
+
+    const inherited = inheritedFor(target, phase);
+    const inheritedG = inherited.good.length;
+    const inheritedB = inherited.bad.length;
+    const inheritLine = (!isUniv && (inheritedG || inheritedB))
+      ? `<div class="qa-acc-inherit">${overrideOn
+            ? `<span class="qa-acc-inherit-strike">Inherits ${inheritedG} good, ${inheritedB} bad</span> <span class="muted-label">(overridden)</span>`
+            : `Inherits ${inheritedG} good, ${inheritedB} bad`}</div>`
+      : '';
+
+    const overrideToggle = isUniv
+      ? ''
+      : `<label class="qa-acc-override-lbl" title="${escHtml(overrideTitle)}">
+           <input type="checkbox" class="qa-acc-override" data-target="${escHtml(target)}" data-phase="${escHtml(phase)}" ${overrideOn ? 'checked' : ''}>
+           ${escHtml(overrideLabel)}
+         </label>`;
+
+    return `
+      <div class="qa-acc-phase-row">
+        <div class="qa-acc-phase-name">
+          ${escHtml(phase)}
+          ${inheritLine}
+        </div>
+        <div class="qa-acc-slots">
+          ${renderAcceptSlot(target, phase, 'good', slots.good)}
+          ${renderAcceptSlot(target, phase, 'bad',  slots.bad)}
+        </div>
+        ${overrideToggle ? `<div class="qa-acc-phase-meta">${overrideToggle}</div>` : ''}
+      </div>`;
+  }).join('')}</div>`;
+}
+
+function renderAcceptSlot(target, phase, kind, keys) {
+  const chips = (keys || []).map(k => {
+    const it    = bpItemMap[k] || (MATCH.itemData || []).find(i => i.normalized_name === k);
+    const label = escHtml(it?.name || k);
+    return `<span class="qa-acc-chip qa-acc-chip-${kind}" data-target="${escHtml(target)}" data-phase="${escHtml(phase)}" data-kind="${kind}" data-key="${escHtml(k)}">
+      ${label} <button class="qa-acc-chip-x" title="Remove">×</button>
+    </span>`;
+  }).join('');
+  return `
+    <div class="qa-acc-slot qa-acc-slot-${kind}">
+      <span class="qa-acc-slot-lbl">${kind === 'good' ? '✓ good' : '✗ bad'}</span>
+      <div class="qa-acc-chips">${chips}</div>
+      <div class="qa-acc-picker">
+        <input type="text" class="qa-acc-input" data-target="${escHtml(target)}" data-phase="${escHtml(phase)}" data-kind="${kind}" placeholder="+ add item…">
+        <div class="qa-acc-suggest"></div>
+      </div>
+    </div>`;
+}
+
+function bindQEAcceptanceInputs(root) {
+  root.querySelectorAll('.qa-acc-chip-x').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const chip = btn.closest('.qa-acc-chip');
+      removeAcceptKey(chip.dataset.target, chip.dataset.phase, chip.dataset.kind, chip.dataset.key);
+    });
+  });
+  root.querySelectorAll('.qa-acc-input').forEach(inp => {
+    inp.addEventListener('input', () => renderAcceptSuggestions(inp));
+    inp.addEventListener('focus', () => renderAcceptSuggestions(inp));
+    inp.addEventListener('blur',  () => setTimeout(() => clearAcceptSuggestions(inp), 150));
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const first = inp.parentElement.querySelector('.qa-acc-suggest-item');
+        if (first) {
+          // Suggest items use mousedown (so the input doesn't blur first).
+          // .click() fires click only, which wouldn't trigger — so call directly.
+          addAcceptKey(inp.dataset.target, inp.dataset.phase, inp.dataset.kind, first.dataset.key);
+          inp.value = '';
+        }
+      }
+    });
+  });
+}
+
+function renderAcceptSuggestions(inp) {
+  const q = inp.value.trim().toLowerCase();
+  const wrap = inp.parentElement.querySelector('.qa-acc-suggest');
+  if (!wrap) return;
+  const pool = (MATCH.itemData || []).filter(it => !it.synthetic);
+  const hits = (q.length >= 1)
+    ? pool.filter(it =>
+        (it.normalized_name || '').includes(q) ||
+        (it.name || '').toLowerCase().includes(q))
+    : pool;
+  wrap.innerHTML = hits.slice(0, 8).map(it => `
+    <div class="qa-acc-suggest-item" data-key="${escHtml(it.normalized_name)}">
+      ${escHtml(it.name || it.normalized_name)} <span class="muted-label">(T${(it.tier || 800)/800})</span>
+    </div>`).join('');
+  wrap.querySelectorAll('.qa-acc-suggest-item').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      addAcceptKey(inp.dataset.target, inp.dataset.phase, inp.dataset.kind, el.dataset.key);
+      inp.value = '';
+    });
+  });
+}
+
+function clearAcceptSuggestions(inp) {
+  const wrap = inp.parentElement.querySelector('.qa-acc-suggest');
+  if (wrap) wrap.innerHTML = '';
+}
+
+function addAcceptKey(target, phase, kind, key) {
+  const slot = getAcceptPhase(target, phase);
+  const list = slot[kind] || (slot[kind] = []);
+  if (list.includes(key)) return;
+  list.push(key);
+  renderQEAcceptance();
+}
+
+function removeAcceptKey(target, phase, kind, key) {
+  const phases = getAcceptTargetPhases(target);
+  const slot = phases?.[phase];
+  if (!slot) return;
+  const list = slot[kind] || [];
+  const i = list.indexOf(key);
+  if (i >= 0) list.splice(i, 1);
+  renderQEAcceptance();
+}
+
 function toggleQEAlgos(show) {
   document.querySelectorAll('#qe-algo-checkboxes input[type=checkbox]').forEach(cb => { cb.checked = show; });
+}
+
+// ── Acceptance Evaluation ─────────────────────────────────────────────────────
+// Given a hero's criteria { phase: { good: [keys], bad: [keys] } } and a built
+// build path, return per-phase + total hits/misses/violations.
+//
+// Semantics:
+//   - "good" = item (or an upgrade of it) should be present in owned-set by
+//     the END of that phase. So a Lane criterion is satisfied if the item is
+//     bought in Lane; an Early criterion is satisfied if the item is bought
+//     in Lane OR Early. The phase represents the LATEST acceptable buy.
+//   - "bad"  = item should NOT be present in owned-set by the end of that
+//     phase. Violation if it appears in or before that phase.
+//   - Upgrade resolution: criterion "extra_spirit" is satisfied if the owned
+//     set contains extra_spirit OR any item that upgrades from it (transitively).
+
+function buildOwnedByPhase(buildPath) {
+  const owned = new Set();
+  const byPhase = {};
+  (buildPath || []).forEach(ph => {
+    (ph.changes || []).forEach(ch => {
+      if (ch.action === 'sell') owned.delete(ch.key);
+      else                       owned.add(ch.key);
+    });
+    byPhase[ph.phase] = new Set(owned);
+  });
+  return byPhase;
+}
+
+// Walk transitively from `key` through upgrades_to. Returns the set of all
+// upgrades that derive from this item. Cached because the upgrade graph is
+// static within a session.
+const _upgradeDescendantsCache = {};
+function upgradeDescendantsOf(key) {
+  if (_upgradeDescendantsCache[key]) return _upgradeDescendantsCache[key];
+  if (!Object.keys(bpItemMap || {}).length && MATCH.itemData?.length) {
+    bpItemMap = {};
+    MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+  }
+  // Build reverse-lookup once per cache miss
+  const upgradesTo = {};
+  Object.keys(bpItemMap).forEach(k => {
+    (bpItemMap[k].upgrades_from || []).forEach(comp => {
+      if (!upgradesTo[comp]) upgradesTo[comp] = [];
+      upgradesTo[comp].push(k);
+    });
+  });
+  const out   = new Set([key]);
+  const stack = [...(upgradesTo[key] || [])];
+  while (stack.length) {
+    const u = stack.pop();
+    if (out.has(u)) continue;
+    out.add(u);
+    (upgradesTo[u] || []).forEach(x => stack.push(x));
+  }
+  _upgradeDescendantsCache[key] = out;
+  return out;
+}
+
+function criterionHit(critKey, ownedSet) {
+  if (ownedSet.has(critKey)) return true;
+  const desc = upgradeDescendantsOf(critKey);
+  for (const d of desc) if (ownedSet.has(d)) return true;
+  return false;
+}
+
+// Compute the effective per-phase criteria for one hero, walking the 3-tier
+// inheritance chain: Universal → side Team → Hero. At each non-universal
+// level, override=true for a phase discards everything inherited above for
+// that phase. Otherwise lists merge (deduped union).
+//
+// `accept` is the normalized { universal, allyTeam, enemyTeam, heroes } shape.
+// `side` is 'ally' or 'enemy'.
+function effectiveCriteriaForHero(accept, heroName, side) {
+  const universal = accept?.universal || {};
+  const team      = (side === 'ally' ? accept?.allyTeam : accept?.enemyTeam) || {};
+  const heroPh    = accept?.heroes?.[heroName] || {};
+  const out = {};
+  QA_PHASES.forEach(phase => {
+    let good = new Set(universal[phase]?.good || []);
+    let bad  = new Set(universal[phase]?.bad  || []);
+
+    const tP = team[phase];
+    if (tP?.override) { good = new Set(); bad = new Set(); }
+    (tP?.good || []).forEach(k => good.add(k));
+    (tP?.bad  || []).forEach(k => bad.add(k));
+
+    const hP = heroPh[phase];
+    if (hP?.override) { good = new Set(); bad = new Set(); }
+    (hP?.good || []).forEach(k => good.add(k));
+    (hP?.bad  || []).forEach(k => bad.add(k));
+
+    out[phase] = { good: [...good], bad: [...bad] };
+  });
+  return out;
+}
+
+function evaluateAcceptance(buildPath, criteria) {
+  if (!criteria) return null;
+  // Skip if every phase is empty
+  const any = QA_PHASES.some(p => (criteria[p]?.good?.length || 0) + (criteria[p]?.bad?.length || 0) > 0);
+  if (!any) return null;
+  const ownedByPhase = buildOwnedByPhase(buildPath);
+  const phases = {};
+  let totalGood = 0, totalGoodHits = 0, totalBad = 0, totalBadViolations = 0;
+
+  QA_PHASES.forEach(phase => {
+    const c = criteria[phase] || { good: [], bad: [] };
+    const owned = ownedByPhase[phase] || new Set();
+    const goodHits   = (c.good || []).filter(k =>  criterionHit(k, owned));
+    const goodMisses = (c.good || []).filter(k => !criterionHit(k, owned));
+    const badViols   = (c.bad  || []).filter(k =>  criterionHit(k, owned));
+    phases[phase] = { goodHits, goodMisses, badViolations: badViols };
+    totalGood          += (c.good || []).length;
+    totalGoodHits      += goodHits.length;
+    totalBad           += (c.bad  || []).length;
+    totalBadViolations += badViols.length;
+  });
+
+  return {
+    phases,
+    totalGood, totalGoodHits,
+    totalBad, totalBadViolations,
+    goodPct: totalGood ? (totalGoodHits / totalGood) : null,
+  };
+}
+
+// Is `itemKey` either a criterion item itself, or an upgrade-descendant of one?
+// Used to color bought-item icons in the overview.
+function critContainsViaUpgrade(critSet, itemKey) {
+  if (critSet.has(itemKey)) return true;
+  for (const crit of critSet) {
+    if (upgradeDescendantsOf(crit).has(itemKey)) return true;
+  }
+  return false;
+}
+
+// Walk QA.runResults into a shape with effective criteria + pre-computed
+// acceptance evaluation per (algo, hero, build). Used by the Overview tab.
+function buildAlgoResultsForOverview(runResults, acceptance) {
+  const out = {};
+  Object.entries(runResults || {}).forEach(([algo, heroResults]) => {
+    out[algo] = (heroResults || []).map(r => {
+      const side = r.isEnemy ? 'enemy' : 'ally';
+      const eff  = effectiveCriteriaForHero(acceptance, r.name, side);
+      return {
+        ...r,
+        builds: (r.builds || []).map(b => ({
+          ...b,
+          _effCriteria: eff,
+          acceptance:   evaluateAcceptance(b.buildPath, eff),
+        })),
+      };
+    });
+  });
+  return out;
+}
+
+// Overview tab content: one block per algorithm, with a table whose columns are
+// the build phases. Each cell shows item icons for items bought in that phase
+// — green-bordered if matching a good criterion, red-bordered if violating a
+// bad one. Missing-good criteria appear as red ✗ chips in their target phase.
+// The whole point is to visualize REACTIVITY (under/over/late/early) — not to
+// score pass/fail.
+function renderQAOverviewWithPhases(algoResultsMap) {
+  const algos = Object.keys(algoResultsMap || {});
+  if (!algos.length) {
+    return '<p class="muted-label" style="padding:20px">No results.</p>';
+  }
+
+  const blocks = algos.map(algo => renderQAOverviewAlgoBlock(algo, algoResultsMap[algo] || []))
+                      .filter(Boolean).join('');
+  if (!blocks) {
+    return '<p class="muted-label" style="padding:20px">No acceptance criteria set in this scenario — add Universal / Team / per-Hero criteria in the editor to gauge reactivity.</p>';
+  }
+  return `<div class="qa-overview-tab">
+    <p class="qa-ov-legend">
+      Items each algorithm bought per phase. Acceptance criteria gauges <strong>reactivity</strong> — under/over/late/early reaction — not pass-fail.
+      <span class="qa-ov-leg-itm qa-ov-itm-good"></span> matches good ·
+      <span class="qa-ov-leg-itm qa-ov-itm-bad"></span> violates bad ·
+      <span style="color:var(--danger);font-weight:700">✗ name</span> = a good criterion missed by that phase.
+    </p>
+    ${blocks}
+  </div>`;
+}
+
+function renderQAOverviewAlgoBlock(algo, heroResults) {
+  const label = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label || algo;
+
+  // Aggregate across heroes that have any criteria
+  let totG = 0, totGH = 0, totB = 0, totBV = 0, any = false;
+  heroResults.forEach(r => (r.builds || []).forEach(b => {
+    const ev = b.acceptance;
+    if (!ev) return;
+    if (!ev.totalGood && !ev.totalBad) return;
+    any = true;
+    totG  += ev.totalGood;
+    totGH += ev.totalGoodHits;
+    totB  += ev.totalBad;
+    totBV += ev.totalBadViolations;
+  }));
+  if (!any) return '';
+
+  const pct = totG ? Math.round((totGH / totG) * 100) : null;
+  const aggG = (totG && totGH === totG) ? 'ok' : (pct >= 75 ? 'warn' : 'bad');
+  const aggB = totBV === 0 ? 'ok' : 'bad';
+
+  const rowsHtml = heroResults.flatMap(r => (r.builds || []).map(b => {
+    const ev = b.acceptance;
+    if (!ev || (!ev.totalGood && !ev.totalBad)) return null;
+    return renderQAOverviewRow(r, b);
+  })).filter(Boolean).join('');
+
+  return `
+    <div class="qa-ov-algo">
+      <div class="qa-ov-algo-hdr">
+        <span class="qa-ov-algo-name">${escHtml(label)}</span>
+        <span class="qa-ov-pill ${aggG}">${totGH}/${totG}${pct != null ? ` · ${pct}%` : ''} good</span>
+        <span class="qa-ov-pill ${aggB}">${totBV} bad violation${totBV !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="qa-ov-table-wrap">
+        <table class="qa-ov-table">
+          <thead><tr>
+            <th>Hero · Build</th>
+            ${QA_PHASES.map(p => `<th>${escHtml(p)}</th>`).join('')}
+            <th>Result</th>
+          </tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderQAOverviewRow(r, b) {
+  const ev   = b.acceptance;
+  const eff  = b._effCriteria || {};
+  const side = r.isEnemy ? 'enemy' : 'ally';
+
+  // Union of all good/bad criterion items across phases — used to color icons
+  const allGood = new Set();
+  const allBad  = new Set();
+  QA_PHASES.forEach(p => {
+    (eff[p]?.good || []).forEach(k => allGood.add(k));
+    (eff[p]?.bad  || []).forEach(k => allBad.add(k));
+  });
+
+  // Build per-phase cells. `buildPath` is the structured form: [{phase, changes:[{key,action}]}]
+  // For saved reports it may also come as buildPathByPhase (flat keys per phase).
+  const buildPathByPhase = b.buildPathByPhase || {};
+  const buildPathStruct  = b.buildPath || [];
+  const isStruct = Array.isArray(buildPathStruct) && buildPathStruct.length && typeof buildPathStruct[0] === 'object';
+
+  const cells = QA_PHASES.map(phase => {
+    let buys = [];
+    if (isStruct) {
+      const phEntry = buildPathStruct.find(p => p.phase === phase);
+      buys = (phEntry?.changes || [])
+        .filter(c => c.action !== 'sell')
+        .map(c => c.key);
+    } else if (buildPathByPhase[phase]) {
+      buys = buildPathByPhase[phase];
+    }
+
+    const itemIcons = buys.map(k => {
+      const it    = bpItemMap[k] || (MATCH.itemData || []).find(i => i.normalized_name === k);
+      const img   = it?.image_path ? srcUrl(it.image_path) : '';
+      const isGd  = critContainsViaUpgrade(allGood, k);
+      const isBd  = critContainsViaUpgrade(allBad, k);
+      const cls   = 'qa-ov-itm' + (isGd ? ' qa-ov-itm-good' : (isBd ? ' qa-ov-itm-bad' : ''));
+      const tip   = `${it?.name || k}${isGd ? ' — ✓ matches good criterion' : (isBd ? ' — ✗ violates bad criterion' : '')}`;
+      return img
+        ? `<img class="${cls}" src="${img}" title="${escHtml(tip)}" alt="${escHtml(it?.name || k)}">`
+        : `<span class="${cls}" title="${escHtml(tip)}">${escHtml((it?.name || k).slice(0, 3))}</span>`;
+    }).join('');
+
+    // Missed good-criteria are intentionally NOT shown as labels here — the
+    // per-build acceptance panel below already lists them. The Overview is
+    // meant to scan REACTIVITY at a glance via the bought-item colors, and
+    // repeating "✗ Disarming Hex" across phases was too distracting.
+    const phaseInfo = ev?.phases?.[phase] || { goodMisses: [], badViolations: [] };
+    const missedHtml = '';
+
+    // Cell metadata: criteria items for export / hover summary
+    const goodNames = (eff[phase]?.good || []).map(k => bpItemMap[k]?.name || k);
+    const badNames  = (eff[phase]?.bad  || []).map(k => bpItemMap[k]?.name || k);
+    const titleParts = [phase];
+    if (goodNames.length) titleParts.push(`good: ${goodNames.join(', ')}`);
+    if (badNames.length)  titleParts.push(`bad: ${badNames.join(', ')}`);
+    const exportTxt = [...goodNames, ...badNames.map(n => `!${n}`)].join(', ');
+
+    return `<td class="qa-ov-cell" title="${escHtml(titleParts.join(' · '))}" data-export="${escHtml(exportTxt)}">
+      <div class="qa-ov-itms">${itemIcons || '<span class="qa-ov-empty">—</span>'}</div>
+      ${missedHtml ? `<div class="qa-ov-missed">${missedHtml}</div>` : ''}
+    </td>`;
+  }).join('');
+
+  const goodPct = ev.totalGood ? Math.round((ev.totalGoodHits / ev.totalGood) * 100) : null;
+  const goodCls = (ev.totalGood && ev.totalGoodHits === ev.totalGood) ? 'ok' : (goodPct >= 75 ? 'warn' : 'bad');
+  const badCls  = ev.totalBadViolations === 0 ? 'ok' : 'bad';
+  const sideCls = side === 'ally' ? 'ally-hdr' : 'enemy-hdr';
+
+  return `
+    <tr class="qa-ov-trow">
+      <td class="qa-ov-hero-cell">
+        <span class="qa-ov-side ${sideCls}">${escHtml(side)}</span>
+        <span class="qa-ov-hero-name">${escHtml(r.engName)}</span>
+        <span class="qa-ov-build-name">${escHtml(b.name)}</span>
+      </td>
+      ${cells}
+      <td class="qa-ov-result-cell">
+        <span class="qa-ov-pill ${goodCls}">${ev.totalGoodHits}/${ev.totalGood}${goodPct != null ? ` · ${goodPct}%` : ''}</span>
+        <span class="qa-ov-pill ${badCls}">${ev.totalBadViolations} bad</span>
+      </td>
+    </tr>`;
+}
+
+// Aggregate per-algo across all heroes in the scenario: sum hits/misses/violations
+// so a "75% good, 2 bad violations" headline can be displayed at the top of the run.
+// scenarioAcceptance is in the v3 {universal, allyTeam, enemyTeam, heroes} shape.
+function aggregateAcceptanceForAlgo(heroResults, scenarioAcceptance) {
+  let g = 0, gh = 0, b = 0, bv = 0, any = false;
+  (heroResults || []).forEach(hr => {
+    const side = hr.isEnemy ? 'enemy' : 'ally';
+    const eff  = effectiveCriteriaForHero(scenarioAcceptance, hr.name, side);
+    hr.builds.forEach(bld => {
+      const ev = evaluateAcceptance(bld.buildPath, eff);
+      if (!ev) return;
+      any = true;
+      g  += ev.totalGood;
+      gh += ev.totalGoodHits;
+      b  += ev.totalBad;
+      bv += ev.totalBadViolations;
+    });
+  });
+  if (!any) return null;
+  return { totalGood: g, totalGoodHits: gh, totalBad: b, totalBadViolations: bv,
+           goodPct: g ? gh / g : null };
 }
 
 // ── Run Scenario ──────────────────────────────────────────────────────────────
@@ -10872,19 +12351,38 @@ async function runQAScenario(id) {
   }
   if (!MATCH.itemData.length) MATCH.itemData = (await api.get('/api/items/all')).filter(it => !it.synthetic);
 
-  const savedAllies  = MATCH.allies;
-  const savedEnemies = MATCH.enemies;
-  const savedFormula = MATCH.scoreFormula;
-  const savedAlgo    = MATCH.bpAlgo;
+  const savedAllies         = MATCH.allies;
+  const savedEnemies        = MATCH.enemies;
+  const savedFormula        = MATCH.scoreFormula;
+  const savedAlgo           = MATCH.bpAlgo;
+  const savedSelectedBuilds = { ...MATCH.selectedBuilds };
 
   MATCH.allies       = scenario.allies;
   MATCH.enemies      = scenario.enemies;
   MATCH.scoreFormula = scenario.scoreFormula;
 
+  // Apply viewBuilds: force which build each hero "IS" when seen as ally/enemy.
+  // Reset to defaults first so prior calc state doesn't leak into the run.
+  const viewBuilds = scenario.viewBuilds || {};
+  [...scenario.allies, ...scenario.enemies].forEach(name => {
+    const hero = MATCH.heroData[name];
+    if (!hero) return;
+    const pick = viewBuilds[name];
+    let idx;
+    if (pick) {
+      idx = hero.builds.findIndex(b => (b.normalized_build_name || b.name) === pick);
+    }
+    if (idx === undefined || idx < 0) idx = defaultBuildIdxFor(name) ?? 0;
+    MATCH.selectedBuilds[name] = idx;
+  });
+
   QA.runScenarioId = id;
   QA.runResults    = {};
   QA.runNotes      = {};
 
+  // testBuilds filters which build entries appear in the run report. Migrate
+  // from legacy buildSelections if a scenario was saved with the old name.
+  const testBuilds = scenario.testBuilds || scenario.buildSelections || {};
   const total = scenario.algos.length;
   for (let i = 0; i < total; i++) {
     const algo = scenario.algos[i];
@@ -10892,21 +12390,32 @@ async function runQAScenario(id) {
     await new Promise(r => setTimeout(r, 0)); // yield to browser between algos
     MATCH.bpAlgo = algo;
     const results = computeResults();
-    QA.runResults[algo] = results.map(r => ({
-      name:      r.name,
-      engName:   r.engName,
-      imagePath: r.imagePath,
-      isEnemy:   r.isEnemy,
-      builds:    r.builds.map(b => ({ ...b, buildPath: computeBuildPath(b, algo) })),
-    }));
+    QA.runResults[algo] = results.map(r => {
+      const pick = testBuilds[r.name];
+      const filtered = pick
+        ? r.builds.filter(b => (b.normalized_build_name || b.name) === pick)
+        : r.builds;
+      // If the saved selection no longer matches any current build, fall back to all
+      // so the scenario doesn't silently produce an empty result.
+      const builds = filtered.length ? filtered : r.builds;
+      return {
+        name:      r.name,
+        engName:   r.engName,
+        imagePath: r.imagePath,
+        isEnemy:   r.isEnemy,
+        builds:    builds.map(b => ({ ...b, buildPath: computeBuildPath(b, algo) })),
+      };
+    });
   }
 
-  MATCH.allies       = savedAllies;
-  MATCH.enemies      = savedEnemies;
-  MATCH.scoreFormula = savedFormula;
-  MATCH.bpAlgo       = savedAlgo;
+  MATCH.allies         = savedAllies;
+  MATCH.enemies        = savedEnemies;
+  MATCH.scoreFormula   = savedFormula;
+  MATCH.bpAlgo         = savedAlgo;
+  MATCH.selectedBuilds = savedSelectedBuilds;
 
-  QA.runAlgo = scenario.algos[0];
+  // Land on the Overview tab — quickest visual scan of all algorithms' reactivity.
+  QA.runAlgo = OVERVIEW_TAB;
   renderQARunPage(scenario);
   showPage('qa-run');
   toast('Done');
@@ -10917,45 +12426,89 @@ function renderQARunPage(scenario) {
 
   const tabs = document.getElementById('qa-run-algo-tabs');
   tabs.innerHTML = '';
+
+  // Prepend the Overview tab — bird's-eye view across all algorithms.
+  const ovBtn = document.createElement('button');
+  ovBtn.className   = `qa-algo-tab qa-algo-tab-overview${QA.runAlgo === OVERVIEW_TAB ? ' active' : ''}`;
+  ovBtn.textContent = 'Overview';
+  ovBtn.dataset.algo = OVERVIEW_TAB;
+  ovBtn.addEventListener('click', () => selectQARunAlgo(OVERVIEW_TAB));
+  tabs.appendChild(ovBtn);
+
   scenario.algos.forEach(algo => {
     const label = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
     const btn   = document.createElement('button');
     btn.className   = `qa-algo-tab${algo === QA.runAlgo ? ' active' : ''}`;
     btn.textContent = label;
+    btn.dataset.algo = algo;
     btn.addEventListener('click', () => selectQARunAlgo(algo));
     tabs.appendChild(btn);
   });
+
+  // The standalone overview banner is replaced by the Overview tab — keep
+  // the container present but empty for layout.
+  const ovEl = document.getElementById('qa-run-overview');
+  if (ovEl) ovEl.innerHTML = '';
 
   renderQARunResults();
 }
 
 function selectQARunAlgo(algo) {
   QA.runAlgo = algo;
-  const label = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
   document.querySelectorAll('.qa-algo-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent === label);
+    btn.classList.toggle('active', btn.dataset.algo === algo);
   });
   renderQARunResults();
 }
 
 function renderQARunResults() {
-  const results   = QA.runResults[QA.runAlgo] || [];
   const container = document.getElementById('qa-run-results');
   container.innerHTML = '';
+  const scenario   = QA.scenarios.find(x => x.id === QA.runScenarioId);
+  const acceptance = normalizeAcceptance(scenario?.acceptance);
 
+  // Overview tab branches before the single-algo render path.
+  if (QA.runAlgo === OVERVIEW_TAB) {
+    const algoResultsForOverview = buildAlgoResultsForOverview(QA.runResults, acceptance);
+    container.innerHTML = renderQAOverviewWithPhases(algoResultsForOverview);
+    return;
+  }
+
+  const results = QA.runResults[QA.runAlgo] || [];
   if (!results.length) {
     container.innerHTML = '<p style="color:var(--muted)">No results.</p>';
     return;
   }
 
-  results.forEach(r => { container.innerHTML += renderQABuildRow(r); });
+  // Per-algo aggregate banner — only renders if scenario has any criteria
+  const agg = aggregateAcceptanceForAlgo(results, acceptance);
+  if (agg) container.innerHTML += renderQAAcceptanceAggregate(agg);
+
+  results.forEach(r => {
+    const side = r.isEnemy ? 'enemy' : 'ally';
+    const eff  = effectiveCriteriaForHero(acceptance, r.name, side);
+    container.innerHTML += renderQABuildRow(r, eff);
+  });
 
   container.querySelectorAll('.qa-note-input[data-key]').forEach(inp => {
     inp.addEventListener('input', () => { QA.runNotes[inp.dataset.key] = inp.value; });
   });
 }
 
-function renderQABuildRow(heroResult) {
+function renderQAAcceptanceAggregate(agg) {
+  const pct = agg.goodPct == null ? '—' : `${Math.round(agg.goodPct * 100)}%`;
+  const goodCls = agg.totalGood && agg.totalGoodHits === agg.totalGood ? 'ok'
+                : agg.goodPct >= 0.75 ? 'warn' : 'bad';
+  const badCls  = agg.totalBadViolations === 0 ? 'ok' : 'bad';
+  return `
+    <div class="qa-acc-agg">
+      <span class="qa-acc-agg-lbl">Acceptance:</span>
+      <span class="qa-acc-agg-pill ${goodCls}">${agg.totalGoodHits}/${agg.totalGood} good · ${pct}</span>
+      <span class="qa-acc-agg-pill ${badCls}">${agg.totalBadViolations} bad violations</span>
+    </div>`;
+}
+
+function renderQABuildRow(heroResult, criteria) {
   const isAlly    = !heroResult.isEnemy;
   const sideClass = isAlly ? 'ally-hdr' : 'enemy-hdr';
   const sideLabel = isAlly ? 'Ally' : 'Enemy';
@@ -10966,10 +12519,12 @@ function renderQABuildRow(heroResult) {
   const buildsHtml = heroResult.builds.map(b => {
     const noteKey = `${QA.runAlgo}::${heroResult.name}::${b.name}`;
     const noteVal = escHtml(QA.runNotes[noteKey] || '');
+    const ev = criteria ? evaluateAcceptance(b.buildPath, criteria) : null;
     return `
       <div class="qa-build-entry">
         <div class="qa-build-name">${escHtml(b.name)} <span class="qa-build-score">${b.total.toFixed(2)}</span></div>
         <div class="qa-build-path-wrap">${renderQABuildPath(b.buildPath, b)}</div>
+        ${ev ? renderQAAcceptancePanel(ev) : ''}
         <div class="qa-note-row">
           <label class="qa-note-lbl">Note</label>
           <input type="text" class="qa-note-input" data-key="${escHtml(noteKey)}" placeholder="Optional note" value="${noteVal}">
@@ -10985,6 +12540,45 @@ function renderQABuildRow(heroResult) {
         <span class="qa-hero-side-badge">${sideLabel}</span>
       </div>
       <div class="qa-hero-builds">${buildsHtml}</div>
+    </div>`;
+}
+
+function renderQAAcceptancePanel(ev) {
+  // Show only phases where the user actually set criteria — keeps the panel compact.
+  const rows = QA_PHASES.map(phase => {
+    const p = ev.phases[phase];
+    if (!p) return '';
+    const totalGood = p.goodHits.length + p.goodMisses.length;
+    const totalBad  = p.badViolations.length;
+    if (!totalGood && !totalBad) return '';
+
+    const itemLabel = k => {
+      const it = bpItemMap[k] || (MATCH.itemData || []).find(i => i.normalized_name === k);
+      return escHtml(it?.name || k);
+    };
+    const goodCls   = (totalGood && p.goodMisses.length === 0) ? 'ok' : (p.goodMisses.length ? 'bad' : 'na');
+    const badCls    = totalBad === 0 ? 'ok' : 'bad';
+    const goodStr   = totalGood
+      ? `${p.goodHits.length}/${totalGood} good${p.goodMisses.length ? ` <span class="qa-acc-miss">(missed ${p.goodMisses.map(itemLabel).join(', ')})</span>` : ''}`
+      : '<span class="muted-label">no good criteria</span>';
+    const badStr    = totalBad
+      ? `${p.badViolations.length} bad${p.badViolations.length ? ` <span class="qa-acc-miss">(${p.badViolations.map(itemLabel).join(', ')})</span>` : ''}`
+      : '<span class="muted-label">no bad criteria</span>';
+
+    return `
+      <div class="qa-acc-eval-row">
+        <span class="qa-acc-eval-phase">${escHtml(phase)}</span>
+        <span class="qa-acc-eval-pill ${goodCls}">${goodStr}</span>
+        <span class="qa-acc-eval-pill ${badCls}">${badStr}</span>
+      </div>`;
+  }).filter(Boolean).join('');
+
+  if (!rows) return '';
+  const pct = ev.goodPct == null ? '—' : `${Math.round(ev.goodPct * 100)}%`;
+  return `
+    <div class="qa-acc-eval">
+      <div class="qa-acc-eval-hdr">Acceptance · ${pct} good · ${ev.totalBadViolations} bad violations</div>
+      ${rows}
     </div>`;
 }
 
@@ -11020,20 +12614,40 @@ async function saveQAReport() {
     if (v) QA.runNotes[inp.dataset.key] = v;
   });
 
+  const acceptance = normalizeAcceptance(scenario.acceptance);
   const algoResults = {};
   for (const [algo, results] of Object.entries(QA.runResults)) {
-    algoResults[algo] = results.map(r => ({
-      name:      r.name,
-      engName:   r.engName,
-      imagePath: r.imagePath,
-      isEnemy:   r.isEnemy,
-      builds:    r.builds.map(b => ({
-        name:      b.name,
-        total:     b.total,
-        buildPath: (b.buildPath || []).flatMap(phase => (phase.changes || []).map(ch => ch.key)),
-        note:      QA.runNotes[`${algo}::${r.name}::${b.name}`] || '',
-      })),
-    }));
+    algoResults[algo] = results.map(r => {
+      const side = r.isEnemy ? 'enemy' : 'ally';
+      const eff  = effectiveCriteriaForHero(acceptance, r.name, side);
+      return {
+        name:      r.name,
+        engName:   r.engName,
+        imagePath: r.imagePath,
+        isEnemy:   r.isEnemy,
+        builds:    r.builds.map(b => {
+          // Preserve phase-grouped form too — the report-viewer Overview needs it
+          // to render the same per-phase columns the live run page shows.
+          const phaseMap = {};
+          (b.buildPath || []).forEach(p => {
+            phaseMap[p.phase] = (p.changes || [])
+              .filter(c => c.action !== 'sell')
+              .map(c => c.key);
+          });
+          return {
+            name:             b.name,
+            total:            b.total,
+            buildPath:        (b.buildPath || []).flatMap(phase => (phase.changes || []).map(ch => ch.key)),
+            buildPathByPhase: phaseMap,
+            // Persist the effective criteria too so the report viewer's Overview
+            // can recolor icons + list missed criteria without recomputing.
+            effCriteria:      eff,
+            note:             QA.runNotes[`${algo}::${r.name}::${b.name}`] || '',
+            acceptance:       evaluateAcceptance(b.buildPath, eff),
+          };
+        }),
+      };
+    });
   }
 
   const res = await api.post('/api/qa/reports', {
@@ -11044,6 +12658,7 @@ async function saveQAReport() {
     algos:         scenario.algos,
     scoreFormula:  scenario.scoreFormula,
     heroNotes:     scenario.heroNotes || {},
+    acceptance:    acceptance,
     algoResults,
     buildNotes:    QA.runNotes,
   });
@@ -11057,6 +12672,7 @@ async function saveQAReport() {
 async function viewQAReport(id) {
   const report = await api.get(`/api/qa/reports/${id}`);
   if (report.error) { toast(report.error, 'error'); return; }
+  await ensureQAItemData();   // for item-name display in acceptance misses
   document.getElementById('qa-report-title').textContent   = `Report: ${report.scenario_name}`;
   document.getElementById('btn-delete-qa-report').dataset.rid = id;
   renderQAReportContent(report);
@@ -11083,12 +12699,29 @@ function renderQAReportContent(report) {
   const algosHtml = (report.algos || []).map(algo => {
     const label       = BP_ALGO_OPTIONS.find(o => o.value === algo)?.label ?? algo;
     const heroResults = (report.algoResults || {})[algo] || [];
-    const heroHtml    = heroResults.map(r => {
-      const buildsHtml = (r.builds || []).map(b => `
+
+    // Roll up per-algo aggregate from saved per-build evaluations.
+    let g = 0, gh = 0, b = 0, bv = 0, any = false;
+    heroResults.forEach(r => (r.builds || []).forEach(bd => {
+      if (!bd.acceptance) return;
+      any = true;
+      g  += bd.acceptance.totalGood;
+      gh += bd.acceptance.totalGoodHits;
+      b  += bd.acceptance.totalBad;
+      bv += bd.acceptance.totalBadViolations;
+    }));
+    const aggHtml = any ? renderQAAcceptanceAggregate({
+      totalGood: g, totalGoodHits: gh, totalBad: b, totalBadViolations: bv,
+      goodPct: g ? gh / g : null,
+    }) : '';
+
+    const heroHtml = heroResults.map(r => {
+      const buildsHtml = (r.builds || []).map(bd => `
         <div class="qa-build-entry">
-          <div class="qa-build-name">${escHtml(b.name)} <span class="qa-build-score">${typeof b.total === 'number' ? b.total.toFixed(2) : b.total}</span></div>
-          <div class="qa-bp-list">${(b.buildPath || []).map((k, i) => `<span class="qa-bp-pill">${i + 1}. ${escHtml(k)}</span>`).join('')}</div>
-          ${b.note ? `<div class="qa-build-note">${escHtml(b.note)}</div>` : ''}
+          <div class="qa-build-name">${escHtml(bd.name)} <span class="qa-build-score">${typeof bd.total === 'number' ? bd.total.toFixed(2) : bd.total}</span></div>
+          <div class="qa-bp-list">${(bd.buildPath || []).map((k, i) => `<span class="qa-bp-pill">${i + 1}. ${escHtml(k)}</span>`).join('')}</div>
+          ${bd.acceptance ? renderQAAcceptancePanel(bd.acceptance) : ''}
+          ${bd.note ? `<div class="qa-build-note">${escHtml(bd.note)}</div>` : ''}
         </div>`).join('');
       return `
         <div class="qa-hero-block">
@@ -11100,6 +12733,7 @@ function renderQAReportContent(report) {
     }).join('');
     return `<div class="qa-report-algo">
       <div class="qa-report-algo-name">${escHtml(label)}</div>
+      ${aggHtml}
       ${heroHtml}
     </div>`;
   }).join('');
@@ -11124,10 +12758,33 @@ function renderQAReportContent(report) {
       </div>
     </div>
     ${heroNotesHtml}
+    ${renderQAReportOverview(report)}
     <div class="qa-report-section">
       <div class="qa-section-hdr">Algorithm Results</div>
       ${algosHtml}
     </div>`;
+}
+
+// Adapt the saved report's algoResults into the shape renderQAOverviewWithPhases
+// expects (each build needs `_effCriteria` and structured buildPath).
+function renderQAReportOverview(report) {
+  const acceptance = normalizeAcceptance(report.acceptance);
+  const adapted = {};
+  Object.entries(report.algoResults || {}).forEach(([algo, heroResults]) => {
+    adapted[algo] = (heroResults || []).map(r => ({
+      ...r,
+      builds: (r.builds || []).map(b => ({
+        ...b,
+        // Newer reports have b.effCriteria saved; older reports recompute on demand.
+        _effCriteria: b.effCriteria
+          || effectiveCriteriaForHero(acceptance, r.name, r.isEnemy ? 'enemy' : 'ally'),
+        // Older reports only have flat buildPath; renderer falls back to buildPathByPhase.
+        buildPathByPhase: b.buildPathByPhase || null,
+        buildPath:        b.buildPathByPhase ? null : (b.buildPath || []),
+      })),
+    }));
+  });
+  return `<div class="qa-report-section">${renderQAOverviewWithPhases(adapted)}</div>`;
 }
 
 async function deleteQAReport(id) {

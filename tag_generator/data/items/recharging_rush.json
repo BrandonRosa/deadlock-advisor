@@ -1,5 +1,8 @@
 {
   "category": "Weapon",
+  "compare_to": [
+    "intensifying_magazine"
+  ],
   "image_path": "/resources/items/recharging_rush/recharging_rush.png",
   "name": "Recharging Rush",
   "normalized_name": "recharging_rush",
@@ -7,7 +10,7 @@
   "upgrades_from": [],
   "values": {
     "playstyle_score": {
-      "ability_spam": 0.5,
+      "ability_spam": 0.66,
       "aerial": null,
       "ally_buff": null,
       "anti_air": null,
@@ -46,7 +49,7 @@
       "fire_rate": null,
       "fire_rate_slow": null,
       "grounded": null,
-      "gun_burst_damage": 0.2,
+      "gun_burst_damage": 0.4,
       "gun_burst_proc": 1.2,
       "gun_burst_resistance": null,
       "gun_continuous_damage": 0.3,
@@ -57,8 +60,9 @@
       "high_kill_count": null,
       "high_max_hp": null,
       "horizontal_mobility": null,
-      "hybrid_damage_usage": 1.0,
+      "hybrid_damage_usage": 1,
       "interrupt": null,
+      "lane_pusher": null,
       "large_hitbox": null,
       "long_range": null,
       "low_max_hp": null,
@@ -95,12 +99,8 @@
       "team_heal": null,
       "trap_block_obstruct": null,
       "ult_focused": null,
-      "vertical_mobility": null,
-      "lane_pusher": null
+      "vertical_mobility": null
     }
   },
-  "wiki_url": "https://deadlock.wiki/Recharging_Rush",
-  "compare_to": [
-    "intensifying_magazine"
-  ]
+  "wiki_url": "https://deadlock.wiki/Recharging_Rush"
 }

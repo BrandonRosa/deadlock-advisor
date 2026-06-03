@@ -698,6 +698,12 @@ def create_qa_scenario():
         "scoreFormula": d.get("scoreFormula", "v2"),
         "algos":        d.get("algos", ["cosine"]),
         "heroNotes":    d.get("heroNotes", {}),
+        "acceptance":   d.get("acceptance", {}),
+        # testBuilds: which builds to RUN through the algo (filter).
+        # viewBuilds: which build each hero "IS" when they appear as ally/enemy
+        #             (sets MATCH.selectedBuilds before computeResults).
+        "testBuilds":   d.get("testBuilds", d.get("buildSelections", {})),
+        "viewBuilds":   d.get("viewBuilds", {}),
     }
     scenarios.append(scenario)
     save_scenarios(scenarios)
@@ -714,7 +720,12 @@ def update_qa_scenario(sid):
             s["enemies"]      = d.get("enemies", s["enemies"])
             s["scoreFormula"] = d.get("scoreFormula", s.get("scoreFormula", "v2"))
             s["algos"]        = d.get("algos", s.get("algos", []))
-            s["heroNotes"]    = d.get("heroNotes", s.get("heroNotes", {}))
+            s["heroNotes"]  = d.get("heroNotes", s.get("heroNotes", {}))
+            s["acceptance"] = d.get("acceptance", s.get("acceptance", {}))
+            s["testBuilds"] = d.get("testBuilds", s.get("testBuilds", s.get("buildSelections", {})))
+            s["viewBuilds"] = d.get("viewBuilds", s.get("viewBuilds", {}))
+            # legacy field — keep clearing it so old scenarios migrate forward
+            s.pop("buildSelections", None)
             save_scenarios(scenarios)
             return jsonify(s)
     return jsonify({"error": "Not found"}), 404
@@ -817,5 +828,5 @@ def index():
 
 if __name__ == "__main__":
     print("Tag Generator running at http://127.0.0.1:5000")
-    app.run(debug=True, port=5000, use_reloader=False)
-    #app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)
+    app.run(debug=True, port=5000, use_reloader=True)
+    #app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=True)
