@@ -35,7 +35,11 @@ function toast(msg, type = 'success') {
 // Pages that DON'T involve a selected hero/build instance — surfacing these
 // should clear the Codex "Selected instance" sidebar block (B3). Match
 // Results is a fleet overview — selecting a hero or build sets the instance.
-const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'calc', 'qa', 'calc-summary']);
+// Pages that clear the Selected Instance card when navigated to. Calc and
+// calc-summary deliberately PRESERVE the instance so the user can keep their
+// selected build pinned in the sidebar while reviewing the roster or the
+// match results overview.
+const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'qa']);
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -97,6 +101,17 @@ const CODEX = (() => {
     const html = document.documentElement;
     html.setAttribute('data-theme', state.theme);
     html.setAttribute('data-density', state.density);
+    // Expose mode as data-* attrs so plain CSS can gate visibility/editability.
+    // Logical ordering: Standard < Advanced < Dev. Dev implies Advanced — so
+    // `data-advanced="on"` is true whenever EITHER advanced OR developer is
+    // enabled (CSS rules can use `[data-advanced="on"]` without also checking
+    // `[data-developer="on"]`).
+    // Also expose a single ordinal `data-mode` (standard/advanced/dev) for
+    // readability in selectors that need to express "exactly Standard" etc.
+    const advEff = state.advanced || state.developer;
+    html.setAttribute('data-advanced',  advEff ? 'on' : 'off');
+    html.setAttribute('data-developer', state.developer ? 'on' : 'off');
+    html.setAttribute('data-mode', state.developer ? 'dev' : advEff ? 'advanced' : 'standard');
 
     // Sidebar group visibility
     document.querySelectorAll('[data-nav-group="advanced"]').forEach(el => {
@@ -245,12 +260,21 @@ const CODEX = (() => {
     document.getElementById('toggle-density')?.addEventListener('click', () => {
       set({ density: state.density === 'dense' ? 'simple' : 'dense' });
     });
-    // Advanced / Developer toggles
+    // Advanced / Developer toggles. Logical ordering: Standard < Advanced < Dev.
+    // They are SEPARATE toggles in the UI but enforce the implication
+    // dev ⇒ advanced via these handlers:
+    //   • Turning Developer ON also turns Advanced ON
+    //   • Turning Advanced OFF also turns Developer OFF
     document.getElementById('toggle-advanced')?.addEventListener('click', () => {
-      set({ advanced: !state.advanced });
+      const next = !state.advanced;
+      // Cascading off: dropping out of Advanced also drops Dev (can't be in
+      // Dev mode without Advanced being on).
+      set(next ? { advanced: true } : { advanced: false, developer: false });
     });
     document.getElementById('toggle-developer')?.addEventListener('click', () => {
-      set({ developer: !state.developer });
+      const next = !state.developer;
+      // Cascading on: turning Dev on also turns Advanced on.
+      set(next ? { advanced: true, developer: true } : { developer: false });
     });
 
     // Mobile bottom nav: Calc + Settings (instance host filled by setNavInstance)
@@ -702,21 +726,9 @@ async function openHeroEdit(name) {
 
   renderHeroEditPage();
   showPage('hero-edit');
-
-  // Codex B3 — surface the opened hero in the sidebar's "Selected instance"
-  // block, with action buttons that jump to Simulator and Calculator's Build
-  // detail. Build name = current selected build's name when available.
-  const buildName = S.currentHero.builds?.[S.currentBuildIdx]?.name || '';
-  const portraitUrl = S.currentHero.image_path ? `/src/${String(S.currentHero.image_path).replace(/^\//, '')}` : '';
-  window.CODEX?.setNavInstance({
-    key: S.currentHero.normalized_name,
-    name: S.currentHero.eng_name || S.currentHero.normalized_name,
-    build: buildName,
-    portraitUrl,
-    onOpen:  () => showPage('hero-edit'),
-    onBuild: () => showPage('hero-edit'),  // "Build Screen" maps to the in-app hero-edit build tabs
-    onLive:  () => { if (typeof showPage === 'function') showPage('sim'); },
-  });
+  // Hero Editor intentionally does NOT populate the Selected Instance card —
+  // that slot is reserved for builds the user has explicitly selected from
+  // Match Results, so editing a hero never pins them to the sidebar.
 }
 
 function renderHeroEditPage() {
@@ -870,8 +882,8 @@ function renderBuildTabs() {
       + (i === S.currentBuildIdx ? ' active' : '')
       + (b.disabled ? ' is-disabled' : '');
     // Drag handle for reorder; General (index 0) is fixed.
-    const drag = i === 0 ? '' : '<span class="tab-drag" title="Drag to reorder">⋮⋮</span>';
-    btn.innerHTML = `${drag}${b.name || `Build ${i+1}`}${i > 0 ? '<span class="tab-close" title="Delete">×</span>' : ''}`;
+    const drag = i === 0 ? '' : '<span class="tab-drag advanced-up" title="Drag to reorder">⋮⋮</span>';
+    btn.innerHTML = `${drag}${b.name || `Build ${i+1}`}${i > 0 ? '<span class="tab-close advanced-up" title="Delete">×</span>' : ''}`;
     btn.draggable = i > 0;
     btn.dataset.idx = String(i);
     btn.addEventListener('click', e => {
@@ -915,7 +927,7 @@ function renderBuildTabs() {
     bar.appendChild(btn);
   });
   const addBtn = document.createElement('button');
-  addBtn.className = 'tab-add';
+  addBtn.className = 'tab-add advanced-up';
   addBtn.title = 'Add Build';
   addBtn.textContent = '+';
   addBtn.addEventListener('click', openAddBuildModal);
@@ -1983,6 +1995,323 @@ function renderRePreview(selfW, enemyW, allyW) {
     });
     body.appendChild(col);
   });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// RECALIBRATE ITEM AFFINITY
+// ════════════════════════════════════════════════════════════════════════════
+// Per-build helper that re-derives ONLY the `item_affinity` vector from the
+// build's existing Required + Signature items (plus any extras the user adds).
+// Unlike Reverse Engineer, it doesn't create a new build, doesn't touch
+// enemy/ally weights, and surfaces a per-tag diff with checkboxes + editable
+// overrides so the user can apply selectively.
+
+const RECAL = {
+  buildIdx: null,
+  items: [],       // same shape as RE.items: { key, name, tier, imagePath, selfScore, mark }
+  _itemData: null, // cached /api/items/all response (shared with RE if loaded)
+};
+
+async function openRecalibrate(buildIdx) {
+  if (!S.currentHero) return;
+  const build = S.currentHero.builds?.[buildIdx];
+  if (!build) { toast('Select a build first', true); return; }
+
+  RECAL.buildIdx = buildIdx;
+  RECAL.items = [];
+
+  // Reuse RE's cached item list if available, otherwise fetch.
+  if (!RECAL._itemData) {
+    RECAL._itemData = RE._itemData || await api.get('/api/items/all');
+  }
+
+  // Seed: required items first (mark='req'), then signature items (mark='sig').
+  // Preserves the order the user listed them on the build (which is the same
+  // order that affects positional decay).
+  const seed = (keys, mark) => {
+    (keys || []).forEach(key => {
+      if (RECAL.items.some(it => it.key === key)) return;
+      const itd = RECAL._itemData.find(i => i.normalized_name === key);
+      if (!itd) return;
+      RECAL.items.push({
+        key, name: itd.name, tier: itd.tier, imagePath: itd.image_path,
+        selfScore: itd.values?.playstyle_score || {}, mark,
+      });
+    });
+  };
+  seed(build.required_items,  'req');
+  seed(build.signature_items, 'sig');
+
+  document.getElementById('recal-build-label').textContent =
+    `${S.currentHero.eng_name || S.currentHero.normalized_name} — ${build.name}`;
+  document.getElementById('recal-item-search').value = '';
+  document.getElementById('recal-item-dropdown').classList.add('hidden');
+  document.getElementById('recal-preview').classList.add('hidden');
+  renderRecalChips();
+  showPage('recalibrate');
+}
+
+function renderRecalChips() {
+  const cont = document.getElementById('recal-item-chips');
+  cont.innerHTML = '';
+  RECAL.items.forEach((it, i) => {
+    const chip = document.createElement('div');
+    const mark = it.mark || null;
+    chip.className = 're-chip re-item-chip recal-drag-chip'
+      + (mark === 'sig' ? ' is-sig' : '')
+      + (mark === 'req' ? ' is-req' : '');
+    chip.draggable = true;
+    chip.dataset.idx = String(i);
+    const img = srcUrl(it.imagePath);
+    const markLabel = mark === 'req' ? 'REQ' : mark === 'sig' ? '★' : '○';
+    const markTitle = mark === 'req'
+      ? 'Required — click to clear (cycle: none → ★ Sig → REQ → none)'
+      : mark === 'sig'
+      ? 'Signature — click to mark Required'
+      : 'Not flagged — click to mark Signature';
+    chip.innerHTML = `
+      <span class="recal-drag-handle" title="Drag to reorder">⋮⋮</span>
+      ${img ? `<img class="re-chip-img" src="${img}" alt="">` : ''}
+      <span class="re-chip-pos">${i + 1}</span>
+      <span class="re-chip-name">${it.name}</span>
+      <span class="re-chip-tier re-tier-${it.tier}">${it.tier}★</span>
+      <button class="re-mark-btn" title="${markTitle}">${markLabel}</button>
+      <button class="re-chip-x" title="Remove">×</button>`;
+    chip.querySelector('.re-chip-x').addEventListener('click', () => {
+      RECAL.items.splice(i, 1); renderRecalChips();
+    });
+    chip.querySelector('.re-mark-btn').addEventListener('click', () => {
+      RECAL.items[i].mark = mark === null ? 'sig' : mark === 'sig' ? 'req' : null;
+      renderRecalChips();
+    });
+    // Native HTML5 drag-and-drop. The chip itself is the drag source; the
+    // visual feedback ("drag-over" border on the target) is applied per-chip
+    // so the user can see where the drop will land.
+    chip.addEventListener('dragstart', e => {
+      RECAL._dragFromIdx = i;
+      chip.classList.add('recal-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      // setData is required for Firefox to fire the drag at all.
+      try { e.dataTransfer.setData('text/plain', String(i)); } catch (_) { /* ignore */ }
+    });
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('recal-dragging');
+      document.querySelectorAll('.recal-drag-chip.recal-drop-target').forEach(el =>
+        el.classList.remove('recal-drop-target', 'drop-before', 'drop-after'));
+      RECAL._dragFromIdx = null;
+    });
+    chip.addEventListener('dragover', e => {
+      if (RECAL._dragFromIdx == null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      // Clear any prior hover marks on siblings, then mark this chip with
+      // a before/after side based on cursor X position relative to chip center.
+      document.querySelectorAll('.recal-drag-chip.recal-drop-target').forEach(el =>
+        el.classList.remove('recal-drop-target', 'drop-before', 'drop-after'));
+      if (i === RECAL._dragFromIdx) return;   // no self-target
+      const r = chip.getBoundingClientRect();
+      const before = (e.clientX - r.left) < (r.width / 2);
+      chip.classList.add('recal-drop-target', before ? 'drop-before' : 'drop-after');
+    });
+    chip.addEventListener('drop', e => {
+      e.preventDefault();
+      const from = RECAL._dragFromIdx;
+      if (from == null || from === i) return;
+      const r = chip.getBoundingClientRect();
+      const before = (e.clientX - r.left) < (r.width / 2);
+      // Compute destination index: dropping "before" target i lands at i (or i-1 if from<i);
+      // dropping "after" target i lands at i+1 (or i if from<i).
+      let to = before ? i : i + 1;
+      if (from < to) to--;
+      if (to === from) return;
+      const moved = RECAL.items.splice(from, 1)[0];
+      RECAL.items.splice(to, 0, moved);
+      renderRecalChips();
+    });
+    cont.appendChild(chip);
+  });
+}
+
+async function submitRecalibrate() {
+  try {
+    if (!RECAL.items.length) {
+      toast('Add at least one item to recalibrate from.', true); return;
+    }
+    // Defensive: S.tags can be empty on a fresh load if the IIFE hasn't
+    // finished yet. The tag list drives the whole self-weight derivation.
+    if (!S.tags || !S.tags.length) {
+      S.tags = await api.get('/api/tags');
+    }
+    // Same as RE: ensure item-pool is loaded so tier averages compute.
+    if (!RECAL._itemData || !RECAL._itemData.length) {
+      RECAL._itemData = RE._itemData || await api.get('/api/items/all');
+    }
+
+    // Same self-weight computation as submitReverseEngineer's "items-only" path,
+    // extracted so it doesn't drag in the enemy/ally subtraction or the build-
+    // creation side effects. See §22.0.13 / DESIGN.md for the formula rationale.
+    const tagCodes  = S.tags.map(t => t.code).filter(t => !SKIP_TAGS.has(t));
+    const TIER_W    = { 800: 1.0, 1600: 1.35, 3200: 1.75, 6400: 2.2, 9999: 3.0 };
+    const VALID_TIERS = [800, 1600, 3200, 6400];
+    const MARK_MULT = { sig: 1.6, req: 2.5 };
+
+    // Tier averages (used for revealed-preference delta)
+    const tierAvg = {};
+    VALID_TIERS.forEach(tier => {
+      const pool = (RECAL._itemData || []).filter(it => it.tier === tier);
+      const avg  = {}; tagCodes.forEach(t => avg[t] = 0);
+      pool.forEach(it => { tagCodes.forEach(t => { avg[t] += it.values?.playstyle_score?.[t] || 0; }); });
+      if (pool.length) tagCodes.forEach(t => { avg[t] /= pool.length; });
+      tierAvg[tier] = avg;
+    });
+
+    const swRaw = {}; tagCodes.forEach(t => swRaw[t] = 0);
+    let totalW = 0;
+    const decayK = (RECAL.items.length > 1)
+      ? Math.min(0.12, 1 / (RECAL.items.length - 1))
+      : 0;
+    RECAL.items.forEach((it, i) => {
+      const posW  = 1 / (1 + i * decayK);
+      const tierW = TIER_W[it.tier] || 1.0;
+      const markW = MARK_MULT[it.mark] || 1.0;
+      const w     = posW * tierW * markW;
+      totalW += w;
+      const avg = tierAvg[it.tier] || {};
+      const sscore = it.selfScore || {};
+      tagCodes.forEach(t => {
+        const delta = (sscore[t] || 0) - (avg[t] || 0);
+        swRaw[t] += delta * w;
+      });
+    });
+    if (totalW > 0) tagCodes.forEach(t => { swRaw[t] /= totalW; });
+
+    // scaleVec: normalise so peak ≈ 1.5; round to 2 decimals; drop sub-0.05 noise
+    let absMax = 0.001;
+    Object.values(swRaw).forEach(v => { const a = Math.abs(v); if (a > absMax) absMax = a; });
+    const selfW = {};
+    if (absMax >= 0.01) {
+      const scale = 1.5 / absMax;
+      Object.keys(swRaw).forEach(t => {
+        const v = swRaw[t] * scale;
+        if (Math.abs(v) >= 0.05) selfW[t] = parseFloat(v.toFixed(2));
+      });
+    }
+    renderRecalPreview(selfW);
+  } catch (err) {
+    console.error('[recalibrate] submit failed:', err);
+    toast(`Recalibrate failed: ${err.message || err}`, true);
+  }
+}
+
+function renderRecalPreview(selfW) {
+  const build   = S.currentHero.builds[RECAL.buildIdx];
+  const current = build?.values?.item_affinity || {};
+
+  const body = document.getElementById('recal-preview-body');
+  body.innerHTML = '';
+
+  // Build the set of tags that have a "change" worth showing: either suggested
+  // value present, or current value above noise floor (so the user can opt to
+  // zero out a stale tag). Use Number() coercion since stored values may be
+  // string literals from the JSON file.
+  const tagSet = new Set([
+    ...Object.keys(selfW),
+    ...Object.keys(current).filter(t => {
+      const n = Number(current[t]);
+      return Number.isFinite(n) && Math.abs(n) >= 0.01;
+    }),
+  ]);
+
+  // Coerce to Number first: item_affinity values loaded from JSON can be
+  // strings ("0.5"), and calling .toFixed on a string throws.
+  const num = v => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const rows = [];
+  tagSet.forEach(t => {
+    const cur = parseFloat(num(current[t]).toFixed(2));
+    const sug = parseFloat(num(selfW[t]).toFixed(2));
+    const delta = parseFloat((sug - cur).toFixed(2));
+    if (Math.abs(delta) < 0.01) return;   // skip no-change rows
+    rows.push({ tag: t, cur, sug, delta });
+  });
+  // Sort by largest absolute delta first — biggest changes top the list.
+  rows.sort((a, c) => Math.abs(c.delta) - Math.abs(a.delta));
+
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--muted); padding: 12px;">No changes — the suggested weights match the current item_affinity.</td></tr>';
+  } else {
+    rows.forEach(({ tag, cur, sug, delta }) => {
+      const tagMeta = S.tags.find(t => t.code === tag);
+      const tr = document.createElement('tr');
+      tr.dataset.tag = tag;
+      tr.innerHTML = `
+        <td class="col-chk"><input type="checkbox" class="recal-row-chk" checked></td>
+        <td class="col-tag">${tagMeta?.name || tag}</td>
+        <td class="col-num">${cur.toFixed(2)}</td>
+        <td class="col-num">${sug.toFixed(2)}</td>
+        <td class="col-num"><input type="number" class="recal-row-val" step="0.01" value="${sug.toFixed(2)}"></td>
+        <td class="col-num ${delta >= 0 ? 'pct-pos' : 'pct-neg'}">${delta >= 0 ? '+' : ''}${delta.toFixed(2)}</td>`;
+      // Dim row when unchecked so the user can see at a glance what's pending.
+      const chk = tr.querySelector('.recal-row-chk');
+      chk.addEventListener('change', () => {
+        tr.classList.toggle('row-disabled', !chk.checked);
+      });
+      body.appendChild(tr);
+    });
+  }
+
+  document.getElementById('recal-preview').classList.remove('hidden');
+  // Scroll the preview into view so the user sees the result.
+  document.getElementById('recal-preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function applyRecalibrate() {
+  const build = S.currentHero?.builds?.[RECAL.buildIdx];
+  if (!build) { toast('Build no longer available', true); return; }
+  if (!build.values) build.values = {};
+  if (!build.values.item_affinity) build.values.item_affinity = {};
+
+  // 1. item_affinity updates — from the preview table (checked rows only,
+  //    using the user-editable Apply value column).
+  let appliedAff = 0;
+  document.querySelectorAll('#recal-preview-body tr').forEach(tr => {
+    const tag = tr.dataset.tag;
+    if (!tag) return;
+    const chk = tr.querySelector('.recal-row-chk');
+    if (!chk?.checked) return;
+    const raw = parseFloat(tr.querySelector('.recal-row-val').value);
+    if (Number.isNaN(raw)) return;
+    build.values.item_affinity[tag] = parseFloat(raw.toFixed(2));
+    appliedAff++;
+  });
+
+  // 2. Required + Signature flag updates — rebuild both arrays from the
+  //    current chip marks. Items the user removed via × are no longer in
+  //    RECAL.items so they drop out. Items added + marked become req/sig.
+  //    Mark changes (○ ↔ ★ ↔ REQ) propagate. Preserves the chip ordering.
+  const prevReq = (build.required_items  || []).slice();
+  const prevSig = (build.signature_items || []).slice();
+  const newReq = RECAL.items.filter(it => it.mark === 'req').map(it => it.key);
+  const newSig = RECAL.items.filter(it => it.mark === 'sig').map(it => it.key);
+  const reqChanged = newReq.length !== prevReq.length || newReq.some((k, i) => k !== prevReq[i]);
+  const sigChanged = newSig.length !== prevSig.length || newSig.some((k, i) => k !== prevSig[i]);
+  build.required_items  = newReq;
+  build.signature_items = newSig;
+
+  // Build a single helpful summary toast.
+  const bits = [];
+  if (appliedAff) bits.push(`${appliedAff} item_affinity update${appliedAff === 1 ? '' : 's'}`);
+  if (reqChanged) bits.push(`Required (${newReq.length})`);
+  if (sigChanged) bits.push(`Signature (${newSig.length})`);
+  if (!bits.length) {
+    toast('Nothing to apply — no preview rows checked and no flag changes.', true);
+    return;
+  }
+  setHeroDirty(true);
+  toast(`Applied: ${bits.join(', ')} — remember to Save the hero.`);
+  setTimeout(() => { renderBuildTabs(); renderBuildContent(); showPage('hero-edit'); }, 700);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -3285,6 +3614,10 @@ async function runCalculation() {
   if (MATCH.autoRegen) autoRegenPromote();
   renderCalcSummary();
   window.CODEX?.refreshNavVisibility();  // results now exist → reveal Match Results nav
+  // Recalculating starts a fresh match — any previously pinned build belongs
+  // to the prior calc, so clear the Selected Instance card. The next build
+  // the user opens from Match Results will re-populate it.
+  window.CODEX?.setNavInstance(null);
   showPage('calc-summary');
 }
 
@@ -3620,21 +3953,24 @@ function computeTeamStrengthsWeaknesses(heroNames) {
 
 function mkStrengthsWeaknessesEl(sw, compact = false) {
   const d = document.createElement('div');
-  d.className = 'tag-affinity' + (compact ? ' ta-compact' : '');
-  if (sw.strengths.length) {
+  // Icon-prefixed single-row layout: an up/down Material Symbol replaces the
+  // word labels, and tags flow on the same row. Compact version keeps the
+  // inline layout used by per-hero summary chips and dense subpanels.
+  d.className = 'tag-affinity ta-iconrow' + (compact ? ' ta-compact' : '');
+  const mkRow = (icon, lblCls, tagCls, items, title) => {
+    if (!items.length) return null;
     const row = document.createElement('div');
     row.className = 'ta-row';
-    row.innerHTML = `<span class="ta-lbl ta-good-lbl">Strengths:</span>`
-      + sw.strengths.map(t => `<span class="ta-tag ta-good" title="${fmtScore(t.val)}">${t.name}</span>`).join('');
-    d.appendChild(row);
-  }
-  if (sw.weaknesses.length) {
-    const row = document.createElement('div');
-    row.className = 'ta-row';
-    row.innerHTML = `<span class="ta-lbl ta-bad-lbl">Countered by:</span>`
-      + sw.weaknesses.map(t => `<span class="ta-tag ta-bad" title="${fmtScore(t.val)}">${t.name}</span>`).join('');
-    d.appendChild(row);
-  }
+    row.innerHTML = `<span class="ta-lbl ${lblCls}" title="${title}"><span class="msym">${icon}</span></span>`
+      + `<span class="ta-tags">`
+      + items.map(t => `<span class="ta-tag ${tagCls}" title="${fmtScore(t.val)}">${t.name}</span>`).join('')
+      + `</span>`;
+    return row;
+  };
+  const s = mkRow('arrow_upward',   'ta-good-lbl', 'ta-good', sw.strengths,    'Strengths');
+  const w = mkRow('arrow_downward', 'ta-bad-lbl',  'ta-bad',  sw.weaknesses,  'Countered by');
+  if (s) d.appendChild(s);
+  if (w) d.appendChild(w);
   return d;
 }
 
@@ -3645,6 +3981,20 @@ function mkStrengthsWeaknessesEl(sw, compact = false) {
 function renderCalcSummary() {
   const tagPanel = document.getElementById('summary-tag-panel');
   tagPanel.innerHTML = '';
+
+  // Top Items now uses bsRenderItemTile which reads from bpItemMap. That map
+  // is normally populated lazily by computeBuildPath; ensure it's available
+  // for the summary render so tile images/categories/tiers resolve correctly.
+  if (Array.isArray(MATCH?.itemData) && Object.keys(bpItemMap).length === 0) {
+    MATCH.itemData.forEach(it => { bpItemMap[it.normalized_name] = it; });
+  }
+
+  // Team vulnerability banner (top of Match Results). Renders nothing when
+  // neither side has a major consensus vulnerability.
+  const vulnEl = document.createElement('div');
+  vulnEl.id = 'summary-vuln-banner';
+  renderTeamVulnerabilityBanner(vulnEl);
+  if (vulnEl.children.length) tagPanel.appendChild(vulnEl);
 
   // Tag profiles — ally team and enemy team side by side
   const profileRow = document.createElement('div');
@@ -3670,54 +4020,6 @@ function renderCalcSummary() {
 
   if (profileRow.children.length) tagPanel.appendChild(profileRow);
 
-  // Best / Worst matchups panel
-  if (MATCH.allies.length && MATCH.enemies.length) {
-    const matchupScores = {};
-    MATCH.results.filter(r => !r.isEnemy).forEach(r => {
-      const b = r.topBuilds[0];
-      if (!b) return;
-      Object.entries(b.enemyBD || {}).forEach(([en, score]) => {
-        matchupScores[en] = (matchupScores[en] || 0) + score;
-      });
-    });
-    const sorted       = Object.entries(matchupScores).sort((a, b) => b[1] - a[1]);
-    const bestMatchups = sorted.slice(0, 2);
-    const worstMatchups= sorted.slice(-2).reverse();
-
-    if (sorted.length) {
-      const mp = document.createElement('div');
-      // Top-of-page Best/Worst Matchup band is dense-only — Simple Layout
-      // skips the matchup band and shows just the team tag profiles.
-      mp.className = 'calc-panel ta-team-panel dense-only';
-      mp.innerHTML = '<div class="calc-panel-title">Matchups</div>';
-      const grid = document.createElement('div');
-      grid.className = 'matchup-grid';
-
-      const mkMatchupCol = (label, cls, entries) => {
-        const col = document.createElement('div');
-        col.className = `matchup-col ${cls}`;
-        col.innerHTML = `<div class="matchup-col-lbl">${label}</div>`;
-        entries.forEach(([name, score]) => {
-          const heroData = MATCH.heroData[name];
-          const engName  = heroData?.eng_name || name;
-          const img      = srcUrl(heroData?.image_path || '');
-          const row = document.createElement('div');
-          row.className = 'matchup-row';
-          row.innerHTML = `
-            ${img ? `<img class="matchup-img" src="${img}" alt="">` : '<div class="matchup-img no-img">🦸</div>'}
-            <span class="matchup-name">${engName}</span>
-            <span class="matchup-score">${fmtScore(score)}</span>`;
-          col.appendChild(row);
-        });
-        return col;
-      };
-
-      grid.appendChild(mkMatchupCol('Best Matchup',  'best-col',  bestMatchups));
-      grid.appendChild(mkMatchupCol('Worst Matchup', 'worst-col', worstMatchups));
-      mp.appendChild(grid);
-      tagPanel.appendChild(mp);
-    }
-  }
 
   const grid = document.getElementById('summary-grid');
   grid.innerHTML = '';
@@ -3744,9 +4046,6 @@ function makeSummaryCard(r) {
     + (r.isEnemy ? ' sc-enemy' : '');
 
   const topBuild = r.topBuilds[0];
-  const topItems = topBuild
-    ? [...topBuild.items].sort((a, b) => b.total - a.total).slice(0, 3)
-    : [];
   const img = srcUrl(r.imagePath);
   const genBuild = r.builds.find(x => x.isGeneral);
   const genTotal = genBuild?.total ?? 0;
@@ -3763,12 +4062,24 @@ function makeSummaryCard(r) {
       const pcls = pct >= 0 ? 'pct-pos' : 'pct-neg';
       pctHtml = `<span class="sc-build-pct ${pcls}">${sign}${pct.toFixed(0)}%</span>`;
     }
+    // Top 3 items for this build — icons only, sit left of the pct chip.
+    // Dense-only so the row stays compact in simple mode.
+    const top3 = [...(b.items || [])]
+      .sort((a, c) => c.total - a.total)
+      .slice(0, 3);
+    const itemsHtml = top3.length
+      ? `<span class="sc-row-items dense-only">${top3.map(it => it.imagePath
+          ? `<img class="sc-row-item-img" src="${srcUrl(it.imagePath)}" alt="" title="${it.name}">`
+          : `<span class="sc-row-item-img sc-row-item-empty"></span>`
+        ).join('')}</span>`
+      : '';
     // data-build-idx makes the row directly clickable — bypasses the card-level
     // openCalcHero and jumps straight to that build's detail.
     return `<div class="sc-build-row" data-build-idx="${b.buildIdx}" role="button" tabindex="0">
       <span class="sc-bname">${b.name}</span>
+      ${itemsHtml}
       ${pctHtml}
-      <span class="sc-bscore">${fmtScore(b.total)}</span>
+      <span class="sc-bscore dense-only dev-only">${fmtScore(b.total)}</span>
       <span class="sc-build-arrow" aria-hidden="true">›</span>
     </div>`;
   }
@@ -3786,16 +4097,8 @@ function makeSummaryCard(r) {
     </div>
     <div class="sc-builds">
       ${r.topBuilds.map(b => scBuildRow(b)).join('')}
-    </div>
-    ${topItems.length ? `<div class="sc-items dense-only">
-      <div class="sc-items-lbl">Top Items (${topBuild.name}):</div>
-      ${topItems.map(it => `
-        <div class="sc-item-row">
-          ${it.imagePath ? `<img class="sc-item-img" src="${srcUrl(it.imagePath)}" alt="">` : ''}
-          <span class="sc-item-name">${it.name}</span>
-          <span class="sc-item-score">${fmtScore(it.total)}</span>
-        </div>`).join('')}
-    </div>` : ''}`;
+    </div>`;
+
 
   // Per-hero strengths / weaknesses (compact, using top build)
   const topBuildData = r.topBuilds[0]
@@ -3916,7 +4219,9 @@ function openCalcHero(name) {
 
   const isV2 = MATCH.scoreFormula === 'v2' || MATCH.scoreFormula === 'v3';
   const hdr = document.createElement('div');
-  hdr.className = 'ch-header-row' + (isV2 ? ' v2' : '');
+  // Header columns for the raw score grid live behind the dense+dev gate so
+  // the layout collapses gracefully when those values are hidden.
+  hdr.className = 'ch-header-row dense-only dev-only' + (isV2 ? ' v2' : '');
   hdr.innerHTML = isV2
     ? '<span>Build</span><span title="Your build benefits from allies">Ally</span><span title="Allies benefit from your build">+Ally</span><span title="Your build counters enemies">Enemy</span><span title="Enemies react to your build">+Enemy</span><span>Total</span>'
     : '<span>Build</span><span>Ally</span><span>Enemy</span><span>Total</span>';
@@ -3931,22 +4236,24 @@ function openCalcHero(name) {
       const pct  = (b.total - genTotal) / Math.abs(genTotal) * 100;
       const sign = pct >= 0 ? '+' : '';
       const pcls = pct >= 0 ? 'pct-pos' : 'pct-neg';
-      totalHtml = `<span class="ch-pct ${pcls}">${sign}${pct.toFixed(0)}%</span><span class="ch-score-dim total-clr">${fmtScore(b.total)}</span>`;
+      totalHtml = `<span class="ch-pct ${pcls}">${sign}${pct.toFixed(0)}%</span><span class="ch-score-dim total-clr dense-only dev-only">${fmtScore(b.total)}</span>`;
     } else {
-      totalHtml = `<span class="ch-score total-clr">${fmtScore(b.total)}</span>`;
+      totalHtml = `<span class="ch-score total-clr dense-only dev-only">${fmtScore(b.total)}</span>`;
     }
     const row = document.createElement('div');
     row.className = 'ch-build-row' + (b.isGeneral ? ' is-general' : '') + (isV2 ? ' v2' : '');
+    // Raw breakdown columns hide in non-(dense+dev) — the percentage chip in
+    // ch-total-wrap stays visible as the at-a-glance comparison.
     row.innerHTML = isV2
       ? `<span class="ch-bname">${b.name}</span>
-         <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
-         <span class="ch-score ally-dim-clr">${fmtScore(b.allyScoreSelf)}</span>
-         <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
-         <span class="ch-score enemy-dim-clr">${fmtScore(b.enemyScoreSelf)}</span>
+         <span class="ch-score ally-clr dense-only dev-only">${fmtScore(b.ally)}</span>
+         <span class="ch-score ally-dim-clr dense-only dev-only">${fmtScore(b.allyScoreSelf)}</span>
+         <span class="ch-score enemy-clr dense-only dev-only">${fmtScore(b.enemy)}</span>
+         <span class="ch-score enemy-dim-clr dense-only dev-only">${fmtScore(b.enemyScoreSelf)}</span>
          <div class="ch-total-wrap">${totalHtml}</div>`
       : `<span class="ch-bname">${b.name}</span>
-         <span class="ch-score ally-clr">${fmtScore(b.ally)}</span>
-         <span class="ch-score enemy-clr">${fmtScore(b.enemy)}</span>
+         <span class="ch-score ally-clr dense-only dev-only">${fmtScore(b.ally)}</span>
+         <span class="ch-score enemy-clr dense-only dev-only">${fmtScore(b.enemy)}</span>
          <div class="ch-total-wrap">${totalHtml}</div>`;
 
     const buildData = MATCH.heroData[name]?.builds[b.buildIdx];
@@ -4017,20 +4324,10 @@ function openCalcHero(name) {
     el.appendChild(row);
   });
   showPage('calc-hero');
-
-  // Codex B3 — refresh sidebar Selected Instance card for this hero (no
-  // build yet; topBuilds[0] is the most-likely build to open next).
-  const topBld = r.topBuilds[0];
-  const portraitUrl = heroData?.image_path ? srcUrl(heroData.image_path) : '';
-  window.CODEX?.setNavInstance({
-    key:  name,
-    name: r.engName,
-    build: topBld ? topBld.name : '',
-    portraitUrl,
-    onOpen:  () => openCalcHero(name),
-    onBuild: () => topBld && openCalcBuild(name, topBld.buildIdx),
-    onLive:  () => { if (typeof simStart === 'function' && topBld) { try { simStart(name, topBld.buildIdx); } catch {} } showPage('sim'); },
-  });
+  // Per-hero detail does NOT populate the Selected Instance card — only
+  // openCalcBuild (an explicit build pick from Match Results) does. The
+  // existing card (if any) is preserved so the user can keep their pinned
+  // build visible while browsing other hero details.
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -4038,6 +4335,17 @@ function openCalcHero(name) {
 // ════════════════════════════════════════════════════════════════════════════
 
 function openCalcBuild(heroName, buildIdx) {
+  // Preserve the currently active tab when re-rendering the SAME build —
+  // focus-portrait clicks call openCalcBuild() to redraw, and without this
+  // the tab snaps back to "summary" (the default first tab) every time.
+  const prevHero = MATCH.viewHeroName, prevIdx = MATCH.viewBuildIdx;
+  const sameContext = (prevHero === heroName && prevIdx === buildIdx);
+  let preservedTab = null;
+  if (sameContext) {
+    const prevDetail = document.getElementById('calc-build-detail');
+    const activeBtn = prevDetail?.querySelector('.tab-btn.on');
+    preservedTab = activeBtn?.dataset.tab || null;
+  }
   MATCH.viewHeroName = heroName;
   MATCH.viewBuildIdx = buildIdx;
   const r = MATCH.results.find(x => x.name === heroName);
@@ -4105,6 +4413,10 @@ function openCalcBuild(heroName, buildIdx) {
       if (on && !panel.dataset.built) { build(panel); panel.dataset.built = '1'; }
     });
   }
+
+  // Restore the tab the user was on if this is a re-render of the same build
+  // (e.g. focus-portrait toggle). Skips for fresh navigations.
+  if (preservedTab && panels[preservedTab]) activateTab(preservedTab);
 
   showPage('calc-build');
 
@@ -4991,10 +5303,22 @@ function computeSurgeAnchors(b, sets) {
   const t4only = pool.filter(it => tierBucket(it.key) === 4);
 
   function pickSpike(cands, t3Strong, t4Enc) {
-    const reqArr = cands.filter(it => isReqAny(it.key));
-    const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
-    const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
-    const tier = reqArr.length ? reqArr : (sigArr.length ? sigArr : norArr);
+    // Strict 4-tier preference: explicit required > explicit signature >
+    // req-component > sig-component > anything else. The old code lumped
+    // req-components in with required via isReqAny, which let a sig-that's-
+    // also-a-req-component (e.g. Superior Cooldown as component of required
+    // Transcendent) outrank actually-required spike candidates. User: "Both
+    // spikes should almost always come from required items first."
+    const reqArr     = cands.filter(it => requiredSet.has(it.key));
+    const sigArr     = cands.filter(it => !requiredSet.has(it.key) && signatureSet.has(it.key));
+    const reqCompArr = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && reqComponentSet.has(it.key));
+    const sigCompArr = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && !reqComponentSet.has(it.key) && sigComponentSet.has(it.key));
+    const norArr     = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && !reqComponentSet.has(it.key) && !sigComponentSet.has(it.key));
+    const tier = reqArr.length     ? reqArr
+               : sigArr.length     ? sigArr
+               : reqCompArr.length ? reqCompArr
+               : sigCompArr.length ? sigCompArr
+               : norArr;
     return [...tier].sort((a, c) => {
       let sa = spikeScore(a), sc = spikeScore(c);
       const ba = tierBucket(a.key), bc = tierBucket(c.key);
@@ -5438,8 +5762,20 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
     });
 
-    // Phase-aware tier preference (same table as greedy).
-    baseScore *= getPhaseTierMult(phaseName, tier);
+    // Phase-aware tier preference. Damped (^0.85, milder than Maestro's
+    // 0.75) so the cross-phase tier table doesn't bury T2 mid-game picks
+    // when a T3 alternative is available — aligns directionally with §22.0.12.
+    baseScore *= Math.pow(getPhaseTierMult(phaseName, tier), 0.85);
+
+    // Spike-phase awareness (§22.0.3): nudge spike-flagged items toward
+    // their target phase. spike[0]→Mid, spike[1]→Late. Small ×1.15 in the
+    // preferred phase, ×1.05 in any other phase. Keeps cosine's character
+    // but stops it from completely ignoring `preAnchors.spikes`.
+    if (preAnchors?.spikes?.length) {
+      const sIdx = preAnchors.spikes.indexOf(k);
+      if (sIdx === 0)      baseScore *= (phaseName === 'Mid'  ? 1.15 : 1.05);
+      else if (sIdx === 1) baseScore *= (phaseName === 'Late' ? 1.15 : 1.05);
+    }
 
     // Cost-normalisation blend: early → efficient cheap items, late → raw power.
     const gamePhase = Math.min(1.0, totalEarned / 42200);
@@ -6837,8 +7173,24 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return false;
     }
 
+    // Transitive ancestor-of-owned guard (§22.0.7). Mirrors Maestro's check:
+    // once an upgrade is owned, its transitive components become unpurchasable
+    // (`isSubsumed` only catches DIRECT parents — when Superior is consumed
+    // into Transcendent it isn't in `owned` anymore, so Compress would slip
+    // through and get re-bought standalone).
+    function isAncestorOfOwned(key) {
+      for (const k of owned) {
+        if (k === key) continue;
+        if (ancestorsOf(k).has(key)) return true;
+      }
+      return false;
+    }
+
     // Priority score: item .total + role boost + chain bonus + owned-chain bonus.
-    function priorityScore(it) {
+    // `phaseName` is optional — used to apply a Maestro-aligned spike-phase
+    // boost (§22.0.3) when the item is a spike-anchor and the current phase
+    // matches its target window.
+    function priorityScore(it, phaseName) {
       const k = it.key;
       let s   = (it.total || 0);
       if      (requiredSet.has(k))     s *= 3.0;
@@ -6851,11 +7203,16 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         if (stillNeeded > 0) s *= 1.2;
       }
       if (hasOwnedAncestor(k)) s *= 1.15;   // upgrades that consume owned chain
+      if (phaseName && preAnchors?.spikes?.length) {
+        const sIdx = preAnchors.spikes.indexOf(k);
+        if (sIdx === 0)      s *= (phaseName === 'Mid'  ? 1.25 : 1.08);
+        else if (sIdx === 1) s *= (phaseName === 'Late' ? 1.25 : 1.08);
+      }
       return s;
     }
 
     // Build full affordable-candidate list for this tick.
-    function affordableCandidates() {
+    function affordableCandidates(phaseName) {
       const out = [];
       for (const it of b.items) {
         const k = it.key;
@@ -6863,9 +7220,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         if (blacklistSet.has(k)) continue;
         const ups = upgradesTo[k] || [];
         if (ups.some(u => owned.has(u))) continue;
+        if (isAncestorOfOwned(k)) continue;   // §22.0.7 transitive guard
         const cost = effCost(k);
         if (cost > souls) continue;
-        out.push({ it, key: k, cost, score: priorityScore(it), tier: bpItemMap[k]?.tier || 0 });
+        out.push({ it, key: k, cost, score: priorityScore(it, phaseName), tier: bpItemMap[k]?.tier || 0 });
       }
       return out;
     }
@@ -6906,7 +7264,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         // At slot cap for this phase — accumulate until cap raises.
         mode = 'slot-cap';
       } else {
-        let candidates = affordableCandidates();
+        let candidates = affordableCandidates(phaseName);
 
         if (souls >= BR_SAVE_LO && souls < BR_T4_LO) {
           // Save mode: only allow upgrades (consume owned ancestor).
@@ -7006,6 +7364,10 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return dot / (Math.sqrt(nA) * Math.sqrt(nB));
     }
 
+    // Spike-aware endgame scoring (§22.0.3, §22.0.4). Spike-flagged items get
+    // a +0.5 bonus so they're more likely to make it into the 12-slot endgame
+    // composition, which then ensures the chain resolver plans through them.
+    const _invSpikeSet = new Set(((preAnchors && preAnchors.spikes) || []));
     function endgameScore(it, currentSet) {
       const tier = bpItemMap[it.key]?.tier || 0;
       const base = (it.total || 0) * getPhaseTierMult('Extra Late', tier);
@@ -7015,7 +7377,8 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const other = candByKey[k2];
         if (other) synergy += tagCosine(it, other);
       });
-      return base + SYNERGY_LAMBDA * synergy;
+      const spikeBonus = _invSpikeSet.has(it.key) ? 0.5 : 0;
+      return base + SYNERGY_LAMBDA * synergy + spikeBonus;
     }
 
     const endgame = new Set();
@@ -7102,6 +7465,26 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return out;
     }
 
+    // §22.0.7 transitive ancestor-of-owned guard. Once a chain upgrade is
+    // owned (Transcendent), its components (Superior, Compress) are no longer
+    // standalone-purchasable — they've been consumed. `upgradesTo` only
+    // captures DIRECT parents, so a multi-step consumption needs this walk.
+    function isAncestorOfOwned(key) {
+      for (const k of owned) {
+        if (k === key) continue;
+        const seen = new Set();
+        const stack = [...(bpItemMap[k]?.upgrades_from || [])];
+        while (stack.length) {
+          const c = stack.pop();
+          if (seen.has(c)) continue;
+          seen.add(c);
+          if (c === key) return true;
+          (bpItemMap[c]?.upgrades_from || []).forEach(c2 => { if (!seen.has(c2)) stack.push(c2); });
+        }
+      }
+      return false;
+    }
+
     function fire(key, phaseName) {
       const cost = effCost(key);
       const consumed = [...ownedAncestors(key)];
@@ -7135,6 +7518,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           // since we plan parents first, but defend anyway).
           const ups = upgradesTo[key] || [];
           if (ups.some(u => owned.has(u))) continue;
+          if (isAncestorOfOwned(key)) continue;   // §22.0.7 transitive guard
           const cost = effCost(key);
           if (cost > souls) continue;
           fire(key, phaseName);
@@ -7170,6 +7554,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
               if (planSet.has(k)) continue;
               const ups = upgradesTo[k] || [];
               if (ups.some(u => owned.has(u))) continue;
+              if (isAncestorOfOwned(k)) continue;   // §22.0.7 transitive guard
               const cost = effCost(k);
               if (cost > souls) continue;
               const sc = it.total || 0;
@@ -7400,13 +7785,22 @@ function computeBuildPath(b, algo = 'greedy-phase') {
     const t3plus = pool.filter(it => tierBucket(it.key) >= 3);
     const t4only = pool.filter(it => tierBucket(it.key) === 4);
 
-    // Pick a spike anchor — HARD priority required > signature > normal.
-    // `t3Strong` flag uses SURGE_T3_BIAS_STRONG (×1.30, for spike 1).
+    // Pick a spike anchor — STRICT priority: explicit required > explicit
+    // signature > req-component > sig-component > normal. Uses requiredSet
+    // directly (not isReqAny), so a sig that's *also* a req-component (e.g.
+    // Superior Cooldown when Transcendent is required) doesn't outrank an
+    // actually-required spike candidate.
     function pickSpike(cands, t3Strong, t4Encourage) {
-      const reqArr = cands.filter(it => isReqAny(it.key));
-      const sigArr = cands.filter(it => !isReqAny(it.key) && isSigAny(it.key));
-      const norArr = cands.filter(it => !isReqAny(it.key) && !isSigAny(it.key));
-      const tier = reqArr.length ? reqArr : (sigArr.length ? sigArr : norArr);
+      const reqArr     = cands.filter(it => requiredSet.has(it.key));
+      const sigArr     = cands.filter(it => !requiredSet.has(it.key) && signatureSet.has(it.key));
+      const reqCompArr = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && reqComponentSet.has(it.key));
+      const sigCompArr = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && !reqComponentSet.has(it.key) && sigComponentSet.has(it.key));
+      const norArr     = cands.filter(it => !requiredSet.has(it.key) && !signatureSet.has(it.key) && !reqComponentSet.has(it.key) && !sigComponentSet.has(it.key));
+      const tier = reqArr.length     ? reqArr
+                 : sigArr.length     ? sigArr
+                 : reqCompArr.length ? reqCompArr
+                 : sigCompArr.length ? sigCompArr
+                 : norArr;
       return [...tier].sort((a, c) => {
         const ba = tierBucket(a.key), bc = tierBucket(c.key);
         let sa = spikeScore(a), sc = spikeScore(c);
@@ -9034,6 +9428,20 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
       return false;
     }
+    // `key` is an ancestor-of-owned if it appears in the upgrade chain of any
+    // owned item. Once an upgrade is owned, all its transitive components are
+    // "consumed" — they're no longer purchasable as standalone items. This
+    // catches the case where Compress was bought, upgraded to Superior,
+    // upgraded again to Transcendent — then later the algorithm would try
+    // to buy Compress AGAIN. (isSubsumed only checks direct parents, so it
+    // misses transitive consumption.)
+    function isAncestorOfOwned(key, ownedSet) {
+      for (const k of ownedSet) {
+        if (k === key) continue;
+        if (ancestorsOfKey(k).has(key)) return true;
+      }
+      return false;
+    }
     // Candidate is claim-blocked if any of its components is claimed by an
     // owned-but-unrelated upgrade. We allow components the candidate already
     // owns itself (no double-counting).
@@ -9198,10 +9606,13 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       return i < 0 ? 0 : i;
     }
 
-    // ── Pin hierarchy (4 tiers: required / signature / anchor / counter) ──
+    // ── Pin hierarchy (4 tiers: required / anchor / signature / counter) ──
     const phasePins = { 'Lane': [], 'Early': [], 'Mid': [], 'Late': [], 'Extra Late': [] };
     const _pinnedKeys = new Set();
-    const PRIORITY_ORDER = { required: 0, signature: 1, anchor: 2, counter: 3 };
+    // Within-phase ordering: required first (must-buy), then anchor (the
+    // power-spike — should "happen" near the start of its target phase),
+    // then signature (build-flavor), then counter. Lower = placed earlier.
+    const PRIORITY_ORDER = { required: 0, anchor: 1, signature: 2, counter: 3 };
 
     function pinPush(phaseIdx, key, priority) {
       if (_pinnedKeys.has(key)) return;
@@ -9236,8 +9647,60 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       pinPush(naturalIdx, key, priority);
     }
 
-    // Tier 2 — SIGNATURE (SOFT pin)
-    b.items
+    // ── Spike-targeted anchor placement ──
+    // Surge anchors get phase-specific targets instead of natural-tier-phase.
+    // Forcing the target (no Math.max with natural) lets a T4 spike land in
+    // Mid even though its natural-tier phase would be Late — the softPin
+    // budget check will still push forward if Mid is impossibly tight.
+    //   • spikes[0] → Mid  (start-of-Mid earliest, push to Late if no room)
+    //   • spikes[1] → Late
+    //   • spikes[2+] / antiSpikes → natural phase
+    const PHASE_IDX = { Lane: 0, Early: 1, Mid: 2, Late: 3, 'Extra Late': 4 };
+    function anchorTargetIdx(spikeIndex, key) {
+      if (spikeIndex === 0) return PHASE_IDX.Mid;
+      if (spikeIndex === 1) return PHASE_IDX.Late;
+      return naturalPhaseIdx(bpItemMap[key]?.tier || 800);
+    }
+
+    // Generalized "skip if covered by another pin's upgrade chain". Catches:
+    //  • spike that's a component of a required upgrade (e.g. Superior
+    //    pinned as spike when Transcendent is required)
+    //  • signature that's a component of a required upgrade (e.g. Superior
+    //    pinned as sig when Transcendent is required — the original bug)
+    //  • signature that's a component of another (larger) signature
+    // In every case we drop the smaller pin and let placeBuy's recursive
+    // component expansion pull it in when the upgrade is bought.
+    function isAncestorOfAnyPinned(key) {
+      for (const pinnedKey of _pinnedKeys) {
+        if (pinnedKey === key) continue;
+        if (ancestorsOfKey(pinnedKey).has(key)) return true;
+      }
+      return false;
+    }
+
+    // Tier 2 — SURGE ANCHORS (SOFT pin, placed BEFORE signatures so they
+    // claim their target phase before sig pins consume the budget).
+    // Spike dedup: drop any spike that's a transitive component of another
+    // spike OR of any already-pinned item (e.g. required upgrades).
+    const rawSpikes = ((preAnchors && preAnchors.spikes) || [])
+      .filter(k => k && !_pinnedKeys.has(k) && !blacklistSet.has(k)
+              && !isAncestorOfAnyPinned(k));
+    const spikeKeys = rawSpikes.filter(k =>
+      !rawSpikes.some(other => other !== k && ancestorsOfKey(other).has(k))
+    );
+    const antiSpikeKeys = ((preAnchors && preAnchors.antiSpikes) || [])
+      .filter(k => k && !_pinnedKeys.has(k) && !blacklistSet.has(k)
+              && !isAncestorOfAnyPinned(k));
+    spikeKeys.forEach((k, i) => softPinAttempt(anchorTargetIdx(i, k), k, 'anchor'));
+    antiSpikeKeys
+      .sort((a, c) => (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0))
+      .forEach(k => softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'anchor'));
+
+    // Tier 3 — SIGNATURE (SOFT pin). Skip sigs that are transitive
+    // components of any already-pinned item (req / anchor) — the upgrade's
+    // recursive placeBuy expansion will pull them in. Also dedup sigs
+    // against other (larger) sigs in this same pass.
+    const sigList = b.items
       .filter(it =>
         signatureSet.has(it.key) && !requiredSet.has(it.key) && !blacklistSet.has(it.key)
       )
@@ -9246,17 +9709,16 @@ function computeBuildPath(b, algo = 'greedy-phase') {
         const tc = bpItemMap[c.key]?.tier || 0;
         if (ta !== tc) return ta - tc;
         return (c.total || 0) - (a.total || 0);
-      })
-      .forEach(it => softPinAttempt(naturalPhaseIdx(bpItemMap[it.key]?.tier || 800), it.key, 'signature'));
-
-    // Tier 3 — SURGE ANCHORS (SOFT pin, only if not already pinned)
-    const anchorKeys = [
-      ...((preAnchors && preAnchors.spikes) || []),
-      ...((preAnchors && preAnchors.antiSpikes) || []),
-    ].filter(k => k && !_pinnedKeys.has(k) && !blacklistSet.has(k));
-    anchorKeys
-      .sort((a, c) => (bpItemMap[a]?.tier || 0) - (bpItemMap[c]?.tier || 0))
-      .forEach(k => softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'anchor'));
+      });
+    const sigKeysAll = sigList.map(it => it.key);
+    sigList.forEach(it => {
+      const k = it.key;
+      if (isAncestorOfAnyPinned(k)) return;
+      // Drop if another (larger) sig has this in its chain — same idea applied
+      // within the sig list itself.
+      if (sigKeysAll.some(other => other !== k && ancestorsOfKey(other).has(k))) return;
+      softPinAttempt(naturalPhaseIdx(bpItemMap[k]?.tier || 800), k, 'signature');
+    });
 
     // Tier 4 — COUNTER PINS (count scaled by anchor density).
     if (vulnList.length) {
@@ -9292,8 +9754,16 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       }
     }
 
+    // Within-phase ordering: spike-flagged items first (regardless of how
+    // they were pinned — req / sig / anchor), so the spike "moment" fires
+    // early in the phase instead of being buried behind T1/T2 sigs that
+    // tier-asc sort would naturally promote. Then standard tier-asc → priority.
+    const _spikeSet = new Set(((preAnchors && preAnchors.spikes) || []));
     Object.values(phasePins).forEach(arr => {
       arr.sort((a, c) => {
+        const aSp = _spikeSet.has(a.key);
+        const cSp = _spikeSet.has(c.key);
+        if (aSp !== cSp) return aSp ? -1 : 1;
         if (a.tier !== c.tier) return a.tier - c.tier;
         return (PRIORITY_ORDER[a.priority] ?? 99) - (PRIORITY_ORDER[c.priority] ?? 99);
       });
@@ -9309,6 +9779,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
       for (const pin of phasePins[phase]) {
         if (owned.has(pin.key)) continue;
         if (isSubsumed(pin.key, owned)) continue;
+        if (isAncestorOfOwned(pin.key, owned)) continue;
         placeBuy(phase, idx, pin.key, phaseTierCount);
       }
 
@@ -9325,6 +9796,7 @@ function computeBuildPath(b, algo = 'greedy-phase') {
           if (owned.has(k)) continue;
           if (blacklistSet.has(k)) continue;
           if (isSubsumed(k, owned)) continue;
+          if (isAncestorOfOwned(k, owned)) continue;
           if (isClaimedBlocked(k, owned)) continue;
           if (phase === 'Extra Late' && (bpItemMap[k]?.tier || 0) < EXTRA_LATE_MIN_TIER) continue;
           // Per-phase counter cap: once N counter-tag items already placed,
@@ -9717,6 +10189,113 @@ function bsConsensusVulnerability(b) {
   return Object.entries(agg)
     .map(([tag, d]) => ({ tag, ...d }))
     .sort((a, c) => c.strength - a.strength);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// TEAM VULNERABILITY BANNER
+// ════════════════════════════════════════════════════════════════════════════
+// Sibling of bsConsensusVulnerability(b) but team-keyed instead of build-keyed.
+// For each tag, aggregates the top-4 most-negative enemy_weight entries across
+// every hero on the given team. Returns sorted desc by total strength.
+// A vulnerability is "major" when both:
+//   • agreeCount >= ceil(teamSize / 2)  — enough heroes share it that it's
+//                                          team-wide, not one-off
+//   • strength   >= 1.5                  — collective magnitude high enough
+// Thresholds scale with team size: a 6-hero team needs 3 agreers, a 2-hero
+// team only needs 1 (so the read-out still fires on partial drafts).
+function teamConsensusVulnerability(teamKeys) {
+  if (!teamKeys || !teamKeys.length) return [];
+  const teamSize = teamKeys.length;
+  const agg = {};
+  teamKeys.forEach(heroKey => {
+    const hero = MATCH.heroData?.[heroKey];
+    if (!hero?.builds?.length) return;
+    const sel = MATCH.selectedBuilds?.[heroKey];
+    const buildIdx = typeof sel === 'number' ? sel : 0;
+    const build = hero.builds[buildIdx] || hero.builds[0];
+    if (!build) return;
+    let resolved;
+    try { resolved = resolveBuildValues(build, hero.builds); } catch { resolved = build.values || {}; }
+    const ew = resolved.enemy_weight || {};
+    const top = Object.entries(ew)
+      .filter(([_, v]) => typeof v === 'number' && v < 0)
+      .sort((a, c) => a[1] - c[1])
+      .slice(0, 4);
+    top.forEach(([tag, val]) => {
+      if (!agg[tag]) agg[tag] = { contributingHeroes: [], strength: 0 };
+      if (!agg[tag].contributingHeroes.includes(heroKey)) {
+        agg[tag].contributingHeroes.push(heroKey);
+      }
+      agg[tag].strength += Math.abs(val);
+    });
+  });
+  // User-set threshold: at least two-thirds of the team must share the
+  // weakness for it to register as "major". Tougher than the prior 1/2
+  // floor — keeps the banner quiet unless the team really does have a
+  // collective hole. Min 1 so a 1-hero draft can still surface.
+  const agreeThresh    = Math.max(1, Math.ceil(teamSize * 2 / 3));
+  const strengthThresh = 1.5;
+  return Object.entries(agg)
+    .map(([tag, d]) => ({
+      tag,
+      contributingHeroes: d.contributingHeroes,
+      agreeCount: d.contributingHeroes.length,
+      strength: d.strength,
+      teamSize,
+      major: d.contributingHeroes.length >= agreeThresh && d.strength >= strengthThresh,
+    }))
+    .sort((a, c) => c.strength - a.strength);
+}
+
+// Renders compact pulsing red/green vulnerability badges into `containerEl`.
+// Red badge: "Ally Major Vulnerability: <tag>"   — build owner's team weak
+// Green badge: "Major Enemy Team Vulnerability: <tag>" — opponents weak
+// Renders nothing when neither side has a "major" vulnerability.
+//
+// `perspectiveHeroName` (optional): when supplied AND that hero is on
+// MATCH.enemies, the team mapping flips so labels read from the build
+// owner's POV. Viewing an enemy's build path with this flip: "Ally" =
+// their allies (our enemies); "Enemy" = their enemies (our team). Colors
+// stay tied to build owner — red is "bad for whoever owns the build".
+// Match Results passes nothing → default player perspective.
+function renderTeamVulnerabilityBanner(containerEl, perspectiveHeroName) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+  const allies  = MATCH.allies  || [];
+  const enemies = MATCH.enemies || [];
+  const flipped = !!(perspectiveHeroName && enemies.includes(perspectiveHeroName));
+  const ownerTeam    = flipped ? enemies : allies;
+  const opposingTeam = flipped ? allies  : enemies;
+  const skip = (typeof SKIP_TAGS !== 'undefined' && SKIP_TAGS) ? SKIP_TAGS : new Set();
+  const allyVulns  = teamConsensusVulnerability(ownerTeam)
+    .filter(v => !skip.has(v.tag));
+  const enemyVulns = teamConsensusVulnerability(opposingTeam)
+    .filter(v => !skip.has(v.tag));
+  const topAlly  = allyVulns.find(v => v.major);
+  const topEnemy = enemyVulns.find(v => v.major);
+  if (!topAlly && !topEnemy) return;
+
+  const tagName = code => (S.tags?.find(t => t.code === code)?.name) || code;
+
+  const mkBadge = (vuln, kind) => {
+    const isAlly = kind === 'ally';
+    const badge = document.createElement('div');
+    badge.className = `vuln-badge ${isAlly ? 'vuln-bad' : 'vuln-good'}`;
+    badge.title = isAlly
+      ? `Heroes weak to this: ${vuln.contributingHeroes.join(', ')}`
+      : `Enemies weak to this: ${vuln.contributingHeroes.join(', ')}`;
+    badge.innerHTML = `
+      <span class="vuln-icon">${isAlly ? '⚠' : '✦'}</span>
+      <span class="vuln-label">${isAlly ? 'Ally Major Vulnerability' : 'Major Enemy Team Vulnerability'}:</span>
+      <span class="vuln-tag">${tagName(vuln.tag)}</span>
+      <span class="vuln-detail">${vuln.agreeCount}/${vuln.teamSize} heroes · str ${vuln.strength.toFixed(1)}</span>
+    `;
+    return badge;
+  };
+
+  if (topEnemy) containerEl.appendChild(mkBadge(topEnemy, 'enemy'));
+  if (topAlly)  containerEl.appendChild(mkBadge(topAlly,  'ally'));
+  containerEl.classList.add('vuln-banner');
 }
 
 // Single-pass global categorization of every scored item into:
@@ -10363,6 +10942,14 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
   const d = document.createElement('div');
   d.className = 'calc-panel';
 
+  // Team vulnerability banner (top of Build Screen). Perspective-aware:
+  // when `heroName` is on the enemy team, the labels flip so "Ally" reads
+  // as "this build owner's team" (which from the player's POV is the
+  // enemy team).
+  const vulnEl = document.createElement('div');
+  renderTeamVulnerabilityBanner(vulnEl, heroName);
+  if (vulnEl.children.length) d.appendChild(vulnEl);
+
   const pathData = b.buildPath || computeBuildPath(b);
   const hero = MATCH.heroData[heroName];
 
@@ -10782,8 +11369,19 @@ function mkBuildPathPanel(b) {
   const d = document.createElement('div');
   d.className = 'calc-panel';
 
+  // Team vulnerability banner (top of Build Path Guide). Perspective-aware
+  // off the path's hero — same flip as Build Screen so a viewed enemy
+  // build reads from their POV.
+  const persp = b?.heroName;
+  const vulnEl = document.createElement('div');
+  renderTeamVulnerabilityBanner(vulnEl, persp);
+  if (vulnEl.children.length) d.appendChild(vulnEl);
+
   if (MATCH.lazyBuildPaths) {
     d.innerHTML = '<div class="calc-panel-title">Build Path Guide</div>';
+    const lazyVuln = document.createElement('div');
+    renderTeamVulnerabilityBanner(lazyVuln, persp);
+    if (lazyVuln.children.length) d.insertBefore(lazyVuln, d.firstChild);
     const btn = document.createElement('button');
     btn.className = 'btn-primary btn-sm';
     btn.textContent = 'Calculate Build Path';
@@ -10791,6 +11389,9 @@ function mkBuildPathPanel(b) {
       btn.disabled = true; btn.textContent = 'Calculating…';
       const pathData = computeBuildPath(b, MATCH.bpAlgo);
       d.innerHTML = '';
+      const vuln2 = document.createElement('div');
+      renderTeamVulnerabilityBanner(vuln2, persp);
+      if (vuln2.children.length) d.appendChild(vuln2);
       d.appendChild(buildPathPanelContents(pathData, b));
     });
     d.appendChild(btn);
@@ -11213,6 +11814,60 @@ document.getElementById('re-item-search').addEventListener('blur', () => {
 });
 document.getElementById('re-enemy-search').addEventListener('input', () => renderReHeroPicker('enemy'));
 document.getElementById('re-ally-search').addEventListener('input', () => renderReHeroPicker('ally'));
+
+// ── Recalibrate Item Affinity wiring ──────────────────────────────────────
+document.getElementById('btn-recalibrate').addEventListener('click', () => {
+  if (S.currentBuildIdx == null) { toast('Select a build first', true); return; }
+  openRecalibrate(S.currentBuildIdx);
+});
+document.getElementById('back-recal').addEventListener('click', () => showPage('hero-edit'));
+document.getElementById('btn-recal-submit').addEventListener('click', submitRecalibrate);
+document.getElementById('btn-recal-apply').addEventListener('click', applyRecalibrate);
+document.getElementById('btn-recal-select-all').addEventListener('click', () => {
+  document.querySelectorAll('#recal-preview-body .recal-row-chk').forEach(c => {
+    c.checked = true; c.closest('tr').classList.remove('row-disabled');
+  });
+});
+document.getElementById('btn-recal-select-none').addEventListener('click', () => {
+  document.querySelectorAll('#recal-preview-body .recal-row-chk').forEach(c => {
+    c.checked = false; c.closest('tr').classList.add('row-disabled');
+  });
+});
+
+document.getElementById('recal-item-search').addEventListener('input', function () {
+  const q  = this.value.trim().toLowerCase();
+  const dd = document.getElementById('recal-item-dropdown');
+  if (q.length < 2 || !RECAL._itemData) { dd.classList.add('hidden'); return; }
+  const matches = RECAL._itemData
+    .filter(it => it.tier !== 9999 && it.name.toLowerCase().includes(q))
+    .filter(it => !RECAL.items.some(x => x.key === it.normalized_name))
+    .slice(0, 12);
+  if (!matches.length) { dd.classList.add('hidden'); return; }
+  dd.innerHTML = '';
+  matches.forEach(it => {
+    const opt = document.createElement('div');
+    opt.className = 're-item-opt';
+    const img = srcUrl(it.image_path);
+    opt.innerHTML = `${img ? `<img class="re-item-opt-img" src="${img}" alt="">` : ''}
+      <span class="re-item-opt-name">${it.name}</span>
+      <span class="re-item-opt-tier">${it.tier}★</span>`;
+    opt.addEventListener('mousedown', e => {
+      e.preventDefault();
+      RECAL.items.push({
+        key: it.normalized_name, name: it.name, tier: it.tier,
+        imagePath: it.image_path,
+        selfScore: it.values?.playstyle_score || {},
+      });
+      this.value = ''; dd.classList.add('hidden');
+      renderRecalChips();
+    });
+    dd.appendChild(opt);
+  });
+  dd.classList.remove('hidden');
+});
+document.getElementById('recal-item-search').addEventListener('blur', () => {
+  setTimeout(() => document.getElementById('recal-item-dropdown').classList.add('hidden'), 150);
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // QA TAB

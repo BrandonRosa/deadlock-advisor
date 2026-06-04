@@ -218,6 +218,61 @@ h1, h2, .page-header h1, .display-font {
   font-weight: 400;  /* IM Fell's natural weight is already heavy-feeling */
 }
 
+/* ── Mode gates (Standard < Advanced < Dev) ──────────────────
+   CODEX sets data-mode + data-advanced + data-developer on <html>. These
+   utility classes turn that into visibility / read-only behavior the same
+   way `.dense-only` did before — usable from any markup or render fn.
+
+   Visibility helpers (display: none unless the mode is met):
+     .advanced-up   visible in Advanced + Dev
+     .dev-only      visible only in Dev
+     .standard-only visible only in Standard
+
+   Read-only helpers (kill editability + dim, but keep visible):
+     .gate-edit-advanced  fields readable always, editable only in Advanced+
+     .gate-edit-dev       fields readable always, editable only in Dev
+
+   The .gate-edit-* classes apply to a wrapper; descendant inputs/selects/
+   buttons/contenteditable get disabled or pointer-blocked.
+*/
+html[data-mode="standard"] .advanced-up,
+html[data-mode="standard"] .dev-only,
+html[data-mode="advanced"]  .dev-only {
+  display: none !important;
+}
+html[data-mode="advanced"]  .standard-only,
+html[data-mode="dev"]       .standard-only {
+  display: none !important;
+}
+/* Read-only gates: when below the required level, disable interaction and
+   give a subtle visual cue that the field is locked. */
+html[data-mode="standard"] .gate-edit-advanced :is(input,select,textarea,button),
+html[data-mode="standard"] .gate-edit-advanced [contenteditable] {
+  pointer-events: none;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+html[data-mode="standard"] .gate-edit-advanced :is(input,select,textarea) {
+  background: var(--inset, var(--panel));
+}
+html:not([data-mode="dev"]) .gate-edit-dev :is(input,select,textarea,button),
+html:not([data-mode="dev"]) .gate-edit-dev [contenteditable] {
+  pointer-events: none;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+html:not([data-mode="dev"]) .gate-edit-dev :is(input,select,textarea) {
+  background: var(--inset, var(--panel));
+}
+/* Convenience: a wrapper marked .gate-edit-* gets a tiny "read-only" tag
+   appended via ::after for screen-reader users and visual confirmation. */
+html[data-mode="standard"] .gate-edit-advanced[data-locked-hint]::after,
+html:not([data-mode="dev"]) .gate-edit-dev[data-locked-hint]::after {
+  content: attr(data-locked-hint);
+  font-size: 10px; color: var(--muted); margin-left: 6px;
+  letter-spacing: .4px; text-transform: uppercase;
+}
+
 /* ── Layout ────────────────────────────────────────────────── */
 #sidebar {
   position: fixed; top: 0; left: 0; bottom: 0;
@@ -292,6 +347,13 @@ h1, h2, .page-header h1, .display-font {
   font-size: 17px; line-height: 1;
   color: inherit; opacity: .8;
   transition: opacity .13s;
+}
+/* Material Symbols variant for nav buttons — overrides the default Unicode
+   styling so the icon renders from the loaded MS Outlined font. */
+.nav-ico-msym {
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  font-size: 20px;
 }
 .nav-btn:hover { color: var(--ink); background: var(--card); }
 .nav-btn:hover .nav-ico { opacity: 1; }
@@ -368,6 +430,72 @@ h1, h2, .page-header h1, .display-font {
 .header-actions { display: flex; align-items: center; gap: 10px; }
 .calc-actions { flex-direction: column; align-items: flex-start; gap: 6px; }
 .calc-ctrl-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* Sticky Calculate-Builds button — sits below the (non-sticky) page header
+   and stays pinned to the top of the viewport while scrolling. Right-aligned
+   so it doesn't fight with the title above. pointer-events trick lets clicks
+   pass through the empty left half of the bar to whatever is underneath. */
+.calc-sticky-actions {
+  position: sticky;
+  top: 8px;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px 0 16px;
+  pointer-events: none;
+}
+.calc-sticky-actions > * { pointer-events: auto; }
+
+/* ── Collapsible Options block on the Calculator page ────────── */
+.calc-options {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-soft, rgba(255,255,255,.02));
+}
+.calc-options[open] {
+  background: var(--panel, rgba(255,255,255,.03));
+}
+.calc-options-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-muted, var(--text));
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .12s, background .12s;
+}
+.calc-options-summary::-webkit-details-marker { display: none; }
+.calc-options-summary::before {
+  content: '▸';
+  display: inline-block;
+  font-size: 10px;
+  width: 10px;
+  transition: transform .15s;
+  opacity: .7;
+}
+.calc-options[open] > .calc-options-summary::before { transform: rotate(90deg); }
+.calc-options-summary:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.calc-options-body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+}
+.calc-options-body .calc-ctrl-row {
+  padding: 4px 0;
+}
+.calc-options-body .calc-ctrl-row + .calc-ctrl-row {
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
 
 /* ── Buttons ───────────────────────────────────────────────── */
 .btn-primary {
@@ -1203,6 +1331,24 @@ h1, h2, .page-header h1, .display-font {
 .tag-affinity.ta-compact { gap: 3px; }
 .ta-team-panel      { margin-bottom: 16px; }
 .ta-row             { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ta-tags            { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+/* Icon-row variant: ↑ / ↓ Material icon replaces the word label and sits
+   inline at the left of each row. Tags flow on the same row. The icon picks
+   up its color from the .ta-good-lbl / .ta-bad-lbl rule below. */
+.tag-affinity.ta-iconrow .ta-lbl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 0;
+}
+.tag-affinity.ta-iconrow .ta-lbl .msym {
+  font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 20;
+  font-size: 16px;
+}
+.tag-affinity.ta-iconrow .ta-row { gap: 6px; }
 .ta-lbl             { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; }
 .ta-good-lbl        { color: var(--good); }
 .ta-bad-lbl         { color: var(--danger); }
@@ -2307,6 +2453,61 @@ h1, h2, .page-header h1, .display-font {
 .re-prev-tag { color: var(--muted); }
 .re-prev-val { font-weight: 600; }
 .re-prev-hint { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; font-style: italic; }
+
+/* ── Recalibrate Item Affinity ───────────────────────────────── */
+/* Single-column layout (no enemy/ally split). */
+.recal-body { display: block; }
+.recal-col-full { width: 100%; max-width: 880px; margin: 0 auto; }
+
+/* Drag-and-drop reorder on chips */
+.recal-drag-chip { cursor: grab; }
+.recal-drag-chip:active { cursor: grabbing; }
+.recal-drag-handle {
+  color: var(--muted); font-size: 12px; line-height: 1;
+  letter-spacing: -2px; user-select: none;
+  padding-right: 2px;
+}
+.recal-drag-chip.recal-dragging { opacity: .35; }
+.recal-drag-chip.recal-drop-target {
+  box-shadow: inset 0 0 0 1px var(--accent, #6cf);
+}
+/* Edge indicators so the user can see whether the drop will land before
+   or after the hovered chip — much less ambiguous than a single highlight. */
+.recal-drag-chip.drop-before { border-left: 3px solid var(--accent, #6cf); }
+.recal-drag-chip.drop-after  { border-right: 3px solid var(--accent, #6cf); }
+
+/* Preview controls (Select All / Select None) */
+.recal-preview-controls {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+.recal-preview-hint {
+  font-size: 11px; color: var(--muted); font-style: italic;
+}
+
+/* Diff table */
+.recal-prev-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.recal-prev-table th, .recal-prev-table td {
+  padding: 6px 10px; text-align: left;
+  border-bottom: 1px solid rgba(42,42,74,.3);
+}
+.recal-prev-table th {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--muted); background: var(--card);
+}
+.recal-prev-table .col-chk { width: 32px; text-align: center; }
+.recal-prev-table .col-tag { min-width: 140px; }
+.recal-prev-table .col-num { width: 90px; text-align: right; }
+.recal-prev-table tbody tr:hover { background: rgba(255,255,255,.02); }
+.recal-prev-table .recal-row-val {
+  width: 70px; padding: 3px 6px; font-size: 12px; text-align: right;
+  background: var(--card); border: 1px solid var(--border); color: var(--text);
+  border-radius: 3px;
+}
+.recal-prev-table tr.row-disabled td:not(.col-chk) { opacity: .4; }
+.recal-apply-btn { margin-top: 14px; padding: 10px 18px; font-size: 13px; }
 
 /* ── QA Tab ──────────────────────────────────────────────────── */
 .qa-empty { color: var(--muted); padding: 16px 0; font-size: 13px; }
@@ -3984,6 +4185,25 @@ h1, h2, .page-header h1, .display-font {
 .sc-build-pct.pct-pos { color: var(--good); background: var(--green-soft); }
 .sc-build-pct.pct-neg { color: var(--bad);  background: var(--bad-soft); }
 
+/* Per-build top-3 item icons — sit between the build name and the pct chip.
+   Dense-only (hidden in simple mode) so the row stays compact. Tooltip on
+   each img exposes the item name on hover. */
+.sc-row-items {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.sc-row-item-img {
+  width: 22px; height: 22px;
+  border-radius: 3px;
+  background: rgba(0,0,0,.25);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.sc-row-item-empty { background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 3px, transparent 3px 6px); }
+[data-theme="light"] .sc-row-item-img { background: rgba(60, 50, 30, .12); }
+
 /* Top items section → Codex .hc-items-lbl + .hc-items grid */
 .sc-items { padding-bottom: 14px; }
 .sc-items-lbl {
@@ -5057,3 +5277,185 @@ body.sim-fullscreen #page-sim.active {
 .td-collapse-toggle:hover { color: var(--cream); background: var(--panel2); }
 .td-row-empty { opacity: 0.55; }
 .td-row-empty:hover { opacity: 1; }
+
+/* ── Team Vulnerability Banner ───────────────────────────────────────────
+   Compact pulsing labels at the top of Match Results, Build Screen, and
+   Build Path Guide whenever a team has a major consensus vulnerability.
+   Perspective-aware: when viewing an enemy hero's build, "Ally" refers to
+   THEIR allies (our enemies). Colors stay tied to build owner's POV — red
+   = build owner's team weakness, green = build owner's opponents' weakness.
+*/
+.vuln-banner {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 0 0 12px 0;
+}
+/* Match Results banner sticks to the top while scrolling through the hero
+   cards — easy to miss otherwise. Higher z-index than the page-header sticky
+   (50) so it overlays the title row once the user scrolls past it; gives the
+   pulsing label perpetual visibility. */
+#summary-vuln-banner {
+  position: sticky;
+  top: 0;
+  z-index: 51;
+  background: var(--bg);
+  padding: 10px 0;
+  margin: 0 0 12px 0;
+}
+#summary-vuln-banner:empty { display: none; }
+#summary-vuln-banner > .vuln-banner { margin: 0; }
+.vuln-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px; border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .2px;
+  animation: vuln-pulse 1.6s ease-in-out infinite;
+  cursor: default;
+  user-select: none;
+}
+/* Dark mode (default): saturated borders, light text on rgba bg */
+.vuln-bad {
+  background: rgba(255, 70, 70, 0.13);
+  border: 1px solid #ff4646;
+  color: #ffb0b0;
+}
+.vuln-good {
+  background: rgba(80, 220, 130, 0.13);
+  border: 1px solid #50dc82;
+  color: #b0eec3;
+}
+.vuln-icon { font-size: 15px; line-height: 1; }
+.vuln-label { font-weight: 700; }
+.vuln-tag { font-weight: 800; text-transform: capitalize; }
+.vuln-detail { opacity: 0.7; font-size: 11px; font-weight: 500; }
+
+/* Light mode: parchment background needs DARK text against soft tints,
+   otherwise the existing light-red/light-green text becomes near-invisible.
+   Reuses the theme's existing --bad-* / --green-* variables for consistency
+   with other red/green callouts on parchment. */
+[data-theme="light"] .vuln-bad {
+  background: var(--bad-soft);
+  border-color: var(--bad);
+  color: var(--bad);
+}
+[data-theme="light"] .vuln-good {
+  background: var(--green-soft);
+  border-color: var(--good);
+  color: var(--good);
+}
+[data-theme="light"] .vuln-detail { opacity: 0.85; }
+
+/* Soft pulse — alternates between a faint glow and clear. Stays subtle so it
+   doesn't strobe distractingly on a page the user might leave open. */
+@keyframes vuln-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 70, 70, 0);
+    filter: brightness(1.0);
+  }
+  50% {
+    box-shadow: 0 0 8px 1px currentColor;
+    filter: brightness(1.12);
+  }
+}
+
+/* ── Match Results: collapse build-row score columns when raw values gate hides them ──
+   The ch-header-row and ch-build-row grid templates allocate fixed-width score
+   columns. When the score spans inside them are hidden via .dense-only .dev-only
+   (i.e. anything other than dense+dev mode), the empty columns leave a visual
+   gap. Collapse the grid to just [name | total] in those modes so the row
+   reads cleanly: build name + pct chip + relative dim score (still hidden but
+   the wrapper stays sized for the pct chip). */
+:root[data-density="simple"] .ch-header-row,
+:root[data-density="simple"] .ch-build-row,
+html:not([data-mode="dev"]) .ch-header-row,
+html:not([data-mode="dev"]) .ch-build-row {
+  grid-template-columns: 1fr 120px !important;
+}
+
+/* ───────────────────────── LIGHT-MODE TABLE HEADERS ─────────────────────────
+   The default tag-table / data-table headers carry a hardcoded near-black
+   gradient (designed for dark mode) that turns black on parchment in light
+   theme. Override with a warm tan that complements the rest of the parchment
+   palette and keep the uppercase muted text legible. */
+[data-theme="light"] .tag-table thead tr {
+  background: linear-gradient(180deg, #ede1c0 0%, #e3d5b0 100%);
+  border-bottom: 1px solid var(--line);
+}
+[data-theme="light"] .tag-table th {
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+}
+[data-theme="light"] .tag-table thead .col-tag {
+  background: #ede1c0;
+}
+[data-theme="light"] .data-table thead {
+  background: linear-gradient(180deg, #ede1c0 0%, #e3d5b0 100%);
+}
+[data-theme="light"] .data-table th {
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ───────────────────────── LIGHT-MODE BP BADGES ─────────────────────────────
+   The spike/required/signature/recommended badges show up in the build path
+   guide and the calculator summary chips. In dark mode they sit on a near-
+   black background and rely on a heavy black text-shadow to read; in light
+   mode that shadow turns into a black halo around dark text on parchment,
+   making the labels look muddy / "too dark". Strip the dark shadow and lean
+   on a soft chip background instead — colors stay tied to var(--gold) etc so
+   they continue to follow the theme. */
+[data-theme="light"] .bp-badge {
+  text-shadow: none;
+}
+[data-theme="light"] .bp-badge-spike {
+  color: var(--danger);
+  text-shadow: 0 0 4px rgba(164, 69, 60, .35);
+}
+[data-theme="light"] .bp-badge-required    { color: var(--gold); }
+[data-theme="light"] .bp-badge-recommended { color: #2f7a82; }   /* deeper teal */
+[data-theme="light"] .bp-change.bp-label-spike            .bp-priority-sym {
+  color: var(--danger);
+  text-shadow: 0 0 4px rgba(164, 69, 60, .35);
+}
+[data-theme="light"] .bp-change.bp-label-required         .bp-priority-sym { color: var(--gold); }
+[data-theme="light"] .bp-change.bp-label-required-anti    .bp-priority-sym { color: var(--gold); }
+[data-theme="light"] .bp-change.bp-label-signature        .bp-priority-sym { color: var(--good); }
+[data-theme="light"] .bp-change.bp-label-signature-anti   .bp-priority-sym { color: var(--good); }
+[data-theme="light"] .bp-label-required-anti  .msym:first-child { color: var(--gold); }
+[data-theme="light"] .bp-label-signature-anti .msym:first-child { color: var(--good); }
+
+/* ─────────────── LIGHT-MODE BUILD-SCREEN TILE LABELS ──────────────────────
+   .bs-tile-label backdrops are color-mixed with #1a1614 (warm near-black) so
+   they read on the dark theme. On parchment that mix produces a muddy dark
+   chip with dark text — the user perceives the labels as "super dim". In
+   light mode, swap the mix base to the cream surface so the chip becomes a
+   tinted parchment pill, and lift icon color + strip the black text-shadow
+   so the glyph stands out. */
+[data-theme="light"] .bs-tile-label {
+  background: #f6f0e2;
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 1px rgba(60, 50, 30, .12);
+}
+[data-theme="light"] .bs-tile-label .msym {
+  text-shadow: none;
+}
+[data-theme="light"] .bs-tile.bp-label-spike            .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-spike-c          .bs-tile-label { background: color-mix(in srgb, var(--danger) 18%, #fbf6ea); border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+[data-theme="light"] .bs-tile.bp-label-required         .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-req-c            .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-required-anti    .bs-tile-label { background: color-mix(in srgb, var(--gold) 22%, #fbf6ea); border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
+[data-theme="light"] .bs-tile.bp-label-anti             .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-anti-c           .bs-tile-label { background: color-mix(in srgb, #a06fd1 18%, #fbf6ea); border-color: color-mix(in srgb, #a06fd1 50%, var(--line)); }
+[data-theme="light"] .bs-tile.bp-label-signature        .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-sig-c            .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-signature-anti   .bs-tile-label { background: color-mix(in srgb, var(--good) 18%, #fbf6ea); border-color: color-mix(in srgb, var(--good) 50%, var(--line)); }
+[data-theme="light"] .bs-tile.bp-label-recommended      .bs-tile-label,
+[data-theme="light"] .bs-tile.bp-label-rec-c            .bs-tile-label { background: color-mix(in srgb, #2f7a82 18%, #fbf6ea); border-color: color-mix(in srgb, #2f7a82 50%, var(--line)); }
+
+/* Icon colors get a touch deeper in light mode to compensate for the lighter
+   chip background — keeps contrast with the parchment surface. */
+[data-theme="light"] .bs-tile.bp-label-recommended      .bs-tile-label .msym,
+[data-theme="light"] .bs-tile.bp-label-rec-c            .bs-tile-label .msym { color: #2f7a82; }
+[data-theme="light"] .bs-tile.bp-label-anti             .bs-tile-label .msym,
+[data-theme="light"] .bs-tile.bp-label-anti-c           .bs-tile-label .msym { color: #7a4cb0; }
+[data-theme="light"] .bs-tile.bp-label-required-anti    .bs-tile-label .msym:nth-child(2),
+[data-theme="light"] .bs-tile.bp-label-signature-anti   .bs-tile-label .msym:nth-child(2) { color: #7a4cb0; }

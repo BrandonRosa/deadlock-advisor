@@ -269,7 +269,10 @@ def get_hero(name):
 @app.route("/api/heroes/<name>", methods=["PUT"])
 def save_hero(name):
     f = HEROES_DIR / f"{name}.json"
-    f.write_text(json.dumps(request.json, indent=2, ensure_ascii=False))
+    # Always write UTF-8 — without the explicit encoding, write_text uses the
+    # platform default (cp1252 on Windows), which produces files that the
+    # utf-8-strict reader in /api/heroes/all then silently drops.
+    f.write_text(json.dumps(request.json, indent=2, ensure_ascii=False), encoding='utf-8')
     return jsonify({"ok": True})
 
 
@@ -374,9 +377,20 @@ def get_all_heroes():
     out = []
     for f in sorted(HEROES_DIR.glob("*.json")):
         try:
-            out.append(json.loads(f.read_text(encoding='utf-8')))
-        except Exception:
-            pass
+            # Tolerate Windows cp1252 bytes (e.g. 0x85 ellipsis) that can leak
+            # in via OS clipboards. Read as bytes; try utf-8 first, fall back
+            # to cp1252 — which is what /api/heroes does implicitly via the
+            # platform default. Silently swallowing UnicodeDecodeError was
+            # what caused grey_talon / mcginnis / viscous to vanish from the
+            # tag-explorer's Heroes/Builds tab.
+            raw = f.read_bytes()
+            try:
+                text = raw.decode('utf-8')
+            except UnicodeDecodeError:
+                text = raw.decode('cp1252')
+            out.append(json.loads(text))
+        except Exception as e:
+            print(f"[heroes/all] skipped {f.name}: {e}")
     return jsonify(out)
 
 

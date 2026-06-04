@@ -58,6 +58,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": 0.25,
           "low_max_hp": 0.25,
@@ -85,7 +86,7 @@
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
-          "spirit_damage": null,
+          "spirit_damage": -0.1,
           "spirit_lifesteal": null,
           "spirit_proc": null,
           "spirit_resist_shred": 0.25,
@@ -94,8 +95,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "enemy_weight": {
           "ability_spam": null,
@@ -150,6 +150,7 @@
           "horizontal_mobility": null,
           "hybrid_damage_usage": null,
           "interrupt": null,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": -0.2,
           "low_max_hp": null,
@@ -186,8 +187,7 @@
           "team_heal": null,
           "trap_block_obstruct": null,
           "ult_focused": null,
-          "vertical_mobility": null,
-          "lane_pusher": null
+          "vertical_mobility": null
         },
         "item_affinity": {
           "ability_spam": 0.1,
@@ -242,6 +242,7 @@
           "horizontal_mobility": 0.33,
           "hybrid_damage_usage": 0.15,
           "interrupt": 0.15,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": 0,
           "low_max_hp": 0.15,
@@ -278,8 +279,7 @@
           "team_heal": 1,
           "trap_block_obstruct": 0.15,
           "ult_focused": 0.25,
-          "vertical_mobility": 0.33,
-          "lane_pusher": null
+          "vertical_mobility": 0.33
         },
         "playstyle_score": {
           "ability_spam": 0.1,
@@ -334,6 +334,7 @@
           "horizontal_mobility": 0.33,
           "hybrid_damage_usage": 0.15,
           "interrupt": 0.5,
+          "lane_pusher": null,
           "large_hitbox": null,
           "long_range": 0.1,
           "low_max_hp": 0.15,
@@ -370,8 +371,7 @@
           "team_heal": 1,
           "trap_block_obstruct": 0.25,
           "ult_focused": 0.25,
-          "vertical_mobility": 0.33,
-          "lane_pusher": null
+          "vertical_mobility": 0.33
         }
       }
     }
@@ -380,6 +380,7 @@
     "orange",
     "green"
   ],
+  "default_build_name": "paige_general",
   "desc_eng": "",
   "eng_name": "Paige",
   "image_path": "/resources/heroes/paige/portrait_paige.png",
@@ -391,6 +392,5 @@
     "librarian",
     ".pge"
   ],
-  "wiki_url": "https://deadlock.wiki/Paige",
-  "default_build_name": "paige_general"
+  "wiki_url": "https://deadlock.wiki/Paige"
 }

@@ -820,54 +820,205 @@ Same shape as V2 but enemy/ally axis weighting tilts toward `v3Targets` — spec
 
 The dropdown lives in calc setup row 2. Stored in `MATCH.bpAlgo`. All dispatch through `app.js: computeBuildPath(b, algo)`.
 
-**Currently in the `BP_ALGO_OPTIONS` dropdown** (`app.js: BP_ALGO_OPTIONS` at the top of the QA TAB block, ~line 9736). 11 algorithms total — see §22.1 through §22.11 below.
+**Currently in the `BP_ALGO_OPTIONS` dropdown** (`app.js: BP_ALGO_OPTIONS` ~line 10803). 15 algorithms total — §22.1 through §22.15. **Default: `maestro` (Unified+Smooth)** since 2026-06-03. Previous defaults: `architect` → `spike2` → `maestro`.
 
 **Legacy algorithms removed from the dropdown** (per the inline code comment dated 2026-05-13): `assassin`, `lookahead`, `oracle`. Their runner functions remain inside `computeBuildPath` so old saved QA scenarios still resolve correctly, but they aren't surfaced to the user or to the sim-log harness. Reasons (from the comment): `assassin` worst affinity 23.25, over-buys + over-sells; `lookahead` had an ends-early bug + T4 deficit; `oracle` was mediocre across every metric with no differentiator.
+
+### 22.0 What Makes a Good Build — Construction Principles
+
+Distilled from the Maestro tuning pass (2026-06-03/04). These are the rules every algorithm should respect; later sections list which algos still violate which rule.
+
+#### 22.0.1 Phase budgeting is soul-total, not slot-count
+
+`BUILD_PHASES[i].addBudget` is the souls available to spend per phase (verified):
+
+| Phase       | addBudget | totalSlots |
+|-------------|-----------|------------|
+| Lane        | 3,200     | 9          |
+| Early       | 6,400     | 9          |
+| Mid         | 12,800    | 10         |
+| Late        | 19,800    | 12         |
+| Extra Late  | 1,000,000 | 12         |
+
+Algorithms that fill by tier-bucket-then-slot (older greedy/marginal/cosine) over-spend Lane because they count items not souls. Maestro's walk gates by `phaseSpent[idx] >= budget` — slots are a secondary cap (`MAX_BUYS_PER_PHASE = 30`, `EXTRA_LATE_SLOT_CAP = 12`).
+
+#### 22.0.2 Pin hierarchy — REQUIRED > ANCHOR > SIGNATURE > COUNTER
+
+In Maestro's pin pass, in order:
+
+1. **Required (HARD)** — every `requiredSet` item is hard-pinned to its natural-tier phase. Ignores budget. Sort by tier asc so components pin before upgrades.
+2. **Surge anchors (SOFT)** — placed BEFORE sigs so they claim their target phase before sig pins eat the budget. Phase-targeted (see §22.0.3), not natural-tier.
+3. **Signatures (SOFT)** — `softPinAttempt` from natural-tier phase; pushed forward only if `_tentSpent[idx] + cost > phaseBudget × 1.2`.
+4. **Counter pins (SOFT, optional)** — driven by enemy consensus vulnerability. Count scaled by anchor density (see §22.0.8).
+
+**Within-phase ordering** (`PRIORITY_ORDER = { required: 0, anchor: 1, signature: 2, counter: 3 }`): anchor sorts AHEAD of signature so the spike fires near the start of its phase instead of being buried behind T1/T2 sigs. The sort overrides this when an item is spike-flagged — spike items always go first regardless of tier or pin source.
+
+#### 22.0.3 Spike phase targeting — Mid then Late, NOT natural-tier
+
+`anchorTargetIdx(spikeIndex, key)`:
+
+- `spike[0]` → **Mid** (idx 2), pushed to Late only if Mid is impossibly tight
+- `spike[1]` → **Late** (idx 3)
+- `spike[2+]` and anti-spikes → natural-tier phase
+
+This is a hard override of natural-tier-phase. A T4 spike that "naturally" wants Late will land in Mid if there's room. The user-stated boundaries:
+
+- **First spike** — start of Mid (earliest) → start of Late (latest), preferably middle of Mid
+- **Second spike** — end of Mid (earliest) → end of Late (latest), preferably middle of Late
+
+#### 22.0.4 Spike picker — strict `requiredSet` first
+
+`pickSpike(cands, t3Strong, t4Enc)` in both `computeSurgeAnchors` (~line 4993) and `runSurge` (~line 7417):
+
+```
+requiredSet      → signatureSet      → reqComponentSet → sigComponentSet → rest
+(direct required)  (direct signature)   (chain of req)    (chain of sig)
+```
+
+The OLD `isReqAny = requiredSet || reqComponentSet` lumped components in with direct required, which let a sig that's *also* a req-component (e.g. Superior Cooldown when Transcendent is required) outrank actual required spike candidates. **User rule: both spikes should almost always come from required items first.**
+
+#### 22.0.5 Spike dedup — drop ancestors of other spikes
+
+If `spike[i]` appears in the upgrade chain of `spike[j]`, drop `spike[i]`. The `placeBuy` recursion will pull `spike[i]` in as a component when `spike[j]` is bought — no separate pin needed. **User rule: "Spike #1 cannot be a component of spike #2 — at that point just make the spike the upgrade."**
+
+Implemented in Maestro as:
+```js
+spikeKeys = rawSpikes.filter(k => !rawSpikes.some(other => other !== k && ancestorsOfKey(other).has(k)))
+```
+
+#### 22.0.6 Pin dedup against ALL pinned items
+
+Generalization of 22.0.5: any pin (sig or spike) that's a transitive component of any already-pinned item should be skipped. The upgrade's `placeBuy` recursion handles it.
+
+```js
+function isAncestorOfAnyPinned(key) {
+  for (const pinnedKey of _pinnedKeys) {
+    if (pinnedKey === key) continue;
+    if (ancestorsOfKey(pinnedKey).has(key)) return true;
+  }
+  return false;
+}
+```
+
+Without this, Superior Cooldown was being re-pinned as a signature even though Transcendent (req) was already pinned and would recursively buy Superior — producing the muddied "Mid spike + Late spike that's the upgrade of the Mid spike" pattern.
+
+#### 22.0.7 Two component-related guard rails
+
+Both required, both subtle:
+
+**Component-claim rule** (`isClaimedBlocked`): a component used in any owned upgrade's chain is locked. No OTHER upgrade that needs the same component may be recommended. Kills the "two grits in Lane" duplicate-component scenario.
+
+**Ancestor-of-owned guard** (`isAncestorOfOwned`): once Transcendent is owned, all transitive components (Superior, Compress) are unpurchasable. `isSubsumed` only checks DIRECT parents — when Superior was consumed into Transcendent, `isSubsumed('compress_cooldown', owned)` returned false because `owned` only contained Transcendent. New helper walks `ancestorsOfKey(owned[i])` transitively.
+
+#### 22.0.8 Counter reactivity scales with anchor density
+
+`_anchorCount = requiredSet.size + signatureSet.size`. `_isHighAnchor = _anchorCount >= 3`.
+
+| Knob                          | Low-anchor (<3) | High-anchor (≥3) |
+|-------------------------------|-----------------|------------------|
+| `COUNTER_PIN_MAX`             | 1               | 2                |
+| `PHASE_COUNTER_CAP`           | 1               | 2                |
+| `COUNTER_TIER_BIAS`           | 0.85            | 0.35             |
+| `COUNTER_FILL_TIER_PENALTY`   | 0.55            | 0 (disabled)     |
+| `_liftScaleMult`              | 0.45 → 1.0      | 1.0              |
+
+**Why**: a build with few req/sig has no identity to anchor to — letting counters dominate produces an inversion ("Lash General gets 3 counters in Mid"). Builds with 3+ anchors can absorb 2 counters without losing their shape.
+
+**`_liftScaleMult`**: scales the soft/hard counter lifts in scoring. Formula: `0.45 + 0.55 × min(1, _anchorCount / 3)`. Pins still fire — this only tames score-driven picks.
+
+**Per-phase cap**: once N counter-tag items (`counter_importance ≥ COUNTER_TAG_THRESH`) are placed in a phase, fill loop skips further counter picks unless they're req/sig.
+
+**Low-tier preference**: low-anchor builds get a `tierStep × COUNTER_FILL_TIER_PENALTY` deduction on score-driven counter picks, which pulls T1/T2 suppressor-style items ahead of T3 metal_skin / disarming_hex when consensus is comparable.
+
+#### 22.0.9 Build-side counter/assist gates
+
+`buildAssist = rv.item_affinity.assist_importance` and `buildCounter = rv.item_affinity.counter_importance` from the build's reverse-engineered vector:
+
+```
+itemAssist > 0 && !authored:
+  buildAssist <  0      → return -Infinity   (build refuses assist items)
+  buildAssist <  0.5    → assistMult = 0.5 + buildAssist
+  buildAssist >= 0.5    → assistMult = ASSIST_BOOST (1.25)
+
+itemCounter >= COUNTER_TAG_THRESH && !authored:
+  buildCounter <  0     → return -Infinity
+  buildCounter >= 0.5   → counterMult = COUNTER_BOOST (1.20)
+  else                  → counterMult = 1.0  (no penalty for "lukewarm" counter builds —
+                                              previously was 0.5+buildCounter which
+                                              over-penalized spirit builds)
+```
+
+#### 22.0.10 Tier-diversity penalty — smooth flow
+
+`sameTierAlready × TIER_DIVERSITY_PENALTY (0.45)` deducted from candidate score in fill loop. After placing the first T2 in Lane, the next T2 candidate gets -0.45 — usually enough to lose to a T1 alternative, but small enough to allow a second T2 when no T1 fits. Eliminates the "2 T2 in Lane" pattern Anchored/Spike were prone to.
+
+#### 22.0.11 Extra Late = T3+ finishers only
+
+`EXTRA_LATE_MIN_TIER = 3200`. The fill loop rejects T1/T2 candidates in Extra Late so the luxury slot only gets T3/T4 finishers. Pins can still slip a T2 signature in (if pushed forward by overcrowding), but score-driven fills must be T3+.
+
+#### 22.0.12 Damped cross-phase tier insistence
+
+`PHASE_TIER_DAMP = 0.75` (Spike was 0.80). Applied as `getPhaseTierMult(phase, tier) ** PHASE_TIER_DAMP`. Reduces the steepness of `PHASE_TIER_MULTS` so a T2 item in Mid isn't crushed into irrelevance by a T3 item — gives the tier-diversity penalty and counter-scaled lift more room to maneuver.
+
+#### 22.0.13 Local role multipliers — softer than globals
+
+Maestro uses LOCAL constants instead of the global `REQ_MULT` etc. so it relies less on raw role-stacking:
+
+| Constant            | Local (Maestro) | Global (default in `computeBuildPath`) |
+|---------------------|-----------------|----------------------------------------|
+| REQ_MULT            | 1.7             | 2.0                                    |
+| REQ_COMP_MULT       | 1.4             | 1.6                                    |
+| SIG_MULT            | 1.25            | 1.4                                    |
+| SIG_COMP_MULT       | 1.10            | 1.15                                   |
+
+Combined with 22.0.2 (explicit pin hierarchy) the soft local multipliers prevent "sig stacking" from drowning out spike anchors in the same phase.
+
+---
 
 ### 22.1 `greedy-phase` — Greedy (Phase)
 **Algo:** Per phase, fills slots with the highest-`.total` affordable items respecting phase slot budgets. Wrapped by `applyConstraintsFixup()` to force required-item inclusion.
 **Code:** `app.js: greedyMain()` + `bpScore()`
 **Purpose:** The baseline. Every other algo started life as a tweak to this one.
 **Weakness:** Greedy on raw total → T4-slam builds (too many max-tier items) and overuses sells.
-**Correction:** _(your note here)_
+**Correction:** Violates §22.0.1 (slot-based phase fill, not soul-budget). Violates §22.0.2 (no pin hierarchy). Violates §22.0.3 (no spike-target phases). Use only as a reference baseline; QA against Maestro to see what proper phase budgeting produces.
 
 ### 22.2 `marginal` — Marginal Value
 **Algo:** `marginalScoreFn` — scores each candidate's marginal contribution given items already owned. Uses cosine-style normalization to penalize tag overlap (diminishing returns per tag).
 **Code:** `app.js: marginalScoreFn()`
-**Correction:** _(your note here)_
+**Correction:** Defensive timings — marginal scoring keeps picking T1/T2 fillers in late phases. Inherits Greedy's phase issues. No spike awareness.
 
 ### 22.3 `cosine` — Cosine Deficit
 **Algo:** `cosineScoreFn` — items that move the build vector toward a "guide" vector get scored higher.
 **Code:** `app.js: cosineScoreFn()`
-**Correction:** _(your note here)_
+**Correction:** Same shape as marginal — guide-vector matching ignores phase soul budget and spike timing. Reasonable tag fit, bad pacing.
 
 ### 22.4 `beam` — Beam Search
 **Algo:** Keeps top-K (~3) candidate inventories at each step, expands each, prunes to top-K. Higher quality than greedy but more expensive.
 **Code:** `app.js: runBeamSearch()`
-**Correction:** _(your note here)_
+**Correction:** "Weird buy order, item spam" per old QA report. Uses bpScore wrapper — same phase/focus issues as greedy with extra cost.
 
 ### 22.5 `expert` — Expert Greedy
 **Algo:** Hand-tuned heuristics layered on top of greedy — always upgrade existing chains before starting new ones, etc.
 **Code:** `app.js: runExpertGreedy()`
-**Correction:** _(your note here)_
+**Correction:** Chain-first heuristic helps a little but doesn't address phase budgeting or spike timing.
 
 ### 22.6 `adaptive` — Hybrid Rotation
 **Algo:** Rotates between cosine / marginal / lookahead scoring per phase based on heuristics. Was the previous default before Architect.
 **Code:** `app.js: runHybridRotation('adaptive')`
-**Correction:** _(your note here)_
+**Correction:** Inherits the issues of whichever scorer it rotates to. Per-phase rotation gets the right "feel" of phase awareness without actually budgeting souls.
 
 ### 22.7 `fusion` — Fusion (Best of All)
 **Algo:** Picks the best move across all scorers each step.
 **Code:** `app.js: runHybridRotation('fusion')`
-**Correction:** _(your note here)_
+**Correction:** Same caveats — composite of weak phase models.
 
-### 22.8 `architect` — Architect (Path Planner) — **DEFAULT**
+### 22.8 `architect` — Architect (Path Planner)
 **Algo:** Two-stage:
 1. **Architecting** — priority-orders all items (required → signature → rest by `.total`), takes top-2×-slots, walks upgrade chains to build a `componentOf` map.
 2. **Tick execution** — per tick, scores affordable candidates by `priorityScore(it) = total × role-boost × (1.2 if needed-by-something) × (1.15 if upgrades-owned-component)`. Souls brackets gate which tier can fire.
 **Code:** `app.js: runArchitect()`
 **Purpose:** Plans toward a target endgame inventory; uses souls brackets to avoid T4-slamming.
-**Correction:** _(your note here)_
+**Correction:** Was default for a long time. Respects §22.0.1 (soul-budgeted via brackets) and §22.0.13 (role boosts). Missing §22.0.2 (no explicit pin hierarchy — anchors implicit via componentOf), §22.0.3 (no spike-target phases — relies on tier-bracket timing), and the component guards in §22.0.7. Apply spike-chain boost (see retuning pass 2026-06-04).
 
 ### 22.9 `inverse` — Inverse (Endgame Solver)
 **Algo:** Backward induction:
@@ -875,12 +1026,12 @@ The dropdown lives in calc setup row 2. Stored in `MATCH.bpAlgo`. All dispatch t
 2. **Chain resolver** — for each endgame item, walk to cheapest ancestor chain → ordered `chainPlan`.
 3. **Scheduler** — per tick, fire any unowned chainPlan item that's affordable. Escape valve fires off-plan picks after 3+ idle ticks.
 **Code:** `app.js: runInverse()`
-**Correction:** _(your note here)_
+**Correction:** Strong on req-first endgame composition (§22.0.4 style). No spike-target phase awareness — endgame items land whenever their chain becomes affordable. Underuses Extra Late.
 
 ### 22.10 `surge` — Surge (Power Spike)
 **Algo:** Two phases:
 1. **Anchor planning** — picks 4 anchors:
-    - **firstSpike** — top self-axis item from T3+T4 pool, T3-biased (×1.15). HARD priority: if any required item is in the T3+T4 pool, ONLY consider required; else only signature; else normal.
+    - **firstSpike** — top self-axis item from T3+T4 pool, T3-biased (×1.15). HARD priority: required > signature > req-component > sig-component > normal (strict-bucket fix landed 2026-06-04 to align with §22.0.4).
     - **secondSpike** — top self-axis T4-only item, T4-biased.
     - **firstAntiSpike** — top counter-axis T3+T4 item, T3-biased. Scoring uses consensus enemy vulnerability: for each enemy hero, find their top-4 most-negative `enemy_weight` tags; count how many enemies share each tag (consensus count); rank by count then magnitude sum. This means 6 enemies with moderate CC-resist beats 3 enemies with high bullet-resist.
     - **secondAntiSpike** — top counter-axis T3+T4 item, T4-biased. Masked against anti1's top 3 strongest tags to prevent redundant coverage.
@@ -889,17 +1040,57 @@ The dropdown lives in calc setup row 2. Stored in `MATCH.bpAlgo`. All dispatch t
 
 **Code:** `app.js: runSurge()`
 **Purpose:** Plans two power spikes timed to guardian/walker and midboss/siege fights; two anti-spikes that punish the enemy team's consensus vulnerability.
+**Correction:** Closest legacy algo to Maestro in spirit. Already respects §22.0.4 (after the fix). Missing §22.0.5 (spike dedup against ancestors), §22.0.6 (pin dedup against all pinned), and §22.0.7 (component-claim / ancestor-of-owned guards). Tick-window scheduling is more aggressive than Maestro's phase-pin model — different style but similar intent.
 
-**Correction:** _(your note here)_
+### 22.11 `anchored` — Anchored (Unified)
+**Algo:** First of the "unified" series. Single-pass per-phase walk with: required HARD pin, signature SOFT pin, surge anchors SOFT pin, counter pins driven by enemy consensus vulnerability. Lifts `softCounterLift` / `hardCounterLift` add tag-consensus into scoring.
+**Code:** `app.js: runAnchored()` (~line 7920)
+**Purpose:** First attempt at consolidating the best of architect/inverse/surge into a single non-tick walk.
+**Correction:** Overreacts to counters on low-anchor builds (no `_liftScaleMult`, no per-phase counter cap). Missing §22.0.5/22.0.6 (no pin dedup). Missing §22.0.10 (no tier-diversity penalty) and §22.0.11 (no Extra Late T3+ filter). Useful as an A/B alternative to Maestro.
 
-### 22.11 `fullsurvey` — FullSurvey (CPU KILLER)
+### 22.12 `spike2` — Spike Composer (Unified+Pin)
+**Algo:** Candidate 2 of the unified series. Adds an EXPLICIT `phasePins` data structure built before the walk (`{ phase: [{ key, priority, tier }] }`) so the algorithm has a debugged-visible, priority-ordered pin list per phase that's never mutated during the walk. Four pin tiers: required (HARD) → signature (SOFT) → surge anchors (SOFT) → counter (SOFT or HARD if `v.strength ≥ 3.0`).
+**Code:** `app.js: runSpike()` (~line 8289)
+**Purpose:** Make the "what's pinned where" decision inspectable and stable — Spike's `_bpDbg.spikePhasePins` capture was the foundation for the QA harness inspecting pin placement.
+**Correction:** Was default for a couple weeks (2026-06-02 → 2026-06-03). Same gaps as Anchored but with the pin structure in place. The pin-structure idea was kept and extended in Maestro (§22.14).
+
+### 22.13 `twinlane` — Twin-Lane (Unified+Counter Col)
+**Algo:** Candidate 3. Two parallel walks:
+- **Core walk** — standard scoring with soft/hard counter lifts DISABLED (pure build-fit picks, ignoring enemy team).
+- **Counter walk** — ONLY items with `counter_importance ≥ 0.5`; scored by `enemy_consensus × counter_importance` (no req/sig boost).
+
+Merge: Core's picks land in `changes` (the primary build). Counter's picks not already in Core land in `counterChanges` (Build Path UI renders them in a separate right-hand column). A counter item that's ALSO in Core is "compound utility" and stays in Core (no double-listing).
+**Code:** `app.js: runTwinLane()` (~line 8627)
+**Purpose:** Separate concerns. Makes the counter reactivity legible by isolating it in its own column.
+**Correction:** Bad timings for low-anchor builds (counter walk doesn't know about anchor density). The "Counter column" idea is preserved as a debug visualization; the merging model wasn't carried into Maestro.
+
+### 22.14 `maestro` — Maestro (Unified+Smooth) — **DEFAULT**
+**Algo:** Final unified algorithm. Default since 2026-06-03. Combines Spike's explicit pin hierarchy with:
+- **Phase-soul-total walk** (§22.0.1) — gates by `phaseSpent[idx] >= budget`, not slot count
+- **Strict pin hierarchy** (§22.0.2) — req HARD → anchor SOFT → sig SOFT → counter SOFT
+- **Spike-targeted phases** (§22.0.3) — `anchorTargetIdx`: spike[0]→Mid, spike[1]→Late
+- **Spike dedup** (§22.0.5) — drop ancestor-of-other-spike entries
+- **Pin dedup against all pinned** (§22.0.6) — drop sigs/spikes that are transitive components of any pinned item
+- **Component-claim rule** + **ancestor-of-owned guard** (§22.0.7) — both component guards
+- **Counter reactivity scaled by anchor density** (§22.0.8) — `COUNTER_PIN_MAX`, `PHASE_COUNTER_CAP`, `_liftScaleMult` all derived from `_anchorCount`
+- **Within-phase spike-first sort** — spike-flagged items sort ahead of everything else in their phase
+- **Tier-diversity penalty** (§22.0.10) — smooth tier flow within phase
+- **Extra Late T3+ only** (§22.0.11) — luxury-slot reservation
+- **Damped PHASE_TIER_DAMP = 0.75** (§22.0.12)
+- **Local role multipliers** (§22.0.13) — softer than globals
+
+**Code:** `app.js: runMaestro()` (~line 8961)
+**Purpose:** One algorithm that respects every principle in §22.0. Goal: be the default everyone iterates against.
+**Correction:** _(open seat — note retuning observations here when QA finds gaps)_
+
+### 22.15 `fullsurvey` — FullSurvey (CPU KILLER)
 **Algo:** Exhaustive (or near-exhaustive) search across the candidate space — explores far more branches than `beam`. The dropdown label literally says "CPU KILLER" because it's expensive enough to lock the browser on a full roster.
 **Code:** `app.js: runFullSurvey()` (or whichever runner `computeBuildPath` dispatches `'fullsurvey'` to)
 **Purpose:** Brute-force baseline for QA — useful when you want to know "what's the best a search algorithm could find for this build given infinite time?" Compare other algos against it.
 **Weakness:** Wall-clock cost. Don't use it inside a QA scenario with more than a couple heroes.
 **Correction:** _(your note here)_
 
-### 22.12 Algorithm constants reference
+### 22.16 Algorithm constants reference
 
 **`PHASE_TIER_MULTS`** (verified against code):
 ```
@@ -911,17 +1102,51 @@ Late:       0.10      0.40       1.00        1.20
 Extra Late: 0.00      0.20       0.80        1.30
 ```
 
-Note the **Lane** phase has high T1 (1.30) and very low T3/T4 — appropriate for the opening phase. Early now gives T3 a real score (0.80) rather than heavily penalizing it (was 0.55 before a recent tuning pass).
+Note the **Lane** phase has high T1 (1.30) and very low T3/T4 — appropriate for the opening phase. Early now gives T3 a real score (0.80) rather than heavily penalizing it (was 0.55 before a recent tuning pass). Maestro damps this matrix with `PHASE_TIER_DAMP = 0.75` (§22.0.12).
+
+**Maestro-specific constants** (all local to `runMaestro`):
+```
+SOFT_LIFT_SCALE        = 0.07     // soft counter lift base
+HARD_LIFT_SCALE        = 0.18     // hard counter lift base (gated)
+REQ_MULT_LOCAL         = 1.7      // softer than global REQ_MULT=2.0
+REQ_COMP_MULT_LOCAL    = 1.4
+SIG_MULT_LOCAL         = 1.25     // softer than global SIG_MULT=1.4
+SIG_COMP_MULT_LOCAL    = 1.10
+PHASE_TIER_DAMP        = 0.75     // softens PHASE_TIER_MULTS
+ASSIST_BOOST           = 1.25
+COUNTER_BOOST          = 1.20
+HARD_AFFINITY_THRESH   = 0.30     // self-affinity gate for hard lift
+HARD_STRONG_CONSENSUS  = 1.5      // tag-strength gate for hard lift
+HARD_GATE_AUTHORED     = 1.5
+HARD_GATE_FIT          = 1.0
+HARD_GATE_STRONG       = 0.7
+MARGINAL_DECAY         = 2.5      // upgrade marginal stat-delta exponent
+COUNTER_PIN_MAX_LOW    = 1        // counter pins for low-anchor builds
+COUNTER_PIN_MAX_HIGH   = 2
+COUNTER_PIN_HIGH_AT    = 3        // anchorCount threshold for "high"
+COUNTER_PIN_MIN_VULN   = 1.0      // floor for counter-pin eligibility
+COUNTER_PIN_MIN_AGREE  = 2        // min enemies sharing the tag
+COUNTER_PIN_FORCE_VULN = 3.0      // hard-pin threshold (ignores budget)
+COUNTER_TIER_BIAS_LOW  = 0.85     // strong low-tier preference for low-anchor
+COUNTER_TIER_BIAS_HIGH = 0.35
+PHASE_COUNTER_CAP_LOW  = 1        // per-phase counter cap
+PHASE_COUNTER_CAP_HIGH = 2
+COUNTER_FILL_TIER_PENALTY = 0.55  // low-anchor only: tier-step penalty
+TIER_DIVERSITY_PENALTY = 0.45     // same-tier-in-phase deduction
+EXTRA_LATE_MIN_TIER    = 3200     // T3+ only in Extra Late
+EXTRA_LATE_SLOT_CAP    = 12
+MAX_BUYS_PER_PHASE     = 30
+```
 
 **Other constants:**
-- `BUILD_PHASES` — name, addBudget, totalSlots, minSlots, maxSells per phase (Lane → Extra Late)
-- `COUNTER_TAG_THRESH` = 0.2 (lowered from 0.3; below this threshold no item trips the counter tag flag)
+- `BUILD_PHASES` — name, addBudget, totalSlots, minSlots, maxSells per phase (Lane → Extra Late). `addBudget` listed in §22.0.1.
+- `COUNTER_TAG_THRESH` = 0.5 (raised from 0.2 on 2026-05-24; below this threshold no item trips the counter tag flag — aligns UI gate with algo gate)
 - `DEFAULT_COUNTER_SLOTS` = `[[0,1],[0,2],[1,2],[2,3],[2,4]]` (Lane → Extra Late)
 - `SIM_TICK_INCOME` — 35-element income curve growing from 800 → 4300
 - `SIM_NUM_TICKS` = 35
 - `SIM_BASE_SLOT_CAP` = 9 (initial), `SIM_MAX_SLOT_CAP` = 12
 
-**Correction:** _(your note here)_
+**Correction:** _(open seat — note constant changes here when retuned)_
 
 ---
 
