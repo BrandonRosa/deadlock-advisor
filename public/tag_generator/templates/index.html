@@ -17,14 +17,20 @@
        the settings drawer. -->
   <nav id="sidebar">
     <div class="sidebar-logo">
-      <span class="sidebar-mark">❋</span>
+      <span class="sidebar-mark" aria-label="Deadlock Advisor">
+        <!-- Material Symbols Outlined: eye_tracking (40px, weight 500). Color
+             inherits from .sidebar-mark via currentColor. -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="22" height="22" fill="currentColor" aria-hidden="true">
+          <path d="M228.67-40h-122q-27 0-46.84-19.83Q40-79.67 40-106.67v-122h66.67v122h122V-40Zm502.66 0v-66.67h122v-122H920v122q0 27-19.83 46.84Q880.33-40 853.33-40h-122ZM479.45-223.33q-119.45 0-215.95-69.34Q167-362 119.33-480 167-598.67 263.5-668q96.5-69.33 216.17-69.33 119.66 0 216.5 69.33Q793-598.67 840-480q-47 118-144.05 187.33-97.05 69.34-216.5 69.34Zm-.12-66.67q91.34 0 169-51Q726-392 767-480q-41-88-118.67-139.33-77.66-51.34-169-51.34-91.33 0-168.66 51.34Q233.33-568 192.33-480q41 88 118.34 139 77.33 51 168.66 51Zm.82-55.33q55.85 0 95.52-39.48 39.66-39.49 39.66-95.34t-39.62-95.52q-39.62-39.66-95.66-39.66-56.05 0-95.38 39.62-39.34 39.62-39.34 95.66 0 56.05 39.48 95.38 39.49 39.34 95.34 39.34ZM480-412q-28.33 0-48.17-19.83Q412-451.67 412-480q0-28.33 19.83-48.5 19.84-20.17 48.17-20.17 28.33 0 48.5 20.03T548.67-480q0 28.33-20.03 48.17Q508.61-412 480-412ZM40-731.33v-122q0-27 19.83-46.84Q79.67-920 106.67-920h122v66.67h-122v122H40Zm813.33 0v-122h-122V-920h122q27 0 46.84 19.83Q920-880.33 920-853.33v122h-66.67ZM480-480.67Z"/>
+        </svg>
+      </span>
       <span><span class="sidebar-title">DEADLOCK</span><div class="sidebar-sub">ADVISOR</div></span>
     </div>
 
-    <button class="nav-btn active" data-page="calc" data-nav-group="default"><span class="nav-ico">⊞</span>Calculator</button>
+    <button class="nav-btn active" data-page="calc" data-nav-group="default"><span class="nav-ico nav-ico-msym msym">calculate</span>Calculator</button>
     <!-- Match Results: hidden by default; CODEX.refreshNavVisibility()
          shows it after a calc has been run and MATCH.results is populated. -->
-    <button class="nav-btn" data-page="calc-summary" data-nav-group="default" style="display:none;"><span class="nav-ico">▤</span>Match Results</button>
+    <button class="nav-btn" data-page="calc-summary" data-nav-group="default" style="display:none;"><span class="nav-ico nav-ico-msym msym">search_insights</span>Match Results</button>
 
     <!-- Slot for selected-instance card (filled by JS when a hero is opened) -->
     <div id="nav-instance-host"></div>
@@ -51,7 +57,7 @@
     <section id="page-heroes" class="page">
       <div class="page-header">
         <h1>Heroes</h1>
-        <button class="btn-primary" id="btn-new-hero">+ New Hero</button>
+        <button class="btn-primary advanced-up" id="btn-new-hero">+ New Hero</button>
       </div>
       <div id="hero-grid" class="card-grid"></div>
     </section>
@@ -63,8 +69,8 @@
         <h1 id="hero-edit-title">Hero</h1>
         <div class="header-actions">
           <span id="dirty-badge" class="dirty-badge hidden">Unsaved</span>
-          <button class="btn-secondary btn-sm" id="btn-reverse-engineer" title="Reverse engineer a build from observed items and matchup data">⟲ Reverse Engineer</button>
-          <button class="btn-primary" id="btn-save-hero">Save</button>
+          <button class="btn-secondary btn-sm advanced-up" id="btn-reverse-engineer" title="Reverse engineer a build from observed items and matchup data">⟲ Reverse Engineer</button>
+          <button class="btn-primary advanced-up" id="btn-save-hero">Save</button>
         </div>
       </div>
       <div class="hero-info-panel">
@@ -73,39 +79,39 @@
           <img id="hero-mini-img" src="" alt="" class="hero-mini-preview" />
         </div>
         <div class="hero-fields-col">
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>English Name</label>
             <input id="hf-eng-name" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Hero Key (normalized)</label>
             <input id="hf-key" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Description</label>
             <input id="hf-desc" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Portrait Path</label>
             <input id="hf-portrait" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Mini Icon Path</label>
             <input id="hf-mini" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Wiki URL</label>
             <input id="hf-wiki" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-advanced">
             <label title="Build sent to other heroes' scoring when this hero is in a match. Sets the initial selected build on roster add.">Default Build</label>
             <select id="hf-default-build"></select>
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-advanced">
             <label>Filter Colors</label>
             <div id="hf-colors" class="hf-colors-row"></div>
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-advanced">
             <label>Search Terms</label>
             <div class="hf-terms-wrap">
               <div id="hf-terms-chips" class="hf-terms-chips"></div>
@@ -122,7 +128,7 @@
 
       <!-- Build Content -->
       <div id="build-content">
-        <div class="build-meta-row">
+        <div class="build-meta-row gate-edit-advanced">
           <div class="field-row">
             <label>Build Name</label>
             <input id="bf-name" type="text" />
@@ -152,10 +158,11 @@
             <label>Disabled</label>
             <input type="checkbox" id="bf-disabled">
           </div>
+          <button class="btn-secondary btn-sm" id="btn-recalibrate" title="Recompute the item_affinity weights from this build's Required + Signature items (and any extras you add). Preview shows per-tag changes with checkboxes + editable overrides.">⟲ Recalibrate Item Affinity</button>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
         <!-- Build constraints (advanced): signature/required/blacklist items + counter slots -->
-        <details class="build-constraints" id="bc-section">
+        <details class="build-constraints gate-edit-advanced" id="bc-section">
           <summary>Build Constraints</summary>
           <div class="bc-grid">
             <div class="bc-section">
@@ -190,13 +197,13 @@
         </details>
 
         <!-- Shown only when General build is empty -->
-        <div id="preset-banner" class="preset-banner hidden">
+        <div id="preset-banner" class="preset-banner hidden advanced-up">
           <span class="preset-banner-label">General build is empty —</span>
           <select id="pb-hero-sel"><option value="">— select preset —</option></select>
           <select id="pb-build-sel"><option value="">— select hero first —</option></select>
           <button class="btn-primary btn-sm" id="pb-apply">Fill from Preset</button>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap gate-edit-advanced">
           <table class="tag-table" id="hero-tag-table">
             <thead>
               <tr>
@@ -279,6 +286,56 @@
       </div>
     </section>
 
+    <!-- RECALIBRATE ITEM AFFINITY -->
+    <section id="page-recalibrate" class="page">
+      <div class="page-header sticky-header">
+        <button class="btn-back" id="back-recal">← Back to Editor</button>
+        <h1>Recalibrate Item Affinity</h1>
+        <span id="recal-build-label" class="re-hero-label-badge"></span>
+      </div>
+
+      <div class="re-body recal-body">
+        <div class="re-col recal-col-full">
+          <div class="re-section">
+            <div class="re-section-title">Build Item Order</div>
+            <div class="re-section-hint">Auto-loaded from this build's Required + Signature items. <b>Order matters</b> — earlier picks carry more weight via positional decay. <b>Drag chips</b> to reorder. Click the mark toggle on each chip to cycle <b>○ → ★ Sig → REQ → ○</b>. Add extras via search; remove with ×. When you Apply, the build's <b>Required / Signature flags will be rewritten</b> from the current chip marks AND the checked <code>item_affinity</code> rows are written back.</div>
+            <div class="re-item-search-wrap">
+              <input id="recal-item-search" type="text" placeholder="Search items to add…" class="re-search-input" autocomplete="off">
+              <div id="recal-item-dropdown" class="re-dropdown hidden"></div>
+            </div>
+            <div id="recal-item-chips" class="re-chips-list"></div>
+            <button id="btn-recal-submit" class="btn-primary re-submit-btn">Compute Suggested Weights →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview table with checkboxes + editable overrides -->
+      <div id="recal-preview" class="re-preview recal-preview hidden">
+        <div class="re-prev-title">Suggested item_affinity Updates</div>
+        <div class="recal-preview-controls">
+          <button id="btn-recal-select-all" class="btn-secondary btn-sm">Select All</button>
+          <button id="btn-recal-select-none" class="btn-secondary btn-sm">Select None</button>
+          <span class="recal-preview-hint">Check rows to include. Edit the Apply value to override the suggestion. Unchecked rows keep their current value.</span>
+        </div>
+        <div class="table-wrap">
+          <table id="recal-preview-table" class="recal-prev-table">
+            <thead>
+              <tr>
+                <th class="col-chk"></th>
+                <th class="col-tag">Tag</th>
+                <th class="col-num">Current</th>
+                <th class="col-num">Suggested</th>
+                <th class="col-num">Apply Value</th>
+                <th class="col-num">Δ</th>
+              </tr>
+            </thead>
+            <tbody id="recal-preview-body"></tbody>
+          </table>
+        </div>
+        <button id="btn-recal-apply" class="btn-primary recal-apply-btn">Apply Selected to Build →</button>
+      </div>
+    </section>
+
     <!-- ITEMS LIST -->
     <section id="page-items" class="page">
       <div class="page-header">
@@ -286,8 +343,8 @@
         <div class="header-actions">
           <div class="cat-tabs" id="item-subpage-tabs" style="margin-right:12px">
             <button class="cat-btn active" data-subpage="items">Items</button>
-            <button class="cat-btn" data-subpage="baselines">Baselines</button>
-            <button class="cat-btn" data-subpage="baselines-browse" title="Browse all baseline items as cards">Browse</button>
+            <button class="cat-btn dev-only" data-subpage="baselines">Baselines</button>
+            <button class="cat-btn dev-only" data-subpage="baselines-browse" title="Browse all baseline items as cards">Browse</button>
           </div>
           <input id="item-search" type="search" placeholder="Search…" />
           <div class="cat-tabs" id="item-cat-tabs">
@@ -310,7 +367,7 @@
         <h1 id="item-edit-title">Item</h1>
         <div class="header-actions">
           <span id="item-dirty-badge" class="dirty-badge hidden">Unsaved</span>
-          <button class="btn-primary" id="btn-save-item">Save</button>
+          <button class="btn-primary advanced-up" id="btn-save-item">Save</button>
         </div>
       </div>
       <div class="hero-info-panel">
@@ -320,43 +377,43 @@
           <span id="item-tier-badge" class="tier-badge"></span>
         </div>
         <div class="hero-fields-col">
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Name</label>
             <input id="if-name" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Normalized Name</label>
             <input id="if-key" type="text" readonly />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Category</label>
             <input id="if-cat" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Tier</label>
             <input id="if-tier" type="number" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Wiki URL</label>
             <input id="if-wiki" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Image Path</label>
             <input id="if-image" type="text" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-advanced">
             <label>Remarks</label>
             <input id="if-remarks" type="text" placeholder="e.g. Only buy if enemy melees a lot" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-advanced">
             <label title="Manual recommendation knob. Positive = recommend more, negative = recommend less. Range ±0.5. Adjusts ranking only — doesn't change tag values.">Confidence</label>
             <input id="if-confidence" type="number" step="0.05" min="-0.5" max="0.5" placeholder="0" />
           </div>
-          <div class="field-row">
+          <div class="field-row gate-edit-dev">
             <label>Upgrades From</label>
             <input id="if-upgrades-from" type="text" placeholder="e.g. item_key_a, item_key_b" />
           </div>
-          <div class="field-row compare-to-row">
+          <div class="field-row compare-to-row dev-only">
             <label>Compare To</label>
             <div class="compare-to-inner">
               <input id="compare-to-search" type="text" placeholder="item key…" class="compare-to-input" />
@@ -366,7 +423,7 @@
           </div>
         </div>
       </div>
-      <div class="table-wrap">
+      <div class="table-wrap gate-edit-advanced">
         <table class="tag-table" id="item-tag-table">
           <thead>
             <tr>
@@ -377,8 +434,6 @@
           <tbody id="item-tag-body"></tbody>
         </table>
       </div>
-      <div id="baseline-meta-panel" class="hidden" style="padding: 12px 16px; margin-top: 16px; border-top: 1px solid var(--border, #333)"></div>
-      <div id="baseline-compare-panel" style="padding: 12px 16px; margin-top: 16px; border-top: 1px solid var(--border, #333)"></div>
     </section>
 
     <!-- BASELINE STAT EDIT -->
@@ -398,7 +453,7 @@
     <section id="page-tags" class="page">
       <div class="page-header">
         <h1>Tag Manager</h1>
-        <button class="btn-primary" id="btn-add-tag">+ Add Tag</button>
+        <button class="btn-primary advanced-up" id="btn-add-tag">+ Add Tag</button>
       </div>
       <table class="data-table" id="tags-table">
         <thead>
@@ -445,72 +500,87 @@
 
     <!-- CALCULATOR SETUP -->
     <section id="page-calc" class="page active">
-      <div class="page-header sticky-header">
+      <div class="page-header">
         <h1>Match Calculator</h1>
         <div class="header-actions calc-actions">
-          <div class="calc-ctrl-row">
-            <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
-            <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
-            <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include 9999 items</label>
-            <label class="toggle-label" title="Show 'Simulate this build' button on each build's detail page"><input type="checkbox" id="calc-enable-sim" checked> Simulator</label>
-            <div class="mult-group">
-              <span class="mult-lbl">Build:</span>
-              <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
-              <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+          <!-- All setup controls live inside the collapsible. Calculate button
+               is rendered separately as a sticky action so the user can always
+               run without expanding (see .calc-sticky-actions below). -->
+          <details class="calc-options" id="calc-options">
+            <summary class="calc-options-summary">⚙ Options</summary>
+            <div class="calc-options-body">
+              <!-- Advanced + Dev: matchup mode + roster + build-path algo.
+                   Simulator toggle lives here too — single row, no spacer. -->
+              <div class="calc-ctrl-row advanced-up">
+                <label class="toggle-label" title="Show 'Simulate this build' button on each build's detail page"><input type="checkbox" id="calc-enable-sim" checked> Simulator</label>
+                <label class="toggle-label"><input type="checkbox" id="calc-multi-mode"> Multi-mode</label>
+                <label class="toggle-label"><input type="checkbox" id="calc-uncap"> Uncap teams</label>
+                <label class="toggle-label"><input type="checkbox" id="calc-include9999"> Include Street Brawl items</label>
+                <label class="mult-item" title="After the first calculation, auto-promote each hero's top-scoring build and run a second pass.">
+                  <input type="checkbox" id="opt-auto-regen"> Auto-regen
+                </label>
+                <div class="mult-group">
+                  <span class="mult-lbl">Build Path:</span>
+                  <label class="mult-item">Algorithm
+                    <select id="bp-algo-sel" class="mult-input">
+                      <option value="greedy-phase">Greedy (Phase)</option>
+                      <option value="marginal">Marginal Value</option>
+                      <option value="cosine">Cosine Deficit</option>
+                      <option value="cosine-match">Cosine Match</option>
+                      <option value="beam">Beam Search</option>
+                      <option value="expert">Expert Greedy</option>
+                      <option value="strengths">Play to Strengths</option>
+                      <option value="adaptive">Hybrid Rotation</option>
+                      <option value="fusion">Fusion (Best of All)</option>
+                      <option value="cyclic">Cyclic Focus</option>
+                      <option value="architect">Architect (Path Planner)</option>
+                      <option value="inverse">Inverse (Endgame Solver)</option>
+                      <option value="surge">Surge (Power Spike)</option>
+                      <option value="anchored">Anchored (Unified)</option>
+                      <option value="spike2">Spike Composer (Unified+Pin)</option>
+                      <option value="twinlane">Twin-Lane (Unified+Counter Col)</option>
+                      <option value="maestro" selected>Maestro (Unified+Smooth)</option>
+                      <option value="fullsurvey">FullSurvey (CPU KILLER)</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <!-- Dev only: scoring multipliers + formula tuning -->
+              <div class="calc-ctrl-row dev-only">
+                <div class="mult-group">
+                  <span class="mult-lbl">Build:</span>
+                  <label class="mult-item">Ally <input type="number" id="mult-build-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+                  <label class="mult-item">Enemy <input type="number" id="mult-build-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+                </div>
+                <div class="mult-group">
+                  <span class="mult-lbl">Items:</span>
+                  <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+                  <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
+                </div>
+                <div class="mult-group">
+                  <span class="mult-lbl">Score:</span>
+                  <label class="mult-item">Formula
+                    <select id="score-formula-sel" class="mult-input">
+                      <option value="v1">V1 – Classic</option>
+                      <option value="v2">V2 – Symmetric</option>
+                      <option value="v3" selected>V3 – Target Focus</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="mult-group" id="v2-mult-group" style="display:none">
+                  <span class="mult-lbl" title="V2 only: symmetric build synergy terms">V2 Build:</span>
+                  <label class="mult-item" title="How much your allies benefit from your build's output">Ally←Me <input type="number" id="mult-ally-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
+                  <label class="mult-item" title="How much enemies react to (punish) your build's output">Enemy→Me <input type="number" id="mult-enemy-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
+                </div>
+              </div>
             </div>
-            <div class="mult-group">
-              <span class="mult-lbl">Items:</span>
-              <label class="mult-item">Ally <input type="number" id="mult-item-ally" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
-              <label class="mult-item">Enemy <input type="number" id="mult-item-enemy" class="mult-input" value="1.5" step="0.05" min="0" max="5"></label>
-            </div>
-          </div>
-          <div class="calc-ctrl-row">
-            <div class="mult-group">
-              <span class="mult-lbl">Build Path:</span>
-              <label class="mult-item">Algorithm
-                <select id="bp-algo-sel" class="mult-input">
-                  <option value="greedy-phase">Greedy (Phase)</option>
-                  <option value="marginal">Marginal Value</option>
-                  <option value="cosine">Cosine Deficit</option>
-                  <option value="cosine-match">Cosine Match</option>
-                  <option value="beam">Beam Search</option>
-                  <option value="expert">Expert Greedy</option>
-                  <option value="strengths">Play to Strengths</option>
-                  <option value="adaptive">Hybrid Rotation</option>
-                  <option value="fusion">Fusion (Best of All)</option>
-                  <option value="cyclic">Cyclic Focus</option>
-                  <option value="architect">Architect (Path Planner)</option>
-                  <option value="inverse">Inverse (Endgame Solver)</option>
-                  <option value="surge">Surge (Power Spike)</option>
-                  <option value="anchored">Anchored (Unified)</option>
-                  <option value="spike2">Spike Composer (Unified+Pin)</option>
-                  <option value="twinlane">Twin-Lane (Unified+Counter Col)</option>
-                  <option value="maestro" selected>Maestro (Unified+Smooth)</option>
-                  <option value="fullsurvey">FullSurvey (CPU KILLER)</option>
-                </select>
-              </label>
-            </div>
-            <div class="mult-group">
-              <span class="mult-lbl">Score:</span>
-              <label class="mult-item">Formula
-                <select id="score-formula-sel" class="mult-input">
-                  <option value="v1">V1 – Classic</option>
-                  <option value="v2">V2 – Symmetric</option>
-                  <option value="v3" selected>V3 – Target Focus</option>
-                </select>
-              </label>
-            </div>
-            <div class="mult-group" id="v2-mult-group" style="display:none">
-              <span class="mult-lbl" title="V2 only: symmetric build synergy terms">V2 Build:</span>
-              <label class="mult-item" title="How much your allies benefit from your build's output">Ally←Me <input type="number" id="mult-ally-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
-              <label class="mult-item" title="How much enemies react to (punish) your build's output">Enemy→Me <input type="number" id="mult-enemy-build" class="mult-input" value="0.75" step="0.05" min="0" max="5"></label>
-            </div>
-            <label class="mult-item" title="After the first calculation, auto-promote each hero's top-scoring build and run a second pass.">
-              <input type="checkbox" id="opt-auto-regen"> Auto-regen
-            </label>
-            <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
-          </div>
+          </details>
         </div>
+      </div>
+      <!-- Only the Calculate button is sticky — the options collapsible stays
+           in normal flow so it doesn't eat vertical space while scrolling. -->
+      <div class="calc-sticky-actions">
+        <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
       </div>
       <div class="calc-teams-bar">
         <div class="calc-team" id="ally-drop">
