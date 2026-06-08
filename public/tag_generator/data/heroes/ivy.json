@@ -457,7 +457,7 @@
           "spirit_continuous_damage": null,
           "spirit_continuous_proc": null,
           "spirit_continuous_resistance": null,
-          "spirit_damage": 0.05,
+          "spirit_damage": null,
           "spirit_lifesteal": null,
           "spirit_proc": null,
           "spirit_resist_shred": null,
