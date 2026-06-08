@@ -344,7 +344,7 @@
           "mid_range": 0.75,
           "movement_slow": 0.25,
           "multi_ability_focus": 0.25,
-          "pure_damage": 0.33,
+          "pure_damage": 0.2,
           "range_extender_dependant": 0.1,
           "scaling_early": null,
           "scaling_late": null,

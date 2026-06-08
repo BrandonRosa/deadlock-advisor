@@ -412,7 +412,7 @@
           "aoe_cluster": null,
           "assist_importance": null,
           "away_from_team": null,
-          "bullet_damage": "+0.1",
+          "bullet_damage": null,
           "bullet_evasion": null,
           "bullet_lifesteal": null,
           "bullet_proc": null,
