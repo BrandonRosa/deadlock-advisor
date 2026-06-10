@@ -5580,6 +5580,12 @@ html:not([data-mode="dev"]) .ch-build-row {
 }
 
 /* ── First-run banner on #page-calc ──────────────────────────────── */
+/* The HTML `hidden` attribute resolves to `display: none` in the UA
+   stylesheet, but our `display: flex` / `position: fixed` rules below
+   override it. This explicit rule wins so toggling `banner.hidden = true`
+   from JS actually hides the banner. !important keeps it above the
+   responsive media query for mobile. */
+.tut-banner[hidden] { display: none !important; }
 .tut-banner {
   display: flex; align-items: center; gap: 14px;
   padding: 12px 16px;
