@@ -39,7 +39,7 @@ function toast(msg, type = 'success') {
 // calc-summary deliberately PRESERVE the instance so the user can keep their
 // selected build pinned in the sidebar while reviewing the roster or the
 // match results overview.
-const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'qa']);
+const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'qa', 'tutorial']);
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -313,6 +313,1156 @@ const CODEX = (() => {
   };
 })();
 window.CODEX = CODEX;
+
+/* ════════════════════════════════════════════════════════════════════
+   TUTORIAL — guided-tour module (Phase 1 scaffold)
+   --------------------------------------------------------------------
+   Mirrors the CODEX IIFE pattern. Owns:
+     • mode + first-run + per-mode "enable in Settings" dismissal state
+     • the #page-tutorial render (mode toggle + content area, both stubs in
+       Phase 1 — content cards arrive in Phase 3)
+     • the first-run banner on #page-calc (Start / Skip → flips `seen`)
+     • the sidebar `?` button, mobile `#mtop-tutorial` button, and the
+       Settings-drawer Tutorial row — all funnel through TUTORIAL.open()
+   ──────────────────────────────────────────────────────────────────── */
+const TUTORIAL = (() => {
+  const LS_KEY = 'tutorial_state_v1';
+  const VALID_MODES = ['basic', 'advanced', 'dev'];
+  const DEFAULTS = { mode: 'basic', seen: false, settingsPromptDismissed: [] };
+
+  /* Anchor registry. Every anchor id used by the tutorial is listed here so
+     it's greppable in one place. Cards in TUTORIAL_CONTENT refer to anchors
+     by id; the actual elements carry `data-tutorial-anchor="<id>"`.
+     • `page` lets showCoachmark navigate to the right section before resolving
+       the selector.
+     • `label` is the human-readable name (used as the bubble fallback title).
+     • `before` is an optional hook called after navigation but before
+       resolution — useful for anchors that live inside a closed drawer or
+       behind a tab that needs activating. */
+  /* Helpers used by the `before` hooks on Build Path tab anchors. Clicking
+     the tab button activates the panel via the same code path the user
+     would; the Step-by-Step expander runs the same way. */
+  const _activateBuildPathTab = () => {
+    const btn = document.querySelector('.tab-btn[data-tab="path"]');
+    if (btn && !btn.classList.contains('on')) btn.click();
+  };
+  const _expandBuildPathStep = () => {
+    _activateBuildPathTab();
+    setTimeout(() => {
+      const toggle = document.querySelector('.bp-detail-toggle');
+      if (toggle && /Show/.test(toggle.textContent || '')) toggle.click();
+    }, 60);
+  };
+  const _openOptionsAccordion = () => {
+    const det = document.getElementById('calc-options');
+    if (det && !det.open) det.open = true;
+  };
+
+  const TUTORIAL_ANCHORS = [
+    // Navigation chrome
+    { id: 'nav.sidebar',          page: 'calc',         label: 'Sidebar navigation' },
+    { id: 'nav.settings-btn',     page: 'calc',         label: 'Settings button (sidebar foot)' },
+    { id: 'nav.density-toggle',   page: 'calc',         label: 'Dense / Simple layout toggle',
+      before: () => { try { window.CODEX?.openDrawer(); } catch {} } },
+    // Calculator page
+    { id: 'calc.filter-bar',      page: 'calc',         label: 'Hero text + color filter row' },
+    { id: 'calc.teams-bar',       page: 'calc',         label: 'Allies + Enemies team chips' },
+    { id: 'calc.calculate-btn',   page: 'calc',         label: 'Calculate Builds → button' },
+    { id: 'calc.algo-select',     page: 'calc',         label: 'Build Path algorithm dropdown',
+      before: _openOptionsAccordion },
+    // Match Results page (dynamic — won't exist until a calc has run)
+    { id: 'results.card',         page: 'calc-summary', label: 'Hero summary card',                needs: 'calc-results' },
+    { id: 'results.build-row',    page: 'calc-summary', label: 'Build row inside a summary card',  needs: 'calc-results' },
+    // Calc Build Detail (dynamic — needs a build opened)
+    { id: 'build.tabbar',         page: 'calc-build',   label: 'Build detail tabs',                needs: 'build-open' },
+    { id: 'build.bs-panel',       page: 'calc-build',   label: 'Build Screen 4-column grid',       needs: 'build-open',
+      before: _activateBuildPathTab },
+    { id: 'build.bs-focus-btn',   page: 'calc-build',   label: 'Focus heroes button',              needs: 'build-open',
+      before: _activateBuildPathTab },
+    // Build Path Guide (lives below the Build Screen on the Build Path tab)
+    { id: 'build.bp-title',       page: 'calc-build',   label: 'Build Path Guide header',          needs: 'build-open',
+      before: _activateBuildPathTab },
+    { id: 'build.bp-summary',     page: 'calc-build',   label: 'End-of-Late inventory chips',      needs: 'build-open',
+      before: _activateBuildPathTab },
+    { id: 'build.bp-step',        page: 'calc-build',   label: 'Step-by-step buy list',            needs: 'build-open',
+      before: _expandBuildPathStep },
+    // Simulator entry (lives on Build Path tab, dynamic)
+    { id: 'sim.row',              page: 'calc-build',   label: 'Simulator / Live Match buttons',   needs: 'build-open',
+      before: _activateBuildPathTab },
+    // Authoring + Developer pages. Anchored to the PAGE HEADER instead of
+    // the sidebar nav button so they work regardless of whether the user
+    // has the matching CODEX feature toggle on — `showPage()` reaches the
+    // section directly. Tutorial mode stays independent of global feature
+    // toggles, as designed.
+    { id: 'heroes.page',          page: 'heroes',       label: 'Heroes editor' },
+    { id: 'items.page',           page: 'items',        label: 'Items editor' },
+    { id: 'tags.page',            page: 'tags',         label: 'Tags editor' },
+    { id: 'qa.page',              page: 'qa',           label: 'QA + sim-log harness' },
+  ];
+
+  /* Demo match — auto-loaded by showCoachmark whenever an anchor's
+     `needs` flag triggers, so Show-me always lands the user on a populated
+     page instead of an empty one. Seven is set as self because his hero
+     data is currently the most fleshed-out (per Brandon, 2026-06).
+     Allies include Seven himself (the rest of the app reads MATCH.self
+     as the "you" marker AND expects self to be in MATCH.allies). */
+  const TUTORIAL_DEMO_ALLIES  = ['seven', 'bebop', 'paradox', 'kelvin'];
+  const TUTORIAL_DEMO_ENEMIES = ['haze', 'wraith', 'vindicta', 'lash'];
+  const TUTORIAL_DEMO_SELF    = 'seven';
+
+  async function ensureDemo({ needs } = {}) {
+    needs = needs || 'calc-results';
+
+    // Calc step. Skip if results already exist.
+    if (!Array.isArray(MATCH.results) || !MATCH.results.length) {
+      MATCH.allies  = [...TUTORIAL_DEMO_ALLIES];
+      MATCH.enemies = [...TUTORIAL_DEMO_ENEMIES];
+      MATCH.self    = TUTORIAL_DEMO_SELF;
+      if (typeof saveMatchState === 'function') { try { saveMatchState(); } catch {} }
+      if (typeof toast === 'function') toast('Loading demo match…');
+      try { await runCalculation(); }
+      catch (e) { console.warn('[tutorial] demo runCalculation failed', e); }
+    }
+
+    // Optional build-open step.
+    if (needs === 'build-open' && Array.isArray(MATCH.results) && MATCH.results.length) {
+      const target = MATCH.results.find(r => r.name === TUTORIAL_DEMO_SELF && r.builds?.length)
+                  || MATCH.results.find(r => r.builds?.length);
+      if (target) {
+        const buildIdx = target.builds[0]?.buildIdx ?? 0;
+        if (typeof openCalcBuild === 'function') {
+          try { openCalcBuild(target.name, buildIdx); } catch (e) {
+            console.warn('[tutorial] demo openCalcBuild failed', e);
+          }
+        }
+      }
+    }
+  }
+
+  /* Mode hierarchy: a card with mode='basic' shows in all three modes,
+     'advanced' shows in advanced + dev, 'dev' shows in dev only. */
+  const MODE_RANK = { basic: 0, advanced: 1, dev: 2 };
+
+  /* ──────────────────────────────────────────────────────────────────
+     TUTORIAL_CONTENT — the actual cards, grouped by subsection.
+     Each card.body is a FUNCTION so live values (BUILD_PHASES, the
+     EFFECT_THRESH thresholds, etc.) are pulled at render time, not at
+     module load. That's the adaptive contract: when those constants
+     change, the prose updates automatically without any tutorial edit.
+     ──────────────────────────────────────────────────────────────── */
+  const TUTORIAL_CONTENT = [
+    // ── Welcome ──────────────────────────────────────────────────
+    {
+      id: 'welcome', title: 'Welcome',
+      cards: [
+        { id: 'welcome.overview', mode: 'basic', anchor: 'nav.sidebar',
+          title: 'What this app does',
+          body: () => `
+            <p>Deadlock Advisor scores hero builds against a specific match-up. Pick teams (allies + enemies), click <b>Calculate Builds</b>, and the app tells you which of each hero's builds works best — and what items to buy and in what order.</p>
+            <p>Everything else (editors, simulator, QA) is optional. The core loop: <b>pick teams → calculate → pick a build → read the Build Screen</b>.</p>` },
+        { id: 'welcome.sidebar', mode: 'basic', anchor: 'nav.sidebar',
+          title: 'Sidebar — your map',
+          body: () => `
+            <p>The sidebar shows <b>Calculator</b> by default and reveals <b>Match Results</b> after a calc completes. The <b>Selected Instance</b> card appears whenever you open a hero or build, so you can jump back to it from any page.</p>
+            <p>Foot row: theme toggle, this tutorial, and Settings.</p>` },
+        { id: 'welcome.settings', mode: 'basic', anchor: 'nav.settings-btn',
+          title: 'Settings drawer',
+          body: () => `
+            <p>The gear icon opens Settings:</p>
+            <ul>
+              <li><b>Theme</b> — Dark or Light.</li>
+              <li><b>Dense layout</b> — power-user density. Off shows simpler cards (better on phones).</li>
+              <li><b>Advanced features</b> — reveals Heroes / Items editors and the algorithm picker.</li>
+              <li><b>Developer features</b> — reveals Tags / QA + score formulas + debug tools.</li>
+              <li><b>Tutorial</b> — opens this guide.</li>
+            </ul>
+            <p>Choices persist across reloads.</p>` },
+      ],
+    },
+    // ── Calculator ──────────────────────────────────────────────
+    {
+      id: 'calculator', title: 'Calculator',
+      cards: [
+        { id: 'calc.filter', mode: 'basic', anchor: 'calc.filter-bar',
+          title: 'Filter the roster',
+          body: () => `
+            <p>Type a name or role keyword (<code>tank</code>, <code>healer</code>) — matches are word-prefix, so <code>par</code> finds Paradox.</p>
+            <p>Color chips narrow by hero color tag. <b>Clear filter</b> resets just the search; <b>Clear all</b> also empties both teams.</p>` },
+        { id: 'calc.keyboard', mode: 'basic', anchor: 'calc.filter-bar',
+          title: 'Keyboard: search-and-add',
+          body: () => `
+            <p>When your filter narrows to a single hero, add them without dragging:</p>
+            <ul>
+              <li><b>1</b> — add to <b>Allies</b></li>
+              <li><b>2</b> — add to <b>Enemies</b></li>
+              <li><b>3</b> — add as <b>You</b> (the self hero)</li>
+              <li><b>Enter</b> — add to whichever team has more room</li>
+            </ul>
+            <p>The input clears on each add, so you can rattle off a roster in seconds.</p>` },
+        { id: 'calc.teams', mode: 'basic', anchor: 'calc.teams-bar',
+          title: 'Drag heroes onto a team',
+          body: () => `
+            <p>Drag from the roster onto <b>Allies</b> or <b>Enemies</b>. Each side caps at 6 — toggle <b>Uncap teams</b> in Options to lift it.</p>
+            <p>You can drag chips between teams to switch sides, or click × on a chip to remove it.</p>` },
+        { id: 'calc.run', mode: 'basic', anchor: 'calc.calculate-btn',
+          title: 'Run the calculation',
+          body: () => `
+            <p><b>Calculate Builds →</b> scores every hero's builds against the current rosters and opens Match Results.</p>
+            <p>Re-run any time you change the lineup — results aren't cached.</p>` },
+        // ── Phase 4: generated card. Pulls the live <option> list from
+        // #bp-algo-sel at render time so any algorithm you add/rename in
+        // the HTML appears here automatically with the right `selected`
+        // badge on whichever option is the default.
+        { id: 'calc.algorithms', mode: 'advanced', anchor: 'calc.algo-select',
+          title: 'Build Path algorithms',
+          body: () => {
+            const sel = document.getElementById('bp-algo-sel');
+            const opts = sel ? Array.from(sel.options) : [];
+            const current = MATCH?.bpAlgo || sel?.value || '';
+            const rows = opts.map(o => {
+              const isCurrent = o.value === current;
+              const isDefault = o.defaultSelected;
+              const tag = isCurrent
+                ? '<span class="tut-algo-tag tut-algo-tag--current">current</span>'
+                : (isDefault ? '<span class="tut-algo-tag">ship default</span>' : '');
+              return `
+                <div class="tut-algo-row">
+                  <code class="tut-algo-code">${escapeText(o.value)}</code>
+                  <span class="tut-algo-name">${escapeText(o.textContent || o.value)}</span>
+                  ${tag}
+                </div>`;
+            }).join('');
+            return `
+              <p>The Build Path algorithm determines <i>how</i> the buy order is computed. Different algorithms make different trade-offs between greedy speed, lookahead, and counter coverage.</p>
+              <p>The list below is pulled live from the dropdown — anything you add to <code>#bp-algo-sel</code> appears here without editing the tutorial. Active choice is highlighted; DESIGN.md §22 has a deep dive on each.</p>
+              <div class="tut-algo-list">${rows || '<p class="tut-card-err">No algorithm dropdown found.</p>'}</div>`;
+          } },
+      ],
+    },
+    // ── Match Results ───────────────────────────────────────────
+    {
+      id: 'results', title: 'Match Results',
+      cards: [
+        { id: 'results.card', mode: 'basic', anchor: 'results.card',
+          title: 'Hero summary cards',
+          body: () => `
+            <p>One card per hero on the roster. Header shows portrait, name, a role pill (★ YOU / ALLY / ENEMY), and the overall score.</p>
+            <p>Below the header: builds ranked by score. Each row is independently clickable — jumps straight to that build's detail.</p>` },
+        { id: 'results.build-row', mode: 'basic', anchor: 'results.build-row',
+          title: 'Build rows',
+          body: () => `
+            <p>Each row inside a card is one build (e.g. <i>General</i>, <i>Gun</i>, <i>Ult</i>). The number on the right is the score for this match-up — higher is better.</p>
+            <p>Click anywhere on a row to drill in. Clicking the card header (outside any row) opens the per-hero overview instead.</p>` },
+        { id: 'results.density', mode: 'basic', anchor: 'nav.density-toggle',
+          title: 'Dense vs Simple layout',
+          body: () => `
+            <p>The Dense layout toggle in Settings controls how much detail each summary card shows.</p>
+            <p><b>Dense</b> packs in mini item icons, items-to-assist/counter columns, and matchup rows. <b>Simple</b> strips that to header + builds + chips. Phones feel better on Simple; desktops usually leave Dense on.</p>` },
+      ],
+    },
+    // ── Build Detail ────────────────────────────────────────────
+    {
+      id: 'build-detail', title: 'Build Detail',
+      cards: [
+        { id: 'build.tabs', mode: 'basic', anchor: 'build.tabbar',
+          title: 'Four tabs',
+          body: () => `
+            <p>Every build's detail page has four tabs:</p>
+            <ul>
+              <li><b>★ Summary</b> — score breakdown + tag profile + best/worst vs.</li>
+              <li><b>Build Path</b> — visual <b>Build Screen</b> + step-by-step Build Path Guide.</li>
+              <li><b>Items</b> — full assist/counter columns and a ranked items table.</li>
+              <li><b>Breakdown</b> — score contributions per enemy.</li>
+            </ul>
+            <p>Only Summary builds eagerly; the rest render lazily on first click.</p>` },
+        { id: 'build.bs-panel', mode: 'basic', anchor: 'build.bs-panel',
+          title: 'Build Screen layout',
+          body: () => `
+            <p>Five phase rows (Lane / Early / Mid / Late / Extra Late) across four columns:</p>
+            <ul>
+              <li><b>Core</b> — items to buy in that phase, left-to-right in order.</li>
+              <li><b>Optional</b> — phase-appropriate situational picks.</li>
+              <li><b>Counter</b> — items grouped by what they answer ("FOR DISARM", "FOR BURST RESIST"…).</li>
+              <li><b>Assist</b> — items that help your allies.</li>
+            </ul>
+            <p>Column-toggle checkboxes in the toolbar hide any column. Counter + Assist start hidden when this build doesn't strongly value those roles.</p>` },
+        { id: 'build.bs-tiles', mode: 'basic', anchor: 'build.bs-panel',
+          title: 'Tile labels & glows',
+          body: () => {
+            // Legend is generated directly from BP_LABEL_META — the same
+            // map the tile renderer reads. Top-level labels only (the
+            // -component variants would just duplicate the icon set). If
+            // the label set changes, this card updates automatically.
+            const TOP_LABELS = [
+              { key: 'required',    desc: 'Must-buy constraint set on the build.' },
+              { key: 'signature',   desc: 'Strongly recommended for this build.' },
+              { key: 'spike',       desc: 'Power-spike anchor — buying this is a timing burst. Pulses with an orange glow.' },
+              { key: 'anti',        desc: 'Anti-spike — counters an enemy power spike. Purple ring.' },
+              { key: 'recommended', desc: 'Top algorithm pick in this tier.' },
+            ];
+            const rows = TOP_LABELS.map(r => {
+              const m = BP_LABEL_META[r.key];
+              if (!m) return '';
+              // Wrap in a stand-alone .bs-tile.bp-label-* so the existing CSS
+              // chain (`.bs-tile.bp-label-X .bs-tile-label`, plus the .msym
+              // color rules) cascades correctly without an actual tile
+              // ancestor. tut-label-mock isolates the layout overrides.
+              return `
+                <div class="tut-label-row">
+                  <span class="bs-tile tut-label-mock ${escapeText(m.klass)}">
+                    <span class="bs-tile-label">${m.text}</span>
+                  </span>
+                  <div class="tut-label-text">
+                    <b>${escapeText(m.title)}</b>
+                    <span>${escapeText(r.desc)}</span>
+                  </div>
+                </div>`;
+            }).join('');
+            return `
+              <p>Small icons above an item tile flag its role. The legend below renders the <i>actual</i> label pills used by the Build Screen (pulled live from <code>BP_LABEL_META</code>) so the icons match exactly.</p>
+              <div class="tut-label-legend">${rows}</div>
+              <p>Extra glow cues you'll see on the Build Screen:</p>
+              <ul>
+                <li>A <b>teal halo</b> on an Optional tile — item was demoted out of Core because this build doesn't strongly value its assist or counter role.</li>
+                <li>A <b>gold halo</b> on a tile — you have a focused hero this item is effective against (see <i>Focus heroes</i>).</li>
+              </ul>`;
+          } },
+        { id: 'build.focus', mode: 'basic', anchor: 'build.bs-focus-btn',
+          title: 'Focus heroes',
+          body: () => `
+            <p>The <b>Focus heroes…</b> button opens a strip of mini portraits. Click an ally → items that meaningfully help them light up. Click an enemy → items that counter them light up.</p>
+            <p>"Meaningfully" uses the same thresholds as the simulator — assist score ≥ <b>${EFFECT_THRESH.ally.norm}</b>, counter score ≥ <b>${EFFECT_THRESH.enemy.norm}</b>. Hits also nudge ordering: focused items move one slot left in Core and rise to the top of Optional.</p>` },
+        { id: 'build.optional-hint', mode: 'basic', anchor: 'build.bs-panel',
+          title: 'Optional row hint',
+          body: () => `
+            <p>Each Optional row shows <i>"Buy at least N"</i>. N is "how many extras the phase budget has room for" (0 / 1 / 2 by tightness) plus +1 for each item demoted out of Core, capped at 3. When nothing extra fits and nothing was demoted, the hint reads <i>"Get if desperate"</i>.</p>
+            <p>Phase budgets in souls — <b>Lane ${BUILD_PHASES[0].addBudget}</b>, Early ${BUILD_PHASES[1].addBudget}, Mid ${BUILD_PHASES[2].addBudget}, Late ${BUILD_PHASES[3].addBudget}, Extra Late capped at 6 × T4 = ${6 * 6400}.</p>` },
+        { id: 'build.bs-columns', mode: 'basic', anchor: 'build.bs-panel',
+          title: 'Counter & Assist columns',
+          body: () => `
+            <p>The right side of the Build Screen runs two specialist columns:</p>
+            <ul>
+              <li><b>Counter</b> — items grouped by the tag they answer (<code>FOR DISARM</code>, <code>FOR BURST RESIST</code>…). Mini portraits next to each group header show which enemies trigger that vulnerability.</li>
+              <li><b>Assist</b> — items that help your allies based on their <code>ally_weight</code> vectors.</li>
+            </ul>
+            <p>Both columns are <b>hidden by default</b> unless this build's tag weights reach 0.5 magnitude on <code>counter_importance</code> / <code>assist_importance</code>. Use the toolbar checkboxes to force them back on.</p>` },
+        { id: 'build.bp-overview', mode: 'basic', anchor: 'build.bp-title',
+          title: 'Build Path Guide — the order',
+          body: () => `
+            <p>Below the Build Screen sits the <b>Build Path Guide</b>. It's the same data the Build Screen visualizes, but laid out as the literal buy order the algorithm recommends — useful when you want to know "what do I buy at minute 7?" instead of "what does my Late-game build look like?"</p>
+            <p>Title bar buttons: <b>Debug Build</b> copies the algorithm trace to your clipboard, <b>Show Step-by-Step ▾</b> expands the detail.</p>` },
+        { id: 'build.bp-summary', mode: 'basic', anchor: 'build.bp-summary',
+          title: 'End-of-Late inventory',
+          body: () => `
+            <p>The chip row right under the title bar shows the items you'll own at the end of the Late phase — your "endgame snapshot". Each chip has space reserved for a role symbol on top so spike / required / recommended pop visually even when other chips don't carry one.</p>` },
+        { id: 'build.bp-step', mode: 'basic', anchor: 'build.bp-step',
+          title: 'Step-by-step buys',
+          body: () => `
+            <p>Clicking <b>Show Step-by-Step ▾</b> reveals the per-phase detail. Each phase block has two columns:</p>
+            <ul>
+              <li><b>Main path</b> — buys, upgrades, and sells in order, with each row showing an action badge (<code>+</code> buy / <code>↑</code> upgrade / <code>−</code> sell), the item image and name, the Priority symbol, and the cost.</li>
+              <li><b>Assist / Counter</b> — the side picks that phase recommended on top of the main path.</li>
+            </ul>
+            <p>Background tints highlight the top label tiers — orange for spike anchors, gold for required, purple for anti-spike, faint blue for recommended.</p>` },
+      ],
+    },
+    // ── Simulator ───────────────────────────────────────────────
+    {
+      id: 'simulator', title: 'Simulator & Live Match',
+      cards: [
+        { id: 'sim.modes', mode: 'basic', anchor: 'sim.row',
+          title: 'Tick vs Live',
+          body: () => `
+            <p>Two simulator modes live on the Build Path tab:</p>
+            <ul>
+              <li><b>▶ Simulate this build</b> (Tick) — 35 simulated ticks of game-clock income. Click through tick-by-tick to feel how the algorithm reacts.</li>
+              <li><b>▶ Live Match</b> — budget-based. Type how many souls you have right now during a real game; the app recommends what to buy next.</li>
+            </ul>
+            <p>Both use the same scoring vectors as the Build Screen — no separate ranker.</p>` },
+        { id: 'sim.picking', mode: 'basic', anchor: 'sim.row',
+          title: 'Picking items',
+          body: () => `
+            <p>Each tick the simulator surfaces three recommendation columns — typically your <b>self pick</b>, an <b>assist</b>, and a <b>counter</b>. Click an item to buy, click an empty slot to unlock it, click an owned item to sell.</p>
+            <p>Slot cap starts at 9 and unlocks up to 12 over the course of a match.</p>` },
+        { id: 'sim.focus', mode: 'basic', anchor: 'sim.row',
+          title: 'Focus inside the simulator',
+          body: () => `
+            <p>The simulator has its own Focus modal that shares state with the Build Screen's focus button. Focused heroes weight <b>2×</b> when computing enemy consensus vulnerabilities, so counter recommendations sharpen toward whoever you marked.</p>` },
+      ],
+    },
+    // ── Authoring — Heroes (Advanced) ───────────────────────────
+    {
+      id: 'authoring-heroes', title: 'Authoring — Heroes',
+      cards: [
+        { id: 'auth.heroes-list', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Heroes — your own data',
+          body: () => `
+            <p>The <b>Heroes</b> page is the editor where every shipped hero lives, plus any you author yourself. The grid is your starting point; the <b>+ New Hero</b> button up top opens a modal to create one from scratch.</p>
+            <p>Presets (community heroes) appear first; custom heroes follow underneath.</p>` },
+        { id: 'auth.hero-edit', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Hero Edit page — anatomy',
+          body: () => `
+            <p>Click any hero card to open <b>Hero Edit</b>. It's the heaviest editor in the app and has four main areas:</p>
+            <ul>
+              <li><b>Info panel</b> — name, key, description, portraits, default build, filter colors, search terms.</li>
+              <li><b>Build tabs</b> — one tab per build (General is always index 0 and non-draggable). Drag tabs to reorder; <code>+</code> creates a new build.</li>
+              <li><b>Build meta + constraints</b> — Follows Build, Confidence, Disabled, plus the four constraint columns (Signature / Required / Blacklist / Counter slots).</li>
+              <li><b>Tag table</b> — the big grid where every tag gets its four weights for this build.</li>
+            </ul>
+            <p>Save is dirty-and-save: edits stay client-side until you press the green button.</p>` },
+        { id: 'auth.follows-build', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Follows Build + = / + / × operators',
+          body: () => `
+            <p><b>Follows Build</b> makes a build inherit weights from another build of the same hero. <code>resolveBuildValues()</code> walks the chain at score time.</p>
+            <p>Per-cell operators control inheritance:</p>
+            <ul>
+              <li><code>=</code> — plain number: override the parent.</li>
+              <li><code>+0.25</code> — add to the parent value.</li>
+              <li><code>×0.5</code> — multiply the parent value.</li>
+            </ul>
+            <p>Same operator set applies to Confidence at the build level.</p>` },
+        { id: 'auth.constraints', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Signature / Required / Blacklist',
+          body: () => `
+            <p>The Build Constraints expander has four columns that force-include / force-exclude items per build:</p>
+            <ul>
+              <li><b>Signature</b> — ×1.4 score boost (×1.9 strong variant for beam / expert algos).</li>
+              <li><b>Required</b> — ×2.0 (×2.6 strong) + force-buy + sell-stickiness ×1.5.</li>
+              <li><b>Blacklist</b> — never recommended; their chain components are still allowed elsewhere.</li>
+              <li><b>Counter Items per Phase</b> — explicit <code>[min, max]</code> slots overriding the defaults (Lane <code>[0,1]</code>, Early <code>[0,2]</code>, Mid <code>[1,2]</code>, Late <code>[2,3]</code>, Extra Late <code>[2,4]</code>).</li>
+            </ul>` },
+        { id: 'auth.confidence', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Confidence nudge',
+          body: () => `
+            <p>The <b>Confidence</b> field (range ±0.5) nudges this build's total relative to its siblings without touching the underlying tag values. Useful when you want to bias the calculator toward a build you know is good without re-weighting everything.</p>
+            <p>Confidence supports the same <code>=</code> / <code>+</code> / <code>×</code> operators as tag weights, so it can inherit from a followed build.</p>` },
+        { id: 'auth.reverse-engineer', mode: 'advanced', anchor: 'heroes.page',
+          title: 'Reverse Engineer',
+          body: () => `
+            <p>The <b>⟲ Reverse Engineer</b> button on the Hero Edit header opens a separate page. Give it the items you actually bought during a real game + which enemies you killed most + which allies you played with, and it back-calculates a starting tag-weight vector for this build.</p>
+            <p>Output overwrites the currently-active build's vectors. Two algorithm modes: <code>items+context</code> (full inference) or <code>items-only</code> (just tag-score the items).</p>` },
+        { id: 'auth.resolve-chain', mode: 'dev',
+          title: 'resolveBuildValues chain (Dev)',
+          body: () => `
+            <p>The follow-chain resolver lives at <code>resolveBuildValues(build, heroBuilds, visited?)</code> near the top of <code>app.js</code>. For each of the four weight vectors it walks the parent chain depth-first, applying <code>=</code> / <code>+</code> / <code>×</code> via <code>applyRelation()</code>.</p>
+            <p>The <code>visited</code> set is a cycle-guard. <code>parseWeightEntry()</code> handles the cell encoding (numbers, <code>"+0.25"</code>, <code>"x0.5"</code>, <code>null</code> for inherit).</p>` },
+      ],
+    },
+    // ── Authoring — Items (Advanced) ────────────────────────────
+    {
+      id: 'authoring-items', title: 'Authoring — Items',
+      cards: [
+        { id: 'auth.items-list', mode: 'advanced', anchor: 'items.page',
+          title: 'Items — search & browse',
+          body: () => `
+            <p>The Items page is a flat searchable grid of every item the calculator knows about. Filter tabs on the right narrow by category (All / Weapon / Vitality / Spirit); the search box matches name and key.</p>
+            <p>Click any card to open <b>Item Edit</b>.</p>` },
+        { id: 'auth.item-edit', mode: 'advanced', anchor: 'items.page',
+          title: 'Item Edit + upgrades_from chain',
+          body: () => `
+            <p>The Item Edit page lets you set the item's metadata (name, tier, category, image, wiki) plus its per-tag <code>playstyle_score</code> values.</p>
+            <p>The <b>Upgrades From</b> field is critical: it's a comma-separated list of component item keys defining the upgrade chain. The build path uses this to know that buying a T4 implicitly consumes the listed T1/T2/T3 components — that's also what the Build Screen reads when it enforces "component before upgrade" ordering.</p>` },
+      ],
+    },
+    // ── Authoring — Tags (Developer) ────────────────────────────
+    {
+      id: 'authoring-tags', title: 'Authoring — Tags',
+      cards: [
+        { id: 'auth.tags-list', mode: 'dev', anchor: 'tags.page',
+          title: 'Tags — the vector dimensions',
+          body: () => {
+            const tagCount = (typeof S !== 'undefined' && Array.isArray(S?.tags)) ? S.tags.length : null;
+            const tagCountText = tagCount !== null ? `<b>${tagCount}</b>` : '~90';
+            return `
+              <p>Tags are the dimensions of the whole scoring vector space. Every hero has four weight vectors over the tag list, every item has one. Score = dot product.</p>
+              <p>Adding a tag widens every hero/item file — they all gain a row for the new tag. The current set holds ${tagCountText} tags. The <code>short_label</code> column is what surfaces in the Build Screen tile captions and Counter group headers.</p>
+              <p>Removing a tag is destructive — every reference to it across heroes and items disappears.</p>`;
+          } },
+        { id: 'auth.tag-vectors', mode: 'dev',
+          title: 'How the dot product works',
+          body: () => `
+            <p>A build scores against the match in two passes:</p>
+            <ul>
+              <li><b>Build × build</b> — sum of <code>item_affinity</code> dot products against each ally / enemy build's <code>playstyle_score</code>, weighted by ally / enemy multipliers from <code>MATCH.mult</code>.</li>
+              <li><b>Item × build</b> — for each candidate item, dot its <code>playstyle_score</code> against each hero's <code>ally_weight</code> / <code>enemy_weight</code> to produce the assist / counter scores you see in the Items tab.</li>
+            </ul>
+            <p>That's it — every number in the app is one of those two dot products.</p>` },
+      ],
+    },
+    // ── Developer — QA & Sim Logs ───────────────────────────────
+    {
+      id: 'developer-qa', title: 'Developer — QA & Sim Logs',
+      cards: [
+        { id: 'dev.qa', mode: 'dev', anchor: 'qa.page',
+          title: 'QA Scenarios',
+          body: () => `
+            <p>The QA page lets you save a roster + algorithm + formula as a named scenario, then replay it any time to regression-check the algorithms.</p>
+            <p>Each run produces a report (per-build score, top items, surge anchors, etc.) saved to <code>data/qa/reports/&lt;uuid&gt;.json</code>. The QA Report Viewer renders it; the JSON snapshot is the source of truth.</p>` },
+        { id: 'dev.sim-logs', mode: 'dev', anchor: 'qa.page',
+          title: 'Sim log comparison harness',
+          body: () => `
+            <p>Saved sim runs live in <code>data/sim_logs/&lt;ts&gt;_&lt;hero&gt;.json</code>. The harness lets you snapshot a "good" baseline and diff future runs against it.</p>
+            <p>Baselines are stored as markdown in <code>data/sim_log_baselines/</code> so changes are diff-friendly in git. Used to catch algorithm regressions before shipping.</p>
+            <p>Bucket scoring + similarity metrics are documented in DESIGN.md §19.</p>` },
+        { id: 'dev.debug-build', mode: 'dev',
+          title: 'Debug Build button',
+          body: () => `
+            <p>Inside the Build Path Guide's title bar, the <b>Debug Build</b> button runs <code>computeBuildPath()</code> with <code>_bpDbg</code> capture enabled and copies the formatted trace to your clipboard.</p>
+            <p>The trace includes the guide vector (top 15 tags), surge anchors, the swap log, and per-phase steps with the top-5 candidates considered at each pick. Format function: <code>formatBpDebug()</code>.</p>` },
+      ],
+    },
+    // ── Reference / What to read next ───────────────────────────
+    {
+      id: 'reference', title: 'Reference',
+      cards: [
+        { id: 'ref.data-files', mode: 'advanced',
+          title: 'Where the data lives',
+          body: () => `
+            <p>All hero / item / tag data is JSON-on-disk under <code>public/tag_generator/data/</code>:</p>
+            <ul>
+              <li><code>data/tags.json</code> — master tag list.</li>
+              <li><code>data/heroes/&lt;key&gt;.json</code> — one file per hero with the full <code>builds[]</code> array and per-tag vectors.</li>
+              <li><code>data/items/&lt;key&gt;.json</code> — one file per item with tier and <code>playstyle_score</code>.</li>
+              <li><code>data/qa/</code> — QA scenarios + reports.</li>
+              <li><code>data/sim_logs/</code> + <code>data/sim_log_baselines/</code> — saved sim runs and frozen baselines.</li>
+            </ul>
+            <p>Persistence is just file I/O via the Flask backend — there's no database.</p>` },
+        { id: 'ref.design-doc', mode: 'dev',
+          title: 'DESIGN.md + companion docs',
+          body: () => `
+            <p>Deep reference lives in the working directory:</p>
+            <ul>
+              <li><code>DESIGN.md</code> — full system reference (§22 covers every Build Path algorithm in detail).</li>
+              <li><code>BUILD_SCREEN_WIP.md</code> — the active scratchpad for Build Screen iterations.</li>
+              <li><code>memory/</code> — Claude memory files tracking decisions across sessions.</li>
+            </ul>
+            <p>DESIGN.md sections often have a <i>"Correction:"</i> line where Brandon overrides drift; trust those over the surrounding prose if they conflict.</p>` },
+      ],
+    },
+  ];
+
+  function load() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+      const merged = { ...DEFAULTS, ...raw };
+      if (!VALID_MODES.includes(merged.mode)) merged.mode = 'basic';
+      if (!Array.isArray(merged.settingsPromptDismissed)) merged.settingsPromptDismissed = [];
+      return merged;
+    } catch { return { ...DEFAULTS }; }
+  }
+  let state = load();
+  function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  /* Public state mutator. Merges patch, persists, re-applies side effects. */
+  function set(patch) {
+    state = { ...state, ...patch };
+    if (!VALID_MODES.includes(state.mode)) state.mode = 'basic';
+    save();
+    apply();
+  }
+
+  /* Apply state to the DOM. Phase 1: refresh the mode-toggle highlight,
+     refresh the first-run banner visibility, refresh tutorial-page content
+     IF the page is currently active. */
+  function apply() {
+    document.documentElement.setAttribute('data-tutorial-mode', state.mode);
+    document.querySelectorAll('#tut-mode-seg button').forEach(b => {
+      b.classList.toggle('on', b.dataset.tutMode === state.mode);
+    });
+    applyBanner();
+    const tutPage = document.getElementById('page-tutorial');
+    if (tutPage && tutPage.classList.contains('active')) render();
+  }
+
+  /* First-run banner on the Calculator page. Shown when !state.seen.
+     The banner element itself is static in index.html (#tut-firstrun-banner)
+     so the page-header doesn't reflow on every toggle. */
+  function applyBanner() {
+    const banner = document.getElementById('tut-firstrun-banner');
+    if (!banner) return;
+    banner.hidden = !!state.seen;
+  }
+
+  /* Render the tutorial page body. Walks TUTORIAL_CONTENT, filters cards by
+     the current mode, and emits one `<section>` per subsection with a card
+     list below. Card bodies are functions, called here so they can pull
+     live values (BUILD_PHASES, EFFECT_THRESH, etc.) at render time. */
+  function cardVisible(card) {
+    const cardRank = MODE_RANK[card.mode || 'basic'] ?? 0;
+    const userRank = MODE_RANK[state.mode] ?? 0;
+    return cardRank <= userRank;
+  }
+
+  /* Flat list of visible cards in display order, used for Next/Prev nav. */
+  function visibleCardList() {
+    const flat = [];
+    TUTORIAL_CONTENT.forEach(section => {
+      (section.cards || []).filter(cardVisible).forEach(card => {
+        flat.push({ section, card });
+      });
+    });
+    return flat;
+  }
+
+  /* Scroll to a card on the tutorial page and pulse it briefly so it's
+     obvious where the user landed. */
+  function scrollToCard(cardId) {
+    const target = document.querySelector(`.tut-card[data-card-id="${CSS.escape(cardId)}"]`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('tut-card--flash');
+    setTimeout(() => target.classList.remove('tut-card--flash'), 1500);
+  }
+
+  /* Advance the tour to a specific card. If the card has an anchor, the
+     coach-mark fires (auto-navigating to the right page first). If not, we
+     return to the tutorial page and flash-scroll to it. Used by both the
+     in-card Next/Prev buttons and the bubble's Next/Prev. */
+  function gotoCard(cardId) {
+    if (!cardId) return;
+    const flat = visibleCardList();
+    const idx = flat.findIndex(f => f.card.id === cardId);
+    if (idx < 0) return;
+    const card = flat[idx].card;
+    const prevId = idx > 0 ? flat[idx - 1].card.id : null;
+    const nextId = idx < flat.length - 1 ? flat[idx + 1].card.id : null;
+
+    if (card.anchor) {
+      let cardBody = '';
+      try { cardBody = typeof card.body === 'function' ? card.body() : (card.body || ''); }
+      catch { cardBody = ''; }
+      showCoachmark(card.anchor, {
+        title: card.title,
+        body: cardBody,
+        prevCardId: prevId,
+        nextCardId: nextId,
+      });
+    } else {
+      // Conceptual card (no anchor) — return to the tutorial page and flash.
+      hideCoachmark();
+      if (typeof showPage === 'function') showPage('tutorial');
+      apply();
+      setTimeout(() => scrollToCard(cardId), 80);
+    }
+  }
+
+  function render() {
+    renderSettingsPrompt();
+    renderLintBadge();
+    const host = document.getElementById('tut-body');
+    if (!host) return;
+    host.innerHTML = '';
+
+    const flat = visibleCardList();
+    const totalCount = flat.length;
+
+    TUTORIAL_CONTENT.forEach(section => {
+      const visibleCards = (section.cards || []).filter(cardVisible);
+      if (!visibleCards.length) return;
+
+      const sec = document.createElement('section');
+      sec.className = 'tut-section';
+      sec.dataset.sectionId = section.id;
+      sec.innerHTML = `<h2 class="tut-section-t">${escapeText(section.title)}</h2>`;
+
+      const list = document.createElement('div');
+      list.className = 'tut-card-list';
+
+      visibleCards.forEach(card => {
+        const flatIdx = flat.findIndex(f => f.card.id === card.id);
+        const prevCard = flatIdx > 0 ? flat[flatIdx - 1].card : null;
+        const nextCard = flatIdx < totalCount - 1 ? flat[flatIdx + 1].card : null;
+        const art = document.createElement('article');
+        art.className = `tut-card tut-card--${card.mode || 'basic'}`;
+        art.dataset.cardId = card.id;
+        const modeBadge = `<span class="tut-card-mode tut-card-mode--${card.mode || 'basic'}">${escapeText(card.mode || 'basic')}</span>`;
+        const showMeBtn = card.anchor
+          ? `<button class="btn-tut btn-sm tut-show-me-btn" data-tut-show-me="${escapeText(card.anchor)}" type="button" title="Highlight this on the live page">👁 Show me</button>`
+          : '';
+        let bodyHtml = '';
+        try { bodyHtml = typeof card.body === 'function' ? card.body() : (card.body || ''); }
+        catch (e) { bodyHtml = `<p class="tut-card-err">Failed to render: ${escapeText(String(e?.message || e))}</p>`; }
+        const prevBtn = prevCard
+          ? `<button class="btn-ghost btn-sm tut-nav-btn" data-tut-nav-card="${escapeText(prevCard.id)}" type="button">← Previous</button>`
+          : `<span></span>`;
+        const nextBtn = nextCard
+          ? `<button class="btn-tut btn-sm tut-nav-btn" data-tut-nav-card="${escapeText(nextCard.id)}" type="button">Next →</button>`
+          : ``;
+        art.innerHTML = `
+          <header class="tut-card-hd">
+            <div class="tut-card-hd-l">
+              <h3 class="tut-card-t">${escapeText(card.title)}</h3>
+              ${modeBadge}
+            </div>
+            ${showMeBtn}
+          </header>
+          <div class="tut-card-body">${bodyHtml}</div>
+          <footer class="tut-card-foot">
+            ${prevBtn}
+            <span class="tut-card-pos">${flatIdx + 1} / ${totalCount}</span>
+            ${nextBtn}
+          </footer>`;
+        list.appendChild(art);
+      });
+
+      sec.appendChild(list);
+      host.appendChild(sec);
+    });
+
+    // Wire the "Show me" buttons. Looking up the card by id at click time so
+    // we pass the card's actual description + neighbour ids into the
+    // coach-mark bubble. The user can read the whole explanation right
+    // there instead of having to bounce back to the tutorial page.
+    host.querySelectorAll('[data-tut-show-me]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const anchorId = btn.dataset.tutShowMe;
+        const cardEl = btn.closest('.tut-card');
+        const cardId = cardEl?.dataset.cardId;
+        const flatIdx = flat.findIndex(f => f.card.id === cardId);
+        const card = flat[flatIdx]?.card;
+        const prevCard = flatIdx > 0 ? flat[flatIdx - 1].card : null;
+        const nextCard = flatIdx < flat.length - 1 ? flat[flatIdx + 1].card : null;
+        const meta = TUTORIAL_ANCHORS.find(a => a.id === anchorId);
+        let cardBody = '';
+        try { cardBody = typeof card?.body === 'function' ? card.body() : (card?.body || ''); }
+        catch { cardBody = ''; }
+        showCoachmark(anchorId, {
+          title: card?.title || meta?.label || anchorId,
+          body: cardBody,
+          prevCardId: prevCard?.id,
+          nextCardId: nextCard?.id,
+        });
+      });
+    });
+
+    // Wire the in-page Next/Prev buttons. These advance the tour — if the
+    // target card has an anchor, gotoCard() auto-fires its Show-me; if not,
+    // it just scrolls to the card and flashes it.
+    host.querySelectorAll('[data-tut-nav-card]').forEach(btn => {
+      btn.addEventListener('click', () => gotoCard(btn.dataset.tutNavCard));
+    });
+  }
+
+  /* ── Coach-mark widget ────────────────────────────────────────────
+     Floating bubble (≥761px) anchored next to a target element, or a
+     fixed bottom-sheet on phones. Resolves a target via the
+     `data-tutorial-anchor` attribute; if the anchor is hidden by the
+     current layout (e.g. sidebar on mobile), it falls back to a centered
+     "not visible" bubble instead of pointing at nothing. */
+  let _coachmark = null;  // { el, anchor, reposition }
+  let _coachmarkBoundOnce = false;
+
+  function findAnchor(anchorId) {
+    return document.querySelector(`[data-tutorial-anchor="${anchorId}"]`);
+  }
+  function isAnchorVisible(el) {
+    if (!el || !el.isConnected) return false;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return false;
+    let cur = el;
+    while (cur && cur !== document.body) {
+      const cs = window.getComputedStyle(cur);
+      if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      cur = cur.parentElement;
+    }
+    return true;
+  }
+
+  function ensureCoachmarkEl() {
+    let cm = document.getElementById('tutorial-coachmark');
+    if (cm) return cm;
+    cm = document.createElement('div');
+    cm.id = 'tutorial-coachmark';
+    cm.className = 'tutorial-cm';
+    cm.innerHTML = `
+      <div class="tcm-bubble" role="dialog" aria-modal="false" aria-live="polite">
+        <div class="tcm-arrow" aria-hidden="true"></div>
+        <div class="tcm-hdr">
+          <span class="tcm-title"></span>
+          <button class="tcm-close" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="tcm-body"></div>
+        <div class="tcm-actions"></div>
+      </div>`;
+    document.body.appendChild(cm);
+    cm.querySelector('.tcm-close')?.addEventListener('click', hideCoachmark);
+    if (!_coachmarkBoundOnce) {
+      // ESC closes the bubble. Backdrop click does NOT — the bubble is a
+      // non-modal hint, the user might want to keep it open while exploring.
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && _coachmark) hideCoachmark();
+      });
+      _coachmarkBoundOnce = true;
+    }
+    return cm;
+  }
+
+  /* Public entry point. opts: { title?, body? (HTML), prevCardId?, nextCardId? }.
+     Async because anchors with a `needs` flag trigger ensureDemo() which
+     awaits a real calc / build-open before the bubble lands. */
+  async function showCoachmark(anchorId, opts = {}) {
+    hideCoachmark();
+    const meta = TUTORIAL_ANCHORS.find(a => a.id === anchorId);
+
+    // Auto-load demo data when the anchor depends on dynamic UI (results,
+    // build detail, sim). ensureDemo is a no-op when the state is already
+    // populated, so calling it always is cheap.
+    if (meta?.needs) {
+      try { await ensureDemo({ needs: meta.needs }); }
+      catch (e) { console.warn('[tutorial] ensureDemo failed:', e); }
+    }
+
+    // Navigate to the right page so the anchor exists in the layout.
+    if (meta?.page && typeof showPage === 'function') {
+      const curActive = document.querySelector('.page.active');
+      const targetSection = document.getElementById(`page-${meta.page}`);
+      if (curActive !== targetSection) {
+        if (meta.page === 'calc' && typeof loadCalc === 'function') { try { loadCalc(); } catch {} }
+        showPage(meta.page);
+      }
+    }
+    // Optional anchor-side preparation hook (e.g. open the Settings drawer
+    // when targeting an element inside it).
+    if (typeof meta?.before === 'function') {
+      try { meta.before(); } catch (e) { console.warn('[tutorial] before-hook failed:', e); }
+    }
+    // Wait one frame so the page-active style flip / data-density CSS
+    // resolves before we measure the anchor's rect. Drawer animations
+    // take ~180ms — defer further for drawer-bound anchors. ensureDemo()
+    // also needs a render tick after build-open before the panel exists.
+    const delay = meta?.before ? 200 : (meta?.needs ? 100 : 0);
+    setTimeout(() => requestAnimationFrame(() => {
+      const anchor = findAnchor(anchorId);
+      if (!anchor) {
+        renderFallback(anchorId, opts, 'not-built');
+        return;
+      }
+      if (!isAnchorVisible(anchor)) {
+        renderFallback(anchorId, opts, 'hidden');
+        return;
+      }
+      renderBubble(anchor, opts);
+    }), delay);
+  }
+
+  function renderBubble(anchor, opts) {
+    const cm = ensureCoachmarkEl();
+    cm.classList.remove('tutorial-cm--fallback');
+    cm.querySelector('.tcm-title').textContent = opts.title || 'Coach-mark';
+    cm.querySelector('.tcm-body').innerHTML = opts.body || '';
+    const prevBtn = opts.prevCardId
+      ? `<button class="btn-ghost btn-sm" type="button" data-act="prev">← Prev</button>`
+      : '';
+    const nextBtn = opts.nextCardId
+      ? `<button class="btn-tut btn-sm" type="button" data-act="next">Next →</button>`
+      : '';
+    cm.querySelector('.tcm-actions').innerHTML = `
+      ${prevBtn}
+      <button class="btn-primary btn-sm" type="button" data-act="close">Got it</button>
+      ${nextBtn}`;
+    cm.querySelector('[data-act="close"]')?.addEventListener('click', hideCoachmark);
+    // Next/Prev close the bubble, return to the tutorial page, and flash the
+    // adjacent card. They don't auto-fire that card's Show-me — the user
+    // chooses to advance manually so the tour stays opt-in.
+    // Next/Prev advance the tour: gotoCard() fires the next anchor's
+    // Show-me directly (or scrolls to a no-anchor concept card).
+    cm.querySelector('[data-act="prev"]')?.addEventListener('click', () => gotoCard(opts.prevCardId));
+    cm.querySelector('[data-act="next"]')?.addEventListener('click', () => gotoCard(opts.nextCardId));
+
+    // Scroll the anchor into view if it's off-screen, then highlight + position.
+    const ar = anchor.getBoundingClientRect();
+    const vh = window.innerHeight;
+    if (ar.top < 60 || ar.bottom > vh - 60) {
+      anchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    anchor.classList.add('tutorial-anchor-highlight');
+    cm.classList.add('open');
+
+    // Defer measurement until the bubble has its content sized.
+    requestAnimationFrame(() => positionNear(cm, anchor));
+
+    const reposition = () => {
+      if (!anchor.isConnected || !isAnchorVisible(anchor)) {
+        hideCoachmark();
+        return;
+      }
+      positionNear(cm, anchor);
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, { capture: true, passive: true });
+    _coachmark = { el: cm, anchor, reposition };
+  }
+
+  function renderFallback(anchorId, opts, reason = 'hidden') {
+    const cm = ensureCoachmarkEl();
+    cm.classList.add('tutorial-cm--fallback');
+    const meta = TUTORIAL_ANCHORS.find(a => a.id === anchorId);
+    cm.querySelector('.tcm-title').textContent =
+      (opts.title || meta?.label || 'Element not visible right now');
+    const msg = reason === 'not-built'
+      ? `<p>This element couldn't be found on the live page. Demo data is loaded automatically by Show-me, so this usually means a recent UI rename — please ping Brandon to update the anchor id.</p>`
+      : `<p>This element is hidden right now — likely by a responsive breakpoint (sidebar on phones), by Density (Simple Layout strips dense-only blocks), or by a feature toggle that's off.</p>`;
+    cm.querySelector('.tcm-body').innerHTML = `
+      ${msg}
+      <p><small>Anchor: <code>${escapeText(anchorId)}</code></small></p>`;
+    cm.querySelector('.tcm-actions').innerHTML = `
+      <button class="btn-primary btn-sm" type="button" data-act="close">Got it</button>`;
+    cm.querySelector('[data-act="close"]')?.addEventListener('click', hideCoachmark);
+    cm.classList.add('open');
+    const bubble = cm.querySelector('.tcm-bubble');
+    if (bubble) {
+      if (window.innerWidth <= 760) {
+        cm.classList.add('tutorial-cm--sheet');
+        bubble.style.top = ''; bubble.style.left = ''; bubble.style.transform = '';
+      } else {
+        cm.classList.remove('tutorial-cm--sheet');
+        bubble.style.top = '50%';
+        bubble.style.left = '50%';
+        bubble.style.transform = 'translate(-50%, -50%)';
+        bubble.dataset.arrowSide = 'none';
+      }
+    }
+    _coachmark = { el: cm, anchor: null, reposition: null };
+  }
+
+  function hideCoachmark() {
+    if (!_coachmark) return;
+    _coachmark.el.classList.remove('open');
+    _coachmark.el.classList.remove('tutorial-cm--sheet');
+    _coachmark.el.classList.remove('tutorial-cm--fallback');
+    if (_coachmark.anchor) {
+      _coachmark.anchor.classList.remove('tutorial-anchor-highlight');
+    }
+    if (_coachmark.reposition) {
+      window.removeEventListener('resize', _coachmark.reposition);
+      window.removeEventListener('scroll', _coachmark.reposition, { capture: true });
+    }
+    _coachmark = null;
+  }
+
+  function positionNear(cm, anchor) {
+    const bubble = cm.querySelector('.tcm-bubble');
+    if (!bubble) return;
+    // Mobile = bottom sheet, all positioning handled by CSS.
+    if (window.innerWidth <= 760) {
+      cm.classList.add('tutorial-cm--sheet');
+      bubble.style.top = ''; bubble.style.left = ''; bubble.style.transform = '';
+      bubble.dataset.arrowSide = 'none';
+      return;
+    }
+    cm.classList.remove('tutorial-cm--sheet');
+    bubble.style.transform = '';
+
+    const ar = anchor.getBoundingClientRect();
+    const bw = bubble.offsetWidth  || 320;
+    const bh = bubble.offsetHeight || 160;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const GAP = 14, EDGE = 8;
+
+    // Pick the best side: below → above → right → left, whichever fits.
+    let top, left, arrowSide;
+    if (ar.bottom + GAP + bh < vh - EDGE) {
+      top = ar.bottom + GAP;
+      left = Math.max(EDGE, Math.min(ar.left + ar.width / 2 - bw / 2, vw - bw - EDGE));
+      arrowSide = 'top';
+    } else if (ar.top - GAP - bh > EDGE) {
+      top = ar.top - GAP - bh;
+      left = Math.max(EDGE, Math.min(ar.left + ar.width / 2 - bw / 2, vw - bw - EDGE));
+      arrowSide = 'bottom';
+    } else if (ar.right + GAP + bw < vw - EDGE) {
+      left = ar.right + GAP;
+      top = Math.max(EDGE, Math.min(ar.top + ar.height / 2 - bh / 2, vh - bh - EDGE));
+      arrowSide = 'left';
+    } else {
+      left = Math.max(EDGE, ar.left - GAP - bw);
+      top = Math.max(EDGE, Math.min(ar.top + ar.height / 2 - bh / 2, vh - bh - EDGE));
+      arrowSide = 'right';
+    }
+    bubble.style.top = top + 'px';
+    bubble.style.left = left + 'px';
+    bubble.dataset.arrowSide = arrowSide;
+
+    // Position the arrow centered on the anchor along its axis.
+    const arrow = bubble.querySelector('.tcm-arrow');
+    if (arrow) {
+      if (arrowSide === 'top' || arrowSide === 'bottom') {
+        const ax = Math.max(14, Math.min(ar.left + ar.width / 2 - left, bw - 14));
+        arrow.style.left = ax + 'px';
+        arrow.style.top = '';
+      } else {
+        const ay = Math.max(14, Math.min(ar.top + ar.height / 2 - top, bh - 14));
+        arrow.style.top = ay + 'px';
+        arrow.style.left = '';
+      }
+    }
+  }
+
+  /* When the user picks Advanced or Dev mode but the matching CODEX feature
+     toggle is OFF and the prompt hasn't been dismissed for that mode, render
+     an inline suggestion strip above the cards. */
+  function renderSettingsPrompt() {
+    const host = document.getElementById('tut-settings-prompt');
+    if (!host) return;
+    const dismissed = new Set(state.settingsPromptDismissed);
+    const codex = window.CODEX?.state || {};
+    let target = null;
+    if (state.mode === 'advanced' && !codex.advanced && !dismissed.has('advanced')) target = 'advanced';
+    else if (state.mode === 'dev'  && !codex.developer && !dismissed.has('dev'))     target = 'dev';
+    if (!target) { host.hidden = true; host.innerHTML = ''; return; }
+    const label = target === 'advanced' ? 'Advanced' : 'Developer';
+    host.hidden = false;
+    host.innerHTML = `
+      <span class="tut-sp-icon" aria-hidden="true">!</span>
+      <div class="tut-sp-text">
+        Want to enable <b>${label}</b> features in Settings too? Reading the tutorial alone keeps the UI the same.
+      </div>
+      <div class="tut-sp-actions">
+        <button class="btn-ghost btn-sm" data-act="dismiss">Not now</button>
+        <button class="btn-primary btn-sm" data-act="enable">Enable</button>
+      </div>`;
+    host.querySelector('[data-act="dismiss"]')?.addEventListener('click', () => {
+      const list = state.settingsPromptDismissed.includes(target)
+        ? state.settingsPromptDismissed
+        : [...state.settingsPromptDismissed, target];
+      set({ settingsPromptDismissed: list });
+    });
+    host.querySelector('[data-act="enable"]')?.addEventListener('click', () => {
+      if (target === 'advanced') window.CODEX?.set({ advanced: true });
+      else                       window.CODEX?.set({ advanced: true, developer: true });
+      apply();
+    });
+  }
+
+  /* Dev-mode anchor lint. Two checks:
+     1. Every card.anchor must exist in TUTORIAL_ANCHORS (catches typos).
+     2. Every TUTORIAL_ANCHORS entry must resolve to a `data-tutorial-anchor`
+        attribute somewhere in the DOM (catches stale registrations after a
+        rename — dynamic anchors get a soft warning since they may not be
+        mounted at lint time).
+     Output: a count badge + a clickable list of issues. Only rendered in
+     Dev tutorial mode; cheap (linear scan over O(n) cards and anchors). */
+  function runAnchorLint() {
+    const cardIssues = [];
+    const anchorIssues = [];
+    const anchorIds = new Set(TUTORIAL_ANCHORS.map(a => a.id));
+    TUTORIAL_CONTENT.forEach(section => {
+      (section.cards || []).forEach(card => {
+        if (card.anchor && !anchorIds.has(card.anchor)) {
+          cardIssues.push({ cardId: card.id, anchor: card.anchor, kind: 'unknown-anchor' });
+        }
+      });
+    });
+    TUTORIAL_ANCHORS.forEach(a => {
+      const el = document.querySelector(`[data-tutorial-anchor="${CSS.escape(a.id)}"]`);
+      if (!el) {
+        // If the anchor's page is dynamic (needs build-open / calc-results)
+        // or it's on a non-active page, the element may legitimately not
+        // exist yet. Flag those as "deferred" not "missing".
+        const deferred = !!a.needs || (a.page && !document.getElementById(`page-${a.page}`)?.classList.contains('active'));
+        anchorIssues.push({ id: a.id, kind: deferred ? 'deferred' : 'missing' });
+      }
+    });
+    return { cardIssues, anchorIssues };
+  }
+
+  function renderLintBadge() {
+    const host = document.getElementById('tut-lint');
+    if (!host) return;
+    if (state.mode !== 'dev') { host.hidden = true; host.innerHTML = ''; return; }
+    const { cardIssues, anchorIssues } = runAnchorLint();
+    const hardErrors = cardIssues.length + anchorIssues.filter(a => a.kind === 'missing').length;
+    const deferredCount = anchorIssues.filter(a => a.kind === 'deferred').length;
+
+    host.hidden = false;
+    if (hardErrors === 0 && deferredCount === 0) {
+      host.innerHTML = `<span class="tut-lint-ico tut-lint-ico--ok">✓</span> Anchor lint: all <b>${TUTORIAL_ANCHORS.length}</b> anchors resolved, <b>${TUTORIAL_CONTENT.flatMap(s => s.cards || []).length}</b> cards reference valid anchors.`;
+      host.classList.remove('tut-lint--warn', 'tut-lint--err');
+      host.classList.add('tut-lint--ok');
+      return;
+    }
+
+    const cardLines = cardIssues.map(i =>
+      `<li><b>${escapeText(i.cardId)}</b> → unknown anchor <code>${escapeText(i.anchor)}</code></li>`).join('');
+    const missingLines = anchorIssues.filter(a => a.kind === 'missing').map(i =>
+      `<li><code>${escapeText(i.id)}</code> — no <code>data-tutorial-anchor</code> attr found in DOM</li>`).join('');
+    const deferredLines = anchorIssues.filter(a => a.kind === 'deferred').map(i =>
+      `<li><code>${escapeText(i.id)}</code> — deferred (dynamic page not yet mounted)</li>`).join('');
+
+    host.classList.remove('tut-lint--ok');
+    host.classList.toggle('tut-lint--err',  hardErrors > 0);
+    host.classList.toggle('tut-lint--warn', hardErrors === 0 && deferredCount > 0);
+    host.innerHTML = `
+      <details ${hardErrors > 0 ? 'open' : ''}>
+        <summary>
+          <span class="tut-lint-ico ${hardErrors > 0 ? 'tut-lint-ico--err' : 'tut-lint-ico--warn'}">${hardErrors > 0 ? '⚠' : 'ⓘ'}</span>
+          Anchor lint:
+          ${hardErrors > 0 ? `<b>${hardErrors}</b> error${hardErrors === 1 ? '' : 's'}` : '0 errors'}${deferredCount > 0 ? `, ${deferredCount} deferred` : ''}
+        </summary>
+        ${cardIssues.length ? `<div class="tut-lint-group"><b>Cards with unknown anchors</b><ul>${cardLines}</ul></div>` : ''}
+        ${missingLines ? `<div class="tut-lint-group"><b>Anchors not in DOM</b><ul>${missingLines}</ul></div>` : ''}
+        ${deferredLines ? `<div class="tut-lint-group tut-lint-group--soft"><b>Deferred (won't fire until dynamic UI mounts)</b><ul>${deferredLines}</ul></div>` : ''}
+      </details>`;
+  }
+
+  /* Entry point: navigate to the tutorial page and render it. Closes the
+     Settings drawer if it's open (clicked from inside the drawer). */
+  function open() {
+    if (window.CODEX) {
+      try { window.CODEX.closeDrawer(); } catch {}
+    }
+    if (typeof showPage === 'function') showPage('tutorial');
+    apply();      // sets data-attrs, refreshes mode-toggle highlight
+    render();    // builds the body now that the page is visible
+  }
+
+  /* Set seen=true without opening anything. Banner Skip button. */
+  function dismissBanner() { set({ seen: true }); }
+
+  function escapeText(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function bind() {
+    // Sidebar foot + mobile floating + Settings-drawer entry points
+    document.getElementById('btn-open-tutorial')?.addEventListener('click', open);
+    document.getElementById('mtop-tutorial')?.addEventListener('click', open);
+    document.getElementById('set-open-tutorial')?.addEventListener('click', open);
+
+    // Back button on the tutorial page
+    document.getElementById('back-tutorial')?.addEventListener('click', () => {
+      if (typeof loadCalc === 'function') { try { loadCalc(); } catch {} }
+      if (typeof showPage === 'function') showPage('calc');
+    });
+
+    // Mode segmented control
+    document.querySelectorAll('#tut-mode-seg button').forEach(b => {
+      b.addEventListener('click', () => set({ mode: b.dataset.tutMode }));
+    });
+
+    // First-run banner buttons
+    document.getElementById('tut-banner-start')?.addEventListener('click', () => {
+      set({ seen: true });
+      open();
+    });
+    document.getElementById('tut-banner-skip')?.addEventListener('click', dismissBanner);
+
+    apply();  // initial banner visibility + mode-toggle highlight
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+
+  return {
+    get state() { return { ...state, settingsPromptDismissed: [...state.settingsPromptDismissed] }; },
+    get anchors() { return TUTORIAL_ANCHORS.slice(); },
+    set, open, dismissBanner,
+    showCoachmark, hideCoachmark,
+  };
+})();
+window.TUTORIAL = TUTORIAL;
 
 // ── Image helpers ─────────────────────────────────────────────────────────────
 function srcUrl(path) {
@@ -4044,6 +5194,10 @@ function makeSummaryCard(r) {
   card.className = 'summary-card'
     + (r.isSelf  ? ' sc-self'  : '')
     + (r.isEnemy ? ' sc-enemy' : '');
+  // Tutorial anchor — the FIRST card rendered in the grid carries the
+  // `results.card` anchor so the coach-mark has a target. querySelector
+  // returns the first match, so subsequent cards don't need it.
+  card.setAttribute('data-tutorial-anchor', 'results.card');
 
   const topBuild = r.topBuilds[0];
   const img = srcUrl(r.imagePath);
@@ -4075,7 +5229,7 @@ function makeSummaryCard(r) {
       : '';
     // data-build-idx makes the row directly clickable — bypasses the card-level
     // openCalcHero and jumps straight to that build's detail.
-    return `<div class="sc-build-row" data-build-idx="${b.buildIdx}" role="button" tabindex="0">
+    return `<div class="sc-build-row" data-build-idx="${b.buildIdx}" data-tutorial-anchor="results.build-row" role="button" tabindex="0">
       <span class="sc-bname">${b.name}</span>
       ${itemsHtml}
       ${pctHtml}
@@ -4382,6 +5536,7 @@ function openCalcBuild(heroName, buildIdx) {
 
   const tabbar = document.createElement('div');
   tabbar.className = 'tabbar';
+  tabbar.setAttribute('data-tutorial-anchor', 'build.tabbar');
   el.appendChild(tabbar);
 
   const panels = {};
@@ -10993,7 +12148,7 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
     </div>
     <div class="bs-toolbar">
       <div class="bs-col-toggles">${colToggles}</div>
-      <button class="btn-ghost btn-sm bs-focus-btn" title="Mark allies/enemies as significant — focused chars glow + boost matching items">
+      <button class="btn-ghost btn-sm bs-focus-btn" data-tutorial-anchor="build.bs-focus-btn" title="Mark allies/enemies as significant — focused chars glow + boost matching items">
         Focus heroes${focusedCount ? ` (${focusedCount})` : '…'}
       </button>
     </div>`;
@@ -11058,6 +12213,7 @@ function mkBuildScreenPanel(b, heroName, buildIdx) {
   //    Column headers up top use the same grid template.
   const grid = document.createElement('div');
   grid.className = 'bs-panel';
+  grid.setAttribute('data-tutorial-anchor', 'build.bs-panel');
 
   const colHeaders = document.createElement('div');
   colHeaders.className = 'bs-col-headers bs-phase-row';
@@ -11447,6 +12603,7 @@ function buildPathPanelContents(pathData, b) {
   let detailOpen = false;
   const titleBar = document.createElement('div');
   titleBar.className = 'bp-title-bar';
+  titleBar.setAttribute('data-tutorial-anchor', 'build.bp-title');
   titleBar.innerHTML = `<span class="calc-panel-title" style="margin:0">Build Path Guide</span>
     <div style="display:flex;gap:6px;align-items:center;">
       <button class="btn-ghost btn-sm bp-debug-btn">Debug Build</button>
@@ -11482,6 +12639,7 @@ function buildPathPanelContents(pathData, b) {
   // other categories show no symbol here — they're visible in the step view.
   const summaryEl = document.createElement('div');
   summaryEl.className = 'bp-summary-row';
+  summaryEl.setAttribute('data-tutorial-anchor', 'build.bp-summary');
   if (summaryOwned.size) {
     summaryOwned.forEach(k => {
       const it    = itemNameMap[k];
@@ -11513,6 +12671,7 @@ function buildPathPanelContents(pathData, b) {
   // Detail view (hidden by default)
   const detailEl = document.createElement('div');
   detailEl.className = 'bp-detail hidden';
+  detailEl.setAttribute('data-tutorial-anchor', 'build.bp-step');
   detailEl.appendChild(renderBuildPath(pathData, b, itemNameMap, {
     labelFor, LABEL_META,
   }));
@@ -11529,6 +12688,7 @@ function buildPathPanelContents(pathData, b) {
   if (MATCH.simEnabled !== false) {
     const simRow = document.createElement('div');
     simRow.className = 'bp-sim-row';
+    simRow.setAttribute('data-tutorial-anchor', 'sim.row');
     const sst = SIM.states[`${b.heroName}::${b.buildIdx ?? 0}`];
     const resumeable = !!sst && sst.mode !== 'live' && (sst.tick > 0 || (sst.history && sst.history.length));
     const liveResumeable = !!sst && sst.mode === 'live';

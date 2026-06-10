@@ -15,7 +15,7 @@
   <!-- Nav items carry data-nav-group (default|advanced|developer); the
        advanced/developer groups are hidden until their toggle is on in
        the settings drawer. -->
-  <nav id="sidebar">
+  <nav id="sidebar" data-tutorial-anchor="nav.sidebar">
     <div class="sidebar-logo">
       <span class="sidebar-mark" aria-label="Deadlock Advisor">
         <!-- Material Symbols Outlined: eye_tracking (40px, weight 500). Color
@@ -37,16 +37,17 @@
 
     <div class="nav-group-lbl" data-nav-group="advanced" style="color:var(--gold);">Advanced</div>
     <button class="nav-btn" data-page="heroes" data-nav-group="advanced"><span class="nav-ico">✦</span>Heroes</button>
-    <button class="nav-btn" data-page="items" data-nav-group="advanced"><span class="nav-ico">◈</span>Items</button>
+    <button class="nav-btn" data-page="items"  data-nav-group="advanced"><span class="nav-ico">◈</span>Items</button>
 
     <div class="nav-group-lbl" data-nav-group="developer" style="color:var(--spirit);">Developer</div>
     <button class="nav-btn" data-page="tags" data-nav-group="developer"><span class="nav-ico">❋</span>Tags</button>
-    <button class="nav-btn" data-page="qa" data-nav-group="developer"><span class="nav-ico">⌬</span>QA</button>
+    <button class="nav-btn" data-page="qa"   data-nav-group="developer"><span class="nav-ico">⌬</span>QA</button>
 
     <div class="nav-spacer"></div>
     <div class="nav-foot">
       <button class="nav-btn" id="btn-theme-toggle" title="Toggle dark / light theme"><span class="nav-ico" id="theme-glyph">☾</span><span id="theme-label">Dark theme</span></button>
-      <button class="nav-btn" id="btn-open-settings" title="Settings"><span class="nav-ico">⚙</span>Settings</button>
+      <button class="nav-btn" id="btn-open-tutorial" title="Tutorial — learn the app at your level"><span class="nav-ico">?</span>Tutorial</button>
+      <button class="nav-btn" id="btn-open-settings" data-tutorial-anchor="nav.settings-btn" title="Settings"><span class="nav-ico">⚙</span>Settings</button>
     </div>
   </nav>
 
@@ -55,7 +56,7 @@
 
     <!-- HEROES LIST -->
     <section id="page-heroes" class="page">
-      <div class="page-header">
+      <div class="page-header" data-tutorial-anchor="heroes.page">
         <h1>Heroes</h1>
         <button class="btn-primary advanced-up" id="btn-new-hero">+ New Hero</button>
       </div>
@@ -338,7 +339,7 @@
 
     <!-- ITEMS LIST -->
     <section id="page-items" class="page">
-      <div class="page-header">
+      <div class="page-header" data-tutorial-anchor="items.page">
         <h1>Items</h1>
         <div class="header-actions">
           <div class="cat-tabs" id="item-subpage-tabs" style="margin-right:12px">
@@ -451,7 +452,7 @@
 
     <!-- TAGS -->
     <section id="page-tags" class="page">
-      <div class="page-header">
+      <div class="page-header" data-tutorial-anchor="tags.page">
         <h1>Tag Manager</h1>
         <button class="btn-primary advanced-up" id="btn-add-tag">+ Add Tag</button>
       </div>
@@ -500,6 +501,22 @@
 
     <!-- CALCULATOR SETUP -->
     <section id="page-calc" class="page active">
+      <!-- First-run tutorial banner. Hidden by default; revealed by TUTORIAL.applyBanner()
+           when tutorial_state_v1.seen is false. Renders as an inline top banner on
+           desktop and as a sticky bottom strip on mobile (responsive in CSS). -->
+      <div class="tut-banner" id="tut-firstrun-banner" hidden>
+        <div class="tut-banner-l">
+          <span class="tut-banner-icon" aria-hidden="true">?</span>
+          <div>
+            <div class="tut-banner-t">New here? Take a quick tour.</div>
+            <div class="tut-banner-d">Learn how to run a match, read the build screen, and what every section does.</div>
+          </div>
+        </div>
+        <div class="tut-banner-actions">
+          <button class="btn-ghost btn-sm" id="tut-banner-skip" type="button">Skip</button>
+          <button class="btn-primary btn-sm" id="tut-banner-start" type="button">Start tour →</button>
+        </div>
+      </div>
       <div class="page-header">
         <h1>Match Calculator</h1>
         <div class="header-actions calc-actions">
@@ -522,7 +539,7 @@
                 <div class="mult-group">
                   <span class="mult-lbl">Build Path:</span>
                   <label class="mult-item">Algorithm
-                    <select id="bp-algo-sel" class="mult-input">
+                    <select id="bp-algo-sel" class="mult-input" data-tutorial-anchor="calc.algo-select">
                       <option value="greedy-phase">Greedy (Phase)</option>
                       <option value="marginal">Marginal Value</option>
                       <option value="cosine">Cosine Deficit</option>
@@ -580,9 +597,9 @@
       <!-- Only the Calculate button is sticky — the options collapsible stays
            in normal flow so it doesn't eat vertical space while scrolling. -->
       <div class="calc-sticky-actions">
-        <button class="btn-primary" id="btn-calculate">Calculate Builds →</button>
+        <button class="btn-primary" id="btn-calculate" data-tutorial-anchor="calc.calculate-btn">Calculate Builds →</button>
       </div>
-      <div class="calc-teams-bar">
+      <div class="calc-teams-bar" data-tutorial-anchor="calc.teams-bar">
         <div class="calc-team" id="ally-drop">
           <div class="calc-team-hdr ally-hdr">Allies <span id="ally-count" class="count-badge">0/6</span></div>
           <div class="team-chips" id="ally-chips"></div>
@@ -596,7 +613,7 @@
            horizontal row, intentionally tight so it doesn't crowd the roster.
            When any filter is active, a mini-icon tray appears just below for
            drag-and-drop into the team chip lists. -->
-      <div class="calc-filter-bar">
+      <div class="calc-filter-bar" data-tutorial-anchor="calc.filter-bar">
         <input id="calc-text-filter" class="calc-text-filter" type="text"
                placeholder="Filter heroes by name or term…" autocomplete="off">
         <div id="calc-color-filter" class="calc-color-filter"></div>
@@ -717,7 +734,7 @@
 
     <!-- QA: SCENARIO LIST -->
     <section id="page-qa" class="page">
-      <div class="page-header">
+      <div class="page-header" data-tutorial-anchor="qa.page">
         <h1>QA Scenarios</h1>
         <button class="btn-primary" id="btn-new-qa-scenario">+ New Scenario</button>
       </div>
@@ -824,6 +841,36 @@
       <div id="qa-report-content"></div>
     </section>
 
+    <!-- TUTORIAL ────────────────────────────────────────────────────
+         Guided tour of the app. Mode selector at the top filters cards by
+         Basic / Advanced / Dev. Content is rendered by the TUTORIAL IIFE
+         in app.js so cards can pull live values (phase budgets, label
+         legends, etc.) at render time instead of going stale. -->
+    <section id="page-tutorial" class="page">
+      <div class="page-header sticky-header tut-header">
+        <button class="btn-back" id="back-tutorial" title="Back to Calculator">← Back</button>
+        <div class="tut-title-group">
+          <h1>Tutorial</h1>
+          <span class="tut-subtitle">Learn the app at your level</span>
+        </div>
+        <div class="header-actions tut-header-actions">
+          <div class="seg tut-mode-seg" id="tut-mode-seg" role="tablist" aria-label="Tutorial mode">
+            <button data-tut-mode="basic"    role="tab" aria-label="Basic mode"     title="Basic — the core loop">Basic</button>
+            <button data-tut-mode="advanced" role="tab" aria-label="Advanced mode"  title="Advanced — authoring + editors">Advanced</button>
+            <button data-tut-mode="dev"      role="tab" aria-label="Developer mode" title="Developer — internals + QA">Dev</button>
+          </div>
+        </div>
+      </div>
+      <!-- Settings-mirror prompt (Advanced/Dev mode picked here but matching
+           CODEX feature toggle still off). Shown inline by TUTORIAL.render(). -->
+      <div class="tut-settings-prompt" id="tut-settings-prompt" hidden></div>
+      <!-- Dev-mode anchor lint badge ("⚠ N anchors missing"). Populated by
+           TUTORIAL.render() only when mode === 'dev'. -->
+      <div class="tut-lint" id="tut-lint" hidden></div>
+      <!-- Card column. Built by TUTORIAL.render(). -->
+      <div class="tut-body" id="tut-body"></div>
+    </section>
+
   </main>
 
   <!-- ── Modals ──────────────────────────────────────────────── -->
@@ -904,6 +951,7 @@
        sidebar is hidden, so we float these two icons in the top corner. -->
   <div id="mobile-top-actions" class="mobile-top-actions">
     <button class="btn-icon ghost" id="mtop-theme" title="Toggle theme" aria-label="Toggle theme">☾</button>
+    <button class="btn-icon ghost" id="mtop-tutorial" title="Tutorial" aria-label="Open tutorial">?</button>
     <button class="btn-icon ghost" id="mtop-settings" title="Settings" aria-label="Open settings">⚙</button>
   </div>
 
@@ -932,7 +980,7 @@
         </div>
         <div class="set-row">
           <div class="lab"><div class="t">Dense layout</div><div class="d">Power-user mode — more on screen. Off = simplified.</div></div>
-          <button class="toggle" id="toggle-density"></button>
+          <button class="toggle" id="toggle-density" data-tutorial-anchor="nav.density-toggle"></button>
         </div>
       </div>
 
@@ -945,6 +993,14 @@
         <div class="set-row dev">
           <div class="lab"><div class="t">Developer features</div><div class="d">Tag editor, Tag Manager, QA + sim-log harness, score formulas, debug.</div></div>
           <button class="toggle dev" id="toggle-developer"></button>
+        </div>
+      </div>
+
+      <div class="set-group">
+        <div class="set-group-t">Help</div>
+        <div class="set-row">
+          <div class="lab"><div class="t">Tutorial</div><div class="d">Guided tour of the app. Customizable to Basic / Advanced / Developer levels.</div></div>
+          <button class="btn-tut btn-sm" id="set-open-tutorial">Open</button>
         </div>
       </div>
     </div>
