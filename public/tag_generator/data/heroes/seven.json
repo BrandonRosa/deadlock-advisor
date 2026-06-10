@@ -1967,7 +1967,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Monster Rounds, Suppressor, Enchanters Emblem, Opening Rounds, Cultist Sacrifice | Sig: Monster Rounds, Suppressor, Opening Rounds, Extra Spirit, Improved Spirit, Mystic Vulnerability, Toxic Bullets, Superior Duration | Req: Cultist Sacrifice, Enduring Speed, Surge of Power, Duration Extender, Spirit Lifesteal, Escalating Exposure",
+      "build_description_eng": "RE from: Monster Rounds, Suppressor, Enchanters Emblem, Opening Rounds, Cultist SacrificeÂ… | Sig: Monster Rounds, Suppressor, Opening Rounds, Extra Spirit, Improved Spirit, Mystic Vulnerability, Toxic Bullets, Superior Duration | Req: Cultist Sacrifice, Enduring Speed, Surge of Power, Duration Extender, Spirit Lifesteal, Escalating Exposure",
       "followed_build": "Power Surge",
       "name": "GVS - Power Surge",
       "normalized_build_name": "seven_gvs_power_surge",
@@ -2369,7 +2369,7 @@
     },
     {
       "blacklist_items": [],
-      "build_description_eng": "RE from: Monster Rounds, Healbane, Improved Spirit, Cultist Sacrifice, Duration Extender | Sig: Monster Rounds, Healbane, Mystic Vulnerability, Spirit Lifesteal, Toxic Bullets, Leech | Req: Cultist Sacrifice, Duration Extender, Mercurial Magnum, Escalating Exposure",
+      "build_description_eng": "RE from: Monster Rounds, Healbane, Improved Spirit, Cultist Sacrifice, Duration ExtenderÂ… | Sig: Monster Rounds, Healbane, Mystic Vulnerability, Spirit Lifesteal, Toxic Bullets, Leech | Req: Cultist Sacrifice, Duration Extender, Mercurial Magnum, Escalating Exposure",
       "followed_build": "Power Surge",
       "name": "Run and Gun",
       "normalized_build_name": "seven_run_and_gun",
@@ -2765,7 +2765,8 @@
           "ult_focused": null,
           "vertical_mobility": null
         }
-      }
+      },
+      "disabled": true
     },
     {
       "build_description_eng": "Closest thing to hybrid Seven has. Great at shredding groups and tanks. Awful against Aerial/TinyHitBox/Fast enemies.",
