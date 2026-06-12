@@ -1,0 +1,16 @@
+{
+  "id": "pack-89e119",
+  "name": "Pack Two",
+  "description": "second",
+  "format_version": 1,
+  "created": "2026-06-11T22:22:24+00:00",
+  "updated": "2026-06-11T22:22:24+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

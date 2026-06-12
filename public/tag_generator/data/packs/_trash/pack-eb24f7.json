@@ -1,0 +1,74 @@
+{
+  "id": "pack-eb24f7",
+  "name": "Test pack 1",
+  "description": "",
+  "format_version": 1,
+  "created": "2026-06-11T22:45:27+00:00",
+  "updated": "2026-06-11T22:46:08+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {
+    "abrams": {
+      "default_build_name": "abrams_general",
+      "builds": [
+        {
+          "name": "General",
+          "values": {
+            "ally_weight": {
+              "pure_damage": 0.1,
+              "lane_pusher": null
+            },
+            "enemy_weight": {
+              "lane_pusher": null
+            },
+            "item_affinity": {
+              "lane_pusher": null
+            },
+            "playstyle_score": {
+              "lane_pusher": null
+            }
+          }
+        },
+        {
+          "name": "Melee",
+          "values": {
+            "ally_weight": {
+              "lane_pusher": null
+            },
+            "enemy_weight": {
+              "lane_pusher": null
+            },
+            "item_affinity": {
+              "lane_pusher": null
+            },
+            "playstyle_score": {
+              "lane_pusher": null
+            }
+          }
+        },
+        {
+          "name": "Tank",
+          "values": {
+            "ally_weight": {
+              "lane_pusher": null
+            },
+            "enemy_weight": {
+              "lane_pusher": null
+            },
+            "item_affinity": {
+              "lane_pusher": null
+            },
+            "playstyle_score": {
+              "lane_pusher": null
+            }
+          }
+        }
+      ]
+    }
+  },
+  "items": {},
+  "tags": []
+}

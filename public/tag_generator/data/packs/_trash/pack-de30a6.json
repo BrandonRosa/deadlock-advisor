@@ -1,0 +1,16 @@
+{
+  "id": "pack-de30a6",
+  "name": "smoke test pack",
+  "description": "",
+  "format_version": 1,
+  "created": "2026-06-11T22:16:37+00:00",
+  "updated": "2026-06-11T22:16:37+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

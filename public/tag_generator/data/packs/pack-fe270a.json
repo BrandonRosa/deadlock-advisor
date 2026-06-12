@@ -1,0 +1,16 @@
+{
+  "id": "pack-fe270a",
+  "name": "test",
+  "description": "",
+  "format_version": 1,
+  "created": "2026-06-12T02:10:50+00:00",
+  "updated": "2026-06-12T02:10:50+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

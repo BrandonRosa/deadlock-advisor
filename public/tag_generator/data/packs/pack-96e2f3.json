@@ -1,0 +1,16 @@
+{
+  "id": "pack-96e2f3",
+  "name": "Test 2",
+  "description": "",
+  "format_version": 1,
+  "created": "2026-06-11T22:24:12+00:00",
+  "updated": "2026-06-11T22:24:12+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

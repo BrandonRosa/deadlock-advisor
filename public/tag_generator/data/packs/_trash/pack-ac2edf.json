@@ -1,0 +1,16 @@
+{
+  "id": "pack-ac2edf",
+  "name": "Editor Smoke Pack",
+  "description": "phase 4 test",
+  "format_version": 1,
+  "created": "2026-06-11T22:44:36+00:00",
+  "updated": "2026-06-11T22:44:36+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

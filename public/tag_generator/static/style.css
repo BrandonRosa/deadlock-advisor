@@ -6020,3 +6020,371 @@ html:not([data-mode="dev"]) .ch-build-row {
   /* Bottom sheet sits above #botnav (z-index 80 from the first-run banner
      rules). Coach-mark uses 90 already, so it covers botnav as it should. */
 }
+
+
+/* ════════════════════════════════════════════════════════════════════
+   PACK MANAGER — Active / Inactive ladders with drag-drop
+   ──────────────────────────────────────────────────────────────────── */
+.packs-explainer {
+  background: var(--inset);
+  border: 1px solid var(--line-soft, var(--border));
+  border-radius: var(--r-sm, 6px);
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.packs-explainer b { color: var(--ink); }
+
+.pack-stacks {
+  display: flex; flex-direction: column;
+  gap: 18px;
+}
+.pack-stack { display: flex; flex-direction: column; gap: 8px; }
+.pack-stack-hd {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 0 2px 4px;
+  border-bottom: 1px solid var(--line-soft, var(--border));
+}
+.pack-stack-t {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink);
+  margin: 0;
+}
+.pack-stack-hint {
+  font-size: 11px; color: var(--dim);
+  letter-spacing: .04em;
+}
+
+.pack-list {
+  display: flex; flex-direction: column;
+  gap: 6px;
+  min-height: 40px;
+  padding: 4px;
+  border-radius: var(--r-sm, 6px);
+  transition: background .1s ease, outline .1s ease;
+}
+.pack-list.is-drop-target {
+  background: color-mix(in srgb, var(--accent, var(--green)) 8%, transparent);
+  outline: 2px dashed color-mix(in srgb, var(--accent, var(--green)) 55%, var(--border));
+  outline-offset: -2px;
+}
+
+.pack-empty-hint {
+  padding: 16px 14px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--dim);
+  text-align: center;
+}
+
+/* ── Pack card ──────────────────────────────────────────────────── */
+.pack-card {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm, 6px);
+  cursor: grab;
+  user-select: none;
+  transition: border-color .15s, box-shadow .15s, transform .05s;
+}
+.pack-card:hover { border-color: color-mix(in srgb, var(--accent, var(--green)) 35%, var(--border)); }
+.pack-card.is-dragging {
+  opacity: .55;
+  cursor: grabbing;
+}
+.pack-card.is-drop-target {
+  border-color: var(--accent, var(--green));
+  box-shadow: 0 -2px 0 0 var(--accent, var(--green));
+}
+.pack-card.is-drop-target[data-drop-pos="after"] {
+  box-shadow: 0 2px 0 0 var(--accent, var(--green));
+}
+
+.pack-drag {
+  color: var(--dim);
+  font-size: 18px;
+  text-align: center;
+  cursor: grab;
+}
+.pack-pin {
+  color: var(--accent, var(--green));
+  font-size: 16px;
+  text-align: center;
+  cursor: default;
+}
+
+.pack-card-body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pack-card-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pack-card-name {
+  font-weight: 700; font-size: 14px; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 100%;
+}
+.pack-card-desc {
+  font-size: 12px; color: var(--dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pack-card-stats { display: flex; flex-wrap: wrap; gap: 4px; }
+.pack-card-chip {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  background: var(--inset);
+  border-radius: 10px;
+  color: var(--dim);
+}
+
+/* State pills next to the name (active / inactive / default). */
+.pack-state-pill {
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.pack-state-pill--active   { background: color-mix(in srgb, var(--accent, var(--green)) 20%, transparent); color: var(--accent, var(--green)); }
+.pack-state-pill--inactive { background: var(--inset); color: var(--dim); }
+.pack-state-pill--default  { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); }
+
+/* ── Card actions ──────────────────────────────────────────────── */
+.pack-card-actions { display: flex; align-items: center; gap: 4px; }
+.pack-card-act {
+  background: none; border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px; line-height: 1;
+  color: var(--dim);
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.pack-card-act:hover { background: var(--inset); color: var(--ink); border-color: var(--line-soft, var(--border)); }
+.pack-card-act:disabled { opacity: .35; cursor: not-allowed; }
+.pack-card-act--danger:hover { color: var(--bad, var(--danger)); border-color: color-mix(in srgb, var(--bad, var(--danger)) 50%, var(--border)); }
+.pack-card-lock {
+  font-size: 10px; font-style: italic; color: var(--dim);
+  letter-spacing: .04em;
+}
+
+/* ── Default card styling ──────────────────────────────────────── */
+.pack-card--default {
+  background: color-mix(in srgb, var(--gold) 7%, var(--card));
+  border-color: color-mix(in srgb, var(--gold) 30%, var(--border));
+  cursor: default;
+}
+.pack-card--default:hover { border-color: color-mix(in srgb, var(--gold) 30%, var(--border)); }
+
+/* ── Mobile ────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .pack-card {
+    grid-template-columns: 24px 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px 10px;
+  }
+  .pack-card-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    border-top: 1px dashed var(--line-soft, var(--border));
+    padding-top: 6px;
+  }
+  .pack-card-name { font-size: 13px; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   HERO EDIT — View / Edit mode + target-pack picker (Phase 4)
+   ──────────────────────────────────────────────────────────────────── */
+
+/* ── View mode: read-only inputs, hidden Save ───────────────────── */
+#page-hero-edit[data-view-mode="view"] input,
+#page-hero-edit[data-view-mode="view"] select,
+#page-hero-edit[data-view-mode="view"] textarea {
+  pointer-events: none;
+  background: var(--inset);
+  color: var(--dim);
+  cursor: not-allowed;
+}
+#page-hero-edit[data-view-mode="view"] input[type="checkbox"] {
+  opacity: .5;
+}
+#page-hero-edit[data-view-mode="view"] #btn-save-hero,
+#page-hero-edit[data-view-mode="view"] #btn-reverse-engineer,
+#page-hero-edit[data-view-mode="view"] #dirty-badge,
+#page-hero-edit[data-view-mode="view"] #btn-hero-cancel-edit,
+#page-hero-edit[data-view-mode="view"] .hero-edit-target-pill,
+#page-hero-edit[data-view-mode="view"] #hero-edit-target-pill {
+  display: none !important;
+}
+#page-hero-edit[data-view-mode="edit"] #btn-hero-edit-mode {
+  display: none !important;
+}
+/* Buttons that should remain interactive in view mode — the back button,
+   the tabs bar (just for navigation between builds), and the Edit Mode
+   button itself. Drag handles on tabs also re-enable. */
+#page-hero-edit[data-view-mode="view"] .btn-back,
+#page-hero-edit[data-view-mode="view"] #btn-hero-edit-mode,
+#page-hero-edit[data-view-mode="view"] .tabs-bar .build-tab {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ── Edit-target pill ────────────────────────────────────────────── */
+.edit-target-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: color-mix(in srgb, var(--accent, var(--green)) 16%, transparent);
+  color: var(--accent, var(--green));
+  border: 1px solid color-mix(in srgb, var(--accent, var(--green)) 50%, var(--border));
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.edit-target-pill:hover {
+  background: color-mix(in srgb, var(--accent, var(--green)) 26%, transparent);
+}
+.edit-target-pill .ept-lbl {
+  font-weight: 500;
+  opacity: .85;
+}
+.edit-target-pill .ept-name {
+  font-weight: 700;
+}
+
+/* ── Target-pack picker modal ────────────────────────────────────── */
+.modal-explainer {
+  font-size: 12px; color: var(--dim);
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+.pick-target-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 12px;
+}
+.pick-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm, 6px);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.pick-row:hover {
+  border-color: color-mix(in srgb, var(--accent, var(--green)) 50%, var(--border));
+  background: color-mix(in srgb, var(--accent, var(--green)) 6%, var(--card));
+}
+.pick-row-name { font-weight: 700; color: var(--ink); font-size: 13px; grid-column: 1; }
+.pick-row-desc {
+  font-size: 12px; color: var(--dim);
+  grid-column: 1; grid-row: 2;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pick-row-state {
+  grid-column: 2; grid-row: 1 / span 2;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--inset);
+  color: var(--dim);
+}
+.pick-row--active   .pick-row-state { background: color-mix(in srgb, var(--accent, var(--green)) 18%, var(--inset)); color: var(--accent, var(--green)); }
+.pick-row--default  .pick-row-state { background: color-mix(in srgb, var(--gold) 22%, var(--inset));                color: var(--gold); }
+.pick-loading, .pick-empty, .pick-error {
+  padding: 16px;
+  font-size: 12px; color: var(--dim);
+  text-align: center;
+  font-style: italic;
+}
+.pick-error { color: var(--bad, var(--danger)); }
+
+/* ── Cell flash (overridden cells when pill is clicked) ──────────── */
+#hero-tag-table td.cell-flash {
+  animation: hero-cell-flash 1.4s ease-out;
+}
+@keyframes hero-cell-flash {
+  0%   { background-color: color-mix(in srgb, var(--accent, var(--green)) 50%, transparent); }
+  20%  { background-color: color-mix(in srgb, var(--accent, var(--green)) 35%, transparent); }
+  100% { background-color: transparent; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   HERO EDIT — View mode active-pack strip + Edit mode cell states
+   ──────────────────────────────────────────────────────────────────── */
+
+/* ── View mode: active-packs chip strip ─────────────────────────── */
+.view-pack-strip {
+  display: inline-flex; align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-right: 6px;
+}
+#page-hero-edit[data-view-mode="edit"] .view-pack-strip { display: none; }
+.view-pack-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  background: color-mix(in srgb, var(--accent, var(--green)) 12%, transparent);
+  color: var(--accent, var(--green));
+  border: 1px solid color-mix(in srgb, var(--accent, var(--green)) 40%, var(--border));
+  border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.view-pack-chip:hover {
+  background: color-mix(in srgb, var(--accent, var(--green)) 22%, transparent);
+}
+.view-pack-chip .vpc-name { font-weight: 700; }
+.view-pack-chip .vpc-count {
+  background: color-mix(in srgb, var(--accent, var(--green)) 25%, transparent);
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.view-pack-empty {
+  font-size: 11px; font-style: italic;
+  color: var(--dim);
+}
+
+/* ── Edit mode: cell state visuals ──────────────────────────────── */
+/* Cells the current pack overrides — keep normal styling but tint
+   the background so they stand out. */
+#page-hero-edit[data-view-mode="edit"] #hero-tag-table td[data-pack-overrides="true"] {
+  background-color: color-mix(in srgb, var(--accent, var(--green)) 12%, transparent);
+  position: relative;
+}
+#page-hero-edit[data-view-mode="edit"] #hero-tag-table td[data-pack-overrides="true"]::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent, var(--green));
+}
+
+/* Cells the current pack does NOT override → grey/muted. The input still
+   accepts focus and typing (which promotes the cell to "overridden"). */
+#page-hero-edit[data-view-mode="edit"] #hero-tag-table td[data-vec][data-tag]:not([data-pack-overrides="true"]) input,
+#page-hero-edit[data-view-mode="edit"] #hero-tag-table td[data-vec][data-tag]:not([data-pack-overrides="true"]) select {
+  color: var(--dim);
+  opacity: 0.55;
+  font-style: italic;
+}
+#page-hero-edit[data-view-mode="edit"] #hero-tag-table td[data-vec][data-tag]:not([data-pack-overrides="true"]) input:focus {
+  /* Once the user focuses an inherited cell to type, the italic stays
+     until they actually type (input event flips data-pack-overrides). */
+  background: var(--card);
+}
