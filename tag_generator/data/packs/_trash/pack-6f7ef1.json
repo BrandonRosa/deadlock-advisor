@@ -1,0 +1,33 @@
+{
+  "id": "pack-6f7ef1",
+  "name": "View/Edit Smoke",
+  "description": "",
+  "format_version": 1,
+  "created": "2026-06-12T02:09:58+00:00",
+  "updated": "2026-06-12T02:09:58+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {
+    "seven": {
+      "builds": [
+        {
+          "name": "General",
+          "values": {
+            "ally_weight": {
+              "burst": 0.4,
+              "stun": 0.95
+            },
+            "enemy_weight": {
+              "stun": -0.2
+            }
+          }
+        }
+      ]
+    }
+  },
+  "items": {},
+  "tags": []
+}

@@ -3,6 +3,8 @@ import json, uuid
 from datetime import datetime
 from pathlib import Path
 
+import packs
+
 app = Flask(__name__)
 
 BASE        = Path(__file__).parent
@@ -124,6 +126,12 @@ def bootstrap():
     QA_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Pack system: point the resolver at our DATA dir then create the
+    # packs/ scaffolding (idempotent). Default layer stays as the existing
+    # heroes/ items/ tags.json on disk — packs/ holds user overrides.
+    packs.Paths.configure(DATA)
+    packs.bootstrap_packs()
+
     if not TAGS_F.exists():
         TAGS_F.write_text(json.dumps(DEFAULT_TAGS, indent=2, ensure_ascii=False))
 
@@ -161,7 +169,9 @@ def src_image(filepath):
 # ── Tags ─────────────────────────────────────────────────────────────────────
 @app.route("/api/tags", methods=["GET"])
 def get_tags():
-    return jsonify(json.loads(TAGS_F.read_text()))
+    # Resolved view: default tags + each active pack's additions, with later
+    # packs able to override individual entries by `code`.
+    return jsonify(packs.resolve_tags())
 
 
 @app.route("/api/tags", methods=["POST"])
@@ -177,6 +187,7 @@ def create_tag():
         "description": d.get("description", ""),
     })
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify(tags[-1]), 201
 
 
@@ -192,6 +203,7 @@ def update_tag(code):
             t["description"] = d.get("description", t.get("description", ""))
             break
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify({"ok": True})
 
 
@@ -199,6 +211,7 @@ def update_tag(code):
 def reorder_tags():
     tags = request.json      # full array in new order
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify({"ok": True})
 
 
@@ -207,18 +220,20 @@ def delete_tag(code):
     tags = json.loads(TAGS_F.read_text())
     tags = [t for t in tags if t["code"] != code]
     TAGS_F.write_text(json.dumps(tags, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify({"ok": True})
 
 
 # ── Heroes ───────────────────────────────────────────────────────────────────
 @app.route("/api/heroes", methods=["GET"])
 def get_heroes():
-    presets = []
-    regular = []
+    # Resolved view: default heroes + each active pack's overrides + removals.
+    # We then run the same preset/canonical/custom ordering logic the
+    # original endpoint did, just sourced from the merged dict.
+    resolved = packs.resolve_heroes()
 
-    def read_hero(f):
+    def summarize(d):
         try:
-            d = json.loads(f.read_text())
             return {
                 "normalized_name": d["normalized_name"],
                 "eng_name":        d["eng_name"],
@@ -231,39 +246,41 @@ def get_heroes():
         except Exception:
             return None
 
-    # Preset heroes first (any .json with is_preset=true)
-    for f in sorted(HEROES_DIR.glob("*.json")):
-        if f.stem in HERO_KEYS:
+    presets, regular = [], []
+    # Preset heroes first (anything with is_preset=true, excluding ones that
+    # also live under HERO_KEYS — those go in canonical order).
+    for key, d in sorted(resolved.items()):
+        if key in HERO_KEYS:
             continue
-        h = read_hero(f)
-        if h and h["is_preset"]:
-            presets.append(h)
+        s = summarize(d)
+        if s and s["is_preset"]:
+            presets.append(s)
 
-    # Regular heroes in canonical order
+    # Regular heroes in canonical order.
     for key in HERO_KEYS:
-        f = HEROES_DIR / f"{key}.json"
-        if f.exists():
-            h = read_hero(f)
-            if h:
-                regular.append(h)
+        d = resolved.get(key)
+        if d:
+            s = summarize(d)
+            if s:
+                regular.append(s)
 
-    # Any other custom (non-preset) heroes not in HERO_KEYS
-    for f in sorted(HEROES_DIR.glob("*.json")):
-        key = f.stem
-        if key not in HERO_KEYS:
-            h = read_hero(f)
-            if h and not h["is_preset"]:
-                regular.append(h)
+    # Any other custom (non-preset) heroes not in HERO_KEYS.
+    for key, d in sorted(resolved.items()):
+        if key in HERO_KEYS:
+            continue
+        s = summarize(d)
+        if s and not s["is_preset"]:
+            regular.append(s)
 
     return jsonify(presets + regular)
 
 
 @app.route("/api/heroes/<name>", methods=["GET"])
 def get_hero(name):
-    f = HEROES_DIR / f"{name}.json"
-    if not f.exists():
+    d = packs.resolve_hero(name)
+    if d is None:
         return jsonify({"error": "Not found"}), 404
-    return jsonify(json.loads(f.read_text()))
+    return jsonify(d)
 
 
 @app.route("/api/heroes/<name>", methods=["PUT"])
@@ -273,6 +290,7 @@ def save_hero(name):
     # platform default (cp1252 on Windows), which produces files that the
     # utf-8-strict reader in /api/heroes/all then silently drops.
     f.write_text(json.dumps(request.json, indent=2, ensure_ascii=False), encoding='utf-8')
+    packs.invalidate_cache()
     return jsonify({"ok": True})
 
 
@@ -304,94 +322,77 @@ def create_hero():
         }]
     }
     f.write_text(json.dumps(hero, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify(hero), 201
 
 
 # ── Items ────────────────────────────────────────────────────────────────────
 @app.route("/api/items", methods=["GET"])
 def get_items():
+    # Resolved item map, then ordered: canonical source order first
+    # (resources/items/index.json), then any extras alphabetically.
+    resolved = packs.resolve_items()
     order = []
     if SOURCE_ITEMS_IDX.exists():
-        order = json.loads(SOURCE_ITEMS_IDX.read_text())
-    out = []
-    seen = set()
+        try: order = json.loads(SOURCE_ITEMS_IDX.read_text())
+        except Exception: pass
+
+    def summarize(d):
+        try:
+            return {
+                "normalized_name": d["normalized_name"],
+                "name":     d["name"],
+                "category": d.get("category", ""),
+                "tier":     d.get("tier", 0),
+                "image_path": d.get("image_path", ""),
+            }
+        except Exception:
+            return None
+
+    out, seen = [], set()
     for key in order:
-        f = ITEMS_DIR / f"{key}.json"
-        if f.exists():
-            try:
-                d = json.loads(f.read_text())
-                out.append({
-                    "normalized_name": d["normalized_name"],
-                    "name":     d["name"],
-                    "category": d.get("category", ""),
-                    "tier":     d.get("tier", 0),
-                    "image_path": d.get("image_path", ""),
-                })
+        d = resolved.get(key)
+        if d:
+            s = summarize(d)
+            if s:
+                out.append(s)
                 seen.add(key)
-            except Exception:
-                pass
-    for f in sorted(ITEMS_DIR.glob("*.json")):
-        if f.stem not in seen:
-            try:
-                d = json.loads(f.read_text())
-                out.append({
-                    "normalized_name": d["normalized_name"],
-                    "name":     d["name"],
-                    "category": d.get("category", ""),
-                    "tier":     d.get("tier", 0),
-                    "image_path": d.get("image_path", ""),
-                })
-            except Exception:
-                pass
+    for key in sorted(resolved.keys()):
+        if key not in seen:
+            s = summarize(resolved[key])
+            if s:
+                out.append(s)
     return jsonify(out)
 
 
 @app.route("/api/items/<name>", methods=["GET"])
 def get_item(name):
-    f = ITEMS_DIR / f"{name}.json"
-    if not f.exists():
+    d = packs.resolve_item(name)
+    if d is None:
         return jsonify({"error": "Not found"}), 404
-    return jsonify(json.loads(f.read_text()))
+    return jsonify(d)
 
 
 @app.route("/api/items/<name>", methods=["PUT"])
 def save_item(name):
     f = ITEMS_DIR / f"{name}.json"
     f.write_text(json.dumps(request.json, indent=2, ensure_ascii=False))
+    packs.invalidate_cache()
     return jsonify({"ok": True})
 
 
 @app.route("/api/items/all")
 def get_all_items():
-    out = []
-    for f in sorted(ITEMS_DIR.glob("*.json")):
-        try:
-            out.append(json.loads(f.read_text(encoding='utf-8')))
-        except Exception:
-            pass
-    return jsonify(out)
+    # Resolved view, as a flat list — same shape /api/items/all used to give.
+    return jsonify(list(packs.resolve_items().values()))
 
 
 @app.route("/api/heroes/all")
 def get_all_heroes():
-    out = []
-    for f in sorted(HEROES_DIR.glob("*.json")):
-        try:
-            # Tolerate Windows cp1252 bytes (e.g. 0x85 ellipsis) that can leak
-            # in via OS clipboards. Read as bytes; try utf-8 first, fall back
-            # to cp1252 — which is what /api/heroes does implicitly via the
-            # platform default. Silently swallowing UnicodeDecodeError was
-            # what caused grey_talon / mcginnis / viscous to vanish from the
-            # tag-explorer's Heroes/Builds tab.
-            raw = f.read_bytes()
-            try:
-                text = raw.decode('utf-8')
-            except UnicodeDecodeError:
-                text = raw.decode('cp1252')
-            out.append(json.loads(text))
-        except Exception as e:
-            print(f"[heroes/all] skipped {f.name}: {e}")
-    return jsonify(out)
+    # Resolved heroes as a flat list. The cp1252 / utf-8 fallback that lived
+    # here previously moved into packs._load_default_heroes (which always
+    # tolerates encoding errors), so we can rely on the resolver.
+    return jsonify(list(packs.resolve_heroes().values()))
 
 
 @app.route("/api/baselines", methods=["GET"])
@@ -832,6 +833,173 @@ def get_sim_log(log_id):
     if not f.exists():
         return jsonify({"error": "not found"}), 404
     return jsonify(json.loads(f.read_text()))
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Weight Packs (Phase 1 backend)
+#   Storage   — single JSON file per pack in data/packs/<pack-id>.json
+#   Stack     — data/packs/_index.json
+#   Trash     — data/packs/_trash/
+# All read paths above already go through packs.resolve_* — these new routes
+# add management, per-pack slice access, and import/export.
+# ════════════════════════════════════════════════════════════════════════════
+
+def _pack_404(pack_id):
+    return jsonify({"error": f"pack not found: {pack_id}"}), 404
+
+
+@app.route("/api/packs", methods=["GET"])
+def list_packs():
+    out = [packs.default_pack_meta()] + packs.list_all_packs()
+    return jsonify(out)
+
+
+@app.route("/api/packs/_index", methods=["GET"])
+def get_pack_index():
+    return jsonify(packs.load_index())
+
+
+@app.route("/api/packs/_index", methods=["PUT"])
+def put_pack_index():
+    try:
+        packs.save_index(request.json or {})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify({"ok": True, "index": packs.load_index()})
+
+
+@app.route("/api/packs", methods=["POST"])
+def create_pack():
+    d = request.json or {}
+    name = (d.get("name") or "").strip() or "Untitled Pack"
+    desc = (d.get("description") or "")
+    pack = packs.create_pack(name=name, description=desc)
+    return jsonify(pack), 201
+
+
+@app.route("/api/packs/<pack_id>", methods=["GET"])
+def get_pack(pack_id):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    return jsonify(packs.load_pack(pack_id))
+
+
+@app.route("/api/packs/<pack_id>", methods=["PUT"])
+def put_pack_meta(pack_id):
+    # Updates only metadata (name, description). Slice mutations have their
+    # own endpoints so a misbehaving editor can't accidentally overwrite the
+    # whole pack with a partial payload.
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    pack = packs.load_pack(pack_id)
+    d = request.json or {}
+    if "name" in d:        pack["name"]        = d["name"]
+    if "description" in d: pack["description"] = d["description"]
+    packs.save_pack(pack)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/packs/<pack_id>", methods=["DELETE"])
+def delete_pack(pack_id):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.soft_delete_pack(pack_id)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/packs/<pack_id>/restore", methods=["POST"])
+def restore_pack(pack_id):
+    if not packs.restore_pack(pack_id):
+        return jsonify({"error": f"no trash entry for {pack_id}"}), 404
+    return jsonify({"ok": True})
+
+
+# ── Slice access (just the pack's overrides for one hero / item / tags) ───
+@app.route("/api/packs/<pack_id>/heroes/<key>", methods=["GET"])
+def get_pack_hero_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    slc = packs.get_slice_hero(pack_id, key)
+    if slc is None:
+        return jsonify({"error": "no override in this pack"}), 404
+    return jsonify(slc)
+
+@app.route("/api/packs/<pack_id>/heroes/<key>", methods=["PUT"])
+def put_pack_hero_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.put_slice_hero(pack_id, key, request.json or {})
+    return jsonify({"ok": True})
+
+@app.route("/api/packs/<pack_id>/heroes/<key>", methods=["DELETE"])
+def delete_pack_hero_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.delete_slice_hero(pack_id, key)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/packs/<pack_id>/items/<key>", methods=["GET"])
+def get_pack_item_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    slc = packs.get_slice_item(pack_id, key)
+    if slc is None:
+        return jsonify({"error": "no override in this pack"}), 404
+    return jsonify(slc)
+
+@app.route("/api/packs/<pack_id>/items/<key>", methods=["PUT"])
+def put_pack_item_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.put_slice_item(pack_id, key, request.json or {})
+    return jsonify({"ok": True})
+
+@app.route("/api/packs/<pack_id>/items/<key>", methods=["DELETE"])
+def delete_pack_item_slice(pack_id, key):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.delete_slice_item(pack_id, key)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/packs/<pack_id>/tags", methods=["GET"])
+def get_pack_tags(pack_id):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    return jsonify(packs.get_slice_tags(pack_id))
+
+@app.route("/api/packs/<pack_id>/tags", methods=["PUT"])
+def put_pack_tags(pack_id):
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    packs.put_slice_tags(pack_id, request.json or [])
+    return jsonify({"ok": True})
+
+
+# ── Import / export ──────────────────────────────────────────────────────
+@app.route("/api/packs/<pack_id>/export", methods=["GET"])
+def export_pack(pack_id):
+    # The pack file is already a self-contained JSON blob — exporting is just
+    # serving the file content. The client decides whether to copy to
+    # clipboard or download.
+    if not packs.pack_exists(pack_id):
+        return _pack_404(pack_id)
+    return jsonify(packs.load_pack(pack_id))
+
+
+@app.route("/api/packs/import", methods=["POST"])
+def import_pack_route():
+    blob = request.json or {}
+    # Validate referenced tags against the resolver's current view, since
+    # imports happen after any prior packs are activated — the warnings
+    # should reflect the effective tag set, not just default.
+    known_codes = {t.get("code") for t in packs.resolve_tags() if t.get("code")}
+    try:
+        result = packs.import_pack(blob, known_tag_codes=known_codes)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(result), 201
 
 
 # ── App ───────────────────────────────────────────────────────────────────────

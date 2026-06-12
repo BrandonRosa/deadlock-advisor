@@ -1,0 +1,16 @@
+{
+  "id": "pack-a0da24",
+  "name": "Renamed Pack One",
+  "description": "edited",
+  "format_version": 1,
+  "created": "2026-06-11T22:22:24+00:00",
+  "updated": "2026-06-11T22:22:24+00:00",
+  "_remove": {
+    "heroes": [],
+    "items": [],
+    "tags": []
+  },
+  "heroes": {},
+  "items": {},
+  "tags": []
+}

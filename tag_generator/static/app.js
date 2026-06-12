@@ -39,7 +39,7 @@ function toast(msg, type = 'success') {
 // calc-summary deliberately PRESERVE the instance so the user can keep their
 // selected build pinned in the sidebar while reviewing the roster or the
 // match results overview.
-const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'qa', 'tutorial']);
+const NON_INSTANCE_PAGES = new Set(['heroes', 'items', 'tags', 'qa', 'tutorial', 'packs']);
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -62,6 +62,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     else if (page === 'tags') loadTags();
     else if (page === 'calc') loadCalc();
     else if (page === 'qa') loadQA();
+    else if (page === 'packs') window.PACKS?.open();
     else if (page === 'calc-summary') {
       // Match Results — only renderable if a calc was already run. If no
       // results exist yet, send the user to the Calculator setup instead.
@@ -1464,6 +1465,420 @@ const TUTORIAL = (() => {
 })();
 window.TUTORIAL = TUTORIAL;
 
+/* ════════════════════════════════════════════════════════════════════
+   PACKS — weight pack manager UI (Phase 2 of the pack system).
+   --------------------------------------------------------------------
+   Drag-and-drop ladder between an Active stack (priority order, top
+   wins) and an Inactive list (parked packs). The Default layer is a
+   synthetic entry pinned at the bottom of the active list. User packs
+   are draggable both within and between the two zones.
+   --------------------------------------------------------------------
+   IMPORTANT — display order vs storage order:
+     • Backend stores `active[0]` = lowest priority, `active[last]` = top.
+     • The UI renders top-down with the highest priority FIRST. So the
+       active list in the DOM is the reverse of `active[]`. Drop logic
+       converts visual position → array index when writing back.
+   ──────────────────────────────────────────────────────────────────── */
+const PACKS = (() => {
+  const api = (url, opts) =>
+    fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...(opts || {}),
+    }).then(async r => {
+      if (!r.ok) {
+        let msg = `HTTP ${r.status}`;
+        try { const j = await r.json(); if (j.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      return r.status === 204 ? null : r.json();
+    });
+
+  // In-memory mirror of the manager state. Refreshed by load().
+  let state = {
+    list:  [],     // full list of pack metadata, default + active + inactive
+    index: { active: [], inactive: [], version: 1 },
+  };
+
+  /* Load both the metadata list and the stack index from the backend.
+     Re-renders if the #page-packs section is visible. */
+  async function load() {
+    const [list, index] = await Promise.all([
+      api('/api/packs'),
+      api('/api/packs/_index'),
+    ]);
+    state.list  = list || [];
+    state.index = index || { active: [], inactive: [], version: 1 };
+    if (document.getElementById('page-packs')?.classList.contains('active')) {
+      render();
+    }
+  }
+
+  /* Entry point: navigate to the page and refresh. */
+  async function open() {
+    showPage('packs');
+    try { await load(); }
+    catch (e) {
+      toast(`Couldn't load packs: ${e.message}`, 'error');
+    }
+  }
+
+  /* ── Rendering ─────────────────────────────────────────────────── */
+  function packMeta(packId) {
+    return state.list.find(p => p.id === packId);
+  }
+
+  function render() {
+    const activeEl   = document.getElementById('pack-list-active');
+    const inactiveEl = document.getElementById('pack-list-inactive');
+    if (!activeEl || !inactiveEl) return;
+    activeEl.innerHTML = '';
+    inactiveEl.innerHTML = '';
+
+    // Active stack — render TOP-DOWN (reverse of array). Top of the list
+    // is highest priority.
+    const activeIds = [...(state.index.active || [])].reverse();
+    activeIds.forEach(id => {
+      const meta = packMeta(id);
+      if (meta) activeEl.appendChild(renderCard(meta, 'active'));
+    });
+    // Default pinned at the bottom of the active stack — non-draggable.
+    const defaultMeta = packMeta('default');
+    if (defaultMeta) activeEl.appendChild(renderCard(defaultMeta, 'active'));
+
+    // Inactive — array order (no priority meaning here, just user-curated).
+    (state.index.inactive || []).forEach(id => {
+      const meta = packMeta(id);
+      if (meta) inactiveEl.appendChild(renderCard(meta, 'inactive'));
+    });
+    // Empty-state hint.
+    if (!activeIds.length && !state.index.inactive?.length) {
+      const hint = document.createElement('div');
+      hint.className = 'pack-empty-hint';
+      hint.textContent = 'No custom packs yet — click "+ New Pack" up top to add one.';
+      inactiveEl.appendChild(hint);
+    }
+  }
+
+  function renderCard(meta, list) {
+    const isDefault = meta.id === 'default';
+    const card = document.createElement('article');
+    card.className = 'pack-card' + (isDefault ? ' pack-card--default' : '');
+    card.dataset.packId = meta.id;
+    card.dataset.list   = list;
+    if (!isDefault) {
+      card.draggable = true;
+      attachDragHandlers(card);
+    }
+    const stats = [
+      `${meta.hero_count || 0} hero${meta.hero_count === 1 ? '' : 'es'}`,
+      `${meta.item_count || 0} item${meta.item_count === 1 ? '' : 's'}`,
+      `${meta.tag_count || 0} tag${meta.tag_count === 1 ? '' : 's'}`,
+    ];
+    const removeCount = isDefault ? 0 :
+      (meta.remove_counts?.heroes || 0) + (meta.remove_counts?.items || 0) + (meta.remove_counts?.tags || 0);
+    if (!isDefault && removeCount > 0) stats.push(`${removeCount} removed`);
+
+    const handleHtml = isDefault
+      ? `<span class="pack-pin" aria-hidden="true" title="Default — pinned">⌖</span>`
+      : `<span class="pack-drag" aria-hidden="true" title="Drag to reorder">⋮⋮</span>`;
+    const actionsHtml = isDefault
+      ? `<span class="pack-card-lock">read-only outside Dev</span>`
+      : `<button class="pack-card-act" type="button" data-act="edit"   title="Rename / edit description">✎</button>
+         <button class="pack-card-act" type="button" data-act="export" title="Export this pack as JSON (Phase 5)" disabled>⤓</button>
+         <button class="pack-card-act pack-card-act--danger" type="button" data-act="delete" title="Move pack to trash">🗑</button>`;
+
+    card.innerHTML = `
+      ${handleHtml}
+      <div class="pack-card-body">
+        <div class="pack-card-hd">
+          <span class="pack-card-name">${escapeHtml(meta.name)}</span>
+          ${meta.state === 'active'   ? '<span class="pack-state-pill pack-state-pill--active">active</span>'   : ''}
+          ${meta.state === 'inactive' ? '<span class="pack-state-pill pack-state-pill--inactive">inactive</span>' : ''}
+          ${isDefault                 ? '<span class="pack-state-pill pack-state-pill--default">default</span>'  : ''}
+        </div>
+        ${meta.description ? `<div class="pack-card-desc">${escapeHtml(meta.description)}</div>` : ''}
+        <div class="pack-card-stats">${stats.map(s => `<span class="pack-card-chip">${escapeHtml(s)}</span>`).join('')}</div>
+      </div>
+      <div class="pack-card-actions">${actionsHtml}</div>`;
+
+    if (!isDefault) {
+      card.querySelector('[data-act="edit"]')?.addEventListener('click', e => {
+        e.stopPropagation();
+        openRenameModal(meta);
+      });
+      card.querySelector('[data-act="delete"]')?.addEventListener('click', e => {
+        e.stopPropagation();
+        deletePack(meta);
+      });
+    }
+    return card;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+
+  /* ── Drag and drop ────────────────────────────────────────────────
+     HTML5 DnD: cards set their pack id on dragstart; lists + cards
+     accept drops. After a drop, we recompute the active/inactive
+     arrays from the resulting DOM order and PUT the new index. */
+  let _dragId = null;
+
+  function attachDragHandlers(card) {
+    card.addEventListener('dragstart', e => {
+      _dragId = card.dataset.packId;
+      card.classList.add('is-dragging');
+      e.dataTransfer.setData('text/plain', _dragId);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      _dragId = null;
+      document.querySelectorAll('.pack-card.is-dragging').forEach(el => el.classList.remove('is-dragging'));
+      document.querySelectorAll('.pack-card.is-drop-target, .pack-list.is-drop-target')
+        .forEach(el => el.classList.remove('is-drop-target'));
+    });
+    card.addEventListener('dragover', e => {
+      if (!_dragId || _dragId === card.dataset.packId) return;
+      // Default card can't be displaced — drops onto it are absorbed by
+      // the list level instead.
+      if (card.dataset.packId === 'default') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      // Determine insert position: above vs below by midpoint.
+      const rect = card.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height / 2;
+      document.querySelectorAll('.pack-card.is-drop-target').forEach(el => el.classList.remove('is-drop-target'));
+      card.classList.add('is-drop-target');
+      card.dataset.dropPos = before ? 'before' : 'after';
+    });
+    card.addEventListener('drop', e => {
+      if (!_dragId || _dragId === card.dataset.packId) return;
+      if (card.dataset.packId === 'default') return;
+      e.preventDefault();
+      e.stopPropagation();
+      const before = card.dataset.dropPos === 'before';
+      const dropping = document.querySelector(`.pack-card[data-pack-id="${CSS.escape(_dragId)}"]`);
+      if (!dropping) return;
+      card.parentNode.insertBefore(dropping, before ? card : card.nextSibling);
+      dropping.dataset.list = card.dataset.list;
+      commitOrderFromDom();
+    });
+  }
+
+  function attachListHandlers() {
+    ['pack-list-active', 'pack-list-inactive'].forEach(id => {
+      const list = document.getElementById(id);
+      if (!list || list._packDndBound) return;
+      list._packDndBound = true;
+      list.addEventListener('dragover', e => {
+        if (!_dragId) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        // Highlight the list as a drop zone if no card is currently
+        // claiming the over-state.
+        if (!list.querySelector('.pack-card.is-drop-target')) {
+          list.classList.add('is-drop-target');
+        }
+      });
+      list.addEventListener('dragleave', e => {
+        // Only un-highlight if we actually left the list (not a child).
+        if (!list.contains(e.relatedTarget)) {
+          list.classList.remove('is-drop-target');
+        }
+      });
+      list.addEventListener('drop', e => {
+        list.classList.remove('is-drop-target');
+        if (!_dragId) return;
+        e.preventDefault();
+        const dropping = document.querySelector(`.pack-card[data-pack-id="${CSS.escape(_dragId)}"]`);
+        if (!dropping) return;
+        // If a card-level drop already handled this, nothing else to do.
+        if (dropping.parentNode === list && !list.contains(document.querySelector('.pack-card.is-drop-target'))) {
+          commitOrderFromDom();
+          return;
+        }
+        // Append to end of the target list (drop on empty area).
+        // For the active list specifically: append BEFORE the default
+        // card so default stays pinned at the bottom.
+        const defaultCard = list.querySelector('.pack-card--default');
+        if (defaultCard) {
+          list.insertBefore(dropping, defaultCard);
+        } else {
+          list.appendChild(dropping);
+        }
+        dropping.dataset.list = list.dataset.list;
+        commitOrderFromDom();
+      });
+    });
+  }
+
+  /* Clear any cached frontend data that depends on resolved hero / item /
+     tag values, so the next calc reflects the new stack. Phase 1 already
+     made the backend read paths layered — this just makes sure the user
+     doesn't keep staring at results that were computed against the OLD
+     pack stack. */
+  function invalidateFrontendCaches() {
+    let dirtied = false;
+    if (typeof MATCH !== 'undefined' && MATCH) {
+      if (MATCH.results && MATCH.results.length) { MATCH.results = null; dirtied = true; }
+      if (MATCH.heroData) { MATCH.heroData = {}; dirtied = true; }
+      if (typeof _rsvCache !== 'undefined' && _rsvCache) {
+        for (const k of Object.keys(_rsvCache)) delete _rsvCache[k];
+      }
+    }
+    if (typeof S !== 'undefined' && S) {
+      // Tag and hero lists are re-fetched on next loadCalc / loadHeroes.
+      S.heroList = [];
+      S.itemList = [];
+      S.tags     = [];
+    }
+    // Refresh the Match Results sidebar visibility (it hides itself when
+    // there are no results).
+    window.CODEX?.refreshNavVisibility();
+    if (dirtied) {
+      toast('Pack stack changed — re-run Calculate to apply', 'info');
+    }
+  }
+
+  /* Walk the DOM, rebuild the active/inactive arrays in storage order,
+     and PUT the new index. Reads top-down DOM but stores bottom-up so
+     keep that conversion straight. */
+  async function commitOrderFromDom() {
+    const activeListEl   = document.getElementById('pack-list-active');
+    const inactiveListEl = document.getElementById('pack-list-inactive');
+    if (!activeListEl || !inactiveListEl) return;
+
+    const activeDom = Array.from(activeListEl.querySelectorAll('.pack-card'))
+      .filter(c => c.dataset.packId !== 'default')
+      .map(c => c.dataset.packId);
+    // DOM is top-down (top = highest priority = last in stored array),
+    // so reverse to get the storage order.
+    const active = activeDom.reverse();
+
+    const inactive = Array.from(inactiveListEl.querySelectorAll('.pack-card'))
+      .map(c => c.dataset.packId);
+
+    try {
+      await api('/api/packs/_index', {
+        method: 'PUT',
+        body: JSON.stringify({ version: state.index.version || 1, active, inactive }),
+      });
+      // Optimistic local mirror + re-render to refresh the active/inactive
+      // pill labels per card.
+      state.index = { ...state.index, active, inactive };
+      await load();
+      invalidateFrontendCaches();
+    } catch (e) {
+      toast(`Couldn't save order: ${e.message}`, 'error');
+      // Reload server truth.
+      await load();
+    }
+  }
+
+  /* ── Create / rename / delete ─────────────────────────────────── */
+  function openCreateModal() {
+    const m = document.getElementById('modal-pack-create');
+    document.getElementById('pack-create-name').value = '';
+    document.getElementById('pack-create-desc').value = '';
+    m.classList.remove('hidden');
+    setTimeout(() => document.getElementById('pack-create-name').focus(), 30);
+  }
+  function closeCreateModal() {
+    document.getElementById('modal-pack-create')?.classList.add('hidden');
+  }
+  async function confirmCreate() {
+    const name = document.getElementById('pack-create-name').value.trim() || 'Untitled Pack';
+    const desc = document.getElementById('pack-create-desc').value;
+    try {
+      await api('/api/packs', { method: 'POST', body: JSON.stringify({ name, description: desc }) });
+      closeCreateModal();
+      toast('Pack created', 'success');
+      await load();
+      // No cache invalidation needed here — fresh pack lands in inactive
+      // so it doesn't affect the resolved stack yet.
+    } catch (e) {
+      toast(`Create failed: ${e.message}`, 'error');
+    }
+  }
+
+  let _renameTarget = null;
+  function openRenameModal(meta) {
+    _renameTarget = meta.id;
+    document.getElementById('pack-rename-name').value = meta.name || '';
+    document.getElementById('pack-rename-desc').value = meta.description || '';
+    document.getElementById('modal-pack-rename').classList.remove('hidden');
+    setTimeout(() => document.getElementById('pack-rename-name').focus(), 30);
+  }
+  function closeRenameModal() {
+    _renameTarget = null;
+    document.getElementById('modal-pack-rename')?.classList.add('hidden');
+  }
+  async function confirmRename() {
+    if (!_renameTarget) return;
+    const name = document.getElementById('pack-rename-name').value.trim() || 'Untitled Pack';
+    const desc = document.getElementById('pack-rename-desc').value;
+    try {
+      await api(`/api/packs/${encodeURIComponent(_renameTarget)}`, {
+        method: 'PUT', body: JSON.stringify({ name, description: desc }),
+      });
+      closeRenameModal();
+      toast('Saved', 'success');
+      await load();
+    } catch (e) {
+      toast(`Save failed: ${e.message}`, 'error');
+    }
+  }
+
+  async function deletePack(meta) {
+    const ok = window.confirm(
+      `Move "${meta.name}" to trash? You can restore it later via the API; the file isn't gone from disk.`);
+    if (!ok) return;
+    try {
+      await api(`/api/packs/${encodeURIComponent(meta.id)}`, { method: 'DELETE' });
+      toast('Pack moved to trash', 'success');
+      await load();
+      // If the deleted pack was in the active stack, the resolver returns
+      // different data now — invalidate the calc cache so the user knows.
+      const wasActive = (state.index?.active || []).includes(meta.id);
+      if (wasActive) invalidateFrontendCaches();
+    } catch (e) {
+      toast(`Delete failed: ${e.message}`, 'error');
+    }
+  }
+
+  /* ── Bind ─────────────────────────────────────────────────────── */
+  function bind() {
+    document.getElementById('btn-pack-new')?.addEventListener('click', openCreateModal);
+    document.getElementById('pack-create-cancel')?.addEventListener('click', closeCreateModal);
+    document.getElementById('pack-create-confirm')?.addEventListener('click', confirmCreate);
+    document.getElementById('pack-rename-cancel')?.addEventListener('click', closeRenameModal);
+    document.getElementById('pack-rename-confirm')?.addEventListener('click', confirmRename);
+    // Wire Enter inside the create-name field.
+    document.getElementById('pack-create-name')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmCreate();
+    });
+    document.getElementById('pack-rename-name')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmRename();
+    });
+    // List-level drop handlers — only attach once.
+    attachListHandlers();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind);
+  } else {
+    bind();
+  }
+
+  return {
+    open, load, render,
+    get state() { return state; },        // read-only mirror for hero-edit chip strip
+    invalidateCaches: invalidateFrontendCaches,
+  };
+})();
+window.PACKS = PACKS;
+
 // ── Image helpers ─────────────────────────────────────────────────────────────
 function srcUrl(path) {
   if (!path) return '';
@@ -1870,12 +2285,20 @@ async function openHeroEdit(name) {
   S.currentHero = await api.get(`/api/heroes/${name}`);
   S.currentBuildIdx = 0;
   S.heroDirty = false;
+  // Every fresh open starts in View mode. The user explicitly clicks Edit
+  // to pick a target pack and switch to write mode — keeps "look at the
+  // resolved data" safe by default.
+  setHeroViewMode('view');
 
   // Ensure every build has all current tags
   S.currentHero.builds.forEach(b => ensureTags(b.values, HERO_COLS_KEYS));
 
   renderHeroEditPage();
   showPage('hero-edit');
+  // Fresh pack metadata + view-mode chip strip. Done async so the page
+  // shows immediately and chips materialize when ready.
+  try { await window.PACKS?.load(); } catch {}
+  buildHeroPackStrip().catch(() => {});
   // Hero Editor intentionally does NOT populate the Selected Instance card —
   // that slot is reserved for builds the user has explicitly selected from
   // Match Results, so editing a hero never pins them to the sidebar.
@@ -2135,6 +2558,14 @@ function renderBuildContent() {
 
   renderHeroTagTable(build);
   renderBuildConstraints();
+  // After the tag table re-renders, refresh the view-mode chip strip and
+  // (if currently in edit mode) re-annotate cells against the active
+  // pack's slice. Fire-and-forget; chip strip rebuilds when the data is
+  // ready.
+  buildHeroPackStrip().catch(() => {});
+  if (S.editTargetPack) {
+    annotateEditModeCells().catch(() => {});
+  }
 }
 
 function populatePresetBannerHeroes() {
@@ -2478,6 +2909,10 @@ const HERO_COLS = [
 function renderHeroTagTable(build) {
   const tbody    = document.getElementById('hero-tag-body');
   tbody.innerHTML = '';
+  // Stamp the table itself with the current build name so flashOverriddenCells
+  // can pair td.data-vec/data-tag with the build path the pack stores them under.
+  const tableEl = document.getElementById('hero-tag-table');
+  if (tableEl) tableEl.dataset.buildName = build?.name || '';
   const allBuilds  = S.currentHero.builds;
   const isGeneral  = (build.name === 'General');
 
@@ -2523,6 +2958,12 @@ function renderHeroTagTable(build) {
     HERO_COLS.forEach((col, ci) => {
       const td = document.createElement('td');
       td.dataset.colIdx = String(ci + 1);
+      // Tutorial / pack-flash targeting: pin the vec + tag onto every cell
+      // so flashOverriddenCells() can find the ones the active pack
+      // overrides. The build name is stamped on the table once below
+      // (via data-build-name on the table itself).
+      td.dataset.vec = col.key;
+      td.dataset.tag = tag.code;
 
       const rawVal = (build.values[col.key] || {})[tag.code];
       const { value: numVal, rel } = parseWeightEntry(rawVal !== undefined ? rawVal : null);
@@ -2679,12 +3120,391 @@ function setHeroDirty(val) {
 // ── Save hero ─────────────────────────────────────────────────────────────────
 document.getElementById('btn-save-hero').addEventListener('click', saveHero);
 async function saveHero() {
-  const res = await api.put(`/api/heroes/${S.currentHero.normalized_name}`, S.currentHero);
+  // In Edit mode targeting a user pack: write a DIFF as the pack slice so
+  // the pack stays a thin layer (it overrides only the cells the user
+  // actually changed). Targeting "default" (Dev mode only) keeps the
+  // legacy behavior of writing the full hero to data/heroes/<name>.json.
+  const target = S.editTargetPack;
+  const heroKey = S.currentHero.normalized_name;
+  if (target && target !== 'default') {
+    const diff = computeHeroSliceDiff(S.originalHero || {}, S.currentHero);
+    if (!hasMeaningfulSlice(diff)) {
+      toast('Nothing to save — no cells changed from the layer below.', 'info');
+      setHeroDirty(false);
+      return;
+    }
+    const res = await api.put(`/api/packs/${encodeURIComponent(target)}/heroes/${heroKey}`, diff);
+    if (res.error) { toast(res.error, 'error'); return; }
+    delete _rsvCache[heroKey];
+    setHeroDirty(false);
+    toast(`Saved to pack ✓`);
+    // Re-snapshot so subsequent edits diff against the new baseline.
+    try { S.originalHero = await api.get(`/api/heroes/${heroKey}`); } catch {}
+    return;
+  }
+  // Default path — direct write to the shipped hero file (Dev only path).
+  const res = await api.put(`/api/heroes/${heroKey}`, S.currentHero);
   if (res.error) { toast(res.error, 'error'); return; }
-  delete _rsvCache[S.currentHero.normalized_name];
+  delete _rsvCache[heroKey];
   setHeroDirty(false);
   toast('Hero saved ✓');
 }
+
+/* ── Hero diff helpers (used when saving to a pack slice) ─────────
+   The pack slice should contain ONLY what the user changed relative to the
+   resolved view they started editing from. That keeps the pack a thin
+   layer that still inherits future default updates for cells they didn't
+   touch. Walks the hero object specially:
+     • Top-level fields (eng_name, image_path, search_terms…) replace
+       wholesale if they changed (since these are not deep-merged).
+     • `builds[]` is matched by `name` — only changed builds are emitted;
+       removed builds go into `_remove`.
+     • `values.<vector>` is diffed cell-by-cell. */
+function computeHeroSliceDiff(orig, edited) {
+  const diff = {};
+  const skip = new Set(['builds', '_remove']);
+  for (const k of Object.keys(edited || {})) {
+    if (skip.has(k)) continue;
+    if (!_deepEq(orig?.[k], edited[k])) diff[k] = _clone(edited[k]);
+  }
+  const bd = _diffBuilds(orig?.builds || [], edited?.builds || []);
+  if (bd.builds.length)  diff.builds  = bd.builds;
+  if (bd._remove.length) diff._remove = bd._remove;
+  return diff;
+}
+
+function _diffBuilds(origBuilds, editedBuilds) {
+  const origByName    = Object.fromEntries((origBuilds   || []).filter(b => b?.name).map(b => [b.name, b]));
+  const editedByName  = Object.fromEntries((editedBuilds || []).filter(b => b?.name).map(b => [b.name, b]));
+  const out = { builds: [], _remove: [] };
+  for (const name of Object.keys(editedByName)) {
+    const ob = origByName[name];
+    const eb = editedByName[name];
+    if (!ob) { out.builds.push(_clone(eb)); continue; }
+    const bd = _diffBuild(ob, eb);
+    if (bd) out.builds.push(bd);
+  }
+  for (const name of Object.keys(origByName)) {
+    if (!(name in editedByName)) out._remove.push(name);
+  }
+  return out;
+}
+
+function _diffBuild(orig, edited) {
+  const out = { name: edited.name };
+  let dirty = false;
+  for (const k of Object.keys(edited || {})) {
+    if (k === 'name' || k === 'values') continue;
+    if (!_deepEq(orig?.[k], edited[k])) { out[k] = _clone(edited[k]); dirty = true; }
+  }
+  const vDiff = {};
+  for (const vec of ['ally_weight', 'enemy_weight', 'item_affinity', 'playstyle_score']) {
+    const ov = (orig?.values || {})[vec] || {};
+    const ev = (edited?.values || {})[vec] || {};
+    const cell = {};
+    for (const t of Object.keys(ev)) {
+      if (ev[t] !== ov[t]) cell[t] = ev[t];
+    }
+    if (Object.keys(cell).length) { vDiff[vec] = cell; dirty = true; }
+  }
+  if (Object.keys(vDiff).length) out.values = vDiff;
+  return dirty ? out : null;
+}
+
+function hasMeaningfulSlice(slice) {
+  if (!slice || typeof slice !== 'object') return false;
+  for (const k of Object.keys(slice)) {
+    if (k === '_remove') {
+      if ((slice._remove || []).length) return true;
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
+
+function _deepEq(a, b) {
+  try { return JSON.stringify(a) === JSON.stringify(b); }
+  catch { return a === b; }
+}
+function _clone(x) {
+  try { return structuredClone(x); }
+  catch { return JSON.parse(JSON.stringify(x)); }
+}
+
+// ── View/Edit mode + target-pack picker ──────────────────────────────────────
+// `S.editTargetPack` carries the current target id when in edit mode:
+//   • null            — View mode (all inputs read-only, Save hidden)
+//   • '<pack-id>'     — Edit mode writing to that pack as overrides
+//   • 'default'       — Edit mode writing directly to data/heroes/ (Dev only)
+// `S.originalHero` is the resolved hero snapshot from the moment edit
+// started, used as the diff baseline at save time.
+function setHeroViewMode(mode, packId = null) {
+  const sec = document.getElementById('page-hero-edit');
+  if (!sec) return;
+  sec.setAttribute('data-view-mode', mode);
+  S.editTargetPack = mode === 'edit' ? packId : null;
+  const editBtn   = document.getElementById('btn-hero-edit-mode');
+  const cancelBtn = document.getElementById('btn-hero-cancel-edit');
+  const saveBtn   = document.getElementById('btn-save-hero');
+  const pill      = document.getElementById('hero-edit-target-pill');
+  const pillName  = document.getElementById('hero-edit-target-name');
+  if (mode === 'edit') {
+    editBtn   && (editBtn.classList.add('hidden'));
+    cancelBtn && (cancelBtn.classList.remove('hidden'));
+    saveBtn   && (saveBtn.classList.remove('hidden'));
+    pill      && (pill.classList.remove('hidden'));
+    if (pillName) pillName.textContent = _packDisplayName(packId);
+  } else {
+    editBtn   && (editBtn.classList.remove('hidden'));
+    cancelBtn && (cancelBtn.classList.add('hidden'));
+    saveBtn   && (saveBtn.classList.add('hidden'));
+    pill      && (pill.classList.add('hidden'));
+    if (pillName) pillName.textContent = '';
+    S.originalHero = null;
+  }
+}
+
+function _packDisplayName(packId) {
+  if (packId === 'default') return 'Default';
+  const list = window.PACKS?.state?.list || [];
+  const meta = list.find(p => p.id === packId);
+  return meta?.name || packId || '?';
+}
+
+async function openHeroEditPicker() {
+  const list = document.getElementById('pick-target-list');
+  if (!list) return;
+  list.innerHTML = '<div class="pick-loading">Loading packs…</div>';
+  document.getElementById('modal-pick-target-pack').classList.remove('hidden');
+  let packs = [];
+  try {
+    packs = await fetch('/api/packs').then(r => r.json());
+  } catch (e) {
+    list.innerHTML = `<div class="pick-error">Couldn't load packs: ${e.message}</div>`;
+    return;
+  }
+  const devMode = !!window.CODEX?.state?.developer;
+  const rows = packs
+    .filter(p => p.id !== 'default' || devMode)  // hide Default outside Dev
+    .map(p => {
+      const stateClass = p.id === 'default' ? 'pick-row--default'
+                       : p.state === 'active' ? 'pick-row--active'
+                       : 'pick-row--inactive';
+      const stateLbl = p.id === 'default' ? 'default (read-only outside Dev)'
+                     : p.state || '';
+      const desc = p.description ? `<div class="pick-row-desc">${_escapeHtml(p.description)}</div>` : '';
+      return `
+        <button class="pick-row ${stateClass}" type="button" data-pick="${_escapeHtml(p.id)}">
+          <div class="pick-row-name">${_escapeHtml(p.name)}</div>
+          ${desc}
+          <span class="pick-row-state">${_escapeHtml(stateLbl)}</span>
+        </button>`;
+    }).join('');
+  if (!rows) {
+    list.innerHTML = `<div class="pick-empty">
+      No user packs yet — head to the <b>Packs</b> page to create one, then come back here.
+    </div>`;
+    return;
+  }
+  list.innerHTML = rows;
+  list.querySelectorAll('[data-pick]').forEach(btn => {
+    btn.addEventListener('click', () => enterEditMode(btn.dataset.pick));
+  });
+}
+
+function closeHeroEditPicker() {
+  document.getElementById('modal-pick-target-pack')?.classList.add('hidden');
+}
+
+async function enterEditMode(packId) {
+  closeHeroEditPicker();
+  if (!S.currentHero?.normalized_name) return;
+  // Snapshot the resolved hero — diff baseline. This must come from the
+  // SAME resolved view the editor is showing right now (server-side
+  // resolved), not the editor's S.currentHero (which has already had
+  // user-typed changes applied since opening).
+  try {
+    S.originalHero = await api.get(`/api/heroes/${S.currentHero.normalized_name}`);
+  } catch {
+    S.originalHero = _clone(S.currentHero);
+  }
+  setHeroViewMode('edit', packId);
+  setHeroDirty(false);  // edit mode resets dirty state — clean slate
+  setupOverrideOnInput();
+  await annotateEditModeCells();
+  toast(`Editing in ${_packDisplayName(packId)}`, 'success');
+}
+
+/* Briefly flash inputs whose path is in `slice` (or the slice for `packId`).
+   `flashPackOverrides(packId)` is used by the View-mode pack strip and by
+   the Edit-mode target pill. `getPackSlice` fetches the slice or returns
+   null if the pack has no overrides for the current hero. */
+async function getPackSlice(packId) {
+  const heroKey = S.currentHero?.normalized_name;
+  if (!packId || packId === 'default' || !heroKey) return null;
+  try {
+    const r = await fetch(`/api/packs/${encodeURIComponent(packId)}/heroes/${encodeURIComponent(heroKey)}`);
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+
+async function flashPackOverrides(packId) {
+  const slice = await getPackSlice(packId);
+  if (!slice) {
+    toast('No overrides in that pack for this hero yet.', 'info');
+    return;
+  }
+  const cellPaths = _collectSliceCellPaths(slice);
+  if (!cellPaths.size) {
+    toast('No overridden cells to highlight.', 'info');
+    return;
+  }
+  let hits = 0;
+  document.querySelectorAll('#hero-tag-table td[data-vec][data-tag]').forEach(td => {
+    const buildName = td.closest('[data-build-name]')?.dataset.buildName
+                   || document.getElementById('hero-tag-table')?.dataset.buildName
+                   || _activeBuildName();
+    const path = `${buildName}::${td.dataset.vec}::${td.dataset.tag}`;
+    if (cellPaths.has(path)) {
+      td.classList.add('cell-flash');
+      hits++;
+      setTimeout(() => td.classList.remove('cell-flash'), 1400);
+    }
+  });
+  toast(`${hits} cell${hits === 1 ? '' : 's'} flashed`, 'info');
+}
+
+// Wraps flashPackOverrides for the Edit-mode pill (uses the current target).
+function flashOverriddenCells() { return flashPackOverrides(S.editTargetPack); }
+
+/* Build the View-mode pack strip — one chip per active pack that
+   actually overrides this hero. Empty → "No active packs override this
+   hero" hint. */
+async function buildHeroPackStrip() {
+  const host = document.getElementById('hero-view-pack-strip');
+  if (!host) return;
+  host.innerHTML = '';
+  const list  = window.PACKS?.state?.list  || [];
+  const index = window.PACKS?.state?.index || { active: [] };
+  const activeIds = index.active || [];
+  if (!activeIds.length) {
+    host.innerHTML = '<span class="view-pack-empty">No active packs</span>';
+    return;
+  }
+  // Render top-priority first (reverse of storage order).
+  const ordered = [...activeIds].reverse();
+  const heroKey = S.currentHero?.normalized_name;
+  const currentBuildName = document.getElementById('hero-tag-table')?.dataset.buildName
+    || _activeBuildName();
+  const chips = await Promise.all(ordered.map(async pid => {
+    const meta = list.find(p => p.id === pid);
+    if (!meta) return '';
+    const slice = await getPackSlice(pid);
+    if (!slice) return '';
+    // Count cells in the *current* build only so the chip number matches
+    // what the flash will visibly highlight. Heroes overridden in this
+    // pack but for a different build don't surface as chips on that build.
+    const buildEntry = (slice.builds || []).find(b => b?.name === currentBuildName);
+    const cellCount = _countBuildSliceCells(buildEntry);
+    if (!cellCount) return '';
+    const name = meta.name || pid;
+    return `<button class="view-pack-chip" type="button" data-pack="${_escapeHtml(pid)}" title="Flash the ${cellCount} cell${cellCount === 1 ? '' : 's'} ${name} overrides in build ${_escapeHtml(currentBuildName || '?')}">
+      <span class="vpc-name">${_escapeHtml(name)}</span>
+      <span class="vpc-count">${cellCount}</span>
+    </button>`;
+  }));
+  const rendered = chips.filter(Boolean).join('');
+  host.innerHTML = rendered || `<span class="view-pack-empty">No active packs override <b>${_escapeHtml(heroKey || 'this hero')}</b></span>`;
+  host.querySelectorAll('[data-pack]').forEach(btn => {
+    btn.addEventListener('click', () => flashPackOverrides(btn.dataset.pack));
+  });
+}
+
+/* Edit-mode cell annotation. Reads the current target pack's slice and
+   tags every <td> in the tag table with data-pack-overrides="true" if
+   the slice provides that cell. The CSS uses these attributes to grey
+   inherited cells. As the user types, applyOverrideOnInput() promotes
+   cells live so the visual matches the about-to-be-saved state. */
+async function annotateEditModeCells() {
+  const target = S.editTargetPack;
+  // Clear any leftover annotation from a previous edit-mode session.
+  document.querySelectorAll('#hero-tag-table td[data-pack-overrides]').forEach(td => {
+    delete td.dataset.packOverrides;
+  });
+  if (!target || target === 'default') return;
+  const slice = await getPackSlice(target);
+  if (!slice) return;
+  const cellPaths = _collectSliceCellPaths(slice);
+  const buildName = document.getElementById('hero-tag-table')?.dataset.buildName;
+  document.querySelectorAll('#hero-tag-table td[data-vec][data-tag]').forEach(td => {
+    const path = `${buildName}::${td.dataset.vec}::${td.dataset.tag}`;
+    if (cellPaths.has(path)) td.dataset.packOverrides = 'true';
+  });
+}
+
+/* Promote a cell to "overridden" the moment the user types in it. Bound
+   once on the tag table (delegated). Only fires in Edit mode. */
+function setupOverrideOnInput() {
+  const table = document.getElementById('hero-tag-table');
+  if (!table || table._overrideHandlerBound) return;
+  table._overrideHandlerBound = true;
+  table.addEventListener('input', e => {
+    if (document.getElementById('page-hero-edit')?.dataset.viewMode !== 'edit') return;
+    const td = e.target.closest('td[data-vec][data-tag]');
+    if (td) td.dataset.packOverrides = 'true';
+  }, true);
+}
+
+function _activeBuildName() {
+  // Best-effort: pull from S.currentHero's current build index.
+  const idx = S.currentBuildIdx ?? 0;
+  return S.currentHero?.builds?.[idx]?.name ?? null;
+}
+
+function _countBuildSliceCells(buildEntry) {
+  if (!buildEntry || !buildEntry.values) return 0;
+  let n = 0;
+  for (const vec of Object.keys(buildEntry.values)) {
+    n += Object.keys(buildEntry.values[vec] || {}).length;
+  }
+  return n;
+}
+
+function _collectSliceCellPaths(slice) {
+  const paths = new Set();
+  for (const b of (slice.builds || [])) {
+    const name = b?.name;
+    if (!name) continue;
+    const vals = b.values || {};
+    for (const vec of Object.keys(vals)) {
+      const cells = vals[vec] || {};
+      for (const tag of Object.keys(cells)) {
+        paths.add(`${name}::${vec}::${tag}`);
+      }
+    }
+  }
+  return paths;
+}
+
+function _escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// Wire view/edit mode buttons.
+document.getElementById('btn-hero-edit-mode')?.addEventListener('click', openHeroEditPicker);
+document.getElementById('btn-hero-cancel-edit')?.addEventListener('click', () => {
+  if (S.heroDirty && !confirm('Discard your edits?')) return;
+  setHeroViewMode('view');
+  // Reload the hero so any in-flight edits are dropped.
+  if (S.currentHero?.normalized_name && typeof openHeroEditPage === 'function') {
+    openHeroEditPage(S.currentHero.normalized_name).catch(() => {});
+  }
+});
+document.getElementById('hero-edit-target-pill')?.addEventListener('click', flashOverriddenCells);
+document.getElementById('pick-target-cancel')?.addEventListener('click', closeHeroEditPicker);
 
 // ── Back to heroes ────────────────────────────────────────────────────────────
 document.getElementById('back-heroes').addEventListener('click', async () => {

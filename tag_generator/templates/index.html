@@ -31,6 +31,9 @@
     <!-- Match Results: hidden by default; CODEX.refreshNavVisibility()
          shows it after a calc has been run and MATCH.results is populated. -->
     <button class="nav-btn" data-page="calc-summary" data-nav-group="default" style="display:none;"><span class="nav-ico nav-ico-msym msym">search_insights</span>Match Results</button>
+    <!-- Pack Manager: always visible. Lets users layer custom weight packs
+         on top of the default data without touching the shipped files. -->
+    <button class="nav-btn" data-page="packs" data-nav-group="default"><span class="nav-ico nav-ico-msym msym">layers</span>Packs</button>
 
     <!-- Slot for selected-instance card (filled by JS when a hero is opened) -->
     <div id="nav-instance-host"></div>
@@ -64,13 +67,30 @@
     </section>
 
     <!-- HERO EDIT -->
-    <section id="page-hero-edit" class="page">
+    <!-- View / Edit mode lives on data-view-mode here (set by app.js).
+         "view"   — inputs read-only, Save hidden, Edit ↪ button visible.
+         "edit"   — inputs writable, Save visible, target pack pill shown. -->
+    <section id="page-hero-edit" class="page" data-view-mode="view">
       <div class="page-header sticky-header">
         <button class="btn-back" id="back-heroes">← Heroes</button>
         <h1 id="hero-edit-title">Hero</h1>
         <div class="header-actions">
           <span id="dirty-badge" class="dirty-badge hidden">Unsaved</span>
+          <!-- Target pack pill (visible only in edit mode). Clicking flashes
+               cells the pack currently overrides. -->
+          <button class="edit-target-pill hidden" id="hero-edit-target-pill" type="button" title="Click to flash cells this pack overrides">
+            <span class="ept-lbl">Editing:</span>
+            <span class="ept-name" id="hero-edit-target-name"></span>
+          </button>
           <button class="btn-secondary btn-sm advanced-up" id="btn-reverse-engineer" title="Reverse engineer a build from observed items and matchup data">⟲ Reverse Engineer</button>
+          <!-- Active-packs flash strip (View mode only). Renders one chip
+               per pack that overrides this hero — clicking flashes that
+               pack's cells in the table. Built by buildHeroPackStrip(). -->
+          <div class="view-pack-strip" id="hero-view-pack-strip"></div>
+          <!-- View mode: shown by default. Click to open the target-pack picker. -->
+          <button class="btn-tut" id="btn-hero-edit-mode" type="button" title="Switch to Edit mode in a pack">✎ Edit</button>
+          <!-- Edit mode: cancel-without-save returns to View. -->
+          <button class="btn-ghost btn-sm hidden" id="btn-hero-cancel-edit" type="button">Cancel</button>
           <button class="btn-primary advanced-up" id="btn-save-hero">Save</button>
         </div>
       </div>
@@ -871,6 +891,41 @@
       <div class="tut-body" id="tut-body"></div>
     </section>
 
+    <!-- PACK MANAGER ────────────────────────────────────────────────
+         Weight pack ladder. Two drop zones — active (priority order, top
+         wins) and inactive (parking lot for unused packs). The Default
+         layer is pinned at the bottom of the active stack as a synthetic
+         entry; user packs are draggable between/within zones. Cards
+         render on the fly by PACKS.render() in app.js. -->
+    <section id="page-packs" class="page">
+      <div class="page-header">
+        <h1>Weight Packs</h1>
+        <div class="header-actions">
+          <button class="btn-ghost btn-sm" id="btn-pack-import" disabled title="Import — lands in Phase 5">⤓ Import</button>
+          <button class="btn-primary" id="btn-pack-new">+ New Pack</button>
+        </div>
+      </div>
+      <p class="packs-explainer">
+        Packs layer custom weight changes on top of the default data. <b>Active</b> packs apply in stack order — items at the <b>top win on shared cells</b>. Drag between zones to enable/disable; drag within the active list to reorder priority. <b>Default</b> is pinned at the bottom and is read-only outside Dev mode.
+      </p>
+      <div class="pack-stacks">
+        <section class="pack-stack pack-stack-active">
+          <div class="pack-stack-hd">
+            <h2 class="pack-stack-t">Active</h2>
+            <span class="pack-stack-hint">drag to reorder — top wins</span>
+          </div>
+          <div class="pack-list" id="pack-list-active" data-list="active"></div>
+        </section>
+        <section class="pack-stack pack-stack-inactive">
+          <div class="pack-stack-hd">
+            <h2 class="pack-stack-t">Inactive</h2>
+            <span class="pack-stack-hint">drag up to enable</span>
+          </div>
+          <div class="pack-list" id="pack-list-inactive" data-list="inactive"></div>
+        </section>
+      </div>
+    </section>
+
   </main>
 
   <!-- ── Modals ──────────────────────────────────────────────── -->
@@ -928,6 +983,47 @@
       <div class="modal-actions">
         <button class="btn-ghost" id="mb-cancel">Cancel</button>
         <button class="btn-primary" id="mb-confirm">Add Build</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pack Create Modal -->
+  <div id="modal-pack-create" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>New Pack</h2>
+      <div class="field-row"><label>Name</label><input id="pack-create-name" type="text" placeholder="e.g. My Tweaks"></div>
+      <div class="field-row"><label>Description</label><input id="pack-create-desc" type="text" placeholder="(optional)"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost"   id="pack-create-cancel">Cancel</button>
+        <button class="btn-primary" id="pack-create-confirm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pick target pack (View mode → Edit mode entry) -->
+  <div id="modal-pick-target-pack" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Edit in which pack?</h2>
+      <p class="modal-explainer">
+        Your changes save as overrides in the pack you pick — layered on top of the default data without touching it.
+        Default is read-only outside Developer mode.
+      </p>
+      <div class="pick-target-list" id="pick-target-list"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="pick-target-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pack Rename / Edit-Metadata Modal -->
+  <div id="modal-pack-rename" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Edit Pack</h2>
+      <div class="field-row"><label>Name</label><input id="pack-rename-name" type="text"></div>
+      <div class="field-row"><label>Description</label><input id="pack-rename-desc" type="text"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost"   id="pack-rename-cancel">Cancel</button>
+        <button class="btn-primary" id="pack-rename-confirm">Save</button>
       </div>
     </div>
   </div>
