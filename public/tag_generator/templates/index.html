@@ -180,6 +180,8 @@
             <input type="checkbox" id="bf-disabled">
           </div>
           <button class="btn-secondary btn-sm" id="btn-recalibrate" title="Recompute the item_affinity weights from this build's Required + Signature items (and any extras you add). Preview shows per-tag changes with checkboxes + editable overrides.">⟲ Recalibrate Item Affinity</button>
+          <button class="btn-ghost btn-sm" id="btn-export-build" title="Copy this build's full definition to your clipboard as JSON. Share with a friend, paste into a pack.">⤓ Export Build</button>
+          <button class="btn-ghost btn-sm" id="btn-import-build" title="Paste a build JSON to merge it into a pack. Choose where it lands.">⤒ Import Build</button>
           <button class="btn-danger btn-sm" id="btn-delete-build">Delete Build</button>
         </div>
         <!-- Build constraints (advanced): signature/required/blacklist items + counter slots -->
@@ -996,6 +998,54 @@
       <div class="modal-actions">
         <button class="btn-ghost"   id="pack-create-cancel">Cancel</button>
         <button class="btn-primary" id="pack-create-confirm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pack Import Modal — paste JSON or drop a .json file -->
+  <div id="modal-pack-import" class="modal-overlay hidden">
+    <div class="modal modal-wide">
+      <h2>Import Pack</h2>
+      <p class="modal-explainer">
+        Paste a pack JSON below — or drop a <code>.json</code> file into the box.
+        Imported packs land in the <b>Inactive</b> list so you can review before activating.
+      </p>
+      <textarea id="pack-import-ta" class="pack-import-ta" rows="10"
+        placeholder='Paste pack JSON here, or drop a file…'></textarea>
+      <input id="pack-import-file" type="file" accept="application/json,.json" class="pack-import-file">
+      <div class="pack-import-status" id="pack-import-status"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost"   id="pack-import-cancel">Cancel</button>
+        <button class="btn-primary" id="pack-import-confirm">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Build Import Modal — paste a build JSON and choose target hero + pack -->
+  <div id="modal-build-import" class="modal-overlay hidden">
+    <div class="modal modal-wide">
+      <h2>Import Build</h2>
+      <p class="modal-explainer">
+        Paste a build JSON exported from any Hero Edit page (format:
+        <code>{ heroKey, buildName, build }</code>). Choose where it lands —
+        the build is appended to that hero's builds in the target pack, or
+        replaces an existing build with the same name.
+      </p>
+      <textarea id="build-import-ta" class="pack-import-ta" rows="8"
+        placeholder='Paste build JSON here, or drop a file…'></textarea>
+      <input id="build-import-file" type="file" accept="application/json,.json" class="pack-import-file">
+      <div class="field-row">
+        <label>Target hero</label>
+        <input id="build-import-hero" type="text" placeholder="seven" autocomplete="off">
+      </div>
+      <div class="field-row">
+        <label>Target pack</label>
+        <select id="build-import-pack"></select>
+      </div>
+      <div class="pack-import-status" id="build-import-status"></div>
+      <div class="modal-actions">
+        <button class="btn-ghost"   id="build-import-cancel">Cancel</button>
+        <button class="btn-primary" id="build-import-confirm">Import</button>
       </div>
     </div>
   </div>

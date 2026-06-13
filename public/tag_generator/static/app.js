@@ -1534,24 +1534,38 @@ const PACKS = (() => {
     activeEl.innerHTML = '';
     inactiveEl.innerHTML = '';
 
-    // Active stack — render TOP-DOWN (reverse of array). Top of the list
-    // is highest priority.
-    const activeIds = [...(state.index.active || [])].reverse();
-    activeIds.forEach(id => {
-      const meta = packMeta(id);
-      if (meta) activeEl.appendChild(renderCard(meta, 'active'));
-    });
-    // Default pinned at the bottom of the active stack — non-draggable.
-    const defaultMeta = packMeta('default');
-    if (defaultMeta) activeEl.appendChild(renderCard(defaultMeta, 'active'));
+    // Group state.list by state. This is the source of truth — the backend
+    // includes orphan pack files (those on disk but missing from
+    // _index.json) marked as 'inactive', so iterating state.list catches
+    // every pack the user has ever created. The next reorder action
+    // auto-heals the index file via commitOrderFromDom.
+    const byState = { active: [], inactive: [], default: null };
+    for (const p of state.list || []) {
+      if (p.id === 'default') byState.default = p;
+      else if (p.state === 'active') byState.active.push(p);
+      else byState.inactive.push(p);
+    }
 
-    // Inactive — array order (no priority meaning here, just user-curated).
-    (state.index.inactive || []).forEach(id => {
-      const meta = packMeta(id);
-      if (meta) inactiveEl.appendChild(renderCard(meta, 'inactive'));
-    });
-    // Empty-state hint.
-    if (!activeIds.length && !state.index.inactive?.length) {
+    // Active stack — sort by index.active order (canonical priority), then
+    // reverse for top-down display (top = highest priority = last in
+    // storage). Orphans default to the end of the priority list.
+    const activeOrder = new Map((state.index.active || []).map((id, i) => [id, i]));
+    byState.active.sort((a, b) =>
+      (activeOrder.get(a.id) ?? 9999) - (activeOrder.get(b.id) ?? 9999));
+    byState.active.slice().reverse().forEach(p =>
+      activeEl.appendChild(renderCard(p, 'active')));
+
+    // Default pinned at the bottom of the active stack — non-draggable.
+    if (byState.default) activeEl.appendChild(renderCard(byState.default, 'active'));
+
+    // Inactive — preserve index.inactive order; orphans land at the end.
+    const inactiveOrder = new Map((state.index.inactive || []).map((id, i) => [id, i]));
+    byState.inactive.sort((a, b) =>
+      (inactiveOrder.get(a.id) ?? 9999) - (inactiveOrder.get(b.id) ?? 9999));
+    byState.inactive.forEach(p =>
+      inactiveEl.appendChild(renderCard(p, 'inactive')));
+
+    if (!byState.active.length && !byState.inactive.length) {
       const hint = document.createElement('div');
       hint.className = 'pack-empty-hint';
       hint.textContent = 'No custom packs yet — click "+ New Pack" up top to add one.';
@@ -1584,7 +1598,7 @@ const PACKS = (() => {
     const actionsHtml = isDefault
       ? `<span class="pack-card-lock">read-only outside Dev</span>`
       : `<button class="pack-card-act" type="button" data-act="edit"   title="Rename / edit description">✎</button>
-         <button class="pack-card-act" type="button" data-act="export" title="Export this pack as JSON (Phase 5)" disabled>⤓</button>
+         <button class="pack-card-act" type="button" data-act="export" title="Export this pack as JSON — copies to clipboard, falls back to file download">⤓</button>
          <button class="pack-card-act pack-card-act--danger" type="button" data-act="delete" title="Move pack to trash">🗑</button>`;
 
     card.innerHTML = `
@@ -1610,8 +1624,127 @@ const PACKS = (() => {
         e.stopPropagation();
         deletePack(meta);
       });
+      card.querySelector('[data-act="export"]')?.addEventListener('click', e => {
+        e.stopPropagation();
+        exportPack(meta);
+      });
     }
     return card;
+  }
+
+  /* ── Export ──────────────────────────────────────────────────────
+     Serializes the pack JSON, copies to clipboard if reasonably small,
+     falls back to a file download otherwise. Clipboard-writeText can
+     also fail on insecure (http://) origins or older browsers; on either
+     failure we punt to download. */
+  const CLIPBOARD_SIZE_LIMIT = 50 * 1024;  // 50 KB
+  async function exportPack(meta) {
+    let pack;
+    try {
+      pack = await api(`/api/packs/${encodeURIComponent(meta.id)}/export`);
+    } catch (e) {
+      toast(`Export failed: ${e.message}`, 'error');
+      return;
+    }
+    const json = JSON.stringify(pack, null, 2);
+    const tooBig = json.length > CLIPBOARD_SIZE_LIMIT;
+    if (!tooBig && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(json);
+        toast(`Copied "${meta.name}" to clipboard (${(json.length / 1024).toFixed(1)} KB)`, 'success');
+        return;
+      } catch { /* fall through to download */ }
+    }
+    downloadJson(json, `${meta.id}-${slugify(meta.name)}.json`);
+    toast(`Downloaded "${meta.name}.json"`, 'success');
+  }
+
+  function downloadJson(text, filename) {
+    const blob = new Blob([text], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function slugify(s) {
+    return String(s || 'pack')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'pack';
+  }
+
+  /* ── Import ──────────────────────────────────────────────────────
+     Pack import modal — accepts paste OR file drop. POSTs to
+     /api/packs/import which validates, mints a fresh id, lands the new
+     pack in the inactive list, and returns any missing-tag warnings. */
+  function openImportModal() {
+    const ta = document.getElementById('pack-import-ta');
+    const st = document.getElementById('pack-import-status');
+    if (ta) ta.value = '';
+    if (st) st.innerHTML = '';
+    document.getElementById('pack-import-file').value = '';
+    document.getElementById('modal-pack-import').classList.remove('hidden');
+    setTimeout(() => ta?.focus(), 30);
+  }
+  function closeImportModal() {
+    document.getElementById('modal-pack-import')?.classList.add('hidden');
+  }
+  async function confirmImport() {
+    const ta = document.getElementById('pack-import-ta');
+    const st = document.getElementById('pack-import-status');
+    let blob;
+    try { blob = JSON.parse(ta.value); }
+    catch (e) {
+      st.innerHTML = `<span class="pack-import-err">Invalid JSON: ${escapeHtml(e.message)}</span>`;
+      return;
+    }
+    try {
+      const res = await api('/api/packs/import', {
+        method: 'POST',
+        body: JSON.stringify(blob),
+      });
+      const warnings = res.warnings || [];
+      if (warnings.length) {
+        st.innerHTML = `<span class="pack-import-warn">Imported (${escapeHtml(res.pack_id)}), but missing tags in your local set: <code>${warnings.map(escapeHtml).join('</code> <code>')}</code>. Cells using these tags won't apply until you add them.</span>`;
+      } else {
+        st.innerHTML = `<span class="pack-import-ok">Imported as <code>${escapeHtml(res.pack_id)}</code>. Find it in the Inactive list.</span>`;
+      }
+      await load();
+      // Auto-close after success unless there are warnings the user
+      // should read.
+      if (!warnings.length) setTimeout(closeImportModal, 1500);
+    } catch (e) {
+      st.innerHTML = `<span class="pack-import-err">Import failed: ${escapeHtml(e.message)}</span>`;
+    }
+  }
+  function attachImportFileWiring() {
+    const ta   = document.getElementById('pack-import-ta');
+    const file = document.getElementById('pack-import-file');
+    if (file && !file._packBound) {
+      file._packBound = true;
+      file.addEventListener('change', async () => {
+        const f = file.files?.[0]; if (!f) return;
+        try { ta.value = await f.text(); }
+        catch (e) { toast(`Couldn't read file: ${e.message}`, 'error'); }
+      });
+    }
+    if (ta && !ta._packDropBound) {
+      ta._packDropBound = true;
+      ta.addEventListener('dragover', e => { e.preventDefault(); });
+      ta.addEventListener('drop', async e => {
+        e.preventDefault();
+        const f = e.dataTransfer?.files?.[0];
+        if (!f) return;
+        try { ta.value = await f.text(); }
+        catch (err) { toast(`Couldn't read file: ${err.message}`, 'error'); }
+      });
+    }
   }
 
   function escapeHtml(s) {
@@ -1862,6 +1995,17 @@ const PACKS = (() => {
     document.getElementById('pack-rename-name')?.addEventListener('keydown', e => {
       if (e.key === 'Enter') confirmRename();
     });
+    // Pack-level import (header button + modal).
+    const importBtn = document.getElementById('btn-pack-import');
+    if (importBtn) {
+      importBtn.disabled = false;
+      importBtn.removeAttribute('title');
+      importBtn.title = 'Import a pack from JSON (paste or file)';
+      importBtn.addEventListener('click', openImportModal);
+    }
+    document.getElementById('pack-import-cancel')?.addEventListener('click', closeImportModal);
+    document.getElementById('pack-import-confirm')?.addEventListener('click', confirmImport);
+    attachImportFileWiring();
     // List-level drop handlers — only attach once.
     attachListHandlers();
   }
@@ -3492,6 +3636,158 @@ function _escapeHtml(s) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 }
+
+/* ── Build-level import / export (Phase 5) ─────────────────────────
+   Export the CURRENTLY-ACTIVE build (from the open build tab) as a
+   self-contained JSON blob. Format intentionally explicit:
+       { heroKey, buildName, exportedAt, build: { …full build def… } }
+   so the import side knows what hero this came from and what name to
+   merge under.
+
+   Import accepts that same shape OR a raw build object (we'll detect)
+   and merges it into a target pack at a target hero. The slice PUT
+   handles merge-by-name automatically. */
+const CLIPBOARD_SIZE_LIMIT_BUILD = 50 * 1024;
+
+function _exportCurrentBuild() {
+  const h = S.currentHero;
+  if (!h?.builds?.length) { toast('No build to export.', 'error'); return; }
+  const build = h.builds[S.currentBuildIdx ?? 0];
+  if (!build) { toast('No active build.', 'error'); return; }
+  const blob = {
+    heroKey:    h.normalized_name,
+    buildName:  build.name,
+    exportedAt: new Date().toISOString(),
+    build:      _clone(build),
+  };
+  const json = JSON.stringify(blob, null, 2);
+  const tooBig = json.length > CLIPBOARD_SIZE_LIMIT_BUILD;
+  if (!tooBig && navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(json).then(() => {
+      toast(`Copied "${build.name}" (${(json.length / 1024).toFixed(1)} KB) to clipboard`, 'success');
+    }).catch(() => _downloadJson(json, `${h.normalized_name}-${_slug(build.name)}.json`));
+  } else {
+    _downloadJson(json, `${h.normalized_name}-${_slug(build.name)}.json`);
+    toast(`Downloaded "${build.name}.json"`, 'success');
+  }
+}
+
+function _downloadJson(text, filename) {
+  const blob = new Blob([text], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function _slug(s) {
+  return String(s || 'build').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'build';
+}
+
+async function _openBuildImport() {
+  const ta   = document.getElementById('build-import-ta');
+  const st   = document.getElementById('build-import-status');
+  const hero = document.getElementById('build-import-hero');
+  const pack = document.getElementById('build-import-pack');
+  if (!ta || !hero || !pack) return;
+  ta.value = '';
+  st.innerHTML = '';
+  hero.value = S.currentHero?.normalized_name || '';
+  // Populate the pack dropdown — only user packs (not Default).
+  pack.innerHTML = '<option value="">— pick a pack —</option>';
+  try {
+    const list = await fetch('/api/packs').then(r => r.json());
+    list.filter(p => p.id !== 'default').forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.name} (${p.state})`;
+      pack.appendChild(opt);
+    });
+  } catch (e) {
+    st.innerHTML = `<span class="pack-import-err">Couldn't load packs: ${_escapeHtml(e.message)}</span>`;
+  }
+  document.getElementById('modal-build-import').classList.remove('hidden');
+  _attachBuildImportFileWiring();
+  setTimeout(() => ta.focus(), 30);
+}
+
+function _closeBuildImport() {
+  document.getElementById('modal-build-import')?.classList.add('hidden');
+}
+
+async function _confirmBuildImport() {
+  const ta   = document.getElementById('build-import-ta');
+  const st   = document.getElementById('build-import-status');
+  const hero = document.getElementById('build-import-hero').value.trim();
+  const pid  = document.getElementById('build-import-pack').value;
+  if (!hero) { st.innerHTML = '<span class="pack-import-err">Target hero is required.</span>'; return; }
+  if (!pid)  { st.innerHTML = '<span class="pack-import-err">Pick a target pack.</span>'; return; }
+  let blob;
+  try { blob = JSON.parse(ta.value); }
+  catch (e) {
+    st.innerHTML = `<span class="pack-import-err">Invalid JSON: ${_escapeHtml(e.message)}</span>`;
+    return;
+  }
+  // Detect format: { heroKey, buildName, build } vs raw build object.
+  const buildObj = (blob && typeof blob === 'object' && blob.build) ? blob.build : blob;
+  if (!buildObj || typeof buildObj !== 'object' || !buildObj.name) {
+    st.innerHTML = '<span class="pack-import-err">Couldn\'t find a build object with a "name" field.</span>';
+    return;
+  }
+  // Fetch the existing slice for this hero in this pack so we can merge
+  // (the slice may already have other builds we don't want to wipe).
+  let slice = {};
+  try {
+    const r = await fetch(`/api/packs/${encodeURIComponent(pid)}/heroes/${encodeURIComponent(hero)}`);
+    if (r.ok) slice = await r.json();
+  } catch {}
+  if (!Array.isArray(slice.builds)) slice.builds = [];
+  // Replace-or-append by name.
+  const ix = slice.builds.findIndex(b => b?.name === buildObj.name);
+  if (ix >= 0) slice.builds[ix] = buildObj;
+  else         slice.builds.push(buildObj);
+  try {
+    await api.put(`/api/packs/${encodeURIComponent(pid)}/heroes/${encodeURIComponent(hero)}`, slice);
+    st.innerHTML = `<span class="pack-import-ok">Imported "${_escapeHtml(buildObj.name)}" into pack — activate it from the Packs page to apply.</span>`;
+    setTimeout(_closeBuildImport, 1500);
+    // If the user imported into the hero they're currently viewing and
+    // the target pack is active, the resolved view will change — clear
+    // the resolver cache so a re-open shows it.
+    if (hero === S.currentHero?.normalized_name) {
+      delete _rsvCache[hero];
+    }
+  } catch (e) {
+    st.innerHTML = `<span class="pack-import-err">Import failed: ${_escapeHtml(e.message)}</span>`;
+  }
+}
+
+function _attachBuildImportFileWiring() {
+  const ta = document.getElementById('build-import-ta');
+  const f  = document.getElementById('build-import-file');
+  if (f && !f._buildBound) {
+    f._buildBound = true;
+    f.addEventListener('change', async () => {
+      const file = f.files?.[0]; if (!file) return;
+      try { ta.value = await file.text(); } catch (e) { toast(`Couldn't read file: ${e.message}`, 'error'); }
+    });
+  }
+  if (ta && !ta._buildDropBound) {
+    ta._buildDropBound = true;
+    ta.addEventListener('dragover', e => e.preventDefault());
+    ta.addEventListener('drop', async e => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0]; if (!file) return;
+      try { ta.value = await file.text(); } catch (err) { toast(`Couldn't read file: ${err.message}`, 'error'); }
+    });
+  }
+}
+
+document.getElementById('btn-export-build')?.addEventListener('click', _exportCurrentBuild);
+document.getElementById('btn-import-build')?.addEventListener('click', _openBuildImport);
+document.getElementById('build-import-cancel')?.addEventListener('click', _closeBuildImport);
+document.getElementById('build-import-confirm')?.addEventListener('click', _confirmBuildImport);
 
 // Wire view/edit mode buttons.
 document.getElementById('btn-hero-edit-mode')?.addEventListener('click', openHeroEditPicker);
